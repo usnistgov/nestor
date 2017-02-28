@@ -9,22 +9,27 @@ class FilteredClassify(object):
     (e.g. when vectorizing documents w/ unsupervised techniques).
 
     """
-    def __init__(self, clf, mask=None, **kwargs):
-        self.options = {
-            'verbose': True
-        }
-        self.options.update(kwargs)
-        if mask is not None:
-            self.mask = mask
-            if self.options['verbose']:
-                print "retriving {} selected samples from input".format(len(self.mask))
-
+    def __init__(self, clf, **kwargs):
+        # self.options = {}
+        # self.options.update(kwargs)
+        # self.mask = None
+        self.clf = clf(**kwargs)  # an sklearn object with a predict method.
 
 
     def fit(self, X, y):
-        assert type(X) == textacy.corpus.Corpus  # Must be valid textacy corpus
-        self.corpus = X
+
+        mask = y != -1
+        X_strip = X[mask]
+        y_strip = y[mask]
+
+        self.clf.fit(X_strip, y_strip)
         return self
 
-    def transform(self, X):
-        return self.corpus.vectors
+    def score(self, X, y):
+        mask = y != -1
+        X_strip = X[mask]
+        y_strip = y[mask]
+        return self.clf.score(X_strip, y_strip)
+
+    def predict(self, X):
+        return self.clf.predict(X)
