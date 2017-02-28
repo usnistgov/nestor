@@ -10,7 +10,7 @@ raw_excel_filepath = os.path.join(data_directory,
                                   'Maintenance_All_Clean.xlsx')
 assert os.path.isfile(raw_excel_filepath)
 sheet = "Sheet1"
-df = pd.read_excel(raw_excel_filepath, sheetname=sheet)
+df = pd.read_excel(raw_excel_filepath, sheetname=sheet, encoding='utf-8')
 
 # deal with sparse labeling (Effect Column)
 
@@ -18,9 +18,9 @@ df[["Effect", "Machine Area"]] = df[["Effect", "Machine Area"]].fillna(value="Na
 # print df["Machine Area"].value_counts()
 
 df['labels'] = df["Machine Area"]
-min_count = 3 # Filter labels occuring less than this
+min_count = 3 # Filter labels occurring less than this
 
-value_counts = df["labels"].value_counts() # Specific column
+value_counts = df["labels"].value_counts()  # Specific column
 to_remove = value_counts[value_counts < min_count].index
 df['labels'].replace(to_remove, 'MISC', inplace=True)
 df["labels"] = df["labels"].astype('category')
@@ -31,8 +31,10 @@ area_labeler = LabelEncoder()
 df["labels"] = area_labeler.fit_transform(df["labels"])
 
 missing_label = df['labels'].value_counts().argmax()  # assumes most common label is the missing label.
-df["labels"][df["labels"]==missing_label] = -1  # to make a "non-category"
-df["labels"][df["labels"]>missing_label] = df["labels"][df["labels"]>missing_label].values - 1  # shift higher cats down.
+df["labels"][df["labels"] == missing_label] = -1  # to make a "non-category"
+
+# shift higher cats down.
+df["labels"][df["labels"] > missing_label] = df["labels"][df["labels"] > missing_label].values - 1
 
 
 def old_encode(x):
@@ -41,16 +43,27 @@ def old_encode(x):
 raw_csv_filepath = os.path.join(data_directory,
                                    'raw_csv_logs.csv')
 # if not os.path.isfile(raw_csv_filepath):
-df.to_csv(raw_csv_filepath, encoding='utf-8', header=False)
 
+
+corpus_filepath = os.path.join(data_directory,
+                               'SpacyCorpus')
 
 def get_corpus():
+    # if not os.path.isdir(corpus_filepath):
+    #     os.makedirs(corpus_filepath)
+    #     df.to_csv(raw_csv_filepath, encoding='utf-8', header=False)
+    #     docs = textacy.fileio.read.read_csv(raw_csv_filepath, encoding='utf-8')
+    #     content_stream, metadata_stream = textacy.fileio.split_record_fields(docs, 6)  # Descriptions in Col 6
+    #     corpus = textacy.Corpus(u'en', texts=content_stream, metadatas=metadata_stream)
+    #     corpus.save(corpus_filepath, name='maint_logs', compression='gzip')
+    # else:
+    #     corpus = textacy.Corpus.load(corpus_filepath, name='maint_logs', compression='gzip')
+
+    df.to_csv(raw_csv_filepath, encoding='utf-8', header=False)
     docs = textacy.fileio.read.read_csv(raw_csv_filepath, encoding='utf-8')
-
     content_stream, metadata_stream = textacy.fileio.split_record_fields(docs, 6)  # Descriptions in Col 6
-
     corpus = textacy.Corpus(u'en', texts=content_stream, metadatas=metadata_stream)
-
+    print corpus
     return corpus
 
 

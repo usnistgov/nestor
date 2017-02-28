@@ -1,5 +1,5 @@
-from mlp import *
-from embeddings import TopicVectors, SemanticVectors
+# from mlp import *
+from embed import TopicVectors, SemanticVectors
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
 
@@ -15,7 +15,7 @@ y = pre.get_labeled_data(df['labels'].values)
 
 sgd_w2v = Pipeline([
     ('word2vec embedding', SemanticVectors()),
-    ('extract_labeled', FunctionTransformer(pre.get_labeled_data, validate=False)),
+    ('extract_labeled', FunctionTransformer(pre.get_labeled_data, validate=False)),  # extract labeled points
     ('SGD Lin-SVC w/ElasticNet', SGDClassifier(class_weight='balanced',  # compensate for class freqs
                                                penalty='elasticnet',   # L1 + L2 regularized
                                                alpha=0.001,
