@@ -31,10 +31,12 @@ area_labeler = LabelEncoder()
 df["labels"] = area_labeler.fit_transform(df["labels"])
 
 missing_label = df['labels'].value_counts().argmax()  # assumes most common label is the missing label.
-df["labels"][df["labels"] == missing_label] = -1  # to make a "non-category"
+m_eq = df["labels"] == missing_label
+df.loc[m_eq, "labels"] = -1  # to make a "non-category"
 
 # shift higher cats down.
-df["labels"][df["labels"] > missing_label] = df["labels"][df["labels"] > missing_label].values - 1
+m_gt = df["labels"] > missing_label
+df.loc[m_gt, "labels"] -= 1
 
 
 def old_encode(x):

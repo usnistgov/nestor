@@ -1,7 +1,7 @@
 from mlp import *
+from sklearn.base import BaseEstimator, TransformerMixin
 
-
-class SemanticVectors(object):
+class SemanticVectors(BaseEstimator, TransformerMixin):
     """
     sklearn-style class for retrieving word2vec vector embedding of a document
     corpus via textacy. Used in a Pipeline.
@@ -20,7 +20,7 @@ class SemanticVectors(object):
         return self.corpus.vectors
 
 
-class WordBagVectors(object):
+class WordBagVectors(BaseEstimator, TransformerMixin):
     """
     Returns term-frequency or tf-idf embedding of document corpus via textacy in
     an sklearn-compatible format for use in Pipelines.
@@ -62,7 +62,7 @@ class WordBagVectors(object):
         return self.doc_term_matrix
 
 
-class TopicVectors(object):
+class TopicVectors(BaseEstimator, TransformerMixin):
     """
     sklearn-style class for retrieving word2vec vector embedding of a document
     corpus via textacy. Used in a Pipeline.
@@ -73,21 +73,20 @@ class TopicVectors(object):
     If using LDA, it is recommended to use tf weighting, and no/false normalization or
     smooth_idf in the bow_kws keywords.
     """
-    def __init__(self, model='lsa', bow_kws={}, **kwargs):
+    def __init__(self, model='lsa', bow_kws={}, options={'n_topics': 30}, **kwargs):
         assert model in ['lda', 'nmf', 'lsa']  # only 3 available topic models
         self.topic_type = model
         self.corpus = None
         self.bow_model = None
         self.topic_model = None
-        self.options = {
-            "n_topics" : 30
-        }
+        self.options = options
         self.options.update(kwargs)
         self.bow_options = bow_kws
         self.doc_term_matrix = None
         self.doc_topic_matrix = None
 
     def fit(self, X, y):
+        print type(X)
         assert type(X) == textacy.corpus.Corpus  # Must be valid textacy corpus
         self.corpus = X
         self.bow_model = WordBagVectors()
