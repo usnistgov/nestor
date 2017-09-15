@@ -1,5 +1,5 @@
 # from mlp import *
-from embed import TopicVectors, SemanticVectors
+from .embed import TopicVectors, SemanticVectors
 from predict import FilteredClassify
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
@@ -37,4 +37,4 @@ sgd_w2v = Pipeline([
 # sgd_w2v.set_params(anova__k=10, svc__C=.1).fit(corpus, y)
 sgd_w2v.fit(corpus, y)
 
-print "score: {:2f}%".format((sgd_w2v.score(corpus, y))*100.)
+print("score: {:2f}%".format((sgd_w2v.score(corpus, y))*100.))

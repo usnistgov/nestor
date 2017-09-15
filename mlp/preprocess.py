@@ -1,3 +1,6 @@
+"""
+author: Thurston Sexton     DEPRECATED SkLearn Pipeline experiment
+"""
 from mlp import *
 import os
 from sklearn.preprocessing import LabelEncoder
@@ -65,7 +68,7 @@ def get_corpus():
     docs = textacy.fileio.read.read_csv(raw_csv_filepath, encoding='utf-8')
     content_stream, metadata_stream = textacy.fileio.split_record_fields(docs, 6)  # Descriptions in Col 6
     corpus = textacy.Corpus(u'en', texts=content_stream, metadatas=metadata_stream)
-    print corpus
+    print(corpus)
     return corpus
 
 

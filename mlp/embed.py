@@ -1,3 +1,6 @@
+"""
+author: Thurston Sexton     DEPRECATED SkLearn Pipeline experiment
+"""
 from mlp import *
 from sklearn.base import BaseEstimator, TransformerMixin
 
@@ -86,7 +89,7 @@ class TopicVectors(BaseEstimator, TransformerMixin):
         self.doc_topic_matrix = None
 
     def fit(self, X, y):
-        print type(X)
+        print(type(X))
         assert type(X) == textacy.corpus.Corpus  # Must be valid textacy corpus
         self.corpus = X
         self.bow_model = WordBagVectors()
