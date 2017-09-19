@@ -235,7 +235,6 @@ def trigram_docs(raw_txt_filepath, trigram_logs_filepath, data_directory='data',
                 f.write(trigram_log + '\n')
 
 
-
 def write_clean_docs(clean_filepath, raw_txt_filepath, special=None):
     """
     Creates a lemmatized version of the raw line-wise corpus, with punct., whitespace, and stops removed.

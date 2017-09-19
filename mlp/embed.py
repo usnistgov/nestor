@@ -5,7 +5,7 @@ from mlp import *
 from sklearn.base import BaseEstimator, TransformerMixin
 
 class SemanticVectors(BaseEstimator, TransformerMixin):
-    """
+    """DEPRECATED
     sklearn-style class for retrieving word2vec vector embedding of a document
     corpus via textacy. Used in a Pipeline.
     """
@@ -24,7 +24,7 @@ class SemanticVectors(BaseEstimator, TransformerMixin):
 
 
 class WordBagVectors(BaseEstimator, TransformerMixin):
-    """
+    """DEPRECATED
     Returns term-frequency or tf-idf embedding of document corpus via textacy in
     an sklearn-compatible format for use in Pipelines.
 
@@ -66,7 +66,7 @@ class WordBagVectors(BaseEstimator, TransformerMixin):
 
 
 class TopicVectors(BaseEstimator, TransformerMixin):
-    """
+    """DEPRECATED
     sklearn-style class for retrieving word2vec vector embedding of a document
     corpus via textacy. Used in a Pipeline.
 

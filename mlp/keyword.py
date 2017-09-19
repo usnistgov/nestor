@@ -12,7 +12,22 @@ import textacy
 
 
 class KeywordExtractor(object):
+    """A class for the automatic extraction of keywords (tags) from natural-language text
 
+    Docs WIP, see IEEE Big Data paper submission
+
+    Attributes
+    ----------
+    data_directory : :obj: `os.path`
+        current folder for data- and temp-files
+    vocab : :obj: `pandas.DataFrame`
+        df of classified keywords, usually from a human annotator. See method: <self>.gen_vocab()
+    df : :obj: `pandas.DataFrame`
+        the original data (NL + meta-data), stored as a dataframe for ease-of-use.
+    corpus : :obj: `textacy.Corpus`
+        a corpus object containing parsed NL and metadata. Built on spacy.io
+
+    """
     def __init__(self, xlsx_fname,
                  nlp_cols=None,
                  meta_cols=None,
@@ -20,12 +35,36 @@ class KeywordExtractor(object):
                  pd_kws=None,
                  special_replace=None,
                  wdir='data'):
+        """
 
+        Parameters
+        ----------
+        xlsx_fname : :obj: `str`
+            The initial database, currently in the form of an .xlsx document in 'wdir'
+        nlp_cols : :obj: `list` of :obj: `int`
+            Which columns (int) contain Natural Language text for keyword-extraction
+        meta_cols : :obj: `list` of :obj: `int`, optional
+            Which columns (int) should be kept track of for future data analysis
+        keep_temp_files : bool
+            whether to keep the temporary .txt and .csv files the fit creates (debug)
+        pd_kws : :obj: `dict`, optional
+            any options to pass to the Pandas read_csv file, useful for formatting errors
+        special_replace : :obj: `dict`, optional
+            provide problem substrings as keys and desired replacements as values.
+        wdir : :obj: `str`, optional
+            which sub-folder to store data- and temp-files in
+
+        """
         self.data_directory = os.path.join(os.getcwd(), wdir)
+
         self.vocab = None
+        self.vocab_filepath = None
         self.raw_excel_filepath = None
         self.df = None
+        self._df_pred = None
         self.corpus = None
+        self.doc_term_matrix = None
+        self.id2term = None
 
         self.raw_excel_filepath = os.path.join(self.data_directory, xlsx_fname)
         assert os.path.isfile(self.raw_excel_filepath), 'Please provide a valid xlsx_fname path (in \'wdir\')'
@@ -87,34 +126,89 @@ class KeywordExtractor(object):
             os.remove(raw_txt_filepath)
             os.remove(bigram_logs_filepath)
 
-    def fit(self, vocab_filename, notes=True):
-        """
+    def fit(self, vocab=None, notes=True):
+        """Prepares the classified vocabulary list for keyword extraction
 
-        :param vocab_filename: file containing a classified thesaurus for keyword extraction.
-        must contain 3 or 4 columns: the token list, the classifications, the preferred labels,
-        and any notes (optional).
-        :return:
+        Parameters
+        ----------
+        vocab : :obj: `pandas.Dataframe` or :obj: `str`
+            file or pandas.Dataframe containing a classified thesaurus for
+            keyword extraction. Must contain 3 or 4 columns: the token list,
+            the classifications, the preferred labels, and any notes (optional).
+
+            If a DataFrame is supplied, column names MUST be
+                ['token', 'NE', 'alias'] (+'note', optional)
+            else an assertion error is thrown.
+        notes : bool
+            whether the vocab file/object contains a 4th column with user-commentary
+
+        Returns
+        -------
+        :obj: `pandas.Dataframe`
+            a df containing the original NL text and the tags for each category available (I,S,P + UK)
         """
         if notes:
             add_num, add_name= ([4], ['note'])
         else:
             add_num, add_name = ([], [])
 
-        vocab_filepath = os.path.join(self.data_directory, vocab_filename)
-        self.vocab = pd.read_csv(vocab_filepath, header=0, encoding='utf-8',
-                                 names=['token', 'NE', 'alias']+add_name, index_col=0, na_values=['nan'],
-                                 usecols=[1, 2, 3]+add_num)
+        if isinstance(vocab, pd.DataFrame):
+            assert (list(vocab) == ['token', 'NE', 'alias']+add_name), 'column names must be compatible'
+            self.vocab = vocab
+        else:
+            if self.vocab_filepath is None:
+                self.vocab_filepath = os.path.join(self.data_directory, vocab)
+
+            assert os.path.isfile(self.vocab_filepath), "please provide a valid file!"
+            self.vocab = pd.read_csv(self.vocab_filepath, header=0, encoding='utf-8',
+                                     names=['token', 'NE', 'alias']+add_name, index_col=0, na_values=['nan'],
+                                     usecols=[1, 2, 3]+add_num)
+
         self.vocab = self.vocab.dropna(subset=['NE'])  # remove named entities that are NaN
         self.vocab.alias = self.vocab.apply(lambda x: np.where(pd.isnull(x.alias), x.name, x.alias),
                                             axis=1)  # alias to original if blank
         self.vocab = self.vocab[~self.vocab.index.duplicated(keep='first')]
+        return self.vocab
 
     def transform(self, corpus=None, vocab=None, save=True):
+        """Applies the known keywords to the parsed NL text, returning tagged data
 
+        Parameters
+        ----------
+        corpus : :obj: `textacy.Corpus`, optional
+            a corpus object containing parsed NL and metadata
+            Defaults to <self>.corpus, created upon instantiation.
+        vocab : obj: `pandas.DataFrame`, optional
+            a DataFrame containing classified keyword lookup. Defaults to
+            <self>.vocab, created via <self>.fit()
+        save : bool
+            whether to store the extracted tags as a class attribute <self>._df_pred (debug)
+
+        Returns
+        -------
+        :obj: `pandas.Dataframe`
+            a df containing the original NL text and the tags for each category available (I,S,P + UK)
+        """
         if corpus is None:
             corpus = self.corpus
         if vocab is None:
             vocab = self.vocab
+
+        # make the tf-idf embedding to tokenize with lemma/ngrams
+        if (self.doc_term_matrix is None) or (self.id2term is None):
+
+            self.doc_term_matrix, self.id2term = textacy.vsm.doc_term_matrix(
+                (doc.to_terms_list(ngrams=(1, 2, 3),
+                                   normalize=u'lemma',
+                                   named_entities=False,
+                                   #                                filter_stops=True,  # Nope! Not needed :)
+                                   filter_punct=True,
+                                   as_strings=True)
+                 for doc in corpus),
+                weighting='tfidf',
+                normalize=False,
+                smooth_idf=False,
+                min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
 
         def get_norm_tokens(doc_n, doc_term_mat, id2term):
             doc = doc_term_mat[doc_n].toarray()
@@ -140,22 +234,8 @@ class KeywordExtractor(object):
                     untagged += [tok]
             return tags, list(set(untagged))
 
-        def tag_corpus(corpus, thes):
+        def tag_corpus(corpus, thes, doc_term_matrix, id2term):
             RT, I, S, P, UK = ([], [], [], [], [])
-
-            # make the tf-idf embedding to tokenize with lemma/ngrams
-            doc_term_matrix, id2term = textacy.vsm.doc_term_matrix(
-                (doc.to_terms_list(ngrams=(1, 2, 3),
-                                   normalize=u'lemma',
-                                   named_entities=False,
-                                   #                                filter_stops=True,  # Nope! Not needed :)
-                                   filter_punct=True,
-                                   as_strings=True)
-                 for doc in corpus),
-                weighting='tfidf',
-                normalize=False,
-                smooth_idf=False,
-                min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
 
             # iterate over all issues
             for doc_n, doc in enumerate(tqdm(corpus)):
@@ -175,10 +255,62 @@ class KeywordExtractor(object):
                 'UK_tok': UK  # unknown
             }, columns=['RawText', 'Items', 'Problem', 'Solution', 'UK_tok'])
 
-        df_pred = tag_corpus(corpus, vocab)
+        df_pred = tag_corpus(corpus, vocab, self.doc_term_matrix, self.id2term)
         if save:
-            df_pred.to_excel('keyword_tagged.xlsx')
+            self._df_pred = df_pred
+            # self._df_pred.to_excel('keyword_tagged.xlsx')
+            # self._df_pred = df_pred
         return df_pred
 
+    def gen_vocab(self, vocab_fname, topn=3000):
+        """ A helper method to start the keyword annotation process
+
+        It's helpful to start out with this correctly-formatted .xlsx sheet.
+        Also calculates the document-term-matrix, to speed up <self>.transform()
+        Legacy handling of ASCII to Unicode is still intact, but scheduled for deprecation.
+        Parameters
+        ----------
+        vocab_fname : :obj: `str`
+            file name, used to create a .xlsx file for keyword annotation
+        topn : int
+            how many of the top (tf-idf ranked) vocabulary to write out to the .xlsx
+
+        Returns
+        -------
+        None
+
+        """
+        from unicodedata import normalize
+
+        if (self.doc_term_matrix is None) or (self.id2term is None):
+            self.doc_term_matrix, self.id2term = textacy.vsm.doc_term_matrix(
+                (doc.to_terms_list(ngrams=(1, 2, 3),
+                                   normalize=u'lemma',
+                                   named_entities=False,
+                                   # filter_stops=True,  # Nope! Not needed :)
+                                   filter_punct=True,
+                                   as_strings=True)
+                 for doc in self.corpus),
+                weighting='tfidf',
+                normalize=False,
+                smooth_idf=False,
+                min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
+        # topn = 3000
+
+        topn_tok = [self.id2term[i] for i in self.doc_term_matrix.sum(axis=0).argsort()[0, -topn:].tolist()[0][::-1]]
+        top_n_filepath = os.path.join(self.data_directory, 'TEMP_top{}vocab.txt'.format(topn))
+        with open('TEMP_top{}vocab.txt'.format(topn), 'wb') as f:
+            for i in topn_tok:
+                try:
+                    f.write(i + '\n')
+                except UnicodeEncodeError:
+                    print
+                    i, '-->', normalize('NFKD', i).encode('ascii', 'ignore')
+                    f.write(normalize('NFKD', i).encode('ascii', 'ignore') + '\n')
+
+        tmp_vocab = pd.read_csv(top_n_filepath, header=None, names=['token'])
+        tmp_vocab = tmp_vocab.assign(NE="", alias="")
+        self.vocab_filepath = os.path.join(self.data_directory, vocab_fname)
+        tmp_vocab.to_excel(self.vocab_filepath)
 
 
