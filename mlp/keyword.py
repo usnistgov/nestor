@@ -41,7 +41,7 @@ class KeywordExtractor(object):
         ----------
         xlsx_fname : :obj: `str`
             The initial database, currently in the form of an .xlsx document in 'wdir'
-        nlp_cols : :obj: `list` of :obj: `int`
+        nlp_cols : :obj: `dict`
             Which columns (int) contain Natural Language text for keyword-extraction
         meta_cols : :obj: `list` of :obj: `int`, optional
             Which columns (int) should be kept track of for future data analysis
@@ -83,18 +83,19 @@ class KeywordExtractor(object):
             relevant_names, relevant_cols = tuple(map(list, zip(*relevant_data.items())))
         else:
             relevant_names, relevant_cols = tuple(map(list, zip(*nlp_cols.items())))
-            meta_cols = []
+            meta_cols = {}
 
         default_pd_kws = {
-            'header':1,
+            'header':0,
             'encoding':'utf-8'
         }  # privide some default assumptions
         if pd_kws is not None:
             default_pd_kws.update(pd_kws)
 
         self.df = pd.read_excel(self.raw_excel_filepath,
-                                names=relevant_names, parse_cols=relevant_cols,
-                                **pd_kws)
+                                names=[relevant_names[i] for i in np.argsort(relevant_cols)],
+                                parse_cols=relevant_cols,
+                                **default_pd_kws)
 
         for nlp_col in nlp_cols.keys():
             # replace empty NL descriptions with empty string. Replace '\n' inside descriptions with ' '.
@@ -114,7 +115,7 @@ class KeywordExtractor(object):
 
         # for now, we don't care about the separate NLP cols (future ver.)
         # So, remove all empty NLP work-orders (nothing to extract).
-        csv_df = self.df[['RawText']+meta_cols].dropna(subset=['RawText'])
+        csv_df = self.df[['RawText']+list(meta_cols.keys())].dropna(subset=['RawText'])
         csv_df.to_csv(raw_csv_filepath, header=False, encoding='utf-8')
 
         docs = textacy.fileio.read.read_csv(raw_csv_filepath, encoding='utf-8')
@@ -148,7 +149,7 @@ class KeywordExtractor(object):
             a df containing the original NL text and the tags for each category available (I,S,P + UK)
         """
         if notes:
-            add_num, add_name= ([4], ['note'])
+            add_num, add_name= ([3], ['note'])
         else:
             add_num, add_name = ([], [])
 
@@ -162,13 +163,13 @@ class KeywordExtractor(object):
             assert os.path.isfile(self.vocab_filepath), "please provide a valid file!"
             self.vocab = pd.read_csv(self.vocab_filepath, header=0, encoding='utf-8',
                                      names=['token', 'NE', 'alias']+add_name, index_col=0, na_values=['nan'],
-                                     usecols=[1, 2, 3]+add_num)
+                                     usecols=[0, 1, 2]+add_num)
 
         self.vocab = self.vocab.dropna(subset=['NE'])  # remove named entities that are NaN
         self.vocab.alias = self.vocab.apply(lambda x: np.where(pd.isnull(x.alias), x.name, x.alias),
                                             axis=1)  # alias to original if blank
         self.vocab = self.vocab[~self.vocab.index.duplicated(keep='first')]
-        return self.vocab
+        # return self.vocab
 
     def transform(self, corpus=None, vocab=None, save=True):
         """Applies the known keywords to the parsed NL text, returning tagged data
@@ -214,11 +215,11 @@ class KeywordExtractor(object):
             doc = doc_term_mat[doc_n].toarray()
             return [id2term[i] for i in doc.nonzero()[1]]
 
-        def doc_to_tags(tokens, thes):
+        def doc_to_tags(tokens, thes, vocab_list):
             #     tokens = get_norm_terms(doc)
             tags = {'I': [], 'P': [], 'S': []}
             untagged = []
-            vocab_list = thes.index.tolist()
+            # vocab_list = thes.index.tolist()
             for tok in tokens:
                 if tok in vocab_list:  # recognized token?
                     typ = thes.loc[tok]['NE']
@@ -236,11 +237,12 @@ class KeywordExtractor(object):
 
         def tag_corpus(corpus, thes, doc_term_matrix, id2term):
             RT, I, S, P, UK = ([], [], [], [], [])
-
+            vocab_list = thes.index.tolist()
             # iterate over all issues
             for doc_n, doc in enumerate(tqdm(corpus)):
                 tokens = get_norm_tokens(doc_n, doc_term_matrix, id2term)
-                tags, unknown = doc_to_tags(tokens, thes)
+
+                tags, unknown = doc_to_tags(tokens, thes, vocab_list)
                 UK += [', '.join(unknown)]
                 RT += [doc.text]
                 I += [', '.join(tags['I'])]
@@ -299,7 +301,7 @@ class KeywordExtractor(object):
 
         topn_tok = [self.id2term[i] for i in self.doc_term_matrix.sum(axis=0).argsort()[0, -topn:].tolist()[0][::-1]]
         top_n_filepath = os.path.join(self.data_directory, 'TEMP_top{}vocab.txt'.format(topn))
-        with open('TEMP_top{}vocab.txt'.format(topn), 'wb') as f:
+        with open(top_n_filepath, 'w+') as f:
             for i in topn_tok:
                 try:
                     f.write(i + '\n')
