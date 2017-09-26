@@ -169,6 +169,8 @@ class KeywordExtractor(object):
         self.vocab.alias = self.vocab.apply(lambda x: np.where(pd.isnull(x.alias), x.name, x.alias),
                                             axis=1)  # alias to original if blank
         self.vocab = self.vocab[~self.vocab.index.duplicated(keep='first')]
+        if (self.doc_term_matrix is None) or (self.id2term is None):
+            self._bow()
         # return self.vocab
 
     def transform(self, corpus=None, vocab=None, save=True):
@@ -197,29 +199,18 @@ class KeywordExtractor(object):
 
         # make the tf-idf embedding to tokenize with lemma/ngrams
         if (self.doc_term_matrix is None) or (self.id2term is None):
-
-            self.doc_term_matrix, self.id2term = textacy.vsm.doc_term_matrix(
-                (doc.to_terms_list(ngrams=(1, 2, 3),
-                                   normalize=u'lemma',
-                                   named_entities=False,
-                                   #                                filter_stops=True,  # Nope! Not needed :)
-                                   filter_punct=True,
-                                   as_strings=True)
-                 for doc in corpus),
-                weighting='tfidf',
-                normalize=False,
-                smooth_idf=False,
-                min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
+            self._bow()
 
         def get_norm_tokens(doc_n, doc_term_mat, id2term):
             doc = doc_term_mat[doc_n].toarray()
+
             return [id2term[i] for i in doc.nonzero()[1]]
 
-        def doc_to_tags(tokens, thes, vocab_list):
+        def doc_to_tags(tokens, thes):
             #     tokens = get_norm_terms(doc)
             tags = {'I': [], 'P': [], 'S': []}
             untagged = []
-            # vocab_list = thes.index.tolist()
+            vocab_list = thes.index.tolist()
             for tok in tokens:
                 if tok in vocab_list:  # recognized token?
                     typ = thes.loc[tok]['NE']
@@ -237,12 +228,11 @@ class KeywordExtractor(object):
 
         def tag_corpus(corpus, thes, doc_term_matrix, id2term):
             RT, I, S, P, UK = ([], [], [], [], [])
-            vocab_list = thes.index.tolist()
             # iterate over all issues
             for doc_n, doc in enumerate(tqdm(corpus)):
                 tokens = get_norm_tokens(doc_n, doc_term_matrix, id2term)
 
-                tags, unknown = doc_to_tags(tokens, thes, vocab_list)
+                tags, unknown = doc_to_tags(tokens, thes)
                 UK += [', '.join(unknown)]
                 RT += [doc.text]
                 I += [', '.join(tags['I'])]
@@ -258,16 +248,31 @@ class KeywordExtractor(object):
             }, columns=['RawText', 'Items', 'Problem', 'Solution', 'UK_tok'])
 
         df_pred = tag_corpus(corpus, vocab, self.doc_term_matrix, self.id2term)
+
         if save:
             self._df_pred = df_pred
             # self._df_pred.to_excel('keyword_tagged.xlsx')
             # self._df_pred = df_pred
         return df_pred
 
-    def gen_vocab(self, vocab_fname, topn=3000):
+    def _bow(self):
+        self.doc_term_matrix, self.id2term = textacy.vsm.doc_term_matrix(
+            (doc.to_terms_list(ngrams=(1, 2, 3),
+                               normalize=u'lemma',
+                               named_entities=False,
+                               # filter_stops=True,  # Nope! Not needed :)
+                               filter_punct=True,
+                               as_strings=True)
+             for doc in self.corpus),
+            weighting='tfidf',
+            normalize=False,
+            smooth_idf=False,
+            min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
+
+    def gen_vocab(self, vocab_fname, topn=3000, notes=False):
         """ A helper method to start the keyword annotation process
 
-        It's helpful to start out with this correctly-formatted .xlsx sheet.
+        It's helpful to start out with this correctly-formatted .csv sheet.
         Also calculates the document-term-matrix, to speed up <self>.transform()
         Legacy handling of ASCII to Unicode is still intact, but scheduled for deprecation.
         Parameters
@@ -285,18 +290,7 @@ class KeywordExtractor(object):
         from unicodedata import normalize
 
         if (self.doc_term_matrix is None) or (self.id2term is None):
-            self.doc_term_matrix, self.id2term = textacy.vsm.doc_term_matrix(
-                (doc.to_terms_list(ngrams=(1, 2, 3),
-                                   normalize=u'lemma',
-                                   named_entities=False,
-                                   # filter_stops=True,  # Nope! Not needed :)
-                                   filter_punct=True,
-                                   as_strings=True)
-                 for doc in self.corpus),
-                weighting='tfidf',
-                normalize=False,
-                smooth_idf=False,
-                min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
+            self._bow()
         # topn = 3000
 
         topn_tok = [self.id2term[i] for i in self.doc_term_matrix.sum(axis=0).argsort()[0, -topn:].tolist()[0][::-1]]
@@ -312,7 +306,10 @@ class KeywordExtractor(object):
 
         tmp_vocab = pd.read_csv(top_n_filepath, header=None, names=['token'])
         tmp_vocab = tmp_vocab.assign(NE="", alias="")
+        if notes:
+            tmp_vocab = tmp_vocab.assign(notes="")
+
         self.vocab_filepath = os.path.join(self.data_directory, vocab_fname)
-        tmp_vocab.to_excel(self.vocab_filepath)
+        tmp_vocab.to_csv(self.vocab_filepath, index=False)
 
 
