@@ -157,8 +157,8 @@ class KeywordExtractor(object):
             assert (list(vocab) == ['token', 'NE', 'alias']+add_name), 'column names must be compatible'
             self.vocab = vocab
         else:
-            if self.vocab_filepath is None:
-                self.vocab_filepath = os.path.join(self.data_directory, vocab)
+            # if self.vocab_filepath is None:
+            self.vocab_filepath = os.path.join(self.data_directory, vocab)
 
             assert os.path.isfile(self.vocab_filepath), "please provide a valid file!"
             self.vocab = pd.read_csv(self.vocab_filepath, header=0, encoding='utf-8',
