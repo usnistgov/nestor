@@ -73,7 +73,7 @@ class KeywordExtractor(object):
         bigram_logs_filepath = os.path.join(self.data_directory,
                                             'TEMP_bigram.csv')
         raw_csv_filepath = os.path.join(self.data_directory,
-                                        'nlp_raw.csv')
+                                        'TEMP_nlp_raw.csv')
 
         if nlp_cols is None:
             nlp_cols = {'RawText': 0}
@@ -111,7 +111,7 @@ class KeywordExtractor(object):
         if special_replace is not None:
             bigram_kws['special'] = special_replace
         bigram_docs(raw_txt_filepath, bigram_logs_filepath, **bigram_kws)
-        self.df['RawText'] = pd.read_csv(bigram_logs_filepath, sep='\t')
+        self.df['RawText'] = pd.read_csv(bigram_logs_filepath, sep='\t', header=None)
 
         # for now, we don't care about the separate NLP cols (future ver.)
         # So, remove all empty NLP work-orders (nothing to extract).
@@ -124,8 +124,12 @@ class KeywordExtractor(object):
 
         # FUTURE: Try using python's tempfile module
         if not keep_temp_files:
-            os.remove(raw_txt_filepath)
-            os.remove(bigram_logs_filepath)
+            import glob
+            for filename in glob.glob(os.path.join(self.data_directory,"TEMP_*")):
+                os.remove(filename)
+
+            # os.remove(raw_txt_filepath)
+            # os.remove(bigram_logs_filepath)
 
     def fit(self, vocab=None, notes=True):
         """Prepares the classified vocabulary list for keyword extraction

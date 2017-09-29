@@ -136,13 +136,13 @@ def clean_logs(clean_filepath, raw_txt_filepath, special=None):
 
 def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', special=None):
     clean_filepath = os.path.join(data_directory,
-                                  'clean_logs_all.txt')
+                                  'TEMP_clean_logs_all.txt')
     clean_logs(clean_filepath, raw_txt_filepath, special=special)
     unigram_sentences = LineSentence(clean_filepath)
 
     bigram_model = Phrases(unigram_sentences)
     bigram_sentences_filepath = os.path.join(data_directory,
-                                             'bigram_logs_all.txt')
+                                             'TEMP_bigram_logs_all.txt')
     if not os.path.isfile(bigram_sentences_filepath):
         print("making new file...")
         with codecs.open(bigram_sentences_filepath, 'w', encoding='utf_8') as f:
@@ -178,13 +178,13 @@ def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', s
 
 def trigram_docs(raw_txt_filepath, trigram_logs_filepath, data_directory='data', special=None):
     clean_filepath = os.path.join(data_directory,
-                                  'clean_logs_all.txt')
+                                  'TEMP_clean_logs_all.txt')
     clean_logs(clean_filepath, raw_txt_filepath, special=special)
     unigram_sentences = LineSentence(clean_filepath)
 
     bigram_model = Phrases(unigram_sentences)
     bigram_sentences_filepath = os.path.join(data_directory,
-                                             'bigram_logs_all.txt')
+                                             'TEMP_bigram_logs_all.txt')
     if not os.path.isfile(bigram_sentences_filepath):
         print("making new file...")
         with codecs.open(bigram_sentences_filepath, 'w', encoding='utf_8') as f:
@@ -197,7 +197,7 @@ def trigram_docs(raw_txt_filepath, trigram_logs_filepath, data_directory='data',
     bigram_sentences = LineSentence(bigram_sentences_filepath)
     trigram_model = Phrases(bigram_sentences)
     trigram_sentences_filepath = os.path.join(data_directory,
-                                              'trigram_logs_all.txt')
+                                              'TEMP_trigram_logs_all.txt')
 
     if not os.path.isfile(trigram_sentences_filepath):
         print("making new file...")
