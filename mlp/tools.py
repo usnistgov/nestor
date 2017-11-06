@@ -73,23 +73,14 @@ def strip_tags(html):
     return s.get_data()
 
 
-# def line_review(log):
-#     """
-#     un-escape the original line breaks in the text
-#     """
-#     log = strip_tags(log).lower()
-#     log = log.replace('\\n', '\n')
-#     log = log.replace(' -', '; ')
-#     log = log.replace('action taken:', '')
-# #     log = normalize('NFKD', str(log)).encode('ascii','ignore')
-# #     log = textacy.preprocess.fix_bad_unicode(log)
-#     return log
-
 def multiple_replace(text, adict):
     rx = re.compile('|'.join(map(re.escape, adict)))
+
     def one_xlat(match):
         return adict[match.group(0)]
+
     return rx.sub(one_xlat, text)
+
 
 def line_review(filename, special=None):
     """
@@ -99,7 +90,7 @@ def line_review(filename, special=None):
     special: dict containing corpus-specific replacements.
     """
 
-    with codecs.open(filename, encoding='utf_8') as f:
+    with open(filename, encoding='utf_8', errors='ignore') as f:
         for log in tqdm(f):
             if special is not None:
                 log = multiple_replace(log, special)
@@ -107,7 +98,7 @@ def line_review(filename, special=None):
             log = strip_tags(log).lower()
 
                 # print(special, log)
-            yield log.replace(' -', '; ')
+            yield log
 
 
 def lemmatized_corpus(filename, special=None):
