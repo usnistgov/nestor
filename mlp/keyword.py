@@ -64,8 +64,8 @@ class KeywordExtractor(object):
         self._df_pred = None
         self.corpus = None
         self.doc_term_matrix = None
-        self.id2term = None
-
+        # self.vsm.id_to_term = None
+        self.vsm = None
         self.raw_excel_filepath = os.path.join(self.data_directory, xlsx_fname)
         assert os.path.isfile(self.raw_excel_filepath), 'Please provide a valid xlsx_fname path (in \'wdir\')'
         raw_txt_filepath = os.path.join(self.data_directory,
@@ -173,7 +173,7 @@ class KeywordExtractor(object):
         self.vocab.alias = self.vocab.apply(lambda x: np.where(pd.isnull(x.alias), x.name, x.alias),
                                             axis=1)  # alias to original if blank
         self.vocab = self.vocab[~self.vocab.index.duplicated(keep='first')]
-        if (self.doc_term_matrix is None) or (self.id2term is None):
+        if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
             self._bow()
         # return self.vocab
 
@@ -202,13 +202,13 @@ class KeywordExtractor(object):
             vocab = self.vocab
 
         # make the tf-idf embedding to tokenize with lemma/ngrams
-        if (self.doc_term_matrix is None) or (self.id2term is None):
+        if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
             self._bow()
 
-        def get_norm_tokens(doc_n, doc_term_mat, id2term):
+        def get_norm_tokens(doc_n, doc_term_mat, id_to_term):
             doc = doc_term_mat[doc_n].toarray()
 
-            return [id2term[i] for i in doc.nonzero()[1]]
+            return [id_to_term[i] for i in doc.nonzero()[1]]
 
         def doc_to_tags(tokens, thes):
             #     tokens = get_norm_terms(doc)
@@ -230,11 +230,11 @@ class KeywordExtractor(object):
                     untagged += [tok]
             return tags, list(set(untagged))
 
-        def tag_corpus(corpus, thes, doc_term_matrix, id2term):
+        def tag_corpus(corpus, thes, doc_term_matrix, id_to_term):
             RT, I, S, P, UK = ([], [], [], [], [])
             # iterate over all issues
             for doc_n, doc in enumerate(tqdm(corpus)):
-                tokens = get_norm_tokens(doc_n, doc_term_matrix, id2term)
+                tokens = get_norm_tokens(doc_n, doc_term_matrix, id_to_term)
 
                 tags, unknown = doc_to_tags(tokens, thes)
                 UK += [', '.join(unknown)]
@@ -251,7 +251,7 @@ class KeywordExtractor(object):
                 'UK_tok': UK  # unknown
             }, columns=['RawText', 'Items', 'Problem', 'Solution', 'UK_tok'])
 
-        df_pred = tag_corpus(corpus, vocab, self.doc_term_matrix, self.id2term)
+        df_pred = tag_corpus(corpus, vocab, self.doc_term_matrix, self.vsm.id_to_term)
 
         if save:
             self._df_pred = df_pred
@@ -260,18 +260,32 @@ class KeywordExtractor(object):
         return df_pred
 
     def _bow(self):
-        self.doc_term_matrix, self.id2term = textacy.vsm.doc_term_matrix(
-            (doc.to_terms_list(ngrams=(1, 2, 3),
-                               normalize=u'lemma',
-                               named_entities=False,
-                               # filter_stops=True,  # Nope! Not needed :)
-                               filter_punct=True,
-                               as_strings=True)
-             for doc in self.corpus),
-            weighting='tfidf',
-            normalize=False,
-            smooth_idf=False,
-            min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
+        self.vsm = textacy.vsm.Vectorizer(weighting='tfidf',
+                                          normalize=False,
+                                          smooth_idf=False,
+                                          min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
+
+        terms_list = (doc.to_terms_list(ngrams=(1, 2, 3),
+                                        normalize=u'lemma',
+                                        named_entities=False,
+                                        # filter_stops=True,  # Nope! Not needed :)
+                                        filter_punct=True,
+                                        as_strings=True) for doc in self.corpus)
+
+        self.doc_term_matrix = self.vsm.fit_transform(terms_list)
+        # self.vsm.id_to_term = self.vsm.id_to_term
+        # self.doc_term_matrix, self.vsm.id_to_term = textacy.vsm.doc_term_matrix(
+        #     (doc.to_terms_list(ngrams=(1, 2, 3),
+        #                        normalize=u'lemma',
+        #                        named_entities=False,
+        #                        # filter_stops=True,  # Nope! Not needed :)
+        #                        filter_punct=True,
+        #                        as_strings=True)
+        #      for doc in self.corpus),
+        #     weighting='tfidf',
+        #     normalize=False,
+        #     smooth_idf=False,
+        #     min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
 
     def gen_vocab(self, vocab_fname, topn=3000, notes=False):
         """ A helper method to start the keyword annotation process
@@ -293,19 +307,18 @@ class KeywordExtractor(object):
         """
         from unicodedata import normalize
 
-        if (self.doc_term_matrix is None) or (self.id2term is None):
+        if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
             self._bow()
         # topn = 3000
 
-        topn_tok = [self.id2term[i] for i in self.doc_term_matrix.sum(axis=0).argsort()[0, -topn:].tolist()[0][::-1]]
+        topn_tok = [self.vsm.id_to_term[i] for i in self.doc_term_matrix.sum(axis=0).argsort()[0, -topn:].tolist()[0][::-1]]
         top_n_filepath = os.path.join(self.data_directory, 'TEMP_top{}vocab.txt'.format(topn))
         with open(top_n_filepath, 'w+') as f:
             for i in topn_tok:
                 try:
                     f.write(i + '\n')
                 except UnicodeEncodeError:
-                    print
-                    i, '-->', normalize('NFKD', i).encode('ascii', 'ignore')
+                    print(i, '-->', normalize('NFKD', i).encode('ascii', 'ignore'))
                     f.write(normalize('NFKD', i).encode('ascii', 'ignore') + '\n')
 
         tmp_vocab = pd.read_csv(top_n_filepath, header=None, names=['token'])
