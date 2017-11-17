@@ -199,50 +199,115 @@ class KeywordExtractor(object):
         if corpus is None:
             corpus = self.corpus
         if vocab is None:
-            vocab = self.vocab
+            vocab = self.vocab.copy()
+        vocab.NE.fillna(value='U', inplace=True)  # we want to know what humans didn't do
 
+        # we want to store the vocab as a multi-index on NE types-->tokens
+        # vocab_grp = self.vocab.set_index(['NE'], append=True).swaplevel().sort_index(0)
+        # vocab_grp  = vocab_grp.groupby(level=0)
+        vocab_grp = vocab.groupby('NE')
         # make the tf-idf embedding to tokenize with lemma/ngrams
         if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
             self._bow()
 
         def get_norm_tokens(doc_n, doc_term_mat, id_to_term):
             doc = doc_term_mat[doc_n].toarray()
+            # return [id_to_term[i] for i in doc.nonzero()[1]]
+            # we only care about unique tags, right?
+            # return pd.Index(set([id_to_term[i] for i in doc.nonzero()[1]]))
+            return set([id_to_term[i] for i in doc.nonzero()[1]])
+        set
+        # def doc_to_tags(tokens, vocab_grp):
+        #     # tags = {}
+        #
+        #     tags = vocab_grp.apply(lambda x: x[np.isin(x.index.values, tokens)])
+        #
+        #     # for clf in vocab_grp.groups.keys():
+        #     #     mini_thes = vocab_grp.get_group(clf)
+        #     #     # pass
+        #     #     caught = mini_thes.loc[tokens & set(mini_thes.index)]
+        #     #     tokens -= set(caught.index)  # prune down to unknowns
+        #     #     tags[clf] = caught.alias.values
+        #
+        #     return tags, tokens
+        #     # knowns = {clf: mini_thes.loc[tokens & mini_thes.index, 'alias'].values for clf, mini_thes in vocab_grp}
 
-            return [id_to_term[i] for i in doc.nonzero()[1]]
 
-        def doc_to_tags(tokens, thes):
-            #     tokens = get_norm_terms(doc)
-            tags = {'I': [], 'P': [], 'S': []}
-            untagged = []
-            vocab_list = thes.index.tolist()
-            for tok in tokens:
-                if tok in vocab_list:  # recognized token?
-                    typ = thes.loc[tok]['NE']
+        def doc_to_tags(tokens, thes, vocab_list):
+            # vocab_list = set(thes.index)
+            knowns = thes.loc[tokens & vocab_list].groupby('NE').groups
+            unknowns = tokens - vocab_list
 
-                    if typ in tags.keys():  # I, P, or S?
-                        tags[typ] = list(set(tags[typ] + [thes.loc[tok]['alias'].tolist()]))
-                    else:  # R or X?
-                        pass  # skip'em
-                elif np.any([i in vocab_list for i in tok.split(' ')]):
-                    # If any subset of `tok` is itself a recognized token, skip'em
-                    pass
-                else:  # not recognized :(
-                    untagged += [tok]
-            return tags, list(set(untagged))
+            # tags = {'I': None, 'P': None, 'S': None, 'X': None, 'R': None, 'U': None}
+            # tags = {'I': [], 'P': [], 'S': [], 'X': [], 'R': [], 'U': []}
+            # tags.update(knowns)
+            # untagged = []
+            # # untagged = unknowns.tolist()
+            # double_check = [i.split(' ') for i in unknowns]
+            # # print(len(double_check))
+            # for tok_n, spaced in enumerate(double_check):
+            #     if len(spaced) > 1:  # i.e. unknown bi/trigram
+            #         ignores = (pd.Index(spaced) & vocab_list)
+            #         if not ignores.shape[0]>0:
+            #             # print(ignores.shape[0], len(untagged), len(double_check), tok_n)
+            #             untagged += [unknowns[tok_n]]
+            # print(knowns)
+            # print(unknowns)
+
+            # tags = {'I': [], 'P': [], 'S': [], 'X': [], 'R': [], 'U': []}
+            # tags.update({ne: knowns[knowns.NE == ne].index.tolist() for ne in knowns.NE.unique()})
+
+            # tags = {'I': [], 'P': [], 'S': []}
+            # untagged = []
+
+            # for tok in tokens:
+            #     if tok in vocab_list:  # recognized token?
+            #         typ = thes.loc[tok]['NE']
+            #
+            #         if typ in set(tags.keys()):  # I, P, or S?
+            #             tags[typ] = list(set(tags[typ] + [thes.loc[tok]['alias'].tolist()]))
+            #         else:  # R or X?
+            #             pass  # skip'em
+            #
+            #     elif np.any([i in vocab_list for i in tok.split(' ')]):
+            #         # If any subset of `tok` is itself a recognized token, skip'em
+            #         pass
+            #     else:  # not recognized :(
+            #         untagged += [tok]
+            # return tags, list(set(unknowns))
+            return knowns, unknowns
 
         def tag_corpus(corpus, thes, doc_term_matrix, id_to_term):
             RT, I, S, P, UK = ([], [], [], [], [])
             # iterate over all issues
             for doc_n, doc in enumerate(tqdm(corpus)):
                 tokens = get_norm_tokens(doc_n, doc_term_matrix, id_to_term)
-
-                tags, unknown = doc_to_tags(tokens, thes)
+                tags, unknown = doc_to_tags(tokens, thes, set(thes.index.values))
                 UK += [', '.join(unknown)]
+                # UK += [unknown]
                 RT += [doc.text]
-                I += [', '.join(tags['I'])]
-                S += [', '.join(tags['S'])]
-                P += [', '.join(tags['P'])]
+                # I += [', '.join(tags['I'])]
+                # S += [', '.join(tags['S'])]
+                # P += [', '.join(tags['P'])]
+                try:
+                    I += [', '.join(tags['I'].tolist())]
+                except KeyError:
+                    I += ['']
+                    pass
+                try:
+                    S += [', '.join(tags['S'].tolist())]
+                except KeyError:
+                    S += ['']
+                    pass
+                try:
+                    P += [', '.join(tags['P'].tolist())]
+                except KeyError:
+                    P += ['']
+                    pass
+                # S += [tags['S'].tolist()]
+                # P += [tags['P'].tolist()]
             # get back a tagged DF
+            # return
             return pd.DataFrame(data={
                 'RawText': RT,
                 'Items': I,
@@ -268,7 +333,7 @@ class KeywordExtractor(object):
         terms_list = (doc.to_terms_list(ngrams=(1, 2, 3),
                                         normalize=u'lemma',
                                         named_entities=False,
-                                        # filter_stops=True,  # Nope! Not needed :)
+                                        filter_stops=True,  # Nope! Not needed :)
                                         filter_punct=True,
                                         as_strings=True) for doc in self.corpus)
 

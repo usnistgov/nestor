@@ -158,7 +158,7 @@ def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', s
                 bigram_log = bigram_model[unigram_log]
 
                 # remove any remaining stopwords
-                bigram_log = [term for term in bigram_log if term not in spacy.en.STOP_WORDS]
+                # bigram_log = [term for term in bigram_log if term not in spacy.en.STOP_WORDS]
 
                 # write the transformed review as a line in the new file
                 bigram_log = ' '.join(bigram_log)
