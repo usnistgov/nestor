@@ -125,6 +125,12 @@ def clean_logs(clean_filepath, raw_txt_filepath, special=None):
                 f.write(sentence + '\n')
 
 
+# def unigram_docs(raw_txt_filepath, unigram_logs_filepath, data_directory='data', special=None):
+#     clean_filepath = os.path.join(data_directory,
+#                                   'TEMP_clean_logs_all.txt')
+#     clean_logs(clean_filepath, raw_txt_filepath, special=special)
+
+
 def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', special=None):
     clean_filepath = os.path.join(data_directory,
                                   'TEMP_clean_logs_all.txt')
@@ -226,16 +232,21 @@ def trigram_docs(raw_txt_filepath, trigram_logs_filepath, data_directory='data',
                 f.write(trigram_log + '\n')
 
 
-def write_clean_docs(clean_filepath, raw_txt_filepath, special=None):
+def write_clean_docs(raw_txt_filepath, clean_logs_filepath, data_directory='data', special=None):
     """
     Creates a lemmatized version of the raw line-wise corpus, with punct., whitespace, and stops removed.
-    :param clean_filepath: where the new file should go
+    :param clean_logs_filepath: where the new file should go
     :param raw_txt_filepath: where the original corpus file is
     :param special: dict of corpus-specific string-replacements to perform
     """
-    if not os.path.isfile(clean_filepath):
+
+    # clean_filepath = os.path.join(data_directory,
+    #                               'TEMP_clean_logs_all.txt')
+    # clean_logs(clean_filepath, raw_txt_filepath, special=special)
+
+    if not os.path.isfile(clean_logs_filepath):
         print("making new file...")
-        with codecs.open(clean_filepath, 'w', encoding='utf_8') as f:
+        with codecs.open(clean_logs_filepath, 'w', encoding='utf_8') as f:
             for parsed_log in nlp.pipe(line_review(raw_txt_filepath, special=special),
                                        batch_size=10000, n_threads=4):
                 # lemmatize the text, removing punctuation and whitespace
