@@ -216,15 +216,18 @@ class KeywordExtractor(object):
             return set([id_to_term[i] for i in doc.nonzero()[1]])
 
         def doc_to_tags(tokens, thes, vocab_list):
-            knowns = thes.loc[tokens & vocab_list].groupby('NE')  # set intersection
+            match = tokens & vocab_list # set intersection
+            knowns = thes.loc[match]
+
             unknowns = tokens - vocab_list  # set difference
 
             # remove unknowns with known substrings!
             unknowns = [i for i in unknowns if not np.any(np.isin(list(vocab_list), i.split(' ')))]
             # slow :(
             # unknowns = [i for i in unknowns if not np.any(np.isin(list(vocab_list), re.findall(r"[\w']+", i)))]
+            tag_thes = knowns.groupby('NE')
 
-            return knowns, unknowns
+            return tag_thes, unknowns
 
         def tag_corpus(corpus, thes, doc_term_matrix, id_to_term):
 
