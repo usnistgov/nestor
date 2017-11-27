@@ -94,10 +94,18 @@ class KeywordExtractor(object):
         if pd_kws is not None:
             default_pd_kws.update(pd_kws)
 
-        self.df = pd.read_excel(self.raw_excel_filepath,
-                                names=[relevant_names[i] for i in np.argsort(relevant_cols)],
-                                parse_cols=relevant_cols,
-                                **default_pd_kws)
+        try:
+            self.df = pd.read_excel(self.raw_excel_filepath,
+                                    names=[relevant_names[i] for i in np.argsort(relevant_cols)],
+                                    usecols=relevant_cols,
+                                    **default_pd_kws)
+
+        except Exception as e:
+            print(e, '... did not find .xlsx file, attempting .csv ...')
+            self.df = pd.read_csv(self.raw_excel_filepath,
+                                  names=[relevant_names[i] for i in np.argsort(relevant_cols)],
+                                  usecols=relevant_cols,
+                                  **default_pd_kws)
 
         for nlp_col in nlp_cols.keys():
             # replace empty NL descriptions with empty string. Replace '\n' inside descriptions with ' '.
@@ -287,9 +295,9 @@ class KeywordExtractor(object):
         # make the tf-idf embedding to tokenize with lemma/ngrams
         if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
             self._bow()
-        # df_pred = tag_corpus(corpus, vocab, self.doc_term_matrix, self.vsm.id_to_term)
-        df_pred = lp_wrapper(corpus, vocab, self.doc_term_matrix, self.vsm.id_to_term)
-        lprof.print_stats()
+        df_pred = tag_corpus(corpus, vocab, self.doc_term_matrix, self.vsm.id_to_term)
+        # df_pred = lp_wrapper(corpus, vocab, self.doc_term_matrix, self.vsm.id_to_term)
+        # lprof.print_stats()
 
         if save:
             self._df_pred = df_pred

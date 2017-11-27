@@ -92,11 +92,10 @@ def line_review(filename, special=None):
 
     with open(filename, encoding='utf_8', errors='ignore') as f:
         for log in tqdm(f):
-            if special is not None:
-                log = multiple_replace(log, special)
             log = log.replace('\\n', '\n')
             log = strip_tags(log).lower()
-
+            if special is not None:
+                log = multiple_replace(log, special)
                 # print(special, log)
             yield log
 
@@ -252,9 +251,9 @@ def write_clean_docs(raw_txt_filepath, clean_logs_filepath, data_directory='data
                 # lemmatize the text, removing punctuation and whitespace
                 unigram_log = [token.lemma_ for token in parsed_log
                                if not punct_space(token)]
-                # remove any remaining stopwords
-                unigram_log = [term for term in unigram_log
-                               if term not in spacy.en.STOP_WORDS]
+                # # remove any remaining stopwords
+                # unigram_log = [term for term in unigram_log
+                #                if term not in spacy.en.STOP_WORDS]
                 # write the transformed review as a line in the new file
                 unigram_log = ' '.join(unigram_log)
                 if len(unigram_log) <= 1:
