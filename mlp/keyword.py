@@ -70,8 +70,10 @@ class KeywordExtractor(object):
         assert os.path.isfile(self.raw_excel_filepath), 'Please provide a valid xlsx_fname path (in \'wdir\')'
         raw_txt_filepath = os.path.join(self.data_directory,
                                         'TEMP_init.txt')
-        bigram_logs_filepath = os.path.join(self.data_directory,
-                                            'TEMP_bigram.csv')
+        # bigram_logs_filepath = os.path.join(self.data_directory,
+        #                                     'TEMP_bigram.csv')
+        clean_logs_filepath = os.path.join(self.data_directory,
+                                            'TEMP_clean.csv')
         raw_csv_filepath = os.path.join(self.data_directory,
                                         'TEMP_nlp_raw.csv')
 
@@ -92,10 +94,18 @@ class KeywordExtractor(object):
         if pd_kws is not None:
             default_pd_kws.update(pd_kws)
 
-        self.df = pd.read_excel(self.raw_excel_filepath,
-                                names=[relevant_names[i] for i in np.argsort(relevant_cols)],
-                                parse_cols=relevant_cols,
-                                **default_pd_kws)
+        try:
+            self.df = pd.read_excel(self.raw_excel_filepath,
+                                    names=[relevant_names[i] for i in np.argsort(relevant_cols)],
+                                    usecols=relevant_cols,
+                                    **default_pd_kws)
+
+        except Exception as e:
+            print(e, '... did not find .xlsx file, attempting .csv ...')
+            self.df = pd.read_csv(self.raw_excel_filepath,
+                                  names=[relevant_names[i] for i in np.argsort(relevant_cols)],
+                                  usecols=relevant_cols,
+                                  **default_pd_kws)
 
         for nlp_col in nlp_cols.keys():
             # replace empty NL descriptions with empty string. Replace '\n' inside descriptions with ' '.
@@ -105,13 +115,20 @@ class KeywordExtractor(object):
         self.df['RawText'] = self.df[list(nlp_cols.keys())].apply(lambda x: '. '.join(x), axis=1)
         self.df['RawText'].to_csv(raw_txt_filepath, sep='\t', index=False)
 
-        # Find and replace bigrams using the Phrase Model from gensim (see tools.py)
-        bigram_kws = {'data_directory': self.data_directory,
+        # # Find and replace bigrams using the Phrase Model from gensim (see tools.py)
+        # bigram_kws = {'data_directory': self.data_directory,
+        #               'special': None}
+        # if special_replace is not None:
+        #     bigram_kws['special'] = special_replace
+        # bigram_docs(raw_txt_filepath, bigram_logs_filepath, **bigram_kws)
+        # self.df['RawText'] = pd.read_csv(bigram_logs_filepath, sep='\t', header=None)
+
+        clean_kws = {'data_directory': self.data_directory,
                       'special': None}
         if special_replace is not None:
-            bigram_kws['special'] = special_replace
-        bigram_docs(raw_txt_filepath, bigram_logs_filepath, **bigram_kws)
-        self.df['RawText'] = pd.read_csv(bigram_logs_filepath, sep='\t', header=None)
+            clean_kws['special'] = special_replace
+        write_clean_docs(raw_txt_filepath, clean_logs_filepath, **clean_kws)
+        self.df['RawText'] = pd.read_csv(clean_logs_filepath, sep='\t', header=None)
 
         # for now, we don't care about the separate NLP cols (future ver.)
         # So, remove all empty NLP work-orders (nothing to extract).
@@ -127,9 +144,6 @@ class KeywordExtractor(object):
             import glob
             for filename in glob.glob(os.path.join(self.data_directory,"TEMP_*")):
                 os.remove(filename)
-
-            # os.remove(raw_txt_filepath)
-            # os.remove(bigram_logs_filepath)
 
     def fit(self, vocab=None, notes=True):
         """Prepares the classified vocabulary list for keyword extraction
@@ -199,64 +213,94 @@ class KeywordExtractor(object):
         if corpus is None:
             corpus = self.corpus
         if vocab is None:
-            vocab = self.vocab
-
-        # make the tf-idf embedding to tokenize with lemma/ngrams
-        if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
-            self._bow()
+            vocab = self.vocab.copy()
+        vocab.NE.fillna(value='U', inplace=True)  # we want to know what humans didn't tag yet
+        vocab.alias = vocab.alias.astype('str')
+        # vocab_grp = vocab.groupby('NE')  # pre-allocate groups
 
         def get_norm_tokens(doc_n, doc_term_mat, id_to_term):
             doc = doc_term_mat[doc_n].toarray()
+            # we only care about unique tags, right?
+            return set([id_to_term[i] for i in doc.nonzero()[1]])
 
-            return [id_to_term[i] for i in doc.nonzero()[1]]
+        def doc_to_tags(tokens, thes, vocab_list):
+            match = tokens & vocab_list # set intersection
+            knowns = thes.loc[match]
 
-        def doc_to_tags(tokens, thes):
-            #     tokens = get_norm_terms(doc)
-            tags = {'I': [], 'P': [], 'S': []}
-            untagged = []
-            vocab_list = thes.index.tolist()
-            for tok in tokens:
-                if tok in vocab_list:  # recognized token?
-                    typ = thes.loc[tok]['NE']
+            unknowns = tokens - vocab_list  # set difference
 
-                    if typ in tags.keys():  # I, P, or S?
-                        tags[typ] = list(set(tags[typ] + [thes.loc[tok]['alias'].tolist()]))
-                    else:  # R or X?
-                        pass  # skip'em
-                elif np.any([i in vocab_list for i in tok.split(' ')]):
-                    # If any subset of `tok` is itself a recognized token, skip'em
-                    pass
-                else:  # not recognized :(
-                    untagged += [tok]
-            return tags, list(set(untagged))
+            # remove unknowns with known substrings!
+            unknowns = [i for i in unknowns if not np.any(np.isin(list(vocab_list), i.split(' ')))]
+            # slow :(
+            # unknowns = [i for i in unknowns if not np.any(np.isin(list(vocab_list), re.findall(r"[\w']+", i)))]
+            tag_thes = knowns.groupby('NE')
+
+            return tag_thes, unknowns
 
         def tag_corpus(corpus, thes, doc_term_matrix, id_to_term):
-            RT, I, S, P, UK = ([], [], [], [], [])
+
+            RT, I, S, P, X, R, UK = ([], [], [], [], [], [], [])
+
             # iterate over all issues
+            vocab_list = set(thes.index.values)
             for doc_n, doc in enumerate(tqdm(corpus)):
                 tokens = get_norm_tokens(doc_n, doc_term_matrix, id_to_term)
+                tags, unknown = doc_to_tags(tokens, thes, vocab_list)
 
-                tags, unknown = doc_to_tags(tokens, thes)
-                UK += [', '.join(unknown)]
-                RT += [doc.text]
-                I += [', '.join(tags['I'])]
-                S += [', '.join(tags['S'])]
-                P += [', '.join(tags['P'])]
+                UK += [', '.join(unknown)]  # not caught by vocab
+                RT += [doc.text]  # raw text gets saved
+
+                try:
+                    I += [tags.get_group('I').alias.str.cat(sep=', ')]
+                except KeyError:
+                    I += ['']
+                    pass
+                try:
+                    S += [tags.get_group('S').alias.str.cat(sep=', ')]
+                except KeyError:
+                    S += ['']
+                    pass
+                try:
+                    P += [tags.get_group('P').alias.str.cat(sep=', ')]
+                except KeyError:
+                    P += ['']
+                    pass
+                try:
+                    X += [tags.get_group('X').alias.str.cat(sep=', ')]
+                except KeyError:
+                    X += ['']
+                    pass
+                try:
+                    R += [tags.get_group('R').alias.str.cat(sep=', ')]
+                except KeyError:
+                    R += ['']
+                    pass
+
             # get back a tagged DF
             return pd.DataFrame(data={
                 'RawText': RT,
                 'Items': I,
                 'Problem': P,
                 'Solution': S,
+                'eXcess': X,
+                'Redundant': R,
                 'UK_tok': UK  # unknown
-            }, columns=['RawText', 'Items', 'Problem', 'Solution', 'UK_tok'])
+            }, columns=['RawText', 'Items', 'Problem', 'Solution', 'eXcess', 'Redundant', 'UK_tok'])
 
+        from line_profiler import LineProfiler
+        lprof = LineProfiler()
+        lprof.add_function(doc_to_tags)
+        lp_wrapper = lprof(tag_corpus)
+
+        # make the tf-idf embedding to tokenize with lemma/ngrams
+        if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
+            self._bow()
         df_pred = tag_corpus(corpus, vocab, self.doc_term_matrix, self.vsm.id_to_term)
+        # df_pred = lp_wrapper(corpus, vocab, self.doc_term_matrix, self.vsm.id_to_term)
+        # lprof.print_stats()
 
         if save:
             self._df_pred = df_pred
-            # self._df_pred.to_excel('keyword_tagged.xlsx')
-            # self._df_pred = df_pred
         return df_pred
 
     def _bow(self):
@@ -268,24 +312,11 @@ class KeywordExtractor(object):
         terms_list = (doc.to_terms_list(ngrams=(1, 2, 3),
                                         normalize=u'lemma',
                                         named_entities=False,
-                                        # filter_stops=True,  # Nope! Not needed :)
+                                        filter_stops=True,  # Nope! Not needed :)
                                         filter_punct=True,
                                         as_strings=True) for doc in self.corpus)
 
         self.doc_term_matrix = self.vsm.fit_transform(terms_list)
-        # self.vsm.id_to_term = self.vsm.id_to_term
-        # self.doc_term_matrix, self.vsm.id_to_term = textacy.vsm.doc_term_matrix(
-        #     (doc.to_terms_list(ngrams=(1, 2, 3),
-        #                        normalize=u'lemma',
-        #                        named_entities=False,
-        #                        # filter_stops=True,  # Nope! Not needed :)
-        #                        filter_punct=True,
-        #                        as_strings=True)
-        #      for doc in self.corpus),
-        #     weighting='tfidf',
-        #     normalize=False,
-        #     smooth_idf=False,
-        #     min_df=2, max_df=0.95)  # each token in >2 docs, <95% of docs
 
     def gen_vocab(self, vocab_fname, topn=3000, notes=False):
         """ A helper method to start the keyword annotation process
@@ -309,7 +340,6 @@ class KeywordExtractor(object):
 
         if (self.doc_term_matrix is None) or (self.vsm.id_to_term is None):
             self._bow()
-        # topn = 3000
 
         topn_tok = [self.vsm.id_to_term[i] for i in self.doc_term_matrix.sum(axis=0).argsort()[0, -topn:].tolist()[0][::-1]]
         top_n_filepath = os.path.join(self.data_directory, 'TEMP_top{}vocab.txt'.format(topn))

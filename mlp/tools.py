@@ -92,11 +92,10 @@ def line_review(filename, special=None):
 
     with open(filename, encoding='utf_8', errors='ignore') as f:
         for log in tqdm(f):
-            if special is not None:
-                log = multiple_replace(log, special)
             log = log.replace('\\n', '\n')
             log = strip_tags(log).lower()
-
+            if special is not None:
+                log = multiple_replace(log, special)
                 # print(special, log)
             yield log
 
@@ -123,6 +122,12 @@ def clean_logs(clean_filepath, raw_txt_filepath, special=None):
         with codecs.open(clean_filepath, 'w', encoding='utf_8') as f:
             for sentence in lemmatized_corpus(raw_txt_filepath, special=special):
                 f.write(sentence + '\n')
+
+
+# def unigram_docs(raw_txt_filepath, unigram_logs_filepath, data_directory='data', special=None):
+#     clean_filepath = os.path.join(data_directory,
+#                                   'TEMP_clean_logs_all.txt')
+#     clean_logs(clean_filepath, raw_txt_filepath, special=special)
 
 
 def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', special=None):
@@ -158,7 +163,7 @@ def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', s
                 bigram_log = bigram_model[unigram_log]
 
                 # remove any remaining stopwords
-                bigram_log = [term for term in bigram_log if term not in spacy.en.STOP_WORDS]
+                # bigram_log = [term for term in bigram_log if term not in spacy.en.STOP_WORDS]
 
                 # write the transformed review as a line in the new file
                 bigram_log = ' '.join(bigram_log)
@@ -226,24 +231,29 @@ def trigram_docs(raw_txt_filepath, trigram_logs_filepath, data_directory='data',
                 f.write(trigram_log + '\n')
 
 
-def write_clean_docs(clean_filepath, raw_txt_filepath, special=None):
+def write_clean_docs(raw_txt_filepath, clean_logs_filepath, data_directory='data', special=None):
     """
     Creates a lemmatized version of the raw line-wise corpus, with punct., whitespace, and stops removed.
-    :param clean_filepath: where the new file should go
+    :param clean_logs_filepath: where the new file should go
     :param raw_txt_filepath: where the original corpus file is
     :param special: dict of corpus-specific string-replacements to perform
     """
-    if not os.path.isfile(clean_filepath):
+
+    # clean_filepath = os.path.join(data_directory,
+    #                               'TEMP_clean_logs_all.txt')
+    # clean_logs(clean_filepath, raw_txt_filepath, special=special)
+
+    if not os.path.isfile(clean_logs_filepath):
         print("making new file...")
-        with codecs.open(clean_filepath, 'w', encoding='utf_8') as f:
+        with codecs.open(clean_logs_filepath, 'w', encoding='utf_8') as f:
             for parsed_log in nlp.pipe(line_review(raw_txt_filepath, special=special),
                                        batch_size=10000, n_threads=4):
                 # lemmatize the text, removing punctuation and whitespace
                 unigram_log = [token.lemma_ for token in parsed_log
                                if not punct_space(token)]
-                # remove any remaining stopwords
-                unigram_log = [term for term in unigram_log
-                               if term not in spacy.en.STOP_WORDS]
+                # # remove any remaining stopwords
+                # unigram_log = [term for term in unigram_log
+                #                if term not in spacy.en.STOP_WORDS]
                 # write the transformed review as a line in the new file
                 unigram_log = ' '.join(unigram_log)
                 if len(unigram_log) <= 1:
