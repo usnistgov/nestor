@@ -251,27 +251,27 @@ class KeywordExtractor(object):
                 RT += [doc.text]  # raw text gets saved
 
                 try:
-                    I += [tags.get_group('I').alias.str.cat(sep=', ')]
+                    I += [tags.get_group('I').alias.drop_duplicates().str.cat(sep=', ')]
                 except KeyError:
                     I += ['']
                     pass
                 try:
-                    S += [tags.get_group('S').alias.str.cat(sep=', ')]
+                    S += [tags.get_group('S').alias.drop_duplicates().str.cat(sep=', ')]
                 except KeyError:
                     S += ['']
                     pass
                 try:
-                    P += [tags.get_group('P').alias.str.cat(sep=', ')]
+                    P += [tags.get_group('P').alias.drop_duplicates().str.cat(sep=', ')]
                 except KeyError:
                     P += ['']
                     pass
                 try:
-                    X += [tags.get_group('X').alias.str.cat(sep=', ')]
+                    X += [tags.get_group('X').alias.drop_duplicates().str.cat(sep=', ')]
                 except KeyError:
                     X += ['']
                     pass
                 try:
-                    R += [tags.get_group('R').alias.str.cat(sep=', ')]
+                    R += [tags.get_group('R').alias.drop_duplicates().str.cat(sep=', ')]
                 except KeyError:
                     R += ['']
                     pass
