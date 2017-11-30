@@ -275,6 +275,10 @@ class KeywordExtractor(object):
                 except KeyError:
                     R += ['']
                     pass
+                try:
+                    UK[-1] = ', '.join([UK[-1]]+[tags.get_group('U').alias.drop_duplicates().str.cat(sep=', ')])
+                except KeyError:
+                    pass
 
             # get back a tagged DF
             return pd.DataFrame(data={
@@ -284,8 +288,8 @@ class KeywordExtractor(object):
                 'Solution': S,
                 'eXcess': X,
                 'Redundant': R,
-                'UK_tok': UK  # unknown
-            }, columns=['RawText', 'Items', 'Problem', 'Solution', 'eXcess', 'Redundant', 'UK_tok'])
+                'Unknown': UK  # unknown
+            }, columns=['RawText', 'Items', 'Problem', 'Solution', 'eXcess', 'Redundant', 'Unknown'])
 
         from line_profiler import LineProfiler
         lprof = LineProfiler()
