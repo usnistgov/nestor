@@ -9,9 +9,9 @@ import os
 import codecs
 import spacy
 import re
-import itertools as it
-from gensim.models import Phrases
-from gensim.models.word2vec import LineSentence
+# import itertools as it
+# from gensim.models import Phrases
+# from gensim.models.word2vec import LineSentence
 from html.parser import HTMLParser
 from tqdm import tqdm
 
@@ -130,105 +130,105 @@ def clean_logs(clean_filepath, raw_txt_filepath, special=None):
 #     clean_logs(clean_filepath, raw_txt_filepath, special=special)
 
 
-def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', special=None):
-    clean_filepath = os.path.join(data_directory,
-                                  'TEMP_clean_logs_all.txt')
-    clean_logs(clean_filepath, raw_txt_filepath, special=special)
-    unigram_sentences = LineSentence(clean_filepath)
+# def bigram_docs(raw_txt_filepath, bigram_logs_filepath, data_directory='data', special=None):
+#     clean_filepath = os.path.join(data_directory,
+#                                   'TEMP_clean_logs_all.txt')
+#     clean_logs(clean_filepath, raw_txt_filepath, special=special)
+#     unigram_sentences = LineSentence(clean_filepath)
+#
+#     bigram_model = Phrases(unigram_sentences)
+#     bigram_sentences_filepath = os.path.join(data_directory,
+#                                              'TEMP_bigram_logs_all.txt')
+#     if not os.path.isfile(bigram_sentences_filepath):
+#         print("making new file...")
+#         with codecs.open(bigram_sentences_filepath, 'w', encoding='utf_8') as f:
+#
+#             for unigram_sentence in unigram_sentences:
+#                 bigram_sentence = ' '.join(bigram_model[unigram_sentence])
+#
+#                 f.write(bigram_sentence + '\n')
 
-    bigram_model = Phrases(unigram_sentences)
-    bigram_sentences_filepath = os.path.join(data_directory,
-                                             'TEMP_bigram_logs_all.txt')
-    if not os.path.isfile(bigram_sentences_filepath):
-        print("making new file...")
-        with codecs.open(bigram_sentences_filepath, 'w', encoding='utf_8') as f:
 
-            for unigram_sentence in unigram_sentences:
-                bigram_sentence = ' '.join(bigram_model[unigram_sentence])
-
-                f.write(bigram_sentence + '\n')
-
-
-    if not os.path.isfile(bigram_logs_filepath):
-        print("making new file...")
-        with codecs.open(bigram_logs_filepath, 'w', encoding='utf_8') as f:
-
-            for parsed_log in nlp.pipe(line_review(raw_txt_filepath, special=special),
-                                       batch_size=10000, n_threads=8):
-                # lemmatize the text, removing punctuation and whitespace
-                unigram_log = [token.lemma_ for token in parsed_log
-                               if not punct_space(token)]
-
-                # apply the first-order and second-order phrase models
-                bigram_log = bigram_model[unigram_log]
-
-                # remove any remaining stopwords
-                # bigram_log = [term for term in bigram_log if term not in spacy.en.STOP_WORDS]
-
-                # write the transformed review as a line in the new file
-                bigram_log = ' '.join(bigram_log)
-                if len(bigram_log) <= 1:
-                    bigram_log = 'NaN'
-                    print('Replacing', bigram_log)
-                f.write(bigram_log + '\n')
-
-def trigram_docs(raw_txt_filepath, trigram_logs_filepath, data_directory='data', special=None):
-    clean_filepath = os.path.join(data_directory,
-                                  'TEMP_clean_logs_all.txt')
-    clean_logs(clean_filepath, raw_txt_filepath, special=special)
-    unigram_sentences = LineSentence(clean_filepath)
-
-    bigram_model = Phrases(unigram_sentences)
-    bigram_sentences_filepath = os.path.join(data_directory,
-                                             'TEMP_bigram_logs_all.txt')
-    if not os.path.isfile(bigram_sentences_filepath):
-        print("making new file...")
-        with codecs.open(bigram_sentences_filepath, 'w', encoding='utf_8') as f:
-
-            for unigram_sentence in unigram_sentences:
-                bigram_sentence = ' '.join(bigram_model[unigram_sentence])
-
-                f.write(bigram_sentence + '\n')
-
-    bigram_sentences = LineSentence(bigram_sentences_filepath)
-    trigram_model = Phrases(bigram_sentences)
-    trigram_sentences_filepath = os.path.join(data_directory,
-                                              'TEMP_trigram_logs_all.txt')
-
-    if not os.path.isfile(trigram_sentences_filepath):
-        print("making new file...")
-        with codecs.open(trigram_sentences_filepath, 'w', encoding='utf_8') as f:
-
-            for bigram_sentence in bigram_sentences:
-                trigram_sentence = ' '.join(trigram_model[bigram_sentence])
-
-                f.write(trigram_sentence + '\n')
-    trigram_sentences = LineSentence(trigram_sentences_filepath)
-
-    if not os.path.isfile(trigram_logs_filepath):
-        print("making new file...")
-        with codecs.open(trigram_logs_filepath, 'w', encoding='utf_8') as f:
-
-            for parsed_log in nlp.pipe(line_review(raw_txt_filepath, special=special),
-                                       batch_size=10000, n_threads=4):
-                # lemmatize the text, removing punctuation and whitespace
-                unigram_log = [token.lemma_ for token in parsed_log
-                               if not punct_space(token)]
-
-                # apply the first-order and second-order phrase models
-                bigram_log = bigram_model[unigram_log]
-                trigram_log = trigram_model[bigram_log]
-
-                # remove any remaining stopwords
-                trigram_log = [term for term in trigram_log
-                               if term not in spacy.en.STOP_WORDS]
-
-                # write the transformed review as a line in the new file
-                trigram_log = ' '.join(trigram_log)
-                if len(trigram_log) <= 1:
-                    trigram_log = 'NaN'
-                    print('Replacing', trigram_log)
-                f.write(trigram_log + '\n')
+#     if not os.path.isfile(bigram_logs_filepath):
+#         print("making new file...")
+#         with codecs.open(bigram_logs_filepath, 'w', encoding='utf_8') as f:
+#
+#             for parsed_log in nlp.pipe(line_review(raw_txt_filepath, special=special),
+#                                        batch_size=10000, n_threads=8):
+#                 # lemmatize the text, removing punctuation and whitespace
+#                 unigram_log = [token.lemma_ for token in parsed_log
+#                                if not punct_space(token)]
+#
+#                 # apply the first-order and second-order phrase models
+#                 bigram_log = bigram_model[unigram_log]
+#
+#                 # remove any remaining stopwords
+#                 # bigram_log = [term for term in bigram_log if term not in spacy.en.STOP_WORDS]
+#
+#                 # write the transformed review as a line in the new file
+#                 bigram_log = ' '.join(bigram_log)
+#                 if len(bigram_log) <= 1:
+#                     bigram_log = 'NaN'
+#                     print('Replacing', bigram_log)
+#                 f.write(bigram_log + '\n')
+#
+# def trigram_docs(raw_txt_filepath, trigram_logs_filepath, data_directory='data', special=None):
+#     clean_filepath = os.path.join(data_directory,
+#                                   'TEMP_clean_logs_all.txt')
+#     clean_logs(clean_filepath, raw_txt_filepath, special=special)
+#     unigram_sentences = LineSentence(clean_filepath)
+#
+#     bigram_model = Phrases(unigram_sentences)
+#     bigram_sentences_filepath = os.path.join(data_directory,
+#                                              'TEMP_bigram_logs_all.txt')
+#     if not os.path.isfile(bigram_sentences_filepath):
+#         print("making new file...")
+#         with codecs.open(bigram_sentences_filepath, 'w', encoding='utf_8') as f:
+#
+#             for unigram_sentence in unigram_sentences:
+#                 bigram_sentence = ' '.join(bigram_model[unigram_sentence])
+#
+#                 f.write(bigram_sentence + '\n')
+#
+#     bigram_sentences = LineSentence(bigram_sentences_filepath)
+#     trigram_model = Phrases(bigram_sentences)
+#     trigram_sentences_filepath = os.path.join(data_directory,
+#                                               'TEMP_trigram_logs_all.txt')
+#
+#     if not os.path.isfile(trigram_sentences_filepath):
+#         print("making new file...")
+#         with codecs.open(trigram_sentences_filepath, 'w', encoding='utf_8') as f:
+#
+#             for bigram_sentence in bigram_sentences:
+#                 trigram_sentence = ' '.join(trigram_model[bigram_sentence])
+#
+#                 f.write(trigram_sentence + '\n')
+#     trigram_sentences = LineSentence(trigram_sentences_filepath)
+#
+#     if not os.path.isfile(trigram_logs_filepath):
+#         print("making new file...")
+#         with codecs.open(trigram_logs_filepath, 'w', encoding='utf_8') as f:
+#
+#             for parsed_log in nlp.pipe(line_review(raw_txt_filepath, special=special),
+#                                        batch_size=10000, n_threads=4):
+#                 # lemmatize the text, removing punctuation and whitespace
+#                 unigram_log = [token.lemma_ for token in parsed_log
+#                                if not punct_space(token)]
+#
+#                 # apply the first-order and second-order phrase models
+#                 bigram_log = bigram_model[unigram_log]
+#                 trigram_log = trigram_model[bigram_log]
+#
+#                 # remove any remaining stopwords
+#                 trigram_log = [term for term in trigram_log
+#                                if term not in spacy.en.STOP_WORDS]
+#
+#                 # write the transformed review as a line in the new file
+#                 trigram_log = ' '.join(trigram_log)
+#                 if len(trigram_log) <= 1:
+#                     trigram_log = 'NaN'
+#                     print('Replacing', trigram_log)
+#                 f.write(trigram_log + '\n')
 
 
 def write_clean_docs(raw_txt_filepath, clean_logs_filepath, data_directory='data', special=None):
