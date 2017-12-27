@@ -252,8 +252,8 @@ def write_clean_docs(raw_txt_filepath, clean_logs_filepath, data_directory='data
                 unigram_log = [token.lemma_ for token in parsed_log
                                if not punct_space(token)]
                 # # remove any remaining stopwords
-                # unigram_log = [term for term in unigram_log
-                #                if term not in spacy.en.STOP_WORDS]
+                unigram_log = [term for term in unigram_log
+                               if term not in spacy.en.STOP_WORDS]
                 # write the transformed review as a line in the new file
                 unigram_log = ' '.join(unigram_log)
                 if len(unigram_log) <= 1:
