@@ -49,9 +49,9 @@ class Human:
 
         :param name: a String
         """
-        if name is "":
+        if name is "" or name is None:
             name = "unknown"
-        self.name = name
+        self.name = name.title()
 
     def _get_skills(self):
         """
@@ -66,8 +66,8 @@ class Human:
 
         :param skills: an Array of String or a String
         """
-        if skills is "":
-            skills = None
+        if skills is "" or skills is None:
+            self.skills = None
         if skills is not None:
             if not isinstance(skills, collections.Iterable) or isinstance(skills, str):
                     skills = [skills]
@@ -86,12 +86,11 @@ class Human:
 
         :param crafts: an Array of String or a String
         """
-        if crafts is "":
+        if crafts is "" or cratfs is None:
             crafts = None
-        if crafts is not None:
-            if not isinstance(crafts, collections.Iterable) or isinstance(crafts, str):
+        if not isinstance(crafts, collections.Iterable) or isinstance(crafts, str):
                 crafts = [crafts]
-        self.crafts = crafts
+        self.crafts = [craft.lower() for craft in crafts]
 
     def __str__(self):
         return "OBJECT: %s --> Name: %s || skills: %s || crafts: %s"%\
