@@ -105,49 +105,55 @@ class Issue:
         return self.problem
 
     def _set_problem(self, problem):
-        if problem is "":
-            problem = "unknown"
-        self.problem = problem
+        if problem is "" or problem is None:
+            self.problem = "unknown"
+        else:
+            self.problem = problem
 
     def _get_solution(self):
         return self.solution
 
     def _set_solution(self, solution):
-        if solution is "":
-            solution = "unknown"
-        self.solution = solution
+        if solution is "" or solution is None:
+            self.solution = "unknown"
+        else:
+            self.solution = solution
 
     def _get_cause(self):
         return self.cause
 
     def _set_cause(self, cause):
-        if cause is "":
-            cause = None
-        self.cause = cause
+        if cause is "" or cause is None:
+            self.cause = None
+        else:
+            self.cause = cause
 
     def _get_effects(self):
         return self.effects
 
     def _set_effects(self, effects):
-        if effects is "":
-            effects = None
-        self.effects = effects
+        if effects is "" is None:
+            self.effects = None
+        else:
+            self.effects = effects
 
     def _get_part_in_process(self):
         return self.part_in_process
 
     def _set_part_in_process(self, part_in_process):
-        if part_in_process is "":
-            part_in_process = None
-        self.part_in_process = part_in_process
+        if part_in_process is "" or part_in_process is None:
+            self.part_in_process = None
+        else:
+            self.part_in_process = part_in_process.lower()
 
     def _get_necessary_part(self):
         return self.necessary_part
 
     def _set_necessary_part(self, necessary_part):
-        if necessary_part is "":
-            necessary_part = None
-        self.necessary_part = necessary_part
+        if necessary_part is "" or necessary_part is None:
+            self.necessary_part = None
+        else:
+            self.necessary_part = necessary_part.lower()
 
     def _get_machine_down(self):
         return self.machine_down
@@ -164,6 +170,7 @@ class Issue:
 
 
         ############################  DATE ############################
+#TODO Dates make problem, because there is too much difference between the csv
 
     def _get_date_machine_down(self):
         return self.date_machine_down

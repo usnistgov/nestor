@@ -35,9 +35,10 @@ class Tag:
         set the keyword of a TAG
         :param keyword: a String for the keyword
         """
-        if keyword is "":
-            keyword="unknown"
-        self.keyword = keyword
+        if keyword is "" or keyword is None:
+            self.keyword = None
+        else:
+            self.keyword = keyword.lower()
 
     def __str__(self):
         return "OBJECT: %s --> Keyword: %s "%\

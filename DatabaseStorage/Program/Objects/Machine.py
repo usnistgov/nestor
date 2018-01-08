@@ -42,9 +42,10 @@ class Machine:
         Set the Name of the MACHINE
         :param name: a string for the name
         """
-        if name is "":
-            name = "unknown"
-        self.name = name
+        if name is "" or name is None:
+            self.name = None
+        else:
+            self.name = name.lower()
 
     def _get_manufacturer(self):
         """
@@ -57,9 +58,10 @@ class Machine:
         set the name of the manufacturer
         :param manufacturer: a string for the namufacturer name
         """
-        if manufacturer is "":
-            manufacturer = None
-        self.manufacturer = manufacturer
+        if manufacturer is "" or manufacturer is None:
+            self.manufacturer = None
+        else:
+            self.manufacturer = manufacturer.lower()
 
     def _get_locasion(self):
         """
@@ -72,9 +74,10 @@ class Machine:
         Set the localisation of the MAHCINE
         :param locasion: a string for the localisation
         """
-        if locasion is "":
-            locasion = None
-        self.locasion = locasion
+        if locasion is "" or locasion is None:
+            self.locasion = None
+        else:
+            self.locasion = locasion.lower()
 
     def _get_type(self):
         """
