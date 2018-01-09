@@ -15,6 +15,16 @@ import re
 from html.parser import HTMLParser
 from tqdm import tqdm
 
+
+def series_itervals(s):
+    """
+    Generator for just the values in a series.
+    Useful for e.g. fitting sklearn Vectorizers
+    """
+    for n, val in s.iteritems():
+        yield val
+
+
 nlp = spacy.load('en')
 
 
