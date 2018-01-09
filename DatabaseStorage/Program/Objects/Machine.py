@@ -1,4 +1,5 @@
 from Program.Database.Database_Properties import NodeMachine
+from Program.Database.Database_Properties import LabelEdges
 
 class Machine:
     """
@@ -42,9 +43,10 @@ class Machine:
         Set the Name of the MACHINE
         :param name: a string for the name
         """
-        if name is "":
-            name = "unknown"
-        self.name = name
+        if name is "" or name is None:
+            self.name = None
+        else:
+            self.name = name.lower()
 
     def _get_manufacturer(self):
         """
@@ -57,9 +59,10 @@ class Machine:
         set the name of the manufacturer
         :param manufacturer: a string for the namufacturer name
         """
-        if manufacturer is "":
-            manufacturer = None
-        self.manufacturer = manufacturer
+        if manufacturer is "" or manufacturer is None:
+            self.manufacturer = None
+        else:
+            self.manufacturer = manufacturer.lower()
 
     def _get_locasion(self):
         """
@@ -72,9 +75,10 @@ class Machine:
         Set the localisation of the MAHCINE
         :param locasion: a string for the localisation
         """
-        if locasion is "":
-            locasion = None
-        self.locasion = locasion
+        if locasion is "" or locasion is None:
+            self.locasion = None
+        else:
+            self.locasion = locasion.lower()
 
     def _get_type(self):
         """
@@ -164,3 +168,20 @@ class Machine:
             query += '%s.%s="%s",' % \
                      (variable, NodeMachine.PROPERTY_LOCASION.value, self.locasion)
         return query[:-1]
+
+    @staticmethod
+    def get_all_machine_from_database(name=False, manufacturer=False, locasion=False, type=False):
+        property = "RETURN"
+        query = "MATCH(machine%s)<-[%s]-(issue)"%(NodeMachine.LABEL_MACHINE.value, LabelEdges.LABEL_COVERED.value)
+        if type:
+            query+="\nMATCH (machine)-[%s]->(machine_type%s)"%(LabelEdges.LABEL_ISA.value, NodeMachine.LABEL_MACHINE_TYPE.value)
+            property += " machine_type.%s,"%(NodeMachine.PROPERTY_TYPE.value)
+        if locasion:
+            property += " machine.%s," % (NodeMachine.PROPERTY_LOCASION.value)
+        if manufacturer:
+            property += " machine.%s," % (NodeMachine.PROPERTY_MANUFACTURER.value)
+        if name:
+            property += " machine.%s," % (NodeMachine.PROPERTY_NAME.value)
+        if locasion is False and name is False and manufacturer is False and type is False:
+            property += " machine,"
+        return query, property[:-1]

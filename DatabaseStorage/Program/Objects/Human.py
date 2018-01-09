@@ -49,9 +49,10 @@ class Human:
 
         :param name: a String
         """
-        if name is "":
-            name = "unknown"
-        self.name = name
+        if name is "" or name is None:
+            self.name = None
+        else:
+            self.name = name.lower()
 
     def _get_skills(self):
         """
@@ -66,12 +67,12 @@ class Human:
 
         :param skills: an Array of String or a String
         """
-        if skills is "":
-            skills = None
-        if skills is not None:
-            if not isinstance(skills, collections.Iterable) or isinstance(skills, str):
+        if skills is "" or skills is None:
+            self.skills = None
+        else:
+            if not isinstance(skills, collections.Iterable):
                     skills = [skills]
-        self.skills = skills
+            self.skills = [skill.lower() for skill in skills]
 
     def _get_crafts(self):
         """
@@ -86,12 +87,12 @@ class Human:
 
         :param crafts: an Array of String or a String
         """
-        if crafts is "":
-            crafts = None
-        if crafts is not None:
-            if not isinstance(crafts, collections.Iterable) or isinstance(crafts, str):
+        if crafts is "" or crafts is None:
+            self.crafts = None
+        else:
+            if not isinstance(crafts, collections.Iterable):
                 crafts = [crafts]
-        self.crafts = crafts
+            self.crafts = [craft.lower() for craft in crafts]
 
     def __str__(self):
         return "OBJECT: %s --> Name: %s || skills: %s || crafts: %s"%\
@@ -169,6 +170,12 @@ class Human:
                          (craft, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, craft)
 
         return query
+
+    # @staticmethod
+    # def get_all_human_from_database(work, name=False, skills=false, craft=false):
+    #     query = "MATCH (human:HUMAN%s)"%(work)
+
+
 
 """
     def fromCypher(self, result):

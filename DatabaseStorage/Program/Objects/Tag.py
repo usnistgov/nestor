@@ -1,4 +1,5 @@
 from Program.Database.Database_Properties import NodeTag
+from Program.Database.Database_Properties import LabelEdges
 
 class Tag:
     """
@@ -35,9 +36,10 @@ class Tag:
         set the keyword of a TAG
         :param keyword: a String for the keyword
         """
-        if keyword is "":
-            keyword="unknown"
-        self.keyword = keyword
+        if keyword is "" or keyword is None:
+            self.keyword = None
+        else:
+            self.keyword = keyword.lower()
 
     def __str__(self):
         return "OBJECT: %s --> Keyword: %s "%\
@@ -56,3 +58,16 @@ class Tag:
             return ""
         return '(%s %s %s {%s: "%s"})' % \
                 (variable, NodeTag.LABEL_TAG.value, type.value, NodeTag.PROPERTY_KEYWORD.value, self.keyword)
+
+    @staticmethod
+    def get_all_tag_from_database(item = False, problem_action = False, solution_action=False, keyword=False):
+        property = "RETURN"
+        query = "MATCH ("
+        if item:
+            query+="item%s)<-[%s]-(issue)"%(NodeTag.LABEL_ITEM.value, LabelEdges.LABEL_CONTAINS.value)
+        elif problem_action:
+            query += "action%s)<-[%s]-(issue)" % (NodeTag.LABEL_ACTION.value, LabelEdges.LABEL_PROBLEM.value)
+        elif solution_action:
+            query += "action%s)<-[%s]-(issue)" % (NodeTag.LABEL_ACTION.value, LabelEdges.LABEL_SOLUTION.value)
+        if keyword:
+            property += " "

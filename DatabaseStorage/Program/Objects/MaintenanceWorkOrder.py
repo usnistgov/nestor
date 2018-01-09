@@ -134,9 +134,10 @@ class MaintenanceWorkOrder():
 
 ####    MACHINE     ######
         if self.machine is not None:
-            query += "\n\nMERGE %s" % (self.machine.toCypherName(varMachine))
-            query += "\n %s " % (self.machine.toCypherUpdate(varMachine))
-            query += '\nMERGE(%s)-[%s]->(%s)' % (varIssue, LabelEdges.LABEL_COVERED.value, varMachine)
+            if self.machine._get_name() is not None:
+                query += "\n\nMERGE %s" % (self.machine.toCypherName(varMachine))
+                query += "\n %s " % (self.machine.toCypherUpdate(varMachine))
+                query += '\nMERGE(%s)-[%s]->(%s)' % (varIssue, LabelEdges.LABEL_COVERED.value, varMachine)
 
 ####    MACHINE_TYPE     ######
         if self.machine._get_type() is not None:
@@ -146,43 +147,48 @@ class MaintenanceWorkOrder():
 ####    OPERATORS     ######
         if self.operators is not None and len(self.operators) is not 0:
             for i in range(0, len(self.operators)):
-                query += "\n\nMERGE %s" % \
-                         (self.operators[i].toCypherName(varOperators + str(i)))
-                query += "\n%s" % (self.operators[i].toCypherUpdate(varOperators + str(i), NodeHuman.LABEL_OPERATOR))
-                query += '\nMERGE (%s)-[%s]->(%s)' % \
-                         (varIssue, LabelEdges.LABEL_REQUESTED.value, varOperators + str(i))
+                if self.operators[i]._get_name() is not None:
+                    query += "\n\nMERGE %s" % \
+                             (self.operators[i].toCypherName(varOperators + str(i)))
+                    query += "\n%s" % (self.operators[i].toCypherUpdate(varOperators + str(i), NodeHuman.LABEL_OPERATOR))
+                    query += '\nMERGE (%s)-[%s]->(%s)' % \
+                             (varIssue, LabelEdges.LABEL_REQUESTED.value, varOperators + str(i))
 
 ####    TECHNICIANS     ######
         if self.technicians is not None and len(self.technicians) is not 0:
             for i in range(0, len(self.technicians)):
-                query += "\n\nMERGE %s" % \
-                         (self.technicians[i].toCypherName(varTechnicians + str(i)))
-                query += "\n%s" % (self.technicians[i].toCypherUpdate(varTechnicians + str(i), NodeHuman.LABEL_TECHNICIAN))
-                query += '\nMERGE (%s)-[%s]->(%s)' % \
-                         (varIssue, LabelEdges.LABEL_SOLVE.value, varTechnicians + str(i))
+                if self.technicians[i]._get_name() is not None:
+                    query += "\n\nMERGE %s" % \
+                             (self.technicians[i].toCypherName(varTechnicians + str(i)))
+                    query += "\n%s" % (self.technicians[i].toCypherUpdate(varTechnicians + str(i), NodeHuman.LABEL_TECHNICIAN))
+                    query += '\nMERGE (%s)-[%s]->(%s)' % \
+                             (varIssue, LabelEdges.LABEL_SOLVE.value, varTechnicians + str(i))
 
 ####    ITEM     ######
         if self.itemtags is not None and len(self.itemtags) is not 0:
             for i in range(0, len(self.itemtags)):
-                query += "\n\nMERGE %s" % \
-                         (self.itemtags[i].toCypher(varItemtag + str(i), NodeTag.LABEL_ITEM))
-                query += '\nMERGE (%s)-[%s]->(%s)' % \
-                         (varIssue, LabelEdges.LABEL_CONTAINS.value, varItemtag + str(i))
+                if self.itemtags[i]._get_keyword() is not None:
+                    query += "\n\nMERGE %s" % \
+                             (self.itemtags[i].toCypher(varItemtag + str(i), NodeTag.LABEL_ITEM))
+                    query += '\nMERGE (%s)-[%s]->(%s)' % \
+                             (varIssue, LabelEdges.LABEL_CONTAINS.value, varItemtag + str(i))
 
 ####    PROBLEM     ######
         if self.problemtags is not None and len(self.problemtags) is not 0:
             for i in range(0, len(self.problemtags)):
-                query += "\n\nMERGE %s" % \
-                         (self.problemtags[i].toCypher(varProblemtags + str(i), NodeTag.LABEL_ACTION))
-                query += '\nMERGE (%s)-[%s]->(%s)' % \
-                         (varIssue, LabelEdges.LABEL_PROBLEM.value, varProblemtags + str(i))
+                if self.problemtags[i]._get_keyword() is not None:
+                    query += "\n\nMERGE %s" % \
+                             (self.problemtags[i].toCypher(varProblemtags + str(i), NodeTag.LABEL_ACTION))
+                    query += '\nMERGE (%s)-[%s]->(%s)' % \
+                             (varIssue, LabelEdges.LABEL_PROBLEM.value, varProblemtags + str(i))
 
 ####    SOLUTION     ######
         if self.solutiontags is not None and len(self.solutiontags) is not 0:
             for i in range(0, len(self.solutiontags)):
-                query += "\n\nMERGE %s" % \
-                         (self.solutiontags[i].toCypher(varSolutiontags + str(i), NodeTag.LABEL_ACTION))
-                query += '\nMERGE (%s)-[%s]->(%s)' % \
-                         (varIssue, LabelEdges.LABEL_SOLUTION.value, varSolutiontags + str(i))
+                if self.solutiontags[i]._get_keyword() is not None:
+                    query += "\n\nMERGE %s" % \
+                             (self.solutiontags[i].toCypher(varSolutiontags + str(i), NodeTag.LABEL_ACTION))
+                    query += '\nMERGE (%s)-[%s]->(%s)' % \
+                             (varIssue, LabelEdges.LABEL_SOLUTION.value, varSolutiontags + str(i))
 
         return query

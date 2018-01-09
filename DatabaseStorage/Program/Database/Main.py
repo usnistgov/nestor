@@ -47,7 +47,7 @@ The localisation is a dictionary which describe the CSV file (what column contai
                     }
 """
 
-def GraphDatabaseCsv(database, file_path, localization):
+def GraphDatabaseCsv(database, file_path, localization, date_cleanizer = None):
     """
 
     :param database: the Neo4j database in which you want to store the data
@@ -87,7 +87,7 @@ def GraphDatabaseCsv(database, file_path, localization):
     :return:
     """
 
-    def createMWO(row, localization):
+    def createMWO(row, localization, date_cleanizer = None):
 
         #####   TECHNICIAN #####
         def createTechnicians(row, localization):
@@ -165,7 +165,7 @@ def GraphDatabaseCsv(database, file_path, localization):
             return tags
 
         #####   ISSUE #####
-        def createIssue(row, localization):
+        def createIssue(row, localization, date_cleanizer = None):
             issue = None
 
             try:
@@ -191,52 +191,144 @@ def GraphDatabaseCsv(database, file_path, localization):
                     issue._set_machine_down(row[localization[NodeIssue.VALUE_MACHINE_DOWN.value]])
                 except KeyError:
                     pass
-
                 try:
-                    issue._set_date_machine_down(row[localization[NodeIssue.VALUE_DATE_MACHINE_DOWN.value]])
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_MACHINE_DOWN.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_MACHINE_DOWN.value + "2"]] is not "":
+                        issue._set_date_machine_down(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MACHINE_DOWN.value]],
+                                row[localization[NodeIssue.VALUE_DATE_MACHINE_DOWN.value + "2"]]
+                            )
+                        )
+                    elif NodeIssue.VALUE_DATE_MACHINE_DOWN.value in localization.keys():
+                        issue._set_date_machine_down(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MACHINE_DOWN.value]]
+                            )
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    issue._set_date_machine_up(row[localization[NodeIssue.VALUE_DATE_MACHINE_UP.value]])
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_MACHINE_UP.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_MACHINE_UP.value + "2"]] is not "":
+                        issue._set_date_machine_up(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MACHINE_UP.value]],
+                                row[localization[NodeIssue.VALUE_DATE_MACHINE_UP.value + "2"]]
+                            )
+                        )
+                    elif NodeIssue.VALUE_DATE_MACHINE_UP.value in localization.keys():
+                        issue._set_date_machine_up(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MACHINE_UP.value]]
+                            )
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    #print("----",clean_GS_date(row[9], row[10]))
-                    # issue._set_date_maintenance_work_order_issue(
-                    #     row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value]])
-                    issue._set_date_maintenance_work_order_issue(clean_GS_date(
-                        row[9], row[10]))
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value + "2"]] is not "":
+                        issue._set_date_maintenance_work_order_issue(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value]],
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value + "2"]])
+                        )
+                    elif NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value in localization.keys():
+                        issue._set_date_maintenance_work_order_issue(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value]])
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    #print(clean_GS_date(row[11], row[12]))
-                    # issue._set_date_maintenance_work_order_close(
-                    #     row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value]])
-                    issue._set_date_maintenance_work_order_close(clean_GS_date(
-                        row[11], row[12]))
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value + "2"]] is not "":
+                        issue._set_date_maintenance_work_order_close(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value]],
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value + "2"]])
+                        )
+                    elif NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value in localization.keys():
+                        issue._set_date_maintenance_work_order_close(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value]])
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    issue._set_date_maintenance_technician_arrives(
-                        row[localization[NodeIssue.VALUE_DATE_TECHNICIAN_ARRIVE.value]])
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_TECHNICIAN_ARRIVE.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_TECHNICIAN_ARRIVE.value + "2"]] is not "":
+                        issue._set_date_maintenance_technician_arrives(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_TECHNICIAN_ARRIVE.value]],
+                                row[localization[NodeIssue.VALUE_DATE_TECHNICIAN_ARRIVE.value + "2"]])
+                        )
+                    elif NodeIssue.VALUE_DATE_TECHNICIAN_ARRIVE.value in localization.keys():
+                        issue._set_date_maintenance_technician_arrives(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_TECHNICIAN_ARRIVE.value]])
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    issue._set_date_problem_found(row[localization[NodeIssue.VALUE_DATE_PROBLEM_FOUND.value]])
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_PROBLEM_FOUND.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_PROBLEM_FOUND.value + "2"]] is not "":
+                        issue._set_date_problem_found(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_PROBLEM_FOUND.value]],
+                                row[localization[NodeIssue.VALUE_DATE_PROBLEM_FOUND.value + "2"]])
+                        )
+                    elif NodeIssue.VALUE_DATE_PROBLEM_FOUND.value in localization.keys():
+                        issue._set_date_problem_found(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_PROBLEM_FOUND.value]])
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    issue._set_date_problem_solved(row[localization[NodeIssue.VALUE_DATE_PROBLEM_SOLVE.value]])
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_PROBLEM_SOLVE.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_PROBLEM_SOLVE.value + "2"]] is not "":
+                        issue._set_date_problem_solved(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_PROBLEM_SOLVE.value]],
+                                row[localization[NodeIssue.VALUE_DATE_PROBLEM_SOLVE.value + "2"]])
+                        )
+                    elif NodeIssue.VALUE_DATE_PROBLEM_SOLVE.value in localization.keys():
+                        issue._set_date_problem_solved(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_PROBLEM_SOLVE.value]])
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    issue._set_date_part_ordered(row[localization[NodeIssue.VALUE_DATE_PART_ORDER.value]])
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_PART_ORDER.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_PART_ORDER.value + "2"]] is not "":
+                        issue._set_date_part_ordered(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_PART_ORDER.value]],
+                                row[localization[NodeIssue.VALUE_DATE_PART_ORDER.value + "2"]])
+                        )
+                    elif NodeIssue.VALUE_DATE_PART_ORDER.value in localization.keys():
+                        issue._set_date_part_ordered(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_PART_ORDER.value]])
+                        )
+                except (KeyError, AttributeError):
                     pass
                 try:
-                    issue._set_date_maintenance_technician_begin_repair_problem(
-                        row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value]])
-                except KeyError:
+                    if NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2" in localization \
+                            and row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2"]] is not "":
+                        issue._set_date_maintenance_technician_begin_repair_problem(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value]],
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2"]])
+                        )
+                    elif NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value in localization.keys():
+                        issue._set_date_maintenance_technician_begin_repair_problem(
+                            date_cleanizer(
+                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value]])
+                        )
+                except (KeyError, AttributeError):
                     pass
             except KeyError:
                 pass
@@ -249,7 +341,7 @@ def GraphDatabaseCsv(database, file_path, localization):
         items = createTags(row, localization, NodeTag.VALUE_ITEM.value)
         problems = createTags(row, localization, NodeTag.VALUE_PROBLEM.value)
         solutions = createTags(row, localization, NodeTag.VALUE_SOLUTION.value)
-        issue = createIssue(row, localization)
+        issue = createIssue(row, localization, date_cleanizer)
 
         return MaintenanceWorkOrder(issue=issue,
                                     machine=machine,
@@ -271,7 +363,7 @@ def GraphDatabaseCsv(database, file_path, localization):
 
         for row in tqdm(reader, total=num_lines):
         #for row in reader:
-            mwo = createMWO(row, localization)
+            mwo = createMWO(row, localization, date_cleanizer)
             query = mwo.create_database("issue", "machine", "machinetype", "operator", "technician", "item", "problem", "solution")
             database.runQuery(query=query)
 
