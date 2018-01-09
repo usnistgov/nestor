@@ -1,4 +1,5 @@
 from Program.Database.Database_Properties import NodeMachine
+from Program.Database.Database_Properties import LabelEdges
 
 class Machine:
     """
@@ -167,3 +168,20 @@ class Machine:
             query += '%s.%s="%s",' % \
                      (variable, NodeMachine.PROPERTY_LOCASION.value, self.locasion)
         return query[:-1]
+
+    @staticmethod
+    def get_all_machine_from_database(name=False, manufacturer=False, locasion=False, type=False):
+        property = "RETURN"
+        query = "MATCH(machine%s)<-[%s]-(issue)"%(NodeMachine.LABEL_MACHINE.value, LabelEdges.LABEL_COVERED.value)
+        if type:
+            query+="\nMATCH (machine)-[%s]->(machine_type%s)"%(LabelEdges.LABEL_ISA.value, NodeMachine.LABEL_MACHINE_TYPE.value)
+            property += " machine_type.%s,"%(NodeMachine.PROPERTY_TYPE.value)
+        if locasion:
+            property += " machine.%s," % (NodeMachine.PROPERTY_LOCASION.value)
+        if manufacturer:
+            property += " machine.%s," % (NodeMachine.PROPERTY_MANUFACTURER.value)
+        if name:
+            property += " machine.%s," % (NodeMachine.PROPERTY_NAME.value)
+        if locasion is False and name is False and manufacturer is False and type is False:
+            property += " machine,"
+        return query, property[:-1]

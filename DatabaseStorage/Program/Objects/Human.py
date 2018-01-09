@@ -171,6 +171,12 @@ class Human:
 
         return query
 
+    # @staticmethod
+    # def get_all_human_from_database(work, name=False, skills=false, craft=false):
+    #     query = "MATCH (human:HUMAN%s)"%(work)
+
+
+
 """
     def fromCypher(self, result):
         self._set_name(result[NodeHuman.PROPERTY_NAME.value])
