@@ -8,6 +8,7 @@ sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 import pandas as pd
 from test_skeleton import Ui_MainWindow
+from fuzzywuzzy import process as zz
 
 class MyWindow(qw.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -20,10 +21,11 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         openFile = self.actionOpen
         openFile.setShortcut("Ctrl+O")
         openFile.setStatusTip('Open File')
-
         openFile.triggered.connect(self.file_open)
 
         self.vocabTableWidget.itemSelectionChanged.connect(self.extract_row_info)
+        self.df = None
+        self.vocab_limit = 1000
 
         self.clf_mapper = {
             'S': self.sltnButton,
@@ -33,74 +35,101 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
             'U': self.unknButton
         }
 
-    # def loadCsv(self, fileName):
-    #     with open(fileName, "rt") as fileInput:
-    #         for row in csv.reader(fileInput):
-    #             items = [
-    #                 QStandardItem(field)
-    #                 for field in row
-    #             ]
-    #             self.model.appendRow(items)
+        self.btn_mapper = {
+            'Item': 'I',
+            'Problem': 'P',
+            'Solution': 'S',
+            'Unknown': 'U',
+            'Stop-word': 'X',
+            'not yet classified': pd.np.nan
+        }
+
+        self.actionExit.triggered.connect(self.close_application)
+
+        self.updateButton.clicked.connect(self.update_from_input)
+
+    def close_application(self):
+        # this running means somewhere, an option to leave has been clicked
+        choice = qw.QMessageBox.question(self, 'Shut it Down',
+                                      'Are you sure?',
+                                      qw.QMessageBox.Yes | qw.QMessageBox.No)
+        if choice == qw.QMessageBox.Yes:
+            print('exiting program...')
+            sys.exit()
+        else:
+            pass
+
 
 
     def file_open(self):
-        fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Open File')
+        """
+        GUI file picker wrapper on pandas-to-tab method
+        """
+        # fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Open File')
+        fileName = 'app_vocab.csv'
         self.csv_to_tab(fileName)
-        # self.loadCsv(fileName)
-
-
-    # def writeCsv(self, fileName):
-    #     with open(fileName, "wt") as fileOutput:
-    #         writer = csv.writer(fileOutput)
-    #         for rowNumber in range(self.model.rowCount()):
-    #             fields = [
-    #                 self.model.data(
-    #                     self.model.index(rowNumber, columnNumber),
-    #                     Qt.DisplayRole
-    #                 )
-    #                 for columnNumber in range(self.model.columnCount())
-    #             ]
-    #             writer.writerow(fields)
 
     def file_save(self):
         fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Save File')
 
 
-        # self.writeCsv(fileName)
-
     def extract_row_info(self):
-        items = self.vocabTableWidget.selectedItems()
+        items = self.vocabTableWidget.selectedItems()  # selected row
         tok, clf, alias, notes = (str(i.text()) for i in items)
-        print(tok)
+        # print(tok)
+        # if clf in self.clf_mapper.keys():
+        self.aliasEdit.setText(alias)  # preferred alias
+        # btn = self.clf_mapper[clf]  # which button?
+        btn = self.clf_mapper.get(clf, self.unsetButton)
+        btn.toggle()  # toggle that button
+        self.notesTextEdit.setText(notes)  # show any notes
 
-        if clf in self.clf_mapper.keys():
+        matches = zip(*zz.extractBests(tok, self.df.index.tolist(), limit=10,score_cutoff=75))
+        print(list(matches)[0])
 
-            self.aliasEdit.setText(alias)
 
-            # print([])
-            # self.aliasEdit.setText(items[0])
+        #TODO Add dynamic check-boxes based on fuzzywuzzy
 
-            btn = self.clf_mapper[clf]
-            btn.toggle()
-            self.notesTextEdit.setText(notes)
+    def update_from_input(self):
+        items = self.vocabTableWidget.selectedItems()  # selected row
+        tok, clf, alias, notes = (str(i.text()) for i in items)
+
+        # print(self.clfButtonGroup.checkedId())
+        new_alias = self.aliasEdit.text()
+        new_notes = self.notesTextEdit.text()
+        new_clf = self.btn_mapper.get(self.clfButtonGroup.checkedButton().text(), pd.np.nan)
+
+        self.df.loc[tok] = [new_clf, new_alias, new_notes]
+        self.refresh_pd_tab()
+
+        row = self.vocabTableWidget.currentRow()
+        self.vocabTableWidget.selectRow(row+1)
+        print(new_clf, new_alias, new_notes)
 
     def csv_to_tab(self, filename):
-        df = pd.read_csv(filename, header=0)  # read file and set header row
-        df[df['NE'].notna()]['alias'].fillna(df[df['NE'].notna()]['token'])
+        self.df = pd.read_csv(filename, header=0, index_col=0)  # read file and set header row
+        mask = self.df['NE'].notna()
+        print(self.df.shape, self.df[mask].shape)
+        self.df.loc[mask, 'alias'].fillna(self.df[mask].index.to_series(), inplace=True)
 
-        self.vocabTableWidget.setColumnCount(len(df.columns))
-        self.vocabTableWidget.setRowCount(len(df.index))
+        self.refresh_pd_tab()
 
-        for i in range(len(df.index)):
-            for j in range(len(df.columns)):
-                self.vocabTableWidget.setItem(i, j, qw.QTableWidgetItem(str(df.iat[i, j])))
+    def refresh_pd_tab(self):
+        temp_df = self.df.reset_index()
+        nrows, ncols = temp_df.shape
+        self.vocabTableWidget.setColumnCount(ncols)
+        self.vocabTableWidget.setRowCount(min([nrows, self.vocab_limit]))
+
+        for i in range(min([nrows, self.vocab_limit])):
+            for j in range(ncols):
+                self.vocabTableWidget.setItem(i, j, qw.QTableWidgetItem(str(temp_df.iat[i, j])))
 
         self.vocabTableWidget.resizeColumnsToContents()
         self.vocabTableWidget.resizeRowsToContents()
-        self.vocabTableWidget.setHorizontalHeaderLabels(df.columns.tolist())
+        self.vocabTableWidget.setHorizontalHeaderLabels(temp_df.columns.tolist())
         self.vocabTableWidget.setSelectionBehavior(qw.QTableWidget.SelectRows)
 
-        completed_pct = int(100*df[df['NE'].notna()].shape[0]/df.shape[0])
+        completed_pct = int(100 * self.df[self.df['NE'].notna()].shape[0] / self.df.shape[0])
         self.progressBar.setValue(completed_pct)
 
 

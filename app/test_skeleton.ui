@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>761</width>
-    <height>642</height>
+    <width>816</width>
+    <height>602</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Tag Annotator v0.0.1</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -55,13 +58,6 @@
       </item>
      </layout>
     </item>
-    <item row="3" column="5">
-     <widget class="QDialogButtonBox" name="buttonBox">
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="2">
      <widget class="QTableWidget" name="vocabTableWidget">
       <property name="sizePolicy">
@@ -75,6 +71,21 @@
         <width>16777215</width>
         <height>16777215</height>
        </size>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::EditKeyPressed</set>
+      </property>
+      <property name="tabKeyNavigation">
+       <bool>false</bool>
+      </property>
+      <property name="dragDropOverwriteMode">
+       <bool>false</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
       </property>
      </widget>
     </item>
@@ -127,6 +138,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="clearButtonEnabled">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>
@@ -140,6 +154,12 @@
         <property name="text">
          <string>Item</string>
         </property>
+        <property name="shortcut">
+         <string>Alt+I</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">clfButtonGroup</string>
+        </attribute>
        </widget>
       </item>
       <item>
@@ -153,6 +173,12 @@
         <property name="text">
          <string>Problem</string>
         </property>
+        <property name="shortcut">
+         <string>Alt+P</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">clfButtonGroup</string>
+        </attribute>
        </widget>
       </item>
       <item>
@@ -166,6 +192,50 @@
         <property name="text">
          <string>Solution</string>
         </property>
+        <property name="shortcut">
+         <string>Alt+S</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">clfButtonGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="unknButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Unknown</string>
+        </property>
+        <property name="shortcut">
+         <string>Alt+U</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">clfButtonGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="stpwButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Stop-word</string>
+        </property>
+        <property name="shortcut">
+         <string>Alt+X</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">clfButtonGroup</string>
+        </attribute>
        </widget>
       </item>
       <item>
@@ -185,29 +255,16 @@
        </spacer>
       </item>
       <item>
-       <widget class="QRadioButton" name="unknButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+       <widget class="QRadioButton" name="unsetButton">
         <property name="text">
-         <string>Unknown</string>
+         <string>not yet classified</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="stpwButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="shortcut">
+         <string>Alt+Shift+X</string>
         </property>
-        <property name="text">
-         <string>Stop-word</string>
-        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">clfButtonGroup</string>
+        </attribute>
        </widget>
       </item>
       <item>
@@ -258,12 +315,31 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QPushButton" name="updateButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Update</string>
+        </property>
+        <property name="shortcut">
+         <string>Return</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item row="3" column="2">
      <widget class="QProgressBar" name="progressBar">
       <property name="value">
-       <number>24</number>
+       <number>0</number>
       </property>
      </widget>
     </item>
@@ -290,7 +366,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>761</width>
+     <width>816</width>
      <height>25</height>
     </rect>
    </property>
@@ -324,4 +400,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="clfButtonGroup"/>
+ </buttongroups>
 </ui>
