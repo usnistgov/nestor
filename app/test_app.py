@@ -23,7 +23,25 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         openFile.setStatusTip('Open File')
         openFile.triggered.connect(self.file_open)
 
+        saveFile = self.actionSave
+        saveFile.setShortcut("Ctrl+S")
+        saveFile.setStatusTip('Save File')
+        saveFile.triggered.connect(self.file_save)
+
+        aliasShortCut = qw.QShortcut(QKeySequence("Alt+A"), self)
+        aliasShortCut.activated.connect(lambda: self.editing_mode(self.aliasEdit))
+
+        notesShortCut = qw.QShortcut(QKeySequence("Alt+N"), self)
+
+        notesShortCut.activated.connect(lambda: self.editing_mode(self.notesTextEdit))
+
         self.vocabTableWidget.itemSelectionChanged.connect(self.extract_row_info)
+        # self.vocabTableWidget.itemClicked.connect(self.extract_row_info)
+        # self.vocabTableWidget.keyReleaseEvent(QKeyEvent(Qt.Key_Up)).connect(self.extract_row_info)
+
+        # self.keyReleaseEvent()
+
+        self.vocabTableWidget.setFocus()
         self.simthresSlider.sliderReleased.connect(self.fuzz_thres)
         self.df = None
         self.vocab_limit = 1000
@@ -50,6 +68,10 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
 
         self.updateButton.clicked.connect(self.update_from_input)
 
+        self.vertCheckButtonGroup = qw.QButtonGroup()
+        self.vertCheckButtonGroup.setExclusive(False)
+        # self.vertCheckButtonGroup)
+
     def close_application(self):
         # this running means somewhere, an option to leave has been clicked
         choice = qw.QMessageBox.question(self, 'Shut it Down',
@@ -65,32 +87,68 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         """
         GUI file picker wrapper on pandas-to-tab method
         """
-        # fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Open File')
-        fileName = 'app_vocab.csv'
-        self.csv_to_tab(fileName)
+        try:
+            fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Open File')
+            # fileName = 'app_vocab.csv'
+            self.csv_to_tab(fileName)
+        except FileNotFoundError:
+            pass
 
     def file_save(self):
-        fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Save File')
+        fileName, _ = qw.QFileDialog.getSaveFileName(self, 'Save File')
+        self.df.reset_index().to_csv(fileName, index=False)
+
+    def editing_mode(self, field):
+        # self.alias
+        field.setFocus()
+        field.selectAll()
 
     def extract_row_info(self):
         items = self.vocabTableWidget.selectedItems()  # selected row
         tok, clf, alias, notes = (str(i.text()) for i in items)
         # print(tok)
         # if clf in self.clf_mapper.keys():
-        self.aliasEdit.setText(alias)  # preferred alias
+        if alias is not '':
+            self.aliasEdit.setText(alias)  # preferred alias
+        else:
+            self.aliasEdit.setText(tok)  # Default to tok
         # btn = self.clf_mapper[clf]  # which button?
         btn = self.clf_mapper.get(clf, self.unsetButton)
         btn.toggle()  # toggle that button
         self.notesTextEdit.setText(notes)  # show any notes
 
-        matches = zip(*zz.extractBests(tok, self.df.index.tolist(),
-                                       limit=15, score_cutoff=self.thres))
-        print(list(matches)[0])
+        matches = zz.extractBests(tok, self.df.index.tolist(),
+                                       limit=10, score_cutoff=self.thres)[::-1]
+
+
+        # print(list(list(matches)[0]))
+        self.update_checkboxes(tok, matches)
+
+    def update_checkboxes(self, tok, matches):
+
+        for widg in self.vertCheckButtonGroup.buttons():
+            self.vertCheckButtonGroup.removeButton(widg)
+            self.vertCheckBoxLayout.removeWidget(widg)
+            widg.deleteLater()
+
+        for n, (match, score) in enumerate(matches):
+            # print(match)
+            btn = qw.QCheckBox(f'{len(matches)-n-1} - '+match, self)
+            btn.setShortcut(f'Alt+{len(matches)-n-1}')
+            cond = (self.df.loc[match, 'alias'] == self.df.loc[tok, 'alias']) \
+                   and (self.df.loc[match, 'alias'] != '')
+            if (match == tok) or cond:
+                btn.toggle()
+            self.vertCheckButtonGroup.addButton(btn)
+            self.vertCheckBoxLayout.insertWidget(0, btn)
 
 
         #TODO Add dynamic check-boxes based on fuzzywuzzy
 
     def update_from_input(self):
+        """
+        Triggers with update button. Saves user annotation to self.df
+        """
         items = self.vocabTableWidget.selectedItems()  # selected row
         tok, clf, alias, notes = (str(i.text()) for i in items)
 
@@ -99,8 +157,17 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         new_notes = self.notesTextEdit.text()
         new_clf = self.btn_mapper.get(self.clfButtonGroup.checkedButton().text(), pd.np.nan)
 
-        self.df.loc[tok] = [new_clf, new_alias, new_notes]
+        tok_list = [tok]
+        for btn in self.vertCheckButtonGroup.buttons():
+            if btn.isChecked():
+                tok_list += [btn.text()[4:]]
+            #TODO erace previous checked, if unchecked.
+        print([new_clf, new_alias, new_notes])
+        self.df.loc[tok_list, 'NE'] = new_clf
+        self.df.loc[tok_list, 'alias'] = new_alias
+        self.df.loc[tok_list, 'notes'] = new_notes
         self.refresh_pd_tab()
+        self.vocabTableWidget.setFocus()
 
         row = self.vocabTableWidget.currentRow()
         self.vocabTableWidget.selectRow(row+1)
@@ -111,7 +178,7 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         mask = self.df['NE'].notna()
         print(self.df.shape, self.df[mask].shape)
         self.df.loc[mask, 'alias'].fillna(self.df[mask].index.to_series(), inplace=True)
-
+        self.df.fillna('', inplace=True)
         self.refresh_pd_tab()
 
     def refresh_pd_tab(self):
@@ -129,7 +196,7 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         self.vocabTableWidget.setHorizontalHeaderLabels(temp_df.columns.tolist())
         self.vocabTableWidget.setSelectionBehavior(qw.QTableWidget.SelectRows)
 
-        completed_pct = int(100 * self.df[self.df['NE'].notna()].shape[0] / self.df.shape[0])
+        completed_pct = int(100 * self.df[self.df['NE'] != ''].shape[0] / self.df.shape[0])
         self.progressBar.setValue(completed_pct)
 
     def fuzz_thres(self):

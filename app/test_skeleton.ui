@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Tag Annotator v0.0.1</string>
+   <string>Tag Annotator v0.0.2</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -19,14 +19,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="3">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QCheckBox" name="placeHolderCheckbox">
-        <property name="text">
-         <string>Dummy Tag</string>
-        </property>
-       </widget>
-      </item>
+     <layout class="QVBoxLayout" name="vertCheckBoxLayout">
       <item>
        <spacer name="verticalSpacer_2">
         <property name="orientation">
