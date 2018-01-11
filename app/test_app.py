@@ -10,7 +10,9 @@ import pandas as pd
 from test_skeleton import Ui_MainWindow
 from fuzzywuzzy import process as zz
 
+
 class MyWindow(qw.QMainWindow, Ui_MainWindow):
+
     def __init__(self):
         qw.QMainWindow.__init__(self)
         self.setupUi(self)
@@ -142,9 +144,6 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
             self.vertCheckButtonGroup.addButton(btn)
             self.vertCheckBoxLayout.insertWidget(0, btn)
 
-
-        #TODO Add dynamic check-boxes based on fuzzywuzzy
-
     def update_from_input(self):
         """
         Triggers with update button. Saves user annotation to self.df
@@ -158,10 +157,17 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         new_clf = self.btn_mapper.get(self.clfButtonGroup.checkedButton().text(), pd.np.nan)
 
         tok_list = [tok]
+        rmv_list = []
         for btn in self.vertCheckButtonGroup.buttons():
+            s = btn.text()[4:]
             if btn.isChecked():
-                tok_list += [btn.text()[4:]]
-            #TODO erace previous checked, if unchecked.
+                tok_list += [s]
+            else:
+                if new_alias == self.df.loc[s, 'alias']:
+                    self.df.loc[s, 'NE'] = ''
+                    self.df.loc[s, 'alias'] = ''
+                    self.df.loc[s, 'notes'] = ''
+
         print([new_clf, new_alias, new_notes])
         self.df.loc[tok_list, 'NE'] = new_clf
         self.df.loc[tok_list, 'alias'] = new_alias
