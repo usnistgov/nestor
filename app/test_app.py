@@ -24,8 +24,10 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         openFile.triggered.connect(self.file_open)
 
         self.vocabTableWidget.itemSelectionChanged.connect(self.extract_row_info)
+        self.simthresSlider.sliderReleased.connect(self.fuzz_thres)
         self.df = None
         self.vocab_limit = 1000
+        self.thres = 75
 
         self.clf_mapper = {
             'S': self.sltnButton,
@@ -59,8 +61,6 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         else:
             pass
 
-
-
     def file_open(self):
         """
         GUI file picker wrapper on pandas-to-tab method
@@ -71,7 +71,6 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
 
     def file_save(self):
         fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Save File')
-
 
     def extract_row_info(self):
         items = self.vocabTableWidget.selectedItems()  # selected row
@@ -84,7 +83,8 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         btn.toggle()  # toggle that button
         self.notesTextEdit.setText(notes)  # show any notes
 
-        matches = zip(*zz.extractBests(tok, self.df.index.tolist(), limit=10,score_cutoff=75))
+        matches = zip(*zz.extractBests(tok, self.df.index.tolist(),
+                                       limit=15, score_cutoff=self.thres))
         print(list(matches)[0])
 
 
@@ -132,6 +132,10 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         completed_pct = int(100 * self.df[self.df['NE'].notna()].shape[0] / self.df.shape[0])
         self.progressBar.setValue(completed_pct)
 
+    def fuzz_thres(self):
+        val = self.simthresSlider.value()
+        self.thres = val
+        self.extract_row_info()
 
 if __name__ == "__main__":
     app = qw.QApplication(sys.argv)
