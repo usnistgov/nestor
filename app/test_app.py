@@ -7,19 +7,16 @@ import sip
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 import pandas as pd
-from test_skeleton import Ui_MainWindow
+from app.test_skeleton import Ui_MainWindow
 from fuzzywuzzy import process as zz
 
 
 class MyWindow(qw.QMainWindow, Ui_MainWindow):
 
-    def __init__(self):
+    def __init__(self, vocab_filename=None):
         qw.QMainWindow.__init__(self)
         self.setupUi(self)
-        # self.model = QStandardItemModel(self)
-        # self.vocabTableView.setModel(self.model)
-        # self.vocabTableView.horizontalHeader().setStretchLastSection(True)
-        # self.vocabTableView.selectionChang
+
         openFile = self.actionOpen
         openFile.setShortcut("Ctrl+O")
         openFile.setStatusTip('Open File')
@@ -34,14 +31,11 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         aliasShortCut.activated.connect(lambda: self.editing_mode(self.aliasEdit))
 
         notesShortCut = qw.QShortcut(QKeySequence("Alt+N"), self)
-
         notesShortCut.activated.connect(lambda: self.editing_mode(self.notesTextEdit))
 
+        self.vocab_filename = vocab_filename
         self.vocabTableWidget.itemSelectionChanged.connect(self.extract_row_info)
-        # self.vocabTableWidget.itemClicked.connect(self.extract_row_info)
-        # self.vocabTableWidget.keyReleaseEvent(QKeyEvent(Qt.Key_Up)).connect(self.extract_row_info)
 
-        # self.keyReleaseEvent()
 
         self.vocabTableWidget.setFocus()
         self.simthresSlider.sliderReleased.connect(self.fuzz_thres)
@@ -72,6 +66,8 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
 
         self.vertCheckButtonGroup = qw.QButtonGroup()
         self.vertCheckButtonGroup.setExclusive(False)
+        if self.vocab_filename is not None:
+            self.csv_to_tab(self.vocab_filename)
         # self.vertCheckButtonGroup)
 
     def close_application(self):
@@ -91,9 +87,9 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         """
         try:
             fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Open File')
-            # fileName = 'app_vocab.csv'
             self.csv_to_tab(fileName)
         except FileNotFoundError:
+            print('file not found...')
             pass
 
     def file_save(self):
@@ -211,7 +207,9 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         self.extract_row_info()
 
 if __name__ == "__main__":
+    import qdarkstyle
     app = qw.QApplication(sys.argv)
+    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     window = MyWindow()
     window.show()
     sys.exit(app.exec_())
