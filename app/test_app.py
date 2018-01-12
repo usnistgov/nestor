@@ -13,11 +13,11 @@ from fuzzywuzzy import process as zz
 
 class MyQButtonGroup(qw.QButtonGroup):
 
-    def __init__(self, layout):
+    def __init__(self, layout, btn_checks=None):
         qw.QButtonGroup.__init__(self)
         self.setExclusive(False)
         self.layout = layout
-
+        self.btn_checks=btn_checks
 #    vertCheckButtonGroup is the name of the object typed QButtonGroup
 
     def update_checkboxes(self, tok, matches, df):
@@ -38,6 +38,10 @@ class MyQButtonGroup(qw.QButtonGroup):
             self.addButton(btn)
             self.layout.insertWidget(self.layout.count()-nbr_widget, btn)
         self.set_shortcut()
+
+
+    def print_btn(self):
+
 
     def set_shortcut(self):
         for n, btn in enumerate(self.buttons()):
