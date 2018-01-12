@@ -11,6 +11,39 @@ from test_skeleton import Ui_MainWindow
 from fuzzywuzzy import process as zz
 
 
+class MyQButtonGroup(qw.QButtonGroup):
+
+    def __init__(self, layout):
+        qw.QButtonGroup.__init__(self)
+        self.setExclusive(False)
+        self.layout = layout
+
+#    vertCheckButtonGroup is the name of the object typed QButtonGroup
+
+    def update_checkboxes(self, tok, matches, df):
+    # TODO I don't really ike to trow the dataframe in it ...
+        for widg in self.buttons():
+            self.removeButton(widg)
+            self.layout.removeWidget(widg)
+            widg.deleteLater()
+
+        nbr_widget = self.layout.count()
+        for n, (match, score) in enumerate(matches):
+            # print(match)
+            btn = qw.QCheckBox(f'{n} - '+match, self)
+            cond = (df.loc[match, 'alias'] == df.loc[tok, 'alias']) \
+                   and (df.loc[match, 'alias'] != '')
+            if (match == tok) or cond:
+                btn.toggle()
+            self.addButton(btn)
+            self.layout.insertWidget(self.layout.count()-nbr_widget, btn)
+        self.set_shortcut()
+
+    def set_shortcut(self):
+        for n, btn in enumerate(self.buttons()):
+            btn.setShortcut(f'Alt+{n}')
+
+
 class MyWindow(qw.QMainWindow, Ui_MainWindow):
 
     def __init__(self):
@@ -20,28 +53,20 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         # self.vocabTableView.setModel(self.model)
         # self.vocabTableView.horizontalHeader().setStretchLastSection(True)
         # self.vocabTableView.selectionChang
-        openFile = self.actionOpen
-        openFile.setShortcut("Ctrl+O")
-        openFile.setStatusTip('Open File')
-        openFile.triggered.connect(self.file_open)
-
-        saveFile = self.actionSave
-        saveFile.setShortcut("Ctrl+S")
-        saveFile.setStatusTip('Save File')
-        saveFile.triggered.connect(self.file_save)
-
-        aliasShortCut = qw.QShortcut(QKeySequence("Alt+A"), self)
-        aliasShortCut.activated.connect(lambda: self.editing_mode(self.aliasEdit))
-
-        notesShortCut = qw.QShortcut(QKeySequence("Alt+N"), self)
-
-        notesShortCut.activated.connect(lambda: self.editing_mode(self.notesTextEdit))
+        self.openFile = self.actionOpen
+        self.openFile.setStatusTip('Open File')
+        self.openFile.triggered.connect(self.file_open)
+        self.saveFile = self.actionSave
+        self.saveFile.setStatusTip('Save File')
+        self.saveFile.triggered.connect(self.file_save)
 
         self.vocabTableWidget.itemSelectionChanged.connect(self.extract_row_info)
         # self.vocabTableWidget.itemClicked.connect(self.extract_row_info)
         # self.vocabTableWidget.keyReleaseEvent(QKeyEvent(Qt.Key_Up)).connect(self.extract_row_info)
 
         # self.keyReleaseEvent()
+
+
 
         self.vocabTableWidget.setFocus()
         self.simthresSlider.sliderReleased.connect(self.fuzz_thres)
@@ -70,9 +95,9 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
 
         self.updateButton.clicked.connect(self.update_from_input)
 
-        self.vertCheckButtonGroup = qw.QButtonGroup()
-        self.vertCheckButtonGroup.setExclusive(False)
-        # self.vertCheckButtonGroup)
+        self.vertCheckButtonGroup = MyQButtonGroup(self.vertCheckBoxLayout)
+
+        self.set_shortcut()
 
     def close_application(self):
         # this running means somewhere, an option to leave has been clicked
@@ -100,11 +125,6 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         fileName, _ = qw.QFileDialog.getSaveFileName(self, 'Save File')
         self.df.reset_index().to_csv(fileName, index=False)
 
-    def editing_mode(self, field):
-        # self.alias
-        field.setFocus()
-        field.selectAll()
-
     def extract_row_info(self):
         items = self.vocabTableWidget.selectedItems()  # selected row
         tok, clf, alias, notes = (str(i.text()) for i in items)
@@ -120,29 +140,30 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         self.notesTextEdit.setText(notes)  # show any notes
 
         matches = zz.extractBests(tok, self.df.index.tolist(),
-                                       limit=10, score_cutoff=self.thres)[::-1]
+                                       limit=10, score_cutoff=self.thres)
 
 
         # print(list(list(matches)[0]))
-        self.update_checkboxes(tok, matches)
+        self.vertCheckButtonGroup.update_checkboxes(tok, matches, self.df)
 
-    def update_checkboxes(self, tok, matches):
-
-        for widg in self.vertCheckButtonGroup.buttons():
-            self.vertCheckButtonGroup.removeButton(widg)
-            self.vertCheckBoxLayout.removeWidget(widg)
-            widg.deleteLater()
-
-        for n, (match, score) in enumerate(matches):
-            # print(match)
-            btn = qw.QCheckBox(f'{len(matches)-n-1} - '+match, self)
-            btn.setShortcut(f'Alt+{len(matches)-n-1}')
-            cond = (self.df.loc[match, 'alias'] == self.df.loc[tok, 'alias']) \
-                   and (self.df.loc[match, 'alias'] != '')
-            if (match == tok) or cond:
-                btn.toggle()
-            self.vertCheckButtonGroup.addButton(btn)
-            self.vertCheckBoxLayout.insertWidget(0, btn)
+    # def update_checkboxes(self, tok, matches):
+    #
+    #     for widg in self.vertCheckButtonGroup.buttons():
+    #         self.vertCheckButtonGroup.removeButton(widg)
+    #         self.vertCheckBoxLayout.removeWidget(widg)
+    #         widg.deleteLater()
+    #
+    #     nbr_widget = self.vertCheckBoxLayout.count()
+    #     for n, (match, score) in enumerate(matches):
+    #         # print(match)
+    #         btn = qw.QCheckBox(f'{n} - '+match, self)
+    #         cond = (self.df.loc[match, 'alias'] == self.df.loc[tok, 'alias']) \
+    #                and (self.df.loc[match, 'alias'] != '')
+    #         if (match == tok) or cond:
+    #             btn.toggle()
+    #         self.vertCheckButtonGroup.addButton(btn)
+    #         self.vertCheckBoxLayout.insertWidget(self.vertCheckBoxLayout.count()-nbr_widget, btn)
+    #     self.set_shortcut()
 
     def update_from_input(self):
         """
@@ -157,7 +178,8 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         new_clf = self.btn_mapper.get(self.clfButtonGroup.checkedButton().text(), pd.np.nan)
 
         tok_list = [tok]
-        rmv_list = []
+
+        #TODO see doc QAbstractButton *QButtonGroup::checkedButton()
         for btn in self.vertCheckButtonGroup.buttons():
             s = btn.text()[4:]
             if btn.isChecked():
@@ -210,8 +232,30 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         self.thres = val
         self.extract_row_info()
 
+    def set_shortcut(self):
+        self.openFile.setShortcut("Ctrl+O")
+        self.saveFile.setShortcut("Ctrl+S")
+        self.itemButton.setShortcut(QCoreApplication.translate("MainWindow", "Alt+I"))
+        self.probButton.setShortcut(QCoreApplication.translate("MainWindow", "Alt+P"))
+        self.unknButton.setShortcut(QCoreApplication.translate("MainWindow", "Alt+U"))
+        self.sltnButton.setShortcut(QCoreApplication.translate("MainWindow", "Alt+S"))
+        self.stpwButton.setShortcut(QCoreApplication.translate("MainWindow", "Alt+X"))
+        self.unsetButton.setShortcut(QCoreApplication.translate("MainWindow", "Alt+Shift+X"))
+
+        notesShortCut = qw.QShortcut(QKeySequence("Alt+N"), self)
+        notesShortCut.activated.connect(lambda: self.editing_mode(self.notesTextEdit))
+
+        aliasShortCut = qw.QShortcut(QKeySequence("Alt+A"), self)
+        aliasShortCut.activated.connect(lambda: self.editing_mode(self.aliasEdit))
+
+    def editing_mode(self, field):
+        field.setFocus()
+        field.selectAll()
+
+
 if __name__ == "__main__":
     app = qw.QApplication(sys.argv)
     window = MyWindow()
     window.show()
     sys.exit(app.exec_())
+
