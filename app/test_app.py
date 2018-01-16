@@ -18,30 +18,28 @@ class MyQButtonGroup(qw.QButtonGroup):
         self.setExclusive(False)
         self.layout = layout
         self.btn_checks=btn_checks
-#    vertCheckButtonGroup is the name of the object typed QButtonGroup
 
     def update_checkboxes(self, tok, matches, df):
-    # TODO I don't really ike to trow the dataframe in it ...
+        self.clean_checkboxes()
+        self.create_checkboxes(tok, matches, df)
+        self.set_shortcut()
+
+    def clean_checkboxes(self):
         for widg in self.buttons():
             self.removeButton(widg)
             self.layout.removeWidget(widg)
             widg.deleteLater()
 
+    def create_checkboxes(self, tok, matches, df):
         nbr_widget = self.layout.count()
         for n, (match, score) in enumerate(matches):
-            # print(match)
-            btn = qw.QCheckBox(f'{n} - '+match, self)
+            btn = qw.QCheckBox(f'{n} - ' + match)
             cond = (df.loc[match, 'alias'] == df.loc[tok, 'alias']) \
                    and (df.loc[match, 'alias'] != '')
             if (match == tok) or cond:
                 btn.toggle()
             self.addButton(btn)
-            self.layout.insertWidget(self.layout.count()-nbr_widget, btn)
-        self.set_shortcut()
-
-
-    def print_btn(self):
-
+            self.layout.insertWidget(self.layout.count() - nbr_widget, btn)
 
     def set_shortcut(self):
         for n, btn in enumerate(self.buttons()):
@@ -146,28 +144,7 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         matches = zz.extractBests(tok, self.df.index.tolist(),
                                        limit=10, score_cutoff=self.thres)
 
-
-        # print(list(list(matches)[0]))
         self.vertCheckButtonGroup.update_checkboxes(tok, matches, self.df)
-
-    # def update_checkboxes(self, tok, matches):
-    #
-    #     for widg in self.vertCheckButtonGroup.buttons():
-    #         self.vertCheckButtonGroup.removeButton(widg)
-    #         self.vertCheckBoxLayout.removeWidget(widg)
-    #         widg.deleteLater()
-    #
-    #     nbr_widget = self.vertCheckBoxLayout.count()
-    #     for n, (match, score) in enumerate(matches):
-    #         # print(match)
-    #         btn = qw.QCheckBox(f'{n} - '+match, self)
-    #         cond = (self.df.loc[match, 'alias'] == self.df.loc[tok, 'alias']) \
-    #                and (self.df.loc[match, 'alias'] != '')
-    #         if (match == tok) or cond:
-    #             btn.toggle()
-    #         self.vertCheckButtonGroup.addButton(btn)
-    #         self.vertCheckBoxLayout.insertWidget(self.vertCheckBoxLayout.count()-nbr_widget, btn)
-    #     self.set_shortcut()
 
     def update_from_input(self):
         """
