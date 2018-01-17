@@ -190,5 +190,4 @@ class MaintenanceWorkOrder():
                              (self.solutiontags[i].toCypher(varSolutiontags + str(i), NodeTag.LABEL_ACTION))
                     query += '\nMERGE (%s)-[%s]->(%s)' % \
                              (varIssue, LabelEdges.LABEL_SOLUTION.value, varSolutiontags + str(i))
-
         return query
