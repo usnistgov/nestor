@@ -25,11 +25,18 @@ class Machine:
             toCypherType    --  Used to represent the cypher query of the node MACHINE_TYPE
     """
 
-    def __init__(self, name, manufacturer=None, locasion=None, type=None):
+    def __init__(self, name=None, manufacturer=None, locasion=None, machine_type=None):
+        self.label_machine = NodeMachine.LABEL_MACHINE.value
+        self.label_machine_type = NodeMachine.LABEL_MACHINE_TYPE.value
+        self.property_name = NodeMachine.PROPERTY_NAME.value
+        self.property_manufacturer = NodeMachine.PROPERTY_MANUFACTURER.value
+        self.property_locasion = NodeMachine.PROPERTY_LOCASION.value
+        self.property_type = NodeMachine.PROPERTY_TYPE.value
+
         self._set_name(name)
         self._set_manufacturer(manufacturer)
         self._set_locasion(locasion)
-        self._set_type(type)
+        self._set_machine_type(machine_type)
 
 
     def _get_name(self):
@@ -80,108 +87,76 @@ class Machine:
         else:
             self.locasion = locasion.lower()
 
-    def _get_type(self):
+    def _get_machine_type(self):
         """
         :return: the type of the MACHINE
         """
-        return self.type
+        return self.machine_type
 
-    def _set_type(self, type):
+    def _set_machine_type(self, machine_type):
         """
         Set the type of the MACHINE
         :param type: a string for the type
         """
-        if type is "":
-            type = None
-        self.type = type
+        if machine_type is "":
+            machine_type = None
+        self.machine_type = machine_type
 
     def __str__(self):
-        return "OBJECT: %s --> Name: %s || Manufacturer: %s || Location: %s || Type: %s"%\
-            (type(self), self.name, self.manufacturer, self.locasion, self.type)
+        return f"{type(self)}\n\t" \
+               f"Name: {self.name}\n\t" \
+               f"Manufacturer: {self.manufacturer}\n\t" \
+               f"Location: {self.locasion}\n\t" \
+               f"Type: {self.machine_type}"
 
-    def toCypher(self, variable):
-
-        """
-           DEPRECIATE (use toCypherName and toCypherUpdate instead)
-           Used to create a Cypher query node corresponding to a MACHINE
-
-           The problem is that it create a new MACHINE even if one already has the same name in tha database
-           but if the new one has more parameters
-
-           :param variable: a string to define the variable of the node in CYPHER. It is used to reuse the given node MACHINE
-           :return: a String representing a Cypher query corresponding to a full MACHINE
-
-        """
+    def cypher_machine_name(self, variable="machine"):
         if self.name is None:
             return ""
+        return f'({variable} {self.label_machine}' +\
+            "{" + f'{self.property_name}:"{self.name}"' + "})"
 
-        query = '(%s %s {%s: "%s"'%\
-                (variable, NodeMachine.LABEL_MACHINE.value, NodeMachine.PROPERTY_NAME.value, self.name)
-        if self.manufacturer is not None:
-            query+=', %s: "%s"'%\
-                    (NodeMachine.PROPERTY_MANUFACTURER.value, self.manufacturer)
-        if self.locasion is not None:
-            query+=', %s: "%s"'%\
-                    (NodeMachine.PROPERTY_LOCASION.value, self.locasion)
-        query+="})"
+
+    def cypher_machine_all(self, variable="machine"):
+        query = f'({variable} {self.label_machine}'
+        if self.name or self.manufacturer or self.locasion is not None:
+            query += "{"
+            if self.name is not None:
+                query += f'{self.property_name}:"{self.name}",'
+            if self.manufacturer is not None:
+                query += f'{self.property_manufacturer}:"{self.manufacturer}",'
+            if self.locasion is not None:
+                query += f'{self.property_locasion}:"{self.locasion}",'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_machine_type_name(self, variable="machine_type"):
+        if self.machine_type is None:
+            return ""
+        return f'({variable} {self.label_machine_type}' +\
+            "{" + f'{self.property_type}:"{self.machine_type}"' + "})"
+
+
+    def cypher_machine_type_all(self, variable="machine_type"):
+        query = f'({variable} {self.label_machine_type}'
+        if self.machine_type is not None:
+            query += "{" + f'{self.property_type}:"{self.machine_type}"' + "}"
+        query += ")"
+
         return query
 
-    def toCypherType(self, variable):
-        """
-        Used to create a CYPHER query corresponding to a MACHINE_TYPE
-
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse the given node MACHINE_TYPE
-        :return: a String representing a Cypher query corresponding to a MACHINE_TYPE
-        """
-        if self.type is None:
-            return ""
-        return '(%s %s {%s: "%s"})'%\
-            (variable, NodeMachine.LABEL_MACHINE_TYPE.value, NodeMachine.PROPERTY_TYPE.value, self.type)
-
-    def toCypherName(self, variable):
-        """
-        Used to create a CYPHER query corresponding to a MACHINE only using the name
-
-        :param variable:  a string to define the variable of the node in CYPHER. It is used to reuse the given node MACHINE
-        :return: a String representing a Cypher query corresponding to a MACHINE
-        """
+    def cypher_machine_create_node(self, variable="machine"):
         if self.name is None:
             return ""
-        return '(%s %s {%s: "%s"})' % \
-                (variable, NodeMachine.LABEL_MACHINE.value, NodeMachine.PROPERTY_NAME.value, self.name)
-
-    def toCypherUpdate(self, variable):
-        """
-        Use to to complete the description of the node MACHINE using the information of Manufacturer and Localisation
-
-        :param variable: a string to define the variable of the node in cypher.
-                        The variable has to link with a node MACHINE from your database (use toCypherName to find it)
-        :return: a cypher query to specify a given MACHINE node by adding the work Manufacturer and Localisation
-        """
-        if self.manufacturer is None and self.locasion is None:
-            return ""
-        query = "SET "
+        query = f'MERGE {self.cypher_machine_name(variable)}'
         if self.manufacturer is not None:
-            query += '%s.%s="%s",' % \
-                     (variable, NodeMachine.PROPERTY_MANUFACTURER.value, self.manufacturer)
+            query += f'\nSET {variable}.{self.property_manufacturer} = "{self.manufacturer}"'
         if self.locasion is not None:
-            query += '%s.%s="%s",' % \
-                     (variable, NodeMachine.PROPERTY_LOCASION.value, self.locasion)
-        return query[:-1]
+            query += f'\nSET {variable}.{self.property_locasion} = "{self.locasion}"'
+        return query
 
-    @staticmethod
-    def get_all_machine_from_database(name=False, manufacturer=False, locasion=False, type=False):
-        property = "RETURN"
-        query = "MATCH(machine%s)<-[%s]-(issue)"%(NodeMachine.LABEL_MACHINE.value, LabelEdges.LABEL_COVERED.value)
-        if type:
-            query+="\nMATCH (machine)-[%s]->(machine_type%s)"%(LabelEdges.LABEL_ISA.value, NodeMachine.LABEL_MACHINE_TYPE.value)
-            property += " machine_type.%s,"%(NodeMachine.PROPERTY_TYPE.value)
-        if locasion:
-            property += " machine.%s," % (NodeMachine.PROPERTY_LOCASION.value)
-        if manufacturer:
-            property += " machine.%s," % (NodeMachine.PROPERTY_MANUFACTURER.value)
-        if name:
-            property += " machine.%s," % (NodeMachine.PROPERTY_NAME.value)
-        if locasion is False and name is False and manufacturer is False and type is False:
-            property += " machine,"
-        return query, property[:-1]
+
+    def cypher_machine_type_create_node(self, variable="machine_type"):
+        if self.name is None:
+            return ""
+        query = f'MERGE {self.cypher_machine_name(variable)}'
+        return query

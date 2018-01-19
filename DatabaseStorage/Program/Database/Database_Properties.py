@@ -118,12 +118,23 @@ class NodeTag(Enum):
     LABEL_TAG = ":TAG"
     LABEL_ITEM = ":ITEM"
     LABEL_ACTION = ":ACTION"
+    LABEL_ACTION_ITEM = ":ACTION_ITEM"
+    LABEL_UNKNOWN = ":UNKNOWN"
 
     PROPERTY_KEYWORD = "keyword"
+    PROPERTY_SYNONYMS = "synonyms"
+    PROPERTY_PARENTS = "parents"
+    PROPERTY_LINKS = "links"
 
     VALUE_ITEM = "tag_item"
     VALUE_PROBLEM = "tag_problem"
     VALUE_SOLUTION = "tag_solution"
+    VALUE_ACTION_ITEM = "tag_action_item"
+
+    VALUE_KEYWORD = "keyword"
+    VALUE_SYNONYMS = "synonyms"
+    VALUE_PARENTS = "parents"
+    VALUE_LINKS = "links"
 
 class LabelEdges(Enum):
     """

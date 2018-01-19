@@ -1,6 +1,8 @@
 import collections
 
 from Program.Database.Database_Properties import NodeHuman
+from Program.Database.Database_Properties import NodeIssue
+from Program.Database.Database_Properties import LabelEdges
 
 
 class Human:
@@ -31,7 +33,7 @@ class Human:
                             If in the database a HUMAN already have my name, It updated it and add skills and crafts
     """
 
-    def __init__(self, name=None):
+    def __init__(self, name = None):
         self.label_human=NodeHuman.LABEL_HUMAN.value
         self.property_name=NodeHuman.PROPERTY_NAME.value
 
@@ -56,88 +58,29 @@ class Human:
             self.name = name.lower()
 
     def __str__(self):
-        return f"{type(self)}\n\t --> Name: {self.name}"
+        return f"{type(self)}\n\t" \
+               f"Name: {self.name}"
 
-    def cypher_human_name(self, variable):
-        query = f'({variable} {self.label_human}' + " {"
+    def cypher_human_name(self, variable="human"):
         if self.name is None:
             return ""
-        else:
-            
-        query+=")"
+        return f'({variable} {self.label_human}' +\
+            "{" + f'{self.property_name}:"{self.name}"' + "})"
 
-    def toCypher(self, variable, work):
-        """
-        DEPRECIATE (use toCypherName and toCypherUpdate instead)
-        Used to create a Cypher query node corresponding to a HUMAN
+    def cypher_human_all(self, variable="human"):
+        query = f'({variable} {self.label_human}'
+        if self.name is not None:
+            query += "{" + f'{self.property_name}:"{self.name}"' + "}"
+        query += ")"
 
-        The problem is that it create a new HUMAN even if one already has the same name in tha database
-        but if the new one has more parameters
-
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse the given node HUMAN
-        :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
-                    it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
-        :return: a String representing a Cypher query corresponding to a full HUMAN
-        """
-        if self.name is None:
-            return ""
-
-        query = '(%s %s %s {%s:"%s"' \
-                % (variable, NodeHuman.LABEL_HUMAN.value, work.value,  NodeHuman.PROPERTY_NAME.value, self.name)
-        if self.skills is not None and len(self.skills) is not 0:
-            query += ', %s:[' % (NodeHuman.PROPERTY_SKILLS.value)
-            for i in range(0, len(self.skills)):
-                query += '"%s",' % (self.skills[i])
-            query = query[:-1] + "]"
-        if self.crafts is not None and len(self.crafts) is not 0:
-            query += ', %s:[' % NodeHuman.PROPERTY_CRAFTS.value
-            for i in range(0, len(self.crafts)):
-                query += '"%s",' % (self.crafts[i])
-            query = query[:-1] + "]"
-
-        query += "})"
         return query
 
-    def toCypherName(self, variable):
-        """
-        Used to create a CYPHER query corresponding to a HUMAN only using the name
-
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse name the given node HUMAN
-        :return: a String representing a Cypher query to corresponding to a HUMAN with only th name
-        """
+    def cypher_human_create_node(self, variable="human"):
         if self.name is None:
             return ""
-        return '(%s %s {%s: "%s"})' % \
-                (variable, NodeHuman.LABEL_HUMAN.value, NodeHuman.PROPERTY_NAME.value, self.name)
-
-    def toCypherUpdate(self, variable, work=None):
-        """
-        Used to set the work of a given HUMAN (TECHNICIAN or OPERATOR)
-        and to complete the description of the node HUMAN using the information of Skills and Crafts
-
-        :param variable: a string to define the variable of the node in CYPHER.
-                        The variable has to link with a node HUMAN from your database (use toCypherName to find it)
-        :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
-                    it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
-        :return: a CYPHER query to specify a given HUMAN node by adding the work skills and crafts and set the work
-        """
-        query = ""
-        if work is not None:
-            query += "\nSET %s %s"% (variable, work.value)
-        if self.skills is None and self.crafts is None:
-            return query
-        if self.skills is not None:
-            for skill in self.skills:
-                query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-                         '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-                         (skill, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, skill)
-        if self.crafts is not None:
-            for craft in self.crafts:
-                query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-                         '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-                         (craft, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, craft)
-
+        query = f'MERGE {self.cypher_human_name(variable)}'
         return query
+
 
 class Operator(Human):
 
@@ -167,145 +110,38 @@ class Operator(Human):
                             If in the database a HUMAN already have my name, It updated it and add skills and crafts
     """
 
-    def __init__(self, name, skills=None, crafts=None):
-        self._set_name(name)
-        self._set_skills(skills)
-        self._set_crafts(crafts)
+    def __init__(self, name = None):
+        self.label_operator = NodeHuman.LABEL_OPERATOR.value
 
-    def _get_name(self):
-        """
-        :return: the name of the HUMAN
-        """
-        return self.name
-
-    def _set_name(self, name):
-        """
-        Set the name of the HUMAN
-        if the name is empty "" it became "unknown"
-
-        :param name: a String
-        """
-        if name is "" or name is None:
-            self.name = None
-        else:
-            self.name = name.lower()
-
-    def _get_skills(self):
-        """
-        :return: the skills of the HUMAN
-        """
-        return self.skills
-
-    def _set_skills(self, skills):
-        """
-        Set the skills of the HUMAN
-        The skills is store in an array
-
-        :param skills: an Array of String or a String
-        """
-        if skills is "" or skills is None:
-            self.skills = None
-        else:
-            if not isinstance(skills, collections.Iterable):
-                    skills = [skills]
-            self.skills = [skill.lower() for skill in skills]
-
-    def _get_crafts(self):
-        """
-        :return: the crafts of the Human
-        """
-        return self.crafts
-
-    def _set_crafts(self, crafts):
-        """
-        Set the crafts of the HUMAN
-        The crafts is store in an array
-
-        :param crafts: an Array of String or a String
-        """
-        if crafts is "" or crafts is None:
-            self.crafts = None
-        else:
-            if not isinstance(crafts, collections.Iterable):
-                crafts = [crafts]
-            self.crafts = [craft.lower() for craft in crafts]
+        super().__init__(name)
 
     def __str__(self):
-        return "OBJECT: %s --> Name: %s || skills: %s || crafts: %s"%\
-            (type(self), self.name, self.skills, self.crafts)
+        return f"{type(self)}\n\t" \
+               f"Name: {self.name}"
 
-    def toCypher(self, variable, work):
-        """
-        DEPRECIATE (use toCypherName and toCypherUpdate instead)
-        Used to create a Cypher query node corresponding to a HUMAN
-
-        The problem is that it create a new HUMAN even if one already has the same name in tha database
-        but if the new one has more parameters
-
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse the given node HUMAN
-        :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
-                    it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
-        :return: a String representing a Cypher query corresponding to a full HUMAN
-        """
+    def cypher_operator_name(self, variable="operator"):
         if self.name is None:
             return ""
+        return f'({variable} {self.label_human}{self.label_operator}' + \
+               "{" + f'{self.property_name}:"{self.name}"' + "})"
 
-        query = '(%s %s %s {%s:"%s"' \
-                % (variable, NodeHuman.LABEL_HUMAN.value, work.value,  NodeHuman.PROPERTY_NAME.value, self.name)
-        if self.skills is not None and len(self.skills) is not 0:
-            query += ', %s:[' % (NodeHuman.PROPERTY_SKILLS.value)
-            for i in range(0, len(self.skills)):
-                query += '"%s",' % (self.skills[i])
-            query = query[:-1] + "]"
-        if self.crafts is not None and len(self.crafts) is not 0:
-            query += ', %s:[' % NodeHuman.PROPERTY_CRAFTS.value
-            for i in range(0, len(self.crafts)):
-                query += '"%s",' % (self.crafts[i])
-            query = query[:-1] + "]"
+    def cypher_operator_all(self, variable="operator"):
+        query = f'({variable} {self.label_human}{self.label_operator}'
+        if self.name is not None:
+            query += "{" + f'{self.property_name}:"{self.name}"' + "}"
+        query += ")"
 
-        query += "})"
         return query
 
-    def toCypherName(self, variable):
-        """
-        Used to create a CYPHER query corresponding to a HUMAN only using the name
-
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse name the given node HUMAN
-        :return: a String representing a Cypher query to corresponding to a HUMAN with only th name
-        """
+    def cypher_operator_create_node(self, variable="operator"):
         if self.name is None:
             return ""
-        return '(%s %s {%s: "%s"})' % \
-                (variable, NodeHuman.LABEL_HUMAN.value, NodeHuman.PROPERTY_NAME.value, self.name)
-
-    def toCypherUpdate(self, variable, work=None):
-        """
-        Used to set the work of a given HUMAN (TECHNICIAN or OPERATOR)
-        and to complete the description of the node HUMAN using the information of Skills and Crafts
-
-        :param variable: a string to define the variable of the node in CYPHER.
-                        The variable has to link with a node HUMAN from your database (use toCypherName to find it)
-        :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
-                    it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
-        :return: a CYPHER query to specify a given HUMAN node by adding the work skills and crafts and set the work
-        """
-        query = ""
-        if work is not None:
-            query += "\nSET %s %s"% (variable, work.value)
-        if self.skills is None and self.crafts is None:
-            return query
-        if self.skills is not None:
-            for skill in self.skills:
-                query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-                         '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-                         (skill, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, skill)
-        if self.crafts is not None:
-            for craft in self.crafts:
-                query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-                         '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-                         (craft, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, craft)
+        query = f"MERGE {self.cypher_human_name(variable)}"
+        query += f'\nSET {variable} {self.label_operator}'
 
         return query
+
+
 
 class Technician(Human):
 
@@ -335,28 +171,14 @@ class Technician(Human):
                             If in the database a HUMAN already have my name, It updated it and add skills and crafts
     """
 
-    def __init__(self, name, skills=None, crafts=None):
-        self._set_name(name)
+    def __init__(self, name=None, skills=None, crafts=None):
+        self.label_technician = NodeHuman.LABEL_TECHNICIAN.value
+        self.property_skills = NodeHuman.PROPERTY_SKILLS.value
+        self.property_crafts = NodeHuman.PROPERTY_CRAFTS.value
+
+        super().__init__(name)
         self._set_skills(skills)
         self._set_crafts(crafts)
-
-    def _get_name(self):
-        """
-        :return: the name of the HUMAN
-        """
-        return self.name
-
-    def _set_name(self, name):
-        """
-        Set the name of the HUMAN
-        if the name is empty "" it became "unknown"
-
-        :param name: a String
-        """
-        if name is "" or name is None:
-            self.name = None
-        else:
-            self.name = name.lower()
 
     def _get_skills(self):
         """
@@ -371,10 +193,10 @@ class Technician(Human):
 
         :param skills: an Array of String or a String
         """
-        if skills is "" or skills is None:
+        if skills is "" or skills is None or len(skills) == 0:
             self.skills = None
         else:
-            if not isinstance(skills, collections.Iterable):
+            if not isinstance(skills, collections.Iterable) or isinstance(skills, str):
                     skills = [skills]
             self.skills = [skill.lower() for skill in skills]
 
@@ -391,7 +213,7 @@ class Technician(Human):
 
         :param crafts: an Array of String or a String
         """
-        if crafts is "" or crafts is None:
+        if crafts is "" or crafts is None or len(crafts) == 0:
             self.crafts = None
         else:
             if not isinstance(crafts, collections.Iterable):
@@ -399,78 +221,73 @@ class Technician(Human):
             self.crafts = [craft.lower() for craft in crafts]
 
     def __str__(self):
-        return "OBJECT: %s --> Name: %s || skills: %s || crafts: %s"%\
-            (type(self), self.name, self.skills, self.crafts)
+        return f"{type(self)}\n\t" \
+               f"Name: {self.name}\n\t" \
+               f"Skills: {self.skills}\n\t" \
+               f"Crafts: {self.crafts}"
 
-    def toCypher(self, variable, work):
-        """
-        DEPRECIATE (use toCypherName and toCypherUpdate instead)
-        Used to create a Cypher query node corresponding to a HUMAN
+    def cypher_technician_name(self, variable="technician"):
+        if self.name is None:
+            return ""
+        return f'({variable} {self.label_human}{self.label_technician}'+ \
+               "{" + f'{self.property_name}:"{self.name}"' + "})"
 
-        The problem is that it create a new HUMAN even if one already has the same name in tha database
-        but if the new one has more parameters
+    def cypher_technician_all(self, variable="technician"):
+        query = f'({variable} {self.label_human}{self.label_technician}'
+        if self.name or self.skills or self.crafts is not None:
+            query += "{"
+            if self.name is not None:
+                query += f'{self.property_name}:"{self.name}",'
+            if self.skills is not None:
+                query += f'{self.property_skills}:' + '["' + '","'.join(self.skills) + '"],'
+            if self.crafts is not None:
+                query += f'{self.property_crafts}:' + '["' + '","'.join(self.crafts) + '"],'
+            query = query[:-1] + "}"
+        return query + ")"
 
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse the given node HUMAN
-        :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
-                    it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
-        :return: a String representing a Cypher query corresponding to a full HUMAN
-        """
+    def cypher_technician_create_node(self, variable="technician"):
         if self.name is None:
             return ""
 
-        query = '(%s %s %s {%s:"%s"' \
-                % (variable, NodeHuman.LABEL_HUMAN.value, work.value,  NodeHuman.PROPERTY_NAME.value, self.name)
-        if self.skills is not None and len(self.skills) is not 0:
-            query += ', %s:[' % (NodeHuman.PROPERTY_SKILLS.value)
-            for i in range(0, len(self.skills)):
-                query += '"%s",' % (self.skills[i])
-            query = query[:-1] + "]"
-        if self.crafts is not None and len(self.crafts) is not 0:
-            query += ', %s:[' % NodeHuman.PROPERTY_CRAFTS.value
-            for i in range(0, len(self.crafts)):
-                query += '"%s",' % (self.crafts[i])
-            query = query[:-1] + "]"
-
-        query += "})"
-        return query
-
-    def toCypherName(self, variable):
-        """
-        Used to create a CYPHER query corresponding to a HUMAN only using the name
-
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse name the given node HUMAN
-        :return: a String representing a Cypher query to corresponding to a HUMAN with only th name
-        """
-        if self.name is None:
-            return ""
-        return '(%s %s {%s: "%s"})' % \
-                (variable, NodeHuman.LABEL_HUMAN.value, NodeHuman.PROPERTY_NAME.value, self.name)
-
-    def toCypherUpdate(self, variable, work=None):
-        """
-        Used to set the work of a given HUMAN (TECHNICIAN or OPERATOR)
-        and to complete the description of the node HUMAN using the information of Skills and Crafts
-
-        :param variable: a string to define the variable of the node in CYPHER.
-                        The variable has to link with a node HUMAN from your database (use toCypherName to find it)
-        :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
-                    it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
-        :return: a CYPHER query to specify a given HUMAN node by adding the work skills and crafts and set the work
-        """
-        query = ""
-        if work is not None:
-            query += "\nSET %s %s"% (variable, work.value)
-        if self.skills is None and self.crafts is None:
-            return query
+        query = f"MERGE {self.cypher_human_name(variable)}"
+        query += f'\nSET {variable} {self.label_technician}'
         if self.skills is not None:
             for skill in self.skills:
-                query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-                         '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-                         (skill, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, skill)
+                    query += f'\nFOREACH(x in CASE WHEN "{skill}" in {variable}.{self.property_skills} THEN [] ELSE [1] END |' \
+                             f'  SET {variable}.{self.property_skills} = coalesce({variable}.{self.property_skills},[]) + "{skill}" )'
         if self.crafts is not None:
             for craft in self.crafts:
-                query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-                         '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-                         (craft, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, craft)
+                query += f'\nFOREACH(x in CASE WHEN "{craft}" in {variable}.{self.property_crafts} THEN [] ELSE [1] END |' \
+                         f'  SET {variable}.{self.property_crafts} = coalesce({variable}.{self.property_crafts},[]) + "{craft}" )'
 
         return query
+
+
+    # def toCypherUpdate(self, variable, work=None):
+    #     """
+    #     Used to set the work of a given HUMAN (TECHNICIAN or OPERATOR)
+    #     and to complete the description of the node HUMAN using the information of Skills and Crafts
+    #
+    #     :param variable: a string to define the variable of the node in CYPHER.
+    #                     The variable has to link with a node HUMAN from your database (use toCypherName to find it)
+    #     :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
+    #                 it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
+    #     :return: a CYPHER query to specify a given HUMAN node by adding the work skills and crafts and set the work
+    #     """
+    #     query = ""
+    #     if work is not None:
+    #         query += "\nSET %s %s"% (variable, work.value)
+    #     if self.skills is None and self.crafts is None:
+    #         return query
+    #     if self.skills is not None:
+    #         for skill in self.skills:
+    #             query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
+    #                      '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
+    #                      (skill, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, skill)
+    #     if self.crafts is not None:
+    #         for craft in self.crafts:
+    #             query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
+    #                      '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
+    #                      (craft, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, craft)
+    #
+    #     return query

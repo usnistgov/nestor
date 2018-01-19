@@ -1,3 +1,5 @@
+import collections
+
 from Program.Database.Database_Properties import NodeTag
 from Program.Database.Database_Properties import LabelEdges
 
@@ -22,8 +24,15 @@ class Tag:
         toCypher    --  Used to create a Cypher query to represent a new TAG
     """
 
-    def __init__(self, keyword):
+    def __init__(self, keyword=None, synonyms=None, links=None):
+        self.label_tag=NodeTag.LABEL_TAG.value
+        self.property_keyword=NodeTag.PROPERTY_KEYWORD.value
+        self.property_synonyms=NodeTag.PROPERTY_SYNONYMS.value
+        self.property_links=NodeTag.PROPERTY_LINKS.value
+
         self._set_keyword(keyword)
+        self._set_synonyms(synonyms)
+        self._set_links(links)
 
     def _get_keyword(self):
         """
@@ -41,33 +50,254 @@ class Tag:
         else:
             self.keyword = keyword.lower()
 
+    def _get_synonyms(self):
+        """
+        :return: the keyword of the TAG
+        """
+        return self.synonyms
+
+    def _set_synonyms(self, synonyms):
+        """
+        set the keyword of a TAG
+        :param keyword: a String for the keyword
+        """
+        if synonyms is "" or synonyms is None:
+            self.synonyms = None
+        else:
+            if not isinstance(synonyms, collections.Iterable) or isinstance(synonyms, str):
+                synonyms = [synonyms]
+            self.synonyms = [synonym.lower() for synonym in synonyms]
+
+    def _get_links(self):
+        """
+        :return: the keyword of the TAG
+        """
+        return self.links
+
+    def _set_links(self, links):
+        """
+        set the keyword of a TAG
+        :param keyword: a String for the keyword
+        """
+        if links is "" or links is None:
+            self.links = None
+        else:
+            tmp = []
+            if not isinstance(links, collections.Iterable):
+                links = [links]
+            for link in links:
+                if isinstance(link, Tag):
+                    tmp.append(link)
+            self.links = tmp
+
+    def _get_parents(self):
+        """
+        :return: the keyword of the TAG
+        """
+        return self.parents
+
+    def _set_parents(self, parents):
+        """
+        set the keyword of a TAG
+        :param keyword: a String for the keyword
+        """
+        if parents is "" or parents is None:
+            self.parents = None
+        else:
+            tmp = []
+            if not isinstance(parents, collections.Iterable):
+                parents = [parents]
+            for parent in parents:
+                if isinstance(parent, Tag):
+                    tmp.append(parent)
+            self.parents = tmp
+
     def __str__(self):
-        return "OBJECT: %s --> Keyword: %s "%\
-            (type(self), self.keyword)
+        return f"OBJECT: {type(self)}\n\t" \
+               f"Keyword: {self.keyword}\n\t" \
+               f"Synonyms: {self.synonyms}\n\t" \
+               f"Links: {self.links} "
 
-    def toCypher(self, variable, type):
-        """
-        Used to create a CYPHER query corresponding to a TAG
-
-        :param variable:  a string to define the variable of the node in CYPHER. It is used to reuse the given node TAG
-        :param type: A LABEL from the Enumeration store in the file DatabaseProperty.py
-                    it represent the type of a TAG (ITEM OR ACTION)
-        :return: a String representing a Cypher query corresponding to a TAG
-        """
+    def cypher_tag_keyword(self, variable="tag"):
         if self.keyword is None:
             return ""
-        return '(%s %s %s {%s: "%s"})' % \
-                (variable, NodeTag.LABEL_TAG.value, type.value, NodeTag.PROPERTY_KEYWORD.value, self.keyword)
+        return f'({variable} {self.label_tag}' + \
+               "{" + f'{self.property_keyword}:"{self.keyword}"' + "})"
 
-    @staticmethod
-    def get_all_tag_from_database(item = False, problem_action = False, solution_action=False, keyword=False):
-        property = "RETURN"
-        query = "MATCH ("
-        if item:
-            query+="item%s)<-[%s]-(issue)"%(NodeTag.LABEL_ITEM.value, LabelEdges.LABEL_CONTAINS.value)
-        elif problem_action:
-            query += "action%s)<-[%s]-(issue)" % (NodeTag.LABEL_ACTION.value, LabelEdges.LABEL_PROBLEM.value)
-        elif solution_action:
-            query += "action%s)<-[%s]-(issue)" % (NodeTag.LABEL_ACTION.value, LabelEdges.LABEL_SOLUTION.value)
-        if keyword:
-            property += " "
+    def cypher_tag_all(self, variable="tag"):
+        query = f'({variable} {self.label_tag}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword is not None:
+                query += f'{self.property_keyword}:"{self.keyword}",'
+            if self.synonyms is not None:
+                query += f'{self.property_synonyms}:' + '["' + '","'.join(self.synonyms) + '"],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_tag_create_node(self, variable="tag"):
+        if self.keyword is None:
+            return ""
+        query = f'MERGE {self.cypher_tag_keyword(variable)}'
+        if self.synonyms is not None:
+            for synonym in self.synonyms:
+                query += f'\nFOREACH(x in CASE WHEN "{synonym}" in {variable}.{self.property_synonyms} THEN [] ELSE [1] END |' \
+                         f' SET {variable}.{self.property_synonyms} = coalesce({variable}.{self.property_synonyms},[]) + "{synonym}" )'
+        return query
+
+class TagAction(Tag):
+
+    def __init__(self, keyword=None, synonyms=None, links=None):
+        self.label_action = NodeTag.LABEL_ACTION.value
+
+        super().__init__(keyword, synonyms, links)
+
+    def __str__(self):
+        return f"OBJECT: {type(self)}\n\t" \
+               f"Keyword: {self.keyword}\n\t" \
+               f"Synonyms: {self.synonyms}\n\t" \
+               f"Links: {self.links} "
+
+    def cypher_action_keyword(self, variable="tag_action"):
+        if self.keyword is None:
+            return ""
+        return f'({variable} {self.label_tag}{self.label_action}' +\
+               "{" + f'{self.property_keyword}:"{self.keyword}"' + "})"
+
+    def cypher_action_all(self, variable="tag_action"):
+        query = f'({variable} {self.label_tag}{self.label_action}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword is not None:
+                query += f'{self.property_keyword}:"{self.keyword}",'
+            if self.synonyms is not None:
+                query += f'{self.property_synonyms}:' + '["' + '","'.join(self.synonyms) + '"],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_action_create_node(self, variable="tag_action"):
+        if self.keyword is None:
+            return ""
+        query = f'{self.cypher_tag_create_node(variable)}' \
+                f'\nSET {variable} {self.label_action}'
+
+        return query
+
+class TagUnknown(Tag):
+
+    def __init__(self, keyword=None, synonyms=None, links=None):
+        self.label_unknown = NodeTag.LABEL_UNKNOWN.value
+
+        super().__init__(keyword, synonyms, links)
+
+    def __str__(self):
+        return f"OBJECT: {type(self)}\n\t" \
+               f"Keyword: {self.keyword}\n\t" \
+               f"Synonyms: {self.synonyms}\n\t" \
+               f"Links: {self.links} "
+
+    def cypher_unknown_keyword(self, variable="tag_unknown"):
+        if self.keyword is None:
+            return ""
+        return f'({variable} {self.label_tag}{self.label_unknown}' + \
+               "{" + f'{self.property_keyword}:"{self.keyword}"' + "})"
+
+    def cypher_unknown_all(self, variable="tag_unknown"):
+        query = f'({variable} {self.label_tag}{self.label_unknown}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword is not None:
+                query += f'{self.property_keyword}:"{self.keyword}",'
+            if self.synonyms is not None:
+                query += f'{self.property_synonyms}:' + '["' + '","'.join(self.synonyms) + '"],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_unknown_create_node(self, variable="tag_unknown"):
+        if self.keyword is None:
+            return ""
+        query = f'{self.cypher_tag_create_node(variable)}' \
+                f'\nSET {variable} {self.label_unknown}'
+        return query
+
+class TagItem(Tag):
+
+    def __init__(self, keyword=None, synonyms=None, links=None, parents=None):
+        self.label_item = NodeTag.LABEL_ITEM.value
+        self.property_parents = NodeTag.PROPERTY_PARENTS.value
+
+        super().__init__(keyword, synonyms, links)
+        self._set_parents(parents)
+
+    def __str__(self):
+        return f"OBJECT: {type(self)}\n\t" \
+               f"Keyword: {self.keyword}\n\t" \
+               f"Synonyms: {self.synonyms}\n\t" \
+               f"Links: {self.links} " \
+               f"Parents: {self.parents}\n\t"
+
+    def cypher_item_keyword(self, variable="tag_item"):
+        if self.keyword is None:
+            return ""
+        return f'({variable} {self.label_tag}{self.label_item}' + \
+               "{" + f'{self.property_keyword}:"{self.keyword}"' + "})"
+
+    def cypher_item_all(self, variable="tag_item"):
+        query = f'({variable} {self.label_tag}{self.label_item}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword is not None:
+                query += f'{self.property_keyword}:"{self.keyword}",'
+            if self.synonyms is not None:
+                query += f'{self.property_synonyms}:' + '["' + '","'.join(self.synonyms) + '"],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_item_create_node(self, variable="tag_item"):
+        if self.keyword is None:
+            return ""
+        query = f'{self.cypher_tag_create_node(variable)}' \
+                f'\nSET {variable} {self.label_item}'
+
+        return query
+
+
+class TagActionItem(Tag):
+    def __init__(self, keyword=None, synonyms=None, links=None, parents=None):
+        self.label_action_item = NodeTag.LABEL_ACTION_ITEM.value
+        self.property_parents = NodeTag.PROPERTY_PARENTS.value
+
+        super().__init__(keyword, synonyms, links)
+        self._set_parents(parents)
+
+    def __str__(self):
+        return f"OBJECT: {type(self)}\n\t" \
+               f"Keyword: {self.keyword}\n\t" \
+               f"Synonyms: {self.synonyms}\n\t" \
+               f"Links: {self.links} " \
+               f"Parents: {self.parents}\n\t"
+
+    def cypher_action_item_keyword(self, variable="tag_action_item"):
+        if self.keyword is None:
+            return ""
+        return f'({variable} {self.label_tag}{self.label_action_item}' + \
+               "{" + f'{self.property_keyword}:"{self.keyword}"' + "})"
+
+    def cypher_action_item_all(self, variable="tag_action_item"):
+        query = f'({variable} {self.label_tag}{self.label_action_item}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword is not None:
+                query += f'{self.property_keyword}:"{self.keyword}",'
+            if self.synonyms is not None:
+                query += f'{self.property_synonyms}:' + '["' + '","'.join(self.synonyms) + '"],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_action_item_create_node(self, variable="tag_action_item"):
+        if self.keyword is None:
+            return ""
+        query = f'{self.cypher_tag_create_node(variable)}' \
+                f'\nSET {variable} {self.label_action_item}'
+
+        return query

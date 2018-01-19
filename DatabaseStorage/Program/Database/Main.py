@@ -87,10 +87,10 @@ def GraphDatabaseCsv(database, file_path, localization, date_cleanizer = None):
     :return:
     """
 
-    def createMWO(row, localization, date_cleanizer = None):
+    def create_MWO(row, localization, date_cleanizer = None):
 
         #####   TECHNICIAN #####
-        def createTechnicians(row, localization):
+        def create_technicians(row, localization):
             skills = []
             try:
                 for skill in row[localization[NodeHuman.VALUE_SKILLS.value]].split('/'):
@@ -108,25 +108,25 @@ def GraphDatabaseCsv(database, file_path, localization, date_cleanizer = None):
             technicians = []
             try:
                 for technician in row[localization[NodeHuman.VALUE_TECHNICIAN.value]].split('/'):
-                    technicians.append(Human(name=technician, skills=skills, crafts=crafts))
+                    technicians.append(Technician(name=technician, skills=skills, crafts=crafts))
             except KeyError:
                 pass
 
             return technicians
 
         #####   OPERATOR #####
-        def createOperators(row, localization):
+        def create_operators(row, localization):
             operators = []
             try:
                 for operator in row[localization[NodeHuman.VALUE_OPERATOR.value]].split('/'):
-                    operators.append(Human(name=operator))
+                    operators.append(Operator(name=operator))
             except KeyError:
                 pass
 
             return operators
 
         #####   MACHINE #####
-        def createMachine(row, localization):
+        def create_machine(row, localization):
             machine = None
 
             try:
@@ -138,7 +138,7 @@ def GraphDatabaseCsv(database, file_path, localization, date_cleanizer = None):
                     pass
 
                 try:
-                    machine._set_type(row[localization[NodeMachine.VALUE_TYPE.value]])
+                    machine._set_machine_type(row[localization[NodeMachine.VALUE_TYPE.value]])
                 except KeyError:
                     pass
 
@@ -153,19 +153,42 @@ def GraphDatabaseCsv(database, file_path, localization, date_cleanizer = None):
             return machine
 
         #####   TAG #####
-        def createTags(row, localization, collumn):
-            tags = []
+        def create_items(row, localization):
+            items = []
 
             try:
-                for item in row[localization[collumn]].split('/'):
-                    tags.append(Tag(keyword=item))
+                for item in row[localization[NodeTag.VALUE_ITEM.value]].split('/'):
+                    items.append(TagItem(keyword=item))
             except KeyError:
                 pass
 
-            return tags
+            return items
+
+        def create_problems(row, localization):
+            problems = []
+
+            try:
+                for problem in row[localization[NodeTag.VALUE_PROBLEM.value]].split('/'):
+                    problems.append(TagAction(keyword=problem))
+            except KeyError:
+                pass
+
+            return problems
+
+
+        def create_solutions(row, localization):
+            solutions = []
+
+            try:
+                for solution in row[localization[NodeTag.VALUE_SOLUTION.value]].split('/'):
+                    solutions.append(TagAction(keyword=solution))
+            except KeyError:
+                pass
+
+            return solutions
 
         #####   ISSUE #####
-        def createIssue(row, localization, date_cleanizer = None):
+        def create_issue(row, localization, date_cleanizer = None):
             issue = None
 
             try:
@@ -335,21 +358,21 @@ def GraphDatabaseCsv(database, file_path, localization, date_cleanizer = None):
             return issue
 
         #####   CORE  #####
-        technicians = createTechnicians(row, localization)
-        operators = createOperators(row, localization)
-        machine = createMachine(row, localization)
-        items = createTags(row, localization, NodeTag.VALUE_ITEM.value)
-        problems = createTags(row, localization, NodeTag.VALUE_PROBLEM.value)
-        solutions = createTags(row, localization, NodeTag.VALUE_SOLUTION.value)
-        issue = createIssue(row, localization, date_cleanizer)
+        technicians = create_technicians(row, localization)
+        operators = create_operators(row, localization)
+        machine = create_machine(row, localization)
+        items = create_items(row, localization)
+        problems = create_problems(row, localization)
+        solutions = create_solutions(row, localization)
+        issue = create_issue(row, localization, date_cleanizer)
 
         return MaintenanceWorkOrder(issue=issue,
                                     machine=machine,
                                     operators=operators,
                                     technicians=technicians,
-                                    itemtags=items,
-                                    problemtags=problems,
-                                    solutiontags=solutions
+                                    tag_items=items,
+                                    tag_problems=problems,
+                                    tag_solutions=solutions
                                     )
 
     with open(file_path, encoding='utf-8') as csvfile:
@@ -363,8 +386,8 @@ def GraphDatabaseCsv(database, file_path, localization, date_cleanizer = None):
 
         for row in tqdm(reader, total=num_lines):
         #for row in reader:
-            mwo = createMWO(row, localization, date_cleanizer)
-            query = mwo.create_database("issue", "machine", "machinetype", "operator", "technician", "item", "problem", "solution")
+            mwo = create_MWO(row, localization, date_cleanizer)
+            query = mwo.cypher_mwo_graphdata("issue", "machine", "machine_type", "operators", "technicians", "items", "problems", "solutions")
             database.runQuery(query=query)
 
 

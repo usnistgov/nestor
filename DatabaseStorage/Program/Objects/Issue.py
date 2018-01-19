@@ -65,22 +65,40 @@ class Issue:
                             If in the database a HUMAN already have my name, It updated it and add all other information possible
     """
 
-    def __init__(self, problem, solution, cause=None, effects=None,
-                 part_in_process=None, necessary_part=None, machine_down= None,
+    def __init__(self, problem=None, solution=None, cause=None, effects=None,
+                 part_in_process=None, necessary_part=None, machine_down=None,
 
                  date_machine_up=None, date_machine_down=None,
                  date_maintenance_work_order_issue=None, date_maintenance_work_order_close=None,
                  date_maintenance_technician_arrives=None,
                  date_problem_found=None, date_problem_solved=None,
                  date_part_ordered=None, date_maintenance_technician_begin_repair_problem=None,
-                ):
+                 ):
+        self.label_issue = NodeIssue.LABEL_ISSUE.value
+        self.property_problem = NodeIssue.PROPERTY_DESCRIPTION_PROBLEM.value
+        self.property_solution = NodeIssue.PROPERTY_DESCRIPTION_SOLUTION.value
+        self.property_cause = NodeIssue.PROPERTY_DESCRIPTION_CAUSE.value
+        self.property_effects = NodeIssue.PROPERTY_DESCRIPTION_EFFECT.value
+        self.property_machine_down = NodeIssue.PROPERTY_MACHINE_DOWN.value
+
+        self.property_part_in_process = NodeIssue.PROPERTY_PART_PROCESS.value
+        self.property_necessary_part = NodeIssue.PROPERTY_NECESSARY_PART.value
+
+        self.property_date_machine_down = NodeIssue.PROPERTY_DATE_MACHINE_DOWN.value
+        self.property_date_machine_up = NodeIssue.PROPERTY_DATE_MACHINE_UP.value
+        self.property_date_mwo_issue = NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value
+        self.property_date_mwo_close = NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value
+        self.property_date_mt_arrives = NodeIssue.PROPERTY_DATE_TECHNICIAN_ARRIVE.value
+        self.property_date_problem_found = NodeIssue.PROPERTY_DATE_PROBLEM_FOUND.value
+        self.property_date_problem_solved = NodeIssue.PROPERTY_DATE_PROBLEM_SOLVE.value
+        self.property_date_part_ordered = NodeIssue.PROPERTY_DATE_PART_ORDER.value
+        self.property_date_mt_begin_repaire_problem = NodeIssue.PROPERTY_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value
 
         self._set_problem(problem)
         self._set_solution(solution)
         self._set_cause(cause)
         self._set_effects(effects)
         self._set_machine_down(machine_down)
-
 
         self._set_part_in_process(part_in_process)
         self._set_necessary_part(necessary_part)
@@ -106,7 +124,7 @@ class Issue:
 
     def _set_problem(self, problem):
         if problem is "" or problem is None:
-            self.problem = "unknown"
+            self.problem = None
         else:
             self.problem = problem
 
@@ -115,7 +133,7 @@ class Issue:
 
     def _set_solution(self, solution):
         if solution is "" or solution is None:
-            self.solution = "unknown"
+            self.solution = None
         else:
             self.solution = solution
 
@@ -159,8 +177,6 @@ class Issue:
         return self.machine_down
 
     def _set_machine_down(self, machine_down):
-        #TODO when THURSTON cleaned everything, change it
-
         if machine_down == "y" or machine_down == "yes" or machine_down == "true" or machine_down == "t" or machine_down == "1":
             self.machine_down = True
         elif machine_down == "n" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
@@ -169,17 +185,18 @@ class Issue:
             self.machine_down = None
 
 
-        ############################  DATE ############################
-#TODO Dates make problem, because there is too much difference between the csv
+            ############################  DATE ############################
+        # TODO Dates make problem, because there is too much difference between the csv
 
     def _get_date_machine_down(self):
         return self.date_machine_down
 
     def _set_date_machine_down(self, date_machine_down):
-        if isinstance(date_machine_down, datetime):
-            self.date_machine_down = date_machine_down
-        elif date_machine_down is not None:
-            self.date_machine_down = isoStringToDate(date_machine_down)
+        if date_machine_down is not None:
+            if isinstance(date_machine_down, datetime):
+                self.date_machine_down = date_machine_down
+            else:
+                self.date_machine_down = isoStringToDate(date_machine_down)
         else:
             self.date_machine_down = None
 
@@ -187,22 +204,24 @@ class Issue:
         return self.date_machine_up
 
     def _set_date_machine_up(self, date_machine_up):
-        if isinstance(date_machine_up, datetime):
-            self.date_machine_up = date_machine_up
-        elif date_machine_up is not None:
-            self.date_machine_up = isoStringToDate(date_machine_up)
+        if date_machine_up is not None:
+            if isinstance(date_machine_up, datetime):
+                self.date_machine_up = date_machine_up
+            else:
+                self.date_machine_up = isoStringToDate(date_machine_up)
         else:
             self.date_machine_up = None
-#
+        #
 
     def _get_date_maintenance_work_order_close(self):
         return self.date_maintenance_work_order_close
 
     def _set_date_maintenance_work_order_close(self, date_maintenance_work_order_close):
-        if isinstance(date_maintenance_work_order_close, datetime):
-            self.date_maintenance_work_order_close = date_maintenance_work_order_close
-        elif date_maintenance_work_order_close is not None:
-            self.date_maintenance_work_order_close = isoStringToDate(date_maintenance_work_order_close)
+        if date_maintenance_work_order_close is not None:
+            if isinstance(date_maintenance_work_order_close, datetime):
+                self.date_maintenance_work_order_close = date_maintenance_work_order_close
+            else:
+                self.date_maintenance_work_order_close = isoStringToDate(date_maintenance_work_order_close)
         else:
             self.date_maintenance_work_order_close = None
 
@@ -210,34 +229,37 @@ class Issue:
         return self.date_maintenance_work_order_issue
 
     def _set_date_maintenance_work_order_issue(self, date_maintenance_work_order_issue):
-        if isinstance(date_maintenance_work_order_issue, datetime):
-            self.date_maintenance_work_order_issue = date_maintenance_work_order_issue
-        elif date_maintenance_work_order_issue is not None:
-            self.date_maintenance_work_order_issue = isoStringToDate(date_maintenance_work_order_issue)
+        if date_maintenance_work_order_issue is not None:
+            if isinstance(date_maintenance_work_order_issue, datetime):
+                self.date_maintenance_work_order_issue = date_maintenance_work_order_issue
+            else:
+                self.date_maintenance_work_order_issue = isoStringToDate(date_maintenance_work_order_issue)
         else:
             self.date_maintenance_work_order_issue = None
-#
+        #
 
-    def _get_date_maintenance_technician_arrives(self,):
+    def _get_date_maintenance_technician_arrives(self, ):
         return self.date_maintenance_technician_arrives
 
     def _set_date_maintenance_technician_arrives(self, date_maintenance_technician_arrives):
-        if isinstance(date_maintenance_technician_arrives, datetime):
-            self.date_maintenance_technician_arrives = date_maintenance_technician_arrives
-        elif date_maintenance_technician_arrives is not None:
-            self.date_maintenance_technician_arrives = isoStringToDate(date_maintenance_technician_arrives)
+        if date_maintenance_technician_arrives is not None:
+            if isinstance(date_maintenance_technician_arrives, datetime):
+                self.date_maintenance_technician_arrives = date_maintenance_technician_arrives
+            else:
+                self.date_maintenance_technician_arrives = isoStringToDate(date_maintenance_technician_arrives)
         else:
             self.date_maintenance_technician_arrives = None
-#
+        #
 
     def _get_date_problem_solved(self):
         return self.date_problem_solved
 
     def _set_date_problem_solved(self, date_problem_solved):
-        if isinstance(date_problem_solved, datetime):
-            self.date_problem_solved = date_problem_solved
-        elif date_problem_solved is not None:
-            self.date_problem_solved = isoStringToDate(date_problem_solved)
+        if date_problem_solved is not None:
+            if isinstance(date_problem_solved, datetime):
+                self.date_problem_solved = date_problem_solved
+            else:
+                self.date_problem_solved = isoStringToDate(date_problem_solved)
         else:
             self.date_problem_solved = None
 
@@ -245,22 +267,24 @@ class Issue:
         return self.date_problem_found
 
     def _set_date_problem_found(self, date_problem_found):
-        if isinstance(date_problem_found, datetime):
-            self.date_problem_found = date_problem_found
-        elif date_problem_found is not None:
-            self.date_problem_found = isoStringToDate(date_problem_found)
+        if date_problem_found is not None:
+            if isinstance(date_problem_found, datetime):
+                self.date_problem_found = date_problem_found
+            else:
+                self.date_problem_found = isoStringToDate(date_problem_found)
         else:
             self.date_problem_found = None
-#
+        #
 
     def _get_date_part_ordered(self):
         return self.date_part_ordered
 
-    def _set_date_part_ordered(self,date_part_ordered):
-        if isinstance(date_part_ordered, datetime):
-            self.date_part_ordered = date_part_ordered
-        elif date_part_ordered is not None:
-            self.date_part_ordered = isoStringToDate(date_part_ordered)
+    def _set_date_part_ordered(self, date_part_ordered):
+        if date_part_ordered is not None:
+            if isinstance(date_part_ordered, datetime):
+                self.date_part_ordered = date_part_ordered
+            else:
+                self.date_part_ordered = isoStringToDate(date_part_ordered)
         else:
             self.date_part_ordered = None
 
@@ -268,10 +292,12 @@ class Issue:
         return self.date_maintenance_technician_begin_repair_problem
 
     def _set_date_maintenance_technician_begin_repair_problem(self, date_maintenance_technician_begin_repair_problem):
-        if isinstance(date_maintenance_technician_begin_repair_problem, datetime):
-            self.date_maintenance_technician_begin_repair_problem = date_maintenance_technician_begin_repair_problem
-        elif date_maintenance_technician_begin_repair_problem is not None:
-            self.date_maintenance_technician_begin_repair_problem = isoStringToDate(date_maintenance_technician_begin_repair_problem)
+        if date_maintenance_technician_begin_repair_problem is not None:
+            if isinstance(date_maintenance_technician_begin_repair_problem, datetime):
+                self.date_maintenance_technician_begin_repair_problem = date_maintenance_technician_begin_repair_problem
+            else:
+                self.date_maintenance_technician_begin_repair_problem = isoStringToDate(
+                    date_maintenance_technician_begin_repair_problem)
         else:
             self.date_maintenance_technician_begin_repair_problem = None
 
@@ -385,7 +411,7 @@ class Issue:
         except TypeError:
             self.time_to_turn_on = None
 
-#
+        #
 
     def create_all_time(self):
         """
@@ -404,199 +430,72 @@ class Issue:
         self._set_time_to_fix()
         self._set_time_to_turn_on()
 
-
     def __str__(self):
-        return "OBJECT: %s --> problem: %s \n|| solution: %s \n" \
-               "|| cause: %s \n|| effects: %s \n" \
-               "|| part_in_process: %s \n|| necessary_part: %s \n" \
-               "|| machine_down: %s \n"\
-               "|| date_machine_up: %s \n|| date_machine_down: %s \n" \
-               "|| date_maintenance_work_order_issue: %s \n|| date_maintenance_work_order_close: %s \n" \
-               "|| date_maintenance_technician_arrives: %s \n" \
-               "|| date_problem_found: %s \n|| date_problem_solved: %s \n" \
-               "|| date_part_ordered: %s \n|| date_maintenance_technician_begin_repair_problem: %s \n" \
-               "|| time_to_repair: %s \n|| time_work_order_completion: %s \n" \
-               "|| time_to_dispatch: %s \n|| time_to_return_to_operation: %s \n" \
-               "|| time_to_issue_work_order: %s \n|| time_to_travel: %s \n" \
-               "|| time_to_solve_problem: %s \n|| time_to_diagnose: %s \n" \
-               "|| time_to_order: %s \n|| time_lead_for_part: %s \n" \
-               "|| time_to_fix: %s \n|| time_to_turn_on: %s \n"%\
-               (type(self), self.problem, self.solution,
-                self.cause, self.effects,
-                self.part_in_process, self.necessary_part,
-                self.down,
-                self.date_machine_up, self.date_machine_down,
-                self.date_maintenance_work_order_issue, self.date_maintenance_work_order_close,
-                self.date_maintenance_technician_arrives,
-                self.date_problem_found, self.date_problem_solved,
-                self.date_part_ordered, self.date_maintenance_technician_begin_repair_problem,
-                self.time_to_repair, self.time_work_order_completion, self.time_to_dispatch,
-                self.time_to_return_to_operation, self.time_to_issue_work_order, self.time_to_travel,
-                self.time_to_solve_problem, self.time_to_diagnose, self.time_to_order, self.time_lead_for_part,
-                self.time_to_fix, self.time_to_turn_on)
+        return f"OBJECT: {type(self)}\n\t" \
+               f"problem: {self.problem} \n\tsolution: {self.solution} \n\t" \
+               f"cause: {self.cause} \n\teffects: {self.effects} \n\t" \
+               f"part_in_process: {self.part_in_process} \n\t|| necessary_part: {self.necessary_part} \n\t" \
+               f"machine_down: {self.down} \n\t" \
+               f"date_machine_up: {self.date_machine_up} \n\t|| date_machine_down: {self.date_machine_down} \n\t" \
+               f"date_maintenance_work_order_issue: {self.date_maintenance_work_order_issue} \n\t" \
+               f"date_maintenance_work_order_close: {self.date_maintenance_work_order_close} \n\t" \
+               f"date_maintenance_technician_arrives: {self.date_maintenance_technician_arrives} \n\t" \
+               f"date_problem_found: {self.date_problem_found} \n\tdate_problem_solved: {self.date_problem_solved} \n\t" \
+               f"date_part_ordered: {self.date_part_ordered} \n\t" \
+               f"date_maintenance_technician_begin_repair_problem: {self.date_maintenance_technician_begin_repair_problem} \n\t" \
+               f"time_to_repair: {self.time_to_repair} \n\ttime_work_order_completion: {self.time_work_order_completion} \n\t" \
+               f"time_to_dispatch: {self.time_to_dispatch} \n\ttime_to_return_to_operation: {self.time_to_return_to_operation} \n\t" \
+               f"time_to_issue_work_order: {self.time_to_issue_work_order} \n\ttime_to_travel: {self.time_to_travel} \n\t" \
+               f"time_to_solve_problem: {self.time_to_solve_problem} \n\ttime_to_diagnose: {self.time_to_diagnose} \n\t" \
+               f"time_to_order: {self.time_to_order} \n\ttime_lead_for_part: {self.time_lead_for_part} \n\t" \
+               f"time_to_fix: {self.time_to_fix} \n\ttime_to_turn_on: {self.time_to_turn_on} \n\t"
 
-    def toCypher(self, variable):
-        """
-        DEPRECIATE (use toCypherDescription and toCypherUpdate instead)
-        Used to create a Cypher query node corresponding to an ISSUE
 
-        The problem is that it create a new ISSUE even if one already has the same problem and solution in tha database
-        but if the new one has more parameters
+    def cypher_issue_all(self, variable="issue"):
+        query = f'({variable} {self.label_issue}'
+        if self.problem or self.solution or self.cause or self.effects or self.part_in_process or self.necessary_part\
+                or self.machine_down or self.date_machine_up or self.date_machine_down \
+                or self.date_maintenance_work_order_issue or self.date_maintenance_work_order_close\
+                or self.date_maintenance_technician_arrives or self.date_problem_found or self.date_problem_solved\
+                or self.date_part_ordered or self.date_maintenance_technician_begin_repair_problem is not None :
+            query += "{"
+            if self.problem is not None:
+                query += f'{self.property_problem}:"{self.problem}",'
+            if self.solution is not None:
+                query += f'{self.property_solution}:"{self.solution}",'
+            if self.cause is not None:
+                query += f'{self.property_cause}:"{self.cause}",'
+            if self.effects is not None:
+                query += f'{self.property_effects}:"{self.effects}",'
+            if self.part_in_process is not None:
+                query += f'{self.property_part_in_process}:"{self.part_in_process}",'
+            if self.necessary_part is not None:
+                query += f'{self.property_necessary_part}:"{self.necessary_part}",'
+            if self.machine_down is not None:
+                query += f'{self.property_machine_down}:"{self.machine_down}",'
+            if self.date_machine_up is not None:
+                query += f'{self.property_date_machine_up}:"{self.date_machine_up}",'
+            if self.date_machine_down is not None:
+                query += f'{self.property_date_machine_down}:"{self.date_machine_down }",'
+            if self.date_maintenance_work_order_issue is not None:
+                query += f'{self.property_date_mwo_issue}:"{self.date_maintenance_work_order_issue}",'
+            if self.date_maintenance_work_order_close is not None:
+                query += f'{self.property_date_mwo_close}:"{self.date_maintenance_work_order_close}",'
+            if self.date_maintenance_technician_arrives is not None:
+                query += f'{self.property_date_mt_arrives}:"{self.date_maintenance_technician_arrives}",'
+            if self.date_problem_found is not None:
+                query += f'{self.property_date_problem_found}:"{self.date_problem_found}",'
+            if self.date_problem_solved is not None:
+                query += f'{self.property_date_problem_solved}:"{self.date_problem_solved}",'
+            if self.date_part_ordered is not None:
+                query += f'{self.property_date_part_ordered}:"{self.date_part_ordered}",'
+            if self.date_maintenance_technician_begin_repair_problem is not None:
+                query += f'{self.property_date_mt_begin_repaire_problem}:"{self.date_maintenance_technician_begin_repair_problem}",'
+            query = query[:-1] + "}"
+        return query + ")"
 
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse the given node ISSUE
-        :return: a String representing a Cypher query corresponding to a full ISSUE
-
-        """
-        if self.problem is None or self.solution is None:
+    def cypher_create_issue_node(self, variable="issue"):
+        if self.problem and self.solution is None:
             return ""
-
-        query = '(%s %s {%s: "%s"' %\
-                (variable, NodeIssue.LABEL_ISSUE.value, NodeIssue.PROPERTY_DESCRIPTION_PROBLEM.value, self.problem)
-        query += ', %s: "%s"'%\
-                (NodeIssue.PROPERTY_DESCRIPTION_SOLUTION.value, self.solution)
-        if self.cause is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DESCRIPTION_CAUSE.value, self.cause)
-        if self.effects is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DESCRIPTION_EFFECT.value, self.effects)
-        if self.part_in_process is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_PART_PROCESS.value, self.part_in_process)
-        if self.necessary_part is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_NECESSARY_PART.value, self.necessary_part)
-        if self.machine_down is not None:
-            query+= ', %s: %s'%\
-                (NodeIssue.PROPERTY_MACHINE_DOWN.value, self.machine_down)
-        if self.date_machine_down is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_MACHINE_DOWN.value, self.date_machine_down.isoformat())
-        if self.date_machine_up is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_MACHINE_UP.value, self.date_machine_up.isoformat())
-        if self.date_maintenance_work_order_issue is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value, self.date_maintenance_work_order_issue.isoformat())
-        if self.date_maintenance_work_order_close is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value, self.date_maintenance_work_order_close.isoformat())
-        if self.date_maintenance_technician_arrives is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_TECHNICIAN_ARRIVE.value, self.date_maintenance_technician_arrives.isoformat())
-        if self.date_problem_found is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_PROBLEM_FOUND.value, self.date_problem_found.isoformat())
-        if self.date_problem_solved is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_PROBLEM_SOLVE.value, self.date_problem_solved.isoformat())
-        if self.date_part_ordered is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_PART_ORDER.value, self.date_part_ordered.isoformat())
-        if self.date_maintenance_technician_begin_repair_problem is not None:
-            query += ', %s: "%s"' % \
-                (NodeIssue.PROPERTY_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value, self.date_maintenance_technician_begin_repair_problem.isoformat())
-        query += "})"
+        query = f'CREATE {self.cypher_issue_all(variable)}'
         return query
-
-    def toCypherDescription(self, variable):
-        """
-        Used to create a CYPHER query corresponding to a ISSUE only using the problem and solution
-
-        :param variable: a string to define the variable of the node in CYPHER. It is used to reuse name the given node ISSUE
-        :return: a String representing a Cypher query to corresponding to a ISSUE with only the problem and solution
-        """
-        if self.problem is None and self.solution is None:
-            return ""
-        query = '(%s %s {%s: "%s"' % \
-                (variable, NodeIssue.LABEL_ISSUE.value, NodeIssue.PROPERTY_DESCRIPTION_PROBLEM.value, self.problem)
-        query += ', %s: "%s"})' % \
-                 (NodeIssue.PROPERTY_DESCRIPTION_SOLUTION.value, self.solution)
-        return query
-
-    def toCypherUpdate(self, variable):
-        """
-        Used to complete the description of the node ISSUS using all the other description
-
-        :param variable: a string to define the variable of the node in CYPHER.
-                        The variable has to link with a node ISSUE from your database (use toCypherDescription to find it)
-        :return: a CYPHER query to specify a given ISSUE node by adding the other descriptions in the database
-        """
-
-        if self.cause is None and self.effects is None and self.part_in_process is None and self.necessary_part is None and self.machine_down is None and self.date_machine_down is None\
-                and self.date_machine_up is None and self.date_maintenance_work_order_issue is None and self.date_maintenance_work_order_close is None and self.date_maintenance_technician_arrives is None\
-                and self.date_problem_found is None and self.date_problem_solved is None and self.date_part_ordered is None and self.date_maintenance_technician_begin_repair_problem is None:
-            return ""
-        query = "SET "
-        if self.cause is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DESCRIPTION_CAUSE.value, self.cause)
-        if self.effects is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DESCRIPTION_EFFECT.value, self.effects)
-        if self.part_in_process is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_PART_PROCESS.value, self.part_in_process)
-        if self.necessary_part is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_NECESSARY_PART.value, self.necessary_part)
-        if self.machine_down is not None:
-            query += '%s.%s=%s,' % \
-                (variable, NodeIssue.PROPERTY_MACHINE_DOWN.value, self.machine_down)
-        if self.date_machine_down is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_MACHINE_DOWN.value, self.date_machine_down.isoformat())
-        if self.date_machine_up is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_MACHINE_UP.value, self.date_machine_up.isoformat())
-        if self.date_maintenance_work_order_issue is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value, self.date_maintenance_work_order_issue.isoformat())
-        if self.date_maintenance_work_order_close is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value, self.date_maintenance_work_order_close.isoformat())
-        if self.date_maintenance_technician_arrives is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_TECHNICIAN_ARRIVE.value, self.date_maintenance_technician_arrives.isoformat())
-        if self.date_problem_found is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_PROBLEM_FOUND.value, self.date_problem_found.isoformat())
-        if self.date_problem_solved is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_PROBLEM_SOLVE.value, self.date_problem_solved.isoformat())
-        if self.date_part_ordered is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_PART_ORDER.value, self.date_part_ordered.isoformat())
-        if self.date_maintenance_technician_begin_repair_problem is not None:
-            query += '%s.%s="%s",' % \
-                (variable, NodeIssue.PROPERTY_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value, self.date_maintenance_technician_begin_repair_problem.isoformat())
-
-        return query[:-1]
-
-"""
-    def fromCypher(self, result):
-        self._set_problem(result[NodeIssue.PROPERTY_DESCRIPTION_PROBLEM.value])
-        self._set_solution(result[NodeIssue.PROPERTY_DESCRIPTION_SOLUTION.value])
-        self._set_cause(result[NodeIssue.PROPERTY_DESCRIPTION_CAUSE.value])
-        self._set_effects(result[NodeIssue.PROPERTY_DESCRIPTION_EFFECT.value])
-        self._set_machine_down(result[NodeIssue.PROPERTY_MACHINE_DOWN.value])
-
-        self._set_part_in_process(result[NodeIssue.PROPERTY_PART_PROCESS.value])
-        self._set_necessary_part(result[NodeIssue.PROPERTY_NECESSARY_PART.value])
-
-        self._set_date_machine_down(result[NodeIssue.PROPERTY_DATE_MACHINE_DOWN.value])
-        self._set_date_machine_up(result[NodeIssue.PROPERTY_DATE_MACHINE_UP.value])
-
-        self._set_date_maintenance_work_order_close(result[NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value])
-        self._set_date_maintenance_work_order_issue(result[NodeIssue.PROPERTY_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value])
-
-        self._set_date_maintenance_technician_arrives(result[NodeIssue.PROPERTY_DATE_TECHNICIAN_ARRIVE.value])
-
-        self._set_date_problem_solved(result[NodeIssue.PROPERTY_DATE_PROBLEM_SOLVE.value])
-        self._set_date_problem_found(result[NodeIssue.PROPERTY_DATE_PROBLEM_FOUND.value])
-
-        self._set_date_part_ordered(result[NodeIssue.PROPERTY_DATE_PART_ORDER.value])
-        self._set_date_maintenance_technician_begin_repair_problem(result[NodeIssue.PROPERTY_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value])
-
-        self.create_all_time()
-"""

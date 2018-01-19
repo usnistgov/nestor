@@ -10,6 +10,19 @@ This files is used to store all function to create and execute a query for the g
 And return a DataFrame with the result
 """
 
+def kpi(*args):
+    for obj in args:
+        for att in obj.__dict__:
+            if obj.__dict__[att] == "_":
+                print(type(obj).__name__.lower() + "." + att)
+                print(obj.cypher_kpi())
+
+def cypher_kpi(self):
+    return f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{LabelEdges.LABEL_REQUESTED.value}]->(operator {self.label_human}{self.label_operator})'
+
+
+
+
 
 def abstract_kpi_time_mwo(database, x_value, filter_value, time_value="time", count_value="count", average_value="average"):
     """

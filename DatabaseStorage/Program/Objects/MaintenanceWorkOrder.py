@@ -36,14 +36,23 @@ class MaintenanceWorkOrder():
             create_database --  return the query to create a new MWO
     """
 
-    def __init__(self, issue, machine=None, operators=None, technicians=None, itemtags=None, problemtags=None, solutiontags=None):
+    def __init__(self, issue, machine=None, operators=None, technicians=None, tag_items=None, tag_problems=None, tag_solutions=None):
+
+        self.label_problem = LabelEdges.LABEL_PROBLEM.value
+        self.label_solution = LabelEdges.LABEL_SOLUTION.value
+        self.label_contains = LabelEdges.LABEL_CONTAINS.value
+        self.label_requested = LabelEdges.LABEL_REQUESTED.value
+        self.label_solve = LabelEdges.LABEL_SOLVE.value
+        self.label_covered = LabelEdges.LABEL_COVERED.value
+        self.label_is_a = LabelEdges.LABEL_ISA.value
+
         self._set_issue(issue)
         self._set_machine(machine)
         self._set_operators(operators)
         self._set_technicians(technicians)
-        self._set_itemtags(itemtags)
-        self._set_problemtags(problemtags)
-        self._set_solutiontags(solutiontags)
+        self._set_tag_items(tag_items)
+        self._set_tag_problems(tag_problems)
+        self._set_tag_solutions(tag_solutions)
 
     def _get_issue(self):
         return self.issue
@@ -61,41 +70,56 @@ class MaintenanceWorkOrder():
         return self.operators
 
     def _set_operators(self, operators):
-        if not isinstance(operators, collections.Iterable) or isinstance(operators, str):
-            operators = [operators]
-        self.operators = operators
+        if operators is None or len(operators) == 0:
+            self.operators = None
+        else:
+            if not isinstance(operators, collections.Iterable) or isinstance(operators, str):
+                operators = [operators]
+            self.operators = operators
 
     def _get_technician(self):
-        return self.technician
+        return self.technicians
 
     def _set_technicians(self, technicians):
-        if not isinstance(technicians, collections.Iterable) or isinstance(technicians, str):
-            technicians = [technicians]
-        self.technicians = technicians
+        if technicians is None or len(technicians) == 0:
+            self.technicians = None
+        else:
+            if not isinstance(technicians, collections.Iterable) or isinstance(technicians, str):
+                technicians = [technicians]
+            self.technicians = technicians
 
-    def _get_itemtags(self):
-        return self.itemtags
+    def _get_tag_items(self):
+        return self.tag_items
 
-    def _set_itemtags(self, itemtags):
-        if not isinstance(itemtags, collections.Iterable) or isinstance(itemtags, str):
-            itemtags = [itemtags]
-        self.itemtags = itemtags
+    def _set_tag_items(self, tag_items):
+        if tag_items is None or len(tag_items) == 0:
+            self.tag_items = None
+        else:
+            if not isinstance(tag_items, collections.Iterable) or isinstance(tag_items, str):
+                tag_items = [tag_items]
+            self.tag_items = tag_items
 
-    def _get_problemtags(self):
-        return self.problemtags
+    def _get_tag_problems(self):
+        return self.tag_problemts
 
-    def _set_problemtags(self, problemtags):
-        if not isinstance(problemtags, collections.Iterable) or isinstance(problemtags, str):
-            problemtags = [problemtags]
-        self.problemtags = problemtags
+    def _set_tag_problems(self, tag_problems):
+        if tag_problems is None or len(tag_problems) == 0:
+            self.tag_problems = None
+        else:
+            if not isinstance(tag_problems, collections.Iterable) or isinstance(tag_problems, str):
+                tag_problems = [tag_problems]
+            self.tag_problemts = tag_problems
 
-    def _get_solutiontags(self):
-        return self.solutiontags
+    def _get_tag_solutions(self):
+        return self.tag_solutions
 
-    def _set_solutiontags(self, solutiontags):
-        if not isinstance(solutiontags, collections.Iterable) or isinstance(solutiontags, str):
-            solutiontags = [solutiontags]
-        self.solutiontags = solutiontags
+    def _set_tag_solutions(self, tag_solutions):
+        if tag_solutions is None or len(tag_solutions) == 0:
+            self.tag_solutions = None
+        else:
+            if not isinstance(tag_solutions, collections.Iterable) or isinstance(tag_solutions, str):
+                tag_solutions = [tag_solutions]
+            self.tag_solutions = tag_solutions
 
     def __str__(self):
         return "OBJECT: %s -->\n\t\t ISSUE:\n %s" \
@@ -105,12 +129,11 @@ class MaintenanceWorkOrder():
                "\n\t\t ITEM_TAG:\n %s" \
                "\n\t\t PROBLEM_TAGS:\n %s" \
                "\n\t\t SOLUTION_TAGS:\n %s" % \
-               (type(self), self.issue, self.machine, self.operators, self.technicians, self.itemtags, self.problemtags,
-                self.solutiontags)
+               (type(self), self.issue, self.machine, self.operators, self.technicians, self.tag_items, self.tag_problemts,
+                self.tag_solutions)
 
-
-    def create_database(self, varIssue, varMachine, varMachinetype, varOperators, varTechnicians, varItemtag,
-                        varProblemtags, varSolutiontags):
+    def cypher_mwo_graphdata(self, var_issue, var_machine, var_machine_type, var_operators, var_technicians, var_tag_items,
+                        var_tag_problemts, var_tag_solutions):
         """
         The query created an inuque Issue
         But merge the others:
@@ -129,65 +152,50 @@ class MaintenanceWorkOrder():
         :param varSolutiontags: A string to represent the Tag Solution Action
         :return: a query to create a new MWO
         """
-        query = "CREATE %s" % (self.issue.toCypherDescription(varIssue))
-        query += "\n %s" % (self.issue.toCypherUpdate(varIssue))
+        query = self.issue.cypher_create_issue_node(var_issue) + "\n"
 
-####    MACHINE     ######
-        if self.machine is not None:
-            if self.machine._get_name() is not None:
-                query += "\n\nMERGE %s" % (self.machine.toCypherName(varMachine))
-                query += "\n %s " % (self.machine.toCypherUpdate(varMachine))
-                query += '\nMERGE(%s)-[%s]->(%s)' % (varIssue, LabelEdges.LABEL_COVERED.value, varMachine)
+        if self.machine._get_name() is not None:
+            query += self.machine.cypher_machine_create_node(var_machine) + "\n"
+            query += f'MERGE ({var_issue})-[{self.label_covered}]->({var_machine})' + "\n"
 
-####    MACHINE_TYPE     ######
-        if self.machine._get_type() is not None:
-            query += "\n\nMERGE %s" % (self.machine.toCypherType(varMachinetype))
-            query += '\nMERGE (%s)-[%s]->(%s)' % (varMachine, LabelEdges.LABEL_ISA.value, varMachinetype)
+            if self.machine._get_machine_type() is not None:
+                query += self.machine.cypher_machine_type_create_node(var_machine_type) + "\n"
+                query += f'MERGE ({var_machine})-[{self.label_is_a}]->({var_machine_type})' + "\n"
 
-####    OPERATORS     ######
         if self.operators is not None and len(self.operators) is not 0:
             for i in range(0, len(self.operators)):
                 if self.operators[i]._get_name() is not None:
-                    query += "\n\nMERGE %s" % \
-                             (self.operators[i].toCypherName(varOperators + str(i)))
-                    query += "\n%s" % (self.operators[i].toCypherUpdate(varOperators + str(i), NodeHuman.LABEL_OPERATOR))
-                    query += '\nMERGE (%s)-[%s]->(%s)' % \
-                             (varIssue, LabelEdges.LABEL_REQUESTED.value, varOperators + str(i))
+                    var_operator = f'{var_operators}{i}'
+                    query +=self.operators[i].cypher_operator_create_node(var_operator) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.label_requested}]->({var_operator})' + "\n"
 
-####    TECHNICIANS     ######
         if self.technicians is not None and len(self.technicians) is not 0:
             for i in range(0, len(self.technicians)):
                 if self.technicians[i]._get_name() is not None:
-                    query += "\n\nMERGE %s" % \
-                             (self.technicians[i].toCypherName(varTechnicians + str(i)))
-                    query += "\n%s" % (self.technicians[i].toCypherUpdate(varTechnicians + str(i), NodeHuman.LABEL_TECHNICIAN))
-                    query += '\nMERGE (%s)-[%s]->(%s)' % \
-                             (varIssue, LabelEdges.LABEL_SOLVE.value, varTechnicians + str(i))
+                    var_technician = f'{var_technicians}{i}'
+                    query += self.technicians[i].cypher_technician_create_node(var_technician) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.label_solve}]->({var_technician})' + "\n"
 
-####    ITEM     ######
-        if self.itemtags is not None and len(self.itemtags) is not 0:
-            for i in range(0, len(self.itemtags)):
-                if self.itemtags[i]._get_keyword() is not None:
-                    query += "\n\nMERGE %s" % \
-                             (self.itemtags[i].toCypher(varItemtag + str(i), NodeTag.LABEL_ITEM))
-                    query += '\nMERGE (%s)-[%s]->(%s)' % \
-                             (varIssue, LabelEdges.LABEL_CONTAINS.value, varItemtag + str(i))
+        if self.tag_items is not None and len(self.tag_items) is not 0:
+            for i in range(0, len(self.tag_items)):
+                if self.tag_items[i]._get_keyword() is not None:
+                    var_tag_item = f'{var_tag_items}{i}'
+                    query += self.tag_items[i].cypher_item_create_node(var_tag_item) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.label_contains}]->({var_tag_item})' + "\n"
 
-####    PROBLEM     ######
-        if self.problemtags is not None and len(self.problemtags) is not 0:
-            for i in range(0, len(self.problemtags)):
-                if self.problemtags[i]._get_keyword() is not None:
-                    query += "\n\nMERGE %s" % \
-                             (self.problemtags[i].toCypher(varProblemtags + str(i), NodeTag.LABEL_ACTION))
-                    query += '\nMERGE (%s)-[%s]->(%s)' % \
-                             (varIssue, LabelEdges.LABEL_PROBLEM.value, varProblemtags + str(i))
+        if self.tag_problemts is not None and len(self.tag_problemts) is not 0:
+            for i in range(0, len(self.tag_problemts)):
+                if self.tag_problemts[i]._get_keyword() is not None:
+                    var_tag_problem = f'{var_tag_problemts}{i}'
+                    query += self.tag_problemts[i].cypher_action_create_node(var_tag_problem) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.label_problem}]->({var_tag_problem})' + "\n"
 
-####    SOLUTION     ######
-        if self.solutiontags is not None and len(self.solutiontags) is not 0:
-            for i in range(0, len(self.solutiontags)):
-                if self.solutiontags[i]._get_keyword() is not None:
-                    query += "\n\nMERGE %s" % \
-                             (self.solutiontags[i].toCypher(varSolutiontags + str(i), NodeTag.LABEL_ACTION))
-                    query += '\nMERGE (%s)-[%s]->(%s)' % \
-                             (varIssue, LabelEdges.LABEL_SOLUTION.value, varSolutiontags + str(i))
+        if self.tag_solutions is not None and len(self.tag_solutions) is not 0:
+            for i in range(0, len(self.tag_solutions)):
+                if self.tag_solutions[i]._get_keyword() is not None:
+                    var_tag_solution = f'{var_tag_solutions}{i}'
+                    query += self.tag_solutions[i].cypher_action_create_node(var_tag_solution) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.label_solution}]->({var_tag_solution})' + "\n"
+
+
         return query
