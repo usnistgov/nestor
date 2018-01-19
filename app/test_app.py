@@ -91,7 +91,7 @@ class MyWindow(qw.QMainWindow, Ui_MainWindow):
         """
         try:
             fileName, _ = qw.QFileDialog.getOpenFileName(self, 'Open File')
-            # fileName = 'app_vocab.csv'
+            # fileName = 'app_vocab_new.csv'
             self.csv_to_tab(fileName)
         except FileNotFoundError:
             pass
