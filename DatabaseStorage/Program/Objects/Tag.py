@@ -2,6 +2,7 @@ import collections
 
 from Program.Database.Database_Properties import NodeTag
 from Program.Database.Database_Properties import LabelEdges
+from Program.Database.Database_Properties import NodeIssue
 
 class Tag:
     """
@@ -24,12 +25,13 @@ class Tag:
         toCypher    --  Used to create a Cypher query to represent a new TAG
     """
 
-    def __init__(self, keyword=None, synonyms=None, links=None):
+    def __init__(self, keyword=None, synonyms=None, links=None, it_is=None):
         self.label_tag=NodeTag.LABEL_TAG.value
         self.property_keyword=NodeTag.PROPERTY_KEYWORD.value
         self.property_synonyms=NodeTag.PROPERTY_SYNONYMS.value
         self.property_links=NodeTag.PROPERTY_LINKS.value
 
+        self._set_it_is(it_is)
         self._set_keyword(keyword)
         self._set_synonyms(synonyms)
         self._set_links(links)
@@ -112,11 +114,26 @@ class Tag:
                     tmp.append(parent)
             self.parents = tmp
 
+    def _get_it_is(self):
+        return self.it_is
+
+    def _set_it_is(self, it_is):
+        if it_is is None:
+            self.it_is = None
+        else:
+            if it_is is "p" or it_is is "problem" :
+                self.it_is = "problem"
+            elif it_is is "s" or it_is is "solution":
+                self.it_is = "solution"
+            else:
+                self.it_is = None
+
     def __str__(self):
         return f"OBJECT: {type(self)}\n\t" \
                f"Keyword: {self.keyword}\n\t" \
                f"Synonyms: {self.synonyms}\n\t" \
-               f"Links: {self.links} "
+               f"Links: {self.links}\n\t" \
+               f"It_is: {self.it_is} "
 
     def cypher_tag_keyword(self, variable="tag"):
         if self.keyword is None:
@@ -144,6 +161,16 @@ class Tag:
                 query += f'\nFOREACH(x in CASE WHEN "{synonym}" in {variable}.{self.property_synonyms} THEN [] ELSE [1] END |' \
                          f' SET {variable}.{self.property_synonyms} = coalesce({variable}.{self.property_synonyms},[]) + "{synonym}" )'
         return query
+
+    def cypher_kpi(self):
+        if self.it_is is "problem":
+            label_link = LabelEdges.LABEL_PROBLEM.value
+        elif self.it_is is "solution":
+            label_link = LabelEdges.LABEL_SOLUTION.value
+        else :
+            label_link = ""
+        return f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{label_link}]->(tag {self.label_tag})'
+
 
 class TagAction(Tag):
 
@@ -182,6 +209,10 @@ class TagAction(Tag):
                 f'\nSET {variable} {self.label_action}'
 
         return query
+
+    def cypher_kpi(self, link):
+        return f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{link}]->(operator {self.label_tag}{self.label_action})'
+
 
 class TagUnknown(Tag):
 
