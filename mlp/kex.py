@@ -80,7 +80,8 @@ class TokenExtractor(TransformerMixin):
                                  'ngram_range': (1, 1),
                                  'stop_words': 'english',
                                  'sublinear_tf': True,
-                                 'smooth_idf': False})
+                                 'smooth_idf': False,
+                                 'max_features': 5000})
 
         self.default_kws.update(tf_idfkwargs)
         # super(TfidfVectorizer, self).__init__(**tf_idfkwargs)

@@ -7,7 +7,7 @@ import sip
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 import pandas as pd
-from test_skeleton import Ui_MainWindow
+from app.test_skeleton import Ui_MainWindow
 from fuzzywuzzy import process as zz
 
 
@@ -107,7 +107,7 @@ class MyQTableWidget(Qw.QTableWidget):
 
 class MyWindow(Qw.QMainWindow, Ui_MainWindow):
 
-    def __init__(self):
+    def __init__(self, vocab_filename=None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
         self.set_menu()
@@ -122,6 +122,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         self.df = None
         self.vocab_limit = 1000
         self.thres = 75
+        self.vocab_filename = vocab_filename
 
         self.clf_mapper = {
             'S': self.sltnButton,
@@ -145,6 +146,8 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         self.vertCheckButtonGroup = MyQButtonGroup(self.vertCheckBoxLayout)
 
         self.set_shortcut()
+        if self.vocab_filename is not None:
+            self.set_dataframe(self.vocab_filename)
 
     def set_dataframe(self, filename):
         self.df = pd.read_csv(filename, header=0, index_col=0)  # read file and set header row
@@ -168,7 +171,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         matches = zz.extractBests(tok, self.df.index.tolist(),
                                   limit=10, score_cutoff=self.thres)
 
-        self.vertCheckButtonGroup.update_checkboxes(tok, matches, window.df)
+        self.vertCheckButtonGroup.update_checkboxes(tok, matches, self.df)
 
     def update_from_input(self):
         """
@@ -222,6 +225,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
             fileName, _ = Qw.QFileDialog.getOpenFileName(self, 'Open File')
             # fileName = 'app_vocab.csv'
             self.set_dataframe(fileName)
+            self.update_progress_bar()
             #self.csv_to_tab(fileName)
         except FileNotFoundError:
             pass
