@@ -25,16 +25,18 @@ class Tag:
         toCypher    --  Used to create a Cypher query to represent a new TAG
     """
 
-    def __init__(self, keyword=None, synonyms=None, links=None, it_is=None):
+    def __init__(self, keyword=None, synonyms=None, it_is=None, links=None, parents=None):
         self.label_tag=NodeTag.LABEL_TAG.value
         self.property_keyword=NodeTag.PROPERTY_KEYWORD.value
         self.property_synonyms=NodeTag.PROPERTY_SYNONYMS.value
         self.property_links=NodeTag.PROPERTY_LINKS.value
+        self.property_parents = NodeTag.PROPERTY_PARENTS.value
 
         self._set_it_is(it_is)
         self._set_keyword(keyword)
         self._set_synonyms(synonyms)
         self._set_links(links)
+        self._set_parents(parents)
 
     def _get_keyword(self):
         """
@@ -50,7 +52,10 @@ class Tag:
         if keyword is "" or keyword is None:
             self.keyword = None
         else:
-            self.keyword = keyword.lower()
+            try:
+                self.keyword = keyword.lower()
+            except AttributeError:
+                self.keyword = [k.lower() for k in keyword]
 
     def _get_synonyms(self):
         """
@@ -162,22 +167,44 @@ class Tag:
                          f' SET {variable}.{self.property_synonyms} = coalesce({variable}.{self.property_synonyms},[]) + "{synonym}" )'
         return query
 
-    def cypher_kpi(self):
-        if self.it_is is "problem":
-            label_link = LabelEdges.LABEL_PROBLEM.value
-        elif self.it_is is "solution":
-            label_link = LabelEdges.LABEL_SOLUTION.value
-        else :
-            label_link = ""
-        return f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{label_link}]->(tag {self.label_tag})'
+    def cypher_kpi(self, variable ="tag"):
+        # if self.it_is is "problem":
+        #     label_link = LabelEdges.LABEL_PROBLEM.value
+        # elif self.it_is is "solution":
+        #     label_link = LabelEdges.LABEL_SOLUTION.value
+        # else :
+        #     label_link = ""
+        label_link = ""
+
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{label_link}]->({variable} {self.label_tag})'
+        where, res= self.cypher_where_properties(variable= variable)
+
+        return match, " OR ".join(where), res
+
+    def cypher_where_properties(self, variable = "tag"):
+        where = []
+        res = []
+        if self.keyword is not None :
+            if self.keyword != "_":
+                for k in self.keyword:
+                    where.append(f'{variable}.{self.property_keyword} = "{k}"')
+            else:
+                res.append(f'{variable}.{self.property_keyword}')
+        if self.synonyms is not None :
+            if "_" not in self.synonyms:
+                for s in self.synonyms:
+                    where.append(f'"{s}" IN {variable}.{self.property_synonyms}')
+            else:
+                res.append(f'{variable}.{self.property_synonyms}')
+        return where, res
 
 
 class TagAction(Tag):
 
-    def __init__(self, keyword=None, synonyms=None, links=None):
+    def __init__(self, keyword=None, synonyms=None, it_is=None, links=None, parents=None):
         self.label_action = NodeTag.LABEL_ACTION.value
 
-        super().__init__(keyword, synonyms, links)
+        super().__init__(keyword, synonyms, it_is, links, parents)
 
     def __str__(self):
         return f"OBJECT: {type(self)}\n\t" \
@@ -210,16 +237,29 @@ class TagAction(Tag):
 
         return query
 
-    def cypher_kpi(self, link):
-        return f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{link}]->(operator {self.label_tag}{self.label_action})'
+    def cypher_kpi(self, variable ="tag_action"):
+        if self.it_is is "problem":
+            label_link = LabelEdges.LABEL_PROBLEM.value
+        elif self.it_is is "solution":
+            label_link = LabelEdges.LABEL_SOLUTION.value
+        else :
+            label_link = ""
+
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{label_link}]->({variable} {self.label_tag} {self.label_action})'
+        where, res= self.cypher_where_properties(variable= variable)
+
+        return match, " OR ".join(where), res
+
+    def cypher_where_properties(self, variable="tag_action"):
+        return super().cypher_where_properties(variable)
 
 
 class TagUnknown(Tag):
 
-    def __init__(self, keyword=None, synonyms=None, links=None):
+    def __init__(self, keyword=None, synonyms=None, it_is=None, links=None, parents=None):
         self.label_unknown = NodeTag.LABEL_UNKNOWN.value
 
-        super().__init__(keyword, synonyms, links)
+        super().__init__(keyword, synonyms, it_is, links, parents)
 
     def __str__(self):
         return f"OBJECT: {type(self)}\n\t" \
@@ -251,14 +291,28 @@ class TagUnknown(Tag):
                 f'\nSET {variable} {self.label_unknown}'
         return query
 
+    def cypher_kpi(self, variable ="tag_unknown"):
+        if self.it_is is "problem":
+            label_link = LabelEdges.LABEL_PROBLEM.value
+        elif self.it_is is "solution":
+            label_link = LabelEdges.LABEL_SOLUTION.value
+        else :
+            label_link = ""
+
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{label_link}]->({variable} {self.label_tag} {self.label_unknown})'
+        where, res= self.cypher_where_properties(variable= variable)
+
+        return match, " OR ".join(where),  res
+
+    def cypher_where_properties(self, variable="tag_unknown"):
+        return super().cypher_where_properties(variable)
+
 class TagItem(Tag):
 
-    def __init__(self, keyword=None, synonyms=None, links=None, parents=None):
+    def __init__(self, keyword=None, synonyms=None, it_is=None, links=None, parents=None):
         self.label_item = NodeTag.LABEL_ITEM.value
-        self.property_parents = NodeTag.PROPERTY_PARENTS.value
 
-        super().__init__(keyword, synonyms, links)
-        self._set_parents(parents)
+        super().__init__(keyword, synonyms, it_is, links, parents)
 
     def __str__(self):
         return f"OBJECT: {type(self)}\n\t" \
@@ -292,14 +346,31 @@ class TagItem(Tag):
 
         return query
 
+    def cypher_kpi(self, variable="tag_item"):
+        # if self.it_is is "problem":
+        #     label_link = LabelEdges.LABEL_PROBLEM.value
+        # elif self.it_is is "solution":
+        #     label_link = LabelEdges.LABEL_SOLUTION.value
+        # else:
+        #     label_link = ""
+        label_link = LabelEdges.LABEL_CONTAINS.value
+
+
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{label_link}]->({variable} {self.label_tag} {self.label_item})'
+        where, res = self.cypher_where_properties(variable=variable)
+
+        return match, " OR ".join(where), res
+
+    def cypher_where_properties(self, variable="tag_item"):
+        return super().cypher_where_properties(variable)
+
+
 
 class TagActionItem(Tag):
-    def __init__(self, keyword=None, synonyms=None, links=None, parents=None):
+    def __init__(self, keyword=None, synonyms=None, it_is = None, links=None, parents=None):
         self.label_action_item = NodeTag.LABEL_ACTION_ITEM.value
-        self.property_parents = NodeTag.PROPERTY_PARENTS.value
 
-        super().__init__(keyword, synonyms, links)
-        self._set_parents(parents)
+        super().__init__(keyword, synonyms, it_is, links, parents)
 
     def __str__(self):
         return f"OBJECT: {type(self)}\n\t" \
@@ -332,3 +403,20 @@ class TagActionItem(Tag):
                 f'\nSET {variable} {self.label_action_item}'
 
         return query
+
+    def cypher_kpi(self, variable="tag_action_item"):
+        # if self.it_is is "problem":
+        #     label_link = LabelEdges.LABEL_PROBLEM.value
+        # elif self.it_is is "solution":
+        #     label_link = LabelEdges.LABEL_SOLUTION.value
+        # else:
+        #     label_link = ""
+        label_link = LabelEdges.LABEL_CONTAINS.value
+
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{label_link}]->({variable} {self.label_tag} {self.label_action_item})'
+        where, res = self.cypher_where_properties(variable=variable)
+
+        return match, " OR ".join(where), res
+
+    def cypher_where_properties(self, variable="tag_action_item"):
+        return super().cypher_where_properties(variable)

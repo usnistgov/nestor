@@ -11,17 +11,17 @@ And return a DataFrame with the result
 """
 
 def kpi(*args):
+    match =""
+    where = []
+    res = []
     for obj in args:
-        for att in obj.__dict__:
-            if obj.__dict__[att] == "_":
-                print(type(obj).__name__.lower() + "." + att)
-                print(obj.cypher_kpi())
-
-def cypher_kpi(self):
-    return f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{LabelEdges.LABEL_REQUESTED.value}]->(operator {self.label_human}{self.label_operator})'
-
-
-
+        m,w,r = obj.cypher_kpi()
+        match += m + "\n"
+        if w :
+            where.append(w)
+        [res.append(x) for x in r]
+    query = match + "\nWHERE " + " AND ".join(where) + "\nRETURN " + ", ".join(res)
+    return query
 
 
 def abstract_kpi_time_mwo(database, x_value, filter_value, time_value="time", count_value="count", average_value="average"):

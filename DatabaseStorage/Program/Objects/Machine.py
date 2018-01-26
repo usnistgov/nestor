@@ -1,5 +1,6 @@
 from Program.Database.Database_Properties import NodeMachine
 from Program.Database.Database_Properties import LabelEdges
+from Program.Database.Database_Properties import NodeIssue
 
 class Machine:
     """
@@ -32,6 +33,8 @@ class Machine:
         self.property_manufacturer = NodeMachine.PROPERTY_MANUFACTURER.value
         self.property_locasion = NodeMachine.PROPERTY_LOCASION.value
         self.property_type = NodeMachine.PROPERTY_TYPE.value
+        self.label_link_machine = LabelEdges.LABEL_COVERED.value
+        self.label_link_type = LabelEdges.LABEL_ISA.value
 
         self._set_name(name)
         self._set_manufacturer(manufacturer)
@@ -53,7 +56,10 @@ class Machine:
         if name is "" or name is None:
             self.name = None
         else:
-            self.name = name.lower()
+            try:
+                self.name = name.lower()
+            except AttributeError:
+                self.name = [n.lower() for n in name]
 
     def _get_manufacturer(self):
         """
@@ -69,7 +75,10 @@ class Machine:
         if manufacturer is "" or manufacturer is None:
             self.manufacturer = None
         else:
-            self.manufacturer = manufacturer.lower()
+            try:
+                self.manufacturer = manufacturer.lower()
+            except AttributeError:
+                self.manufacturer = [m.lower() for m in manufacturer]
 
     def _get_locasion(self):
         """
@@ -85,7 +94,10 @@ class Machine:
         if locasion is "" or locasion is None:
             self.locasion = None
         else:
-            self.locasion = locasion.lower()
+            try:
+                self.locasion = locasion.lower()
+            except AttributeError:
+                self.locasion = [l.lower() for l in locasion]
 
     def _get_machine_type(self):
         """
@@ -98,9 +110,13 @@ class Machine:
         Set the type of the MACHINE
         :param type: a string for the type
         """
-        if machine_type is "":
-            machine_type = None
-        self.machine_type = machine_type
+        if machine_type is "" or machine_type is None:
+            self.machine_type = None
+        else:
+            try:
+                self.machine_type = machine_type.lower()
+            except AttributeError:
+                self.machine_type = [t.lower() for t in machine_type]
 
     def __str__(self):
         return f"{type(self)}\n\t" \
@@ -160,3 +176,45 @@ class Machine:
             return ""
         query = f'MERGE {self.cypher_machine_name(variable)}'
         return query
+
+    def cypher_kpi(self, variable ="machine", variable_type="machine_type"):
+
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{self.label_link_machine}]->({variable} {self.label_machine})'
+        if self.machine_type is not None:
+            match += f'-[{self.label_link_type}]->({variable_type} {self.label_machine_type})'
+        where, res = self.cypher_where_properties(variable= variable, variable_type=variable_type)
+
+        return match, " OR ".join(where),  res
+
+    def cypher_where_properties(self, variable = "tag", variable_type="machine_type"):
+        where = []
+        res = []
+        if self.name is not None :
+            if self.name != "_":
+                for n in self.name:
+                    where.append(f'{variable}.{self.property_name} = "{n}"')
+            else:
+                res.append(f'{variable}.{self.property_name}')
+
+        if self.manufacturer is not None :
+            if self.manufacturer != "_":
+                for m in self.manufacturer:
+                    where.append(f'{variable}.{self.property_manufacturer} = "{m}"')
+            else:
+                res.append(f'{variable}.{self.property_manufacturer}')
+
+        if self.locasion is not None:
+            if self.locasion != "_":
+                for l in self.locasion:
+                    where.append(f'{variable}.{self.property_locasion} = "{l}"')
+            else:
+                res.append(f'{variable}.{self.property_locasion}')
+
+        if self.machine_type is not None:
+            if self.machine_type != "_":
+                for m in self.machine_type:
+                    where.append(f'{variable_type}.{self.property_type} = "{m}"')
+            else:
+                res.append(f'{variable_type}.{self.property_type}')
+
+        return where, res

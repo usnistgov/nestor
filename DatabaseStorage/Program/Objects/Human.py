@@ -55,7 +55,10 @@ class Human:
         if name is "" or name is None:
             self.name = None
         else:
-            self.name = name.lower()
+            try:
+                self.name = name.lower()
+            except AttributeError:
+                self.name = [n.lower() for n in name]
 
     def __str__(self):
         return f"{type(self)}\n\t" \
@@ -81,6 +84,23 @@ class Human:
         query = f'MERGE {self.cypher_human_name(variable)}'
         return query
 
+    def cypher_kpi(self, variable="human"):
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-->({variable} {self.label_human})'
+        where, res = self.cypher_where_properties(variable=variable)
+
+        return match, " OR ".join(where), res
+
+    def cypher_where_properties(self, variable = "human"):
+        where = []
+        res = []
+        if self.name is not None :
+            if self.name != "_":
+                for n in self.name:
+                   where.append(f'{variable}.{self.property_name} = "{n}"')
+            else:
+                res.append(f'{variable}.{self.property_name}')
+
+        return where, res
 
 class Operator(Human):
 
@@ -112,6 +132,7 @@ class Operator(Human):
 
     def __init__(self, name = None):
         self.label_operator = NodeHuman.LABEL_OPERATOR.value
+        self.label_link=LabelEdges.LABEL_REQUESTED.value
 
         super().__init__(name)
 
@@ -141,7 +162,14 @@ class Operator(Human):
 
         return query
 
+    def cypher_kpi(self, variable="operator"):
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{self.label_link}]->({variable} {self.label_human}{self.label_operator})'
+        where, res = self.cypher_where_properties(variable=variable)
 
+        return match, " OR ".join(where), res
+
+    def cypher_where_properties(self, variable="operator"):
+        return super().cypher_where_properties(variable)
 
 class Technician(Human):
 
@@ -175,6 +203,8 @@ class Technician(Human):
         self.label_technician = NodeHuman.LABEL_TECHNICIAN.value
         self.property_skills = NodeHuman.PROPERTY_SKILLS.value
         self.property_crafts = NodeHuman.PROPERTY_CRAFTS.value
+        self.label_link=LabelEdges.LABEL_SOLVE.value
+
 
         super().__init__(name)
         self._set_skills(skills)
@@ -262,32 +292,28 @@ class Technician(Human):
 
         return query
 
+    def cypher_kpi(self, variable="technician"):
+        match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})-[{self.label_link}]->({variable} {self.label_human}{self.label_technician})'
+        where, res = self.cypher_where_properties(variable=variable)
 
-    # def toCypherUpdate(self, variable, work=None):
-    #     """
-    #     Used to set the work of a given HUMAN (TECHNICIAN or OPERATOR)
-    #     and to complete the description of the node HUMAN using the information of Skills and Crafts
-    #
-    #     :param variable: a string to define the variable of the node in CYPHER.
-    #                     The variable has to link with a node HUMAN from your database (use toCypherName to find it)
-    #     :param work: A LABEL from the Enumeration store in the file DatabaseProperty.py
-    #                 it represent the work of a HUMAN (TECHNICIAN OR OPERATOR)
-    #     :return: a CYPHER query to specify a given HUMAN node by adding the work skills and crafts and set the work
-    #     """
-    #     query = ""
-    #     if work is not None:
-    #         query += "\nSET %s %s"% (variable, work.value)
-    #     if self.skills is None and self.crafts is None:
-    #         return query
-    #     if self.skills is not None:
-    #         for skill in self.skills:
-    #             query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-    #                      '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-    #                      (skill, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, variable, NodeHuman.PROPERTY_SKILLS.value, skill)
-    #     if self.crafts is not None:
-    #         for craft in self.crafts:
-    #             query += '\nFOREACH(x in CASE WHEN "%s" in %s.%s THEN [] ELSE [1] END |' \
-    #                      '  SET %s.%s = coalesce(%s.%s,[]) + "%s" )' %\
-    #                      (craft, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, variable, NodeHuman.PROPERTY_CRAFTS.value, craft)
-    #
-    #     return query
+        return match, " OR ".join(where), res
+
+    def cypher_where_properties(self, variable="technician"):
+        where, res =  super().cypher_where_properties(variable)
+
+        if self.skills is not None :
+            # with nor in we care about even if there is 1
+            if "_" not in self.skills:
+                for s in self.skills:
+                    where.append(f'"{s}" IN {variable}.{self.property_skills}')
+            else:
+                res.append(f'{variable}.{self.property_skills}')
+
+        if self.crafts is not None :
+            if "_" not in self.crafts:
+                for c in self.crafts:
+                    where.append(f'"{c}" IN {variable}.{self.property_crafts}')
+            else:
+                res.append(f'{variable}.{self.property_crafts}')
+
+        return where, res
