@@ -85,45 +85,8 @@ class TokenExtractor(TransformerMixin):
 
         self.default_kws.update(tf_idfkwargs)
         # super(TfidfVectorizer, self).__init__(**tf_idfkwargs)
-        self._model = TfidfVectorizer(self.default_kws)
+        self._model = TfidfVectorizer(**self.default_kws)
 
-        # super(TokenExtractor, self).__init__(input=input,
-        #                                       ngram_range=ngram_range,
-        #                                       stop_words=stop_words,
-        #                                       sublinear_tf=sublinear_tf,
-        #                                       smooth_idf=smooth_idf,
-        #                                       **kwargs)
-
-    # def fit(self, X, y=None, **fit_params):
-    #     raw_documents = _series_itervals(X)
-    #     self.model.fit(raw_documents)
-    #     return self
-    #
-    # def transform(self, dask_documents, y=None):
-    #     raw_documents = _series_itervals(dask_documents)
-    #     return self.model.transform(raw_documents)
-        # if wdir is None:
-        #     wdir = Path('.') / 'data'
-        # self.data_directory = wdir
-        # self.vocab = None
-        # self.df = None
-        #
-        # if nlp_cols is None:
-        #     nlp_cols = {'RawText': 0}
-        #
-        # if meta_cols is not None:
-        #     relevant_data = dict(nlp_cols, **meta_cols)
-        #     relevant_names, relevant_cols = tuple(map(list, zip(*relevant_data.items())))
-        # else:
-        #     relevant_names, relevant_cols = tuple(map(list, zip(*nlp_cols.items())))
-        #     meta_cols = {}
-        #
-        # default_pd_kws = {
-        #     'header':0,
-        #     'encoding':'utf-8'
-        # }  # privide some default assumptions
-        # if df_kws is not None:
-        #     default_pd_kws.update(df_kws)
 
     def fit(self, dask_documents, y=None):
         X = _series_itervals(dask_documents)
@@ -149,11 +112,15 @@ class TokenExtractor(TransformerMixin):
 
     @property
     def ranks_(self):
-        return self._tf_tot.argsort()[::-1]
+        ranks = self._tf_tot.argsort()[::-1]
+        if len(ranks) > self.default_kws['max_features']:
+            ranks = ranks[:self.default_kws['max_features']]
+        return ranks
 
     @property
     def vocab_(self):
-        return np.array(self._model.get_feature_names())[self.ranks_]
+        extracted_toks = np.array(self._model.get_feature_names())[self.ranks_]
+        return extracted_toks
 
     @property
     def scores_(self):
@@ -168,7 +135,9 @@ class TokenExtractor(TransformerMixin):
             df = pd.DataFrame({'tokens': self.vocab_,
                                'NE': '',
                                'alias': '',
-                               'notes': ''})[['tokens', 'NE', 'alias', 'notes']]
+                               'notes': '',
+                               'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
+            df = df[~df.tokens.duplicated(keep='first')]
             df.to_csv(filename, index=False)
             print(f'New Vocab. file written to {filename}')
             if gui:
@@ -177,8 +146,10 @@ class TokenExtractor(TransformerMixin):
             print('opening pre-existing vocab file in the GUI...')
             annotation_app(filename)
         else:
-            print('file already exists, please enter a new filename or start the GUI!')
-            raise Exception
+            # print('file already exists, please enter a new filename or start the GUI!')
+            # raise Exception
+            df = pd.read_csv(filename, index_col=0)
+            return df
 
 
 def _series_itervals(s):

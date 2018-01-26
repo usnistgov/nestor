@@ -26,9 +26,14 @@ class MyQButtonGroup(Qw.QButtonGroup):
 
         nbr_widget = self.layout.count()
         for n, (match, score) in enumerate(matches):
-            btn = Qw.QCheckBox(f'{n} - ' + match)
-            cond = (df.loc[match, 'alias'] == df.loc[tok, 'alias']) \
-                   and (df.loc[match, 'alias'] != '')
+            # btn = Qw.QCheckBox(f'{n} - ' + match)
+            btn = Qw.QCheckBox(match)
+            # print(type(match), type(tok))
+            same_tok = df.loc[match, 'alias'] == df.loc[tok, 'alias']
+            no_alias = df.loc[match, 'alias'] != ''
+            # print(df.loc[match, 'alias'], df.loc[tok, 'alias'])
+            # print(same_tok, no_alias)
+            cond = same_tok and no_alias
             if (match == tok) or cond:
                 btn.toggle()
             self.addButton(btn)
@@ -68,16 +73,16 @@ class MyQTableWidget(Qw.QTableWidget):
     def print_table(self, df, vocab_limit=1000):
         temp_df = df.reset_index()
         nrows, ncols = temp_df.shape
-        self.setColumnCount(ncols)
+        self.setColumnCount(ncols - 1)  # ignore score column
         self.setRowCount(min([nrows, vocab_limit]))
 
         for i in range(self.rowCount()):
-            for j in range(ncols):
+            for j in range(ncols - 1):  # ignore score column
                 self.setItem(i, j, Qw.QTableWidgetItem(str(temp_df.iat[i, j])))
 
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
-        self.setHorizontalHeaderLabels(temp_df.columns.tolist())
+        self.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
         self.setSelectionBehavior(Qw.QTableWidget.SelectRows)
 
 
