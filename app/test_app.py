@@ -12,6 +12,7 @@ from fuzzywuzzy import process as zz
 
 from app.helper_objects import MyQButtonGroup
 from app.helper_objects import MyQTableWidget
+import tqdm
 
 
 class MyWindow(Qw.QMainWindow, Ui_MainWindow):
@@ -26,11 +27,13 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         self.vocabTableWidget = MyQTableWidget(self.centralwidget, self)
         self.gridLayout.addWidget(self.vocabTableWidget, 1, 2, 1, 1)
         self.vocabTableWidget.itemSelectionChanged.connect(self.table_item_selected)
-
         self.simthresSlider.sliderReleased.connect(self.fuzz_thres)
         self.df = None
+        self.scores = None
+        self.alias_lookup = None
         self.vocab_limit = 1000
-        self.thres = 75
+        val = self.simthresSlider.value()
+        self.thres = val
         self.vocab_filename = vocab_filename
 
         self.clf_mapper = {
@@ -60,10 +63,21 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
 
     def set_dataframe(self, filename):
         self.df = pd.read_csv(filename, header=0, index_col=0)  # read file and set header row
+        self.df = self.df[~self.df.index.duplicated(keep='first')]
         mask = self.df['NE'].notna()
         #print(self.df.shape, self.df[mask].shape)
         self.df.loc[mask, 'alias'].fillna(self.df[mask].index.to_series(), inplace=True)
         self.df.fillna('', inplace=True)
+        # self.df.index = self.df.index.astype(str)
+        # print(self.df.head())
+        self.scores = self.df['score']
+
+        # initialize alias matcher
+        # self.alias_lookup = {}
+        # for i in tqdm.tqdm(self.df.index[:self.vocab_limit]):
+        #     mask = self.df.index.str[0] == i[0]
+        #     self.alias_lookup[i] = zz.extractBests(i, self.df.index[mask], limit=20)
+
         self.vocabTableWidget.print_table(self.df, self.vocab_limit)
 
     def table_item_selected(self):
@@ -76,10 +90,11 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         btn = self.clf_mapper.get(clf, self.unsetButton)
         btn.toggle()  # toggle that button
         self.notesTextEdit.setText(notes)  # show any notes
-
-        matches = zz.extractBests(tok, self.df.index.tolist(),
-                                  limit=10, score_cutoff=self.thres)
-
+        mask = self.df.index.str[0] == tok[0]
+        # print(mask.sum())
+        matches = zz.extractBests(tok, self.df.index[mask],
+                                  limit=20)[:int(self.thres*20/100)]
+        # matches = self.alias_lookup[tok][:int(self.thres*1/10)]
         self.vertCheckButtonGroup.update_checkboxes(tok, matches, self.df)
 
     def update_from_input(self):
@@ -96,7 +111,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         tok_list = [tok]
 
         for btn in self.vertCheckButtonGroup.buttons():
-            s = btn.text()[4:]
+            s = btn.text()
             if btn.isChecked():
                 tok_list += [s]
             else:
@@ -118,8 +133,12 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         self.update_progress_bar()
 
     def update_progress_bar(self):
-         completed_pct = int(100 * self.df[self.df['NE'] != ''].shape[0] / self.df.shape[0])
-         self.progressBar.setValue(completed_pct)
+        matched = self.scores[self.df['NE'] != '']
+        # log-"usefulness" proxy by tf-idf
+        completed_pct = pd.np.log(matched+1).sum()/pd.np.log(self.scores+1).sum()
+        completed_pct = matched.sum()/self.scores.sum()
+        # print(completed_pct)
+        self.progressBar.setValue(100*completed_pct)
 
     def fuzz_thres(self):
         val = self.simthresSlider.value()
