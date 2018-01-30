@@ -69,6 +69,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
 
     def table_item_selected(self):
         items = self.vocabTableWidget.selectedItems()  # selected row
+
         tok, clf, alias, notes = (str(i.text()) for i in items)
         if alias is not '':
             self.aliasEdit.setText(alias)  # preferred alias
