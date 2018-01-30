@@ -36,7 +36,7 @@ class MaintenanceWorkOrder():
             create_database --  return the query to create a new MWO
     """
 
-    def __init__(self, issue, machine=None, operators=None, technicians=None, tag_items=None, tag_problems=None, tag_solutions=None):
+    def __init__(self, issue, machine=None, operators=None, technicians=None, tag_items=None, tag_problems=None, tag_solutions=None, tag_unknowns=None, tag_others=None):
 
         self.label_problem = LabelEdges.LABEL_PROBLEM.value
         self.label_solution = LabelEdges.LABEL_SOLUTION.value
@@ -53,6 +53,8 @@ class MaintenanceWorkOrder():
         self._set_tag_items(tag_items)
         self._set_tag_problems(tag_problems)
         self._set_tag_solutions(tag_solutions)
+        self._set_tag_unknowns(tag_unknowns)
+        self._set_tag_others(tag_others)
 
     def _get_issue(self):
         return self.issue
@@ -100,7 +102,7 @@ class MaintenanceWorkOrder():
             self.tag_items = tag_items
 
     def _get_tag_problems(self):
-        return self.tag_problemts
+        return self.tag_problems
 
     def _set_tag_problems(self, tag_problems):
         if tag_problems is None or len(tag_problems) == 0:
@@ -108,7 +110,7 @@ class MaintenanceWorkOrder():
         else:
             if not isinstance(tag_problems, collections.Iterable) or isinstance(tag_problems, str):
                 tag_problems = [tag_problems]
-            self.tag_problemts = tag_problems
+            self.tag_problems = tag_problems
 
     def _get_tag_solutions(self):
         return self.tag_solutions
@@ -120,6 +122,29 @@ class MaintenanceWorkOrder():
             if not isinstance(tag_solutions, collections.Iterable) or isinstance(tag_solutions, str):
                 tag_solutions = [tag_solutions]
             self.tag_solutions = tag_solutions
+
+    def _get_tag_unknowns(self):
+        return self.tag_unknowns
+
+    def _set_tag_unknowns(self, tag_unknowns):
+        if tag_unknowns is None or len(tag_unknowns) == 0:
+            self.tag_unknowns = None
+        else:
+            if not isinstance(tag_unknowns, collections.Iterable) or isinstance(tag_unknowns, str):
+                tag_unknowns = [tag_unknowns]
+            self.tag_unknowns = tag_unknowns
+
+    def _get_tag_others(self):
+        return self.tag_others
+
+    def _set_tag_others(self, tag_others):
+        if tag_others is None or len(tag_others) == 0:
+            self.tag_others = None
+        else:
+            if not isinstance(tag_others, collections.Iterable) or isinstance(tag_others, str):
+                tag_others = [tag_others]
+            self.tag_others = tag_others
+
 
     def __str__(self):
         return "OBJECT: %s -->\n\t\t ISSUE:\n %s" \
@@ -134,6 +159,8 @@ class MaintenanceWorkOrder():
 
     def cypher_mwo_graphdata(self, var_issue, var_machine, var_machine_type, var_operators, var_technicians, var_tag_items,
                         var_tag_problemts, var_tag_solutions):
+        ## TODO add the code for the other tag unknown and stopword
+
         """
         The query created an inuque Issue
         But merge the others:
@@ -152,7 +179,8 @@ class MaintenanceWorkOrder():
         :param varSolutiontags: A string to represent the Tag Solution Action
         :return: a query to create a new MWO
         """
-        query = self.issue.cypher_create_issue_node(var_issue) + "\n"
+
+        query = self.issue.cypher_issue_create_node(var_issue) + "\n"
 
         if self.machine._get_name() is not None:
             query += self.machine.cypher_machine_create_node(var_machine) + "\n"
@@ -175,27 +203,81 @@ class MaintenanceWorkOrder():
                     var_technician = f'{var_technicians}{i}'
                     query += self.technicians[i].cypher_technician_create_node(var_technician) + "\n"
                     query += f'MERGE ({var_issue})-[{self.label_solve}]->({var_technician})' + "\n"
+        #
+        # if self.tag_items is not None and len(self.tag_items) is not 0:
+        #     for i in range(0, len(self.tag_items)):
+        #         if self.tag_items[i]._get_keyword() is not None:
+        #             var_tag_items = f'{var_tag_items}{i}'
+        #             query += self.tag_items[i].cypher_item_create_node(var_tag_items) + "\n"
+        #             query += f'MERGE ({var_issue})-[{self.tag_items[i].label_link}]->({var_tag_items})' + "\n"
+        #
+        # if self.tag_problems is not None and len(self.tag_problems) is not 0:
+        #     for i in range(0, len(self.tag_problems)):
+        #         if self.tag_problems[i]._get_keyword() is not None:
+        #             var_tag_problems = f'{var_tag_problems}{i}'
+        #             query += self.tag_problems[i].cypher_action_create_node(var_tag_problems) + "\n"
+        #             query += f'MERGE ({var_issue})-[{self.tag_problems[i].label_link}]->({var_tag_problems})' + "\n"
+        #
+        # if self.tag_solutions is not None and len(self.tag_solutions) is not 0:
+        #     for i in range(0, len(self.tag_solutions)):
+        #         if self.tag_solutions[i]._get_keyword() is not None:
+        #             var_tag_solutions = f'{var_tag_solutions}{i}'
+        #             query += self.tag_solutions[i].cypher_action_create_node(var_tag_solutions) + "\n"
+        #             query += f'MERGE ({var_issue})-[{self.tag_solutions[i].label_link}]->({var_tag_solutions})' + "\n"
+        #
+        # if self.tag_unknowns is not None and len(self.tag_unknowns) is not 0:
+        #     for i in range(0, len(self.tag_unknowns)):
+        #         if self.tag_unknowns[i]._get_keyword() is not None:
+        #             var_tag_unknowns = f'{var_tag_unknowns}{i}'
+        #             query += self.tag_unknowns[i].cypher_unknown_create_node(var_tag_unknowns) + "\n"
+        #             query += f'MERGE ({var_issue})-[{self.tag_unknowns[i].label_link}]->({var_tag_unknowns})' + "\n"
+        #
+        # if self.tag_others is not None and len(self.tag_others) is not 0:
+        #     for i in range(0, len(self.tag_others)):
+        #         if self.tag_others[i]._get_keyword() is not None:
+        #             var_tag_others = f'{var_tag_others}{i}'
+        #             query += self.tag_others[i].cypher_tag_create_node(var_tag_others) + "\n"
+        #             query += f'MERGE ({var_issue})-[{self.tag_others[i].label_link}]->({var_tag_others})' + "\n"
+
+        return query
+
+
+    def cypher_mwo_tagdata(self,var_issue, var_tag_items, var_tag_problems, var_tag_solutions, var_tag_unknowns, var_tag_others):
+        query = 'MATCH' + self.issue.cypher_issue_all(var_issue) + "\n"
 
         if self.tag_items is not None and len(self.tag_items) is not 0:
             for i in range(0, len(self.tag_items)):
                 if self.tag_items[i]._get_keyword() is not None:
-                    var_tag_item = f'{var_tag_items}{i}'
-                    query += self.tag_items[i].cypher_item_create_node(var_tag_item) + "\n"
-                    query += f'MERGE ({var_issue})-[{self.label_contains}]->({var_tag_item})' + "\n"
+                    var_tag_items = f'{var_tag_items}{i}'
+                    query += self.tag_items[i].cypher_item_create_node(var_tag_items) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_items[i].label_link}]->({var_tag_items})' + "\n"
 
-        if self.tag_problemts is not None and len(self.tag_problemts) is not 0:
-            for i in range(0, len(self.tag_problemts)):
-                if self.tag_problemts[i]._get_keyword() is not None:
-                    var_tag_problem = f'{var_tag_problemts}{i}'
-                    query += self.tag_problemts[i].cypher_action_create_node(var_tag_problem) + "\n"
-                    query += f'MERGE ({var_issue})-[{self.label_problem}]->({var_tag_problem})' + "\n"
+        if self.tag_problems is not None and len(self.tag_problems) is not 0:
+            for i in range(0, len(self.tag_problems)):
+                if self.tag_problems[i]._get_keyword() is not None:
+                    var_tag_problems = f'{var_tag_problems}{i}'
+                    query += self.tag_problems[i].cypher_action_create_node(var_tag_problems) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_problems[i].label_link}]->({var_tag_problems})' + "\n"
 
         if self.tag_solutions is not None and len(self.tag_solutions) is not 0:
             for i in range(0, len(self.tag_solutions)):
                 if self.tag_solutions[i]._get_keyword() is not None:
-                    var_tag_solution = f'{var_tag_solutions}{i}'
-                    query += self.tag_solutions[i].cypher_action_create_node(var_tag_solution) + "\n"
-                    query += f'MERGE ({var_issue})-[{self.label_solution}]->({var_tag_solution})' + "\n"
+                    var_tag_solutions = f'{var_tag_solutions}{i}'
+                    query += self.tag_solutions[i].cypher_action_create_node(var_tag_solutions) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_solutions[i].label_link}]->({var_tag_solutions})' + "\n"
 
+        if self.tag_unknowns is not None and len(self.tag_unknowns) is not 0:
+            for i in range(0, len(self.tag_unknowns)):
+                if self.tag_unknowns[i]._get_keyword() is not None:
+                    var_tag_unknowns = f'{var_tag_unknowns}{i}'
+                    query += self.tag_unknowns[i].cypher_unknown_create_node(var_tag_unknowns) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_unknowns[i].label_link}]->({var_tag_unknowns})' + "\n"
+
+        if self.tag_others is not None and len(self.tag_others) is not 0:
+            for i in range(0, len(self.tag_others)):
+                if self.tag_others[i]._get_keyword() is not None:
+                    var_tag_others = f'{var_tag_others}{i}'
+                    query += self.tag_others[i].cypher_tag_create_node(var_tag_others) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_others[i].label_link}]->({var_tag_others})' + "\n"
 
         return query

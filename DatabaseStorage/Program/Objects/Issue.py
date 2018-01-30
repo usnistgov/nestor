@@ -519,7 +519,7 @@ class Issue:
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_create_issue_node(self, variable="issue"):
+    def cypher_issue_create_node(self, variable="issue"):
         if self.problem and self.solution is None:
             return ""
         query = f'CREATE {self.cypher_issue_all(variable)}'
