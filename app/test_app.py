@@ -79,6 +79,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         #     self.alias_lookup[i] = zz.extractBests(i, self.df.index[mask], limit=20)
 
         self.vocabTableWidget.print_table(self.df, self.vocab_limit)
+        self.update_progress_bar()
 
     def table_item_selected(self):
         items = self.vocabTableWidget.selectedItems()  # selected row
@@ -153,7 +154,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
             fileName, _ = Qw.QFileDialog.getOpenFileName(self, 'Open File')
             # fileName = 'app_vocab.csv'
             self.set_dataframe(fileName)
-            self.update_progress_bar()
+
             #self.csv_to_tab(fileName)
         except FileNotFoundError:
             pass
@@ -197,7 +198,8 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
                                          Qw.QMessageBox.Yes | Qw.QMessageBox.No)
         if choice == Qw.QMessageBox.Yes:
             print('exiting program...')
-            sys.exit()
+            # sys.exit()
+            app.exec_()
         else:
             pass
 

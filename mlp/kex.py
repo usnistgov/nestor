@@ -126,9 +126,36 @@ class TokenExtractor(TransformerMixin):
     def scores_(self):
         return self._tf_tot[self.ranks_]
 
-    def annotation_assistant(self,
-                             filename,
-                             gui=True):
+    # def annotation_assistant(self,
+    #                          filename,
+    #                          gui=True):
+    #     if not Path(filename).is_file():
+    #         check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
+    #
+    #         df = pd.DataFrame({'tokens': self.vocab_,
+    #                            'NE': '',
+    #                            'alias': '',
+    #                            'notes': '',
+    #                            'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
+    #         df = df[~df.tokens.duplicated(keep='first')]
+    #         df.to_csv(filename, index=False)
+    #         print(f'New Vocab. file written to {filename}')
+    #         if gui:
+    #             print('opening gui with blank, pre-formatted .csv file...')
+    #             annotation_app(filename)
+    #
+    #     elif gui:
+    #         print('opening pre-existing vocab file in the GUI...')
+    #         annotation_app(filename)
+    #         # df = pd.read_csv(filename, index_col=0)
+    #         # return df
+    #     else:
+    #         print('file already exists, importing...')
+    #         # raise Exception
+    #     df = pd.read_csv(filename, index_col=0)
+    #     return df
+
+    def annotation_assistant(self, filename):
         if not Path(filename).is_file():
             check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
 
@@ -140,16 +167,12 @@ class TokenExtractor(TransformerMixin):
             df = df[~df.tokens.duplicated(keep='first')]
             df.to_csv(filename, index=False)
             print(f'New Vocab. file written to {filename}')
-            if gui:
-                annotation_app(filename)
-        elif gui:
-            print('opening pre-existing vocab file in the GUI...')
-            annotation_app(filename)
+
         else:
-            # print('file already exists, please enter a new filename or start the GUI!')
-            # raise Exception
+            print('file already exists, importing...')
             df = pd.read_csv(filename, index_col=0)
-            return df
+
+        return df
 
 
 def _series_itervals(s):
@@ -160,8 +183,12 @@ def _series_itervals(s):
 def annotation_app(fname):
     import PyQt5.QtWidgets as qw
     from app.test_app import MyWindow
-
+    app = 0
     app = qw.QApplication(sys.argv)
+    # if not qw.QApplication.instance():
+    #     app = qw.QApplication(sys.argv)
+    # else:
+    #     app = qw.QApplication.instance()
     window = MyWindow(vocab_filename=fname)
     window.show()
     sys.exit(app.exec_())
