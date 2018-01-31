@@ -156,11 +156,11 @@ class TokenExtractor(TransformerMixin):
     #     df = pd.read_csv(filename, index_col=0)
     #     return df
 
-    def annotation_assistant(self, filename, update=False):
+    def annotation_assistant(self, filename=None, init=None):
         try:
             check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
         except NotFittedError:
-            if Path(filename).is_file():
+            if (filename is not None) and Path(filename).is_file():
                 print('No model fitted, but file already exists. Importing...')
                 return pd.read_csv(filename, index_col=0)
             else:
@@ -172,15 +172,21 @@ class TokenExtractor(TransformerMixin):
                            'notes': '',
                            'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
         df = df[~df.tokens.duplicated(keep='first')]
+        df.set_index('tokens', inplace=True)
 
-        if Path(filename).is_file():
-            print('file already exists. Updating...')
-            df.NE = pd.np.nan
-            df.alias = pd.np.nan
-            df.notes = pd.np.nan
-            df_import = pd.read_csv(filename, index_col=0)
+        if init is None:
+            if (filename is not None) and Path(filename).is_file():
+                init = filename
+
+        if init is not None:
+            df.NE = np.nan
+            df.alias = np.nan
+            df.notes = np.nan
+            df_import = pd.read_csv(init, index_col=0)
             df.update(df_import)
-
+            # df.fillna('', inplace=True)
+        if filename is not None:
+            df.to_csv(filename)
         return df
 
         # if not Path(filename).is_file():
