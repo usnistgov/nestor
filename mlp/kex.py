@@ -9,7 +9,7 @@ import sys
 import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
-from sklearn.utils.validation import check_is_fitted
+from sklearn.utils.validation import check_is_fitted, NotFittedError
 
 
 class Transformer(TransformerMixin):
@@ -124,7 +124,8 @@ class TokenExtractor(TransformerMixin):
 
     @property
     def scores_(self):
-        return self._tf_tot[self.ranks_]
+        scores = self._tf_tot[self.ranks_]
+        return scores/scores.sum()
 
     # def annotation_assistant(self,
     #                          filename,
@@ -155,24 +156,63 @@ class TokenExtractor(TransformerMixin):
     #     df = pd.read_csv(filename, index_col=0)
     #     return df
 
-    def annotation_assistant(self, filename):
-        if not Path(filename).is_file():
+    def annotation_assistant(self, filename, update=False):
+        try:
             check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
+        except NotFittedError:
+            if Path(filename).is_file():
+                print('No model fitted, but file already exists. Importing...')
+                return pd.read_csv(filename, index_col=0)
+            else:
+                raise
 
-            df = pd.DataFrame({'tokens': self.vocab_,
-                               'NE': '',
-                               'alias': '',
-                               'notes': '',
-                               'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
-            df = df[~df.tokens.duplicated(keep='first')]
-            df.to_csv(filename, index=False)
-            print(f'New Vocab. file written to {filename}')
+        df = pd.DataFrame({'tokens': self.vocab_,
+                           'NE': '',
+                           'alias': '',
+                           'notes': '',
+                           'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
+        df = df[~df.tokens.duplicated(keep='first')]
 
-        else:
-            print('file already exists, importing...')
-            df = pd.read_csv(filename, index_col=0)
+        if Path(filename).is_file():
+            print('file already exists. Updating...')
+            df.NE = pd.np.nan
+            df.alias = pd.np.nan
+            df.notes = pd.np.nan
+            df_import = pd.read_csv(filename, index_col=0)
+            df.update(df_import)
 
         return df
+
+        # if not Path(filename).is_file():
+        #     check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
+        #
+        #     df = pd.DataFrame({'tokens': self.vocab_,
+        #                        'NE': '',
+        #                        'alias': '',
+        #                        'notes': '',
+        #                        'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
+        #     df = df[~df.tokens.duplicated(keep='first')]
+        #     df.to_csv(filename, index=False)
+        #     print(f'New Vocab. file written to {filename}')
+        #
+        # else:
+        #     df_import = pd.read_csv(filename, index_col=0)
+        #
+        #     if update:
+        #         check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
+        #
+        #         df = pd.DataFrame({'tokens': self.vocab_,
+        #                            'NE': '',
+        #                            'alias': '',
+        #                            'notes': '',
+        #                            'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
+        #         df = df[~df.tokens.duplicated(keep='first')]
+        #         df.to_csv(filename, index=False)
+        #     else:
+        #         print('file already exists, importing...')
+        #         df = df_import
+        #
+        # return df
 
 
 def _series_itervals(s):
