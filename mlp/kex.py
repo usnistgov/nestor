@@ -5,11 +5,13 @@ from pathlib import Path
 
 import dask.dataframe as dd
 import dask
+import re
 import sys
 import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
+
 
 
 class Transformer(TransformerMixin):
@@ -33,7 +35,7 @@ class NLPSelect(Transformer):
     a dask df, and combine into a single dask series.
     """
 
-    def __init__(self, columns=0):
+    def __init__(self, columns=0, special_replace=None):
         """
         Parameters
         ----------
@@ -42,10 +44,13 @@ class NLPSelect(Transformer):
         """
 
         self.columns = columns
+        self.special_replace = special_replace
         # self.to_np = to_np
 
     def get_params(self, deep=True):
-        return dict(columns=self.columns, names=self.names)
+        return dict(columns=self.columns,
+                    names=self.names,
+                    special_replace=self.special_replace)
 
     def transform(self, X, y=None):
         if isinstance(self.columns, list):
@@ -65,10 +70,13 @@ class NLPSelect(Transformer):
         if len(self.columns) > 1:  # more than one column, cat them
             raw_text = raw_text.add(' ').sum(axis=1).str[:-1]
         raw_text = raw_text.str.lower()  # all lowercase
-        raw_text.str.replace('\n', ' ')  # no hanging newlines
+        raw_text = raw_text.str.replace('\n', ' ')  # no hanging newlines
 
         # No punctuation
         raw_text = raw_text.str.replace('[{}]'.format(string.punctuation), ' ')
+        if self.special_replace is not None:
+            rx = re.compile('|'.join(map(re.escape, self.special_replace)))
+            raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
         return raw_text
 
 
@@ -177,6 +185,7 @@ class TokenExtractor(TransformerMixin):
         if init is None:
             if (filename is not None) and Path(filename).is_file():
                 init = filename
+                print('attempting to initialize with pre-existing vocab')
 
         if init is not None:
             df.NE = np.nan
@@ -184,9 +193,11 @@ class TokenExtractor(TransformerMixin):
             df.notes = np.nan
             df_import = pd.read_csv(init, index_col=0)
             df.update(df_import)
+            print('intialized successfully!')
             # df.fillna('', inplace=True)
         if filename is not None:
             df.to_csv(filename)
+            print('saved locally!')
         return df
 
         # if not Path(filename).is_file():
