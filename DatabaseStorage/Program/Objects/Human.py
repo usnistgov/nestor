@@ -6,7 +6,6 @@ from Program.Database.Database_Properties import LabelEdges
 
 
 class Human:
-
     """
 
     Its utility is to represent the HUMAN data from a Maintenance Work Order.
@@ -33,9 +32,9 @@ class Human:
                             If in the database a HUMAN already have my name, It updated it and add skills and crafts
     """
 
-    def __init__(self, name = None):
-        self.label_human=NodeHuman.LABEL_HUMAN.value
-        self.property_name=NodeHuman.PROPERTY_NAME.value
+    def __init__(self, name=None):
+        self.label_human = NodeHuman.LABEL_HUMAN.value
+        self.property_name = NodeHuman.PROPERTY_NAME.value
 
         self._set_name(name)
 
@@ -67,8 +66,8 @@ class Human:
     def cypher_human_name(self, variable="human"):
         if self.name is None:
             return ""
-        return f'({variable} {self.label_human}' +\
-            "{" + f'{self.property_name}:"{self.name}"' + "})"
+        return f'({variable} {self.label_human}' + \
+               "{" + f'{self.property_name}:"{self.name}"' + "})"
 
     def cypher_human_all(self, variable="human"):
         query = f'({variable} {self.label_human}'
@@ -90,20 +89,20 @@ class Human:
 
         return match, " OR ".join(where), res
 
-    def cypher_where_properties(self, variable = "human"):
+    def cypher_where_properties(self, variable="human"):
         where = []
         res = []
-        if self.name is not None :
-            if self.name != "_":
-                for n in self.name:
-                   where.append(f'{variable}.{self.property_name} = "{n}"')
-            else:
-                res.append(f'{variable}.{self.property_name}')
+        if self.name is not None:
+            for n in self.name:
+                if n == "_":
+                    res.append(f'{variable}.{self.property_name}')
+                else:
+                    where.append(f'{variable}.{self.property_name} = "{n}"')
 
         return where, res
 
-class Operator(Human):
 
+class Operator(Human):
     """
 
     Its utility is to represent the HUMAN data from a Maintenance Work Order.
@@ -130,9 +129,9 @@ class Operator(Human):
                             If in the database a HUMAN already have my name, It updated it and add skills and crafts
     """
 
-    def __init__(self, name = None):
+    def __init__(self, name=None):
         self.label_operator = NodeHuman.LABEL_OPERATOR.value
-        self.label_link=LabelEdges.LABEL_REQUESTED.value
+        self.label_link = LabelEdges.LABEL_REQUESTED.value
 
         super().__init__(name)
 
@@ -171,8 +170,8 @@ class Operator(Human):
     def cypher_where_properties(self, variable="operator"):
         return super().cypher_where_properties(variable)
 
-class Technician(Human):
 
+class Technician(Human):
     """
 
     Its utility is to represent the HUMAN data from a Maintenance Work Order.
@@ -203,8 +202,7 @@ class Technician(Human):
         self.label_technician = NodeHuman.LABEL_TECHNICIAN.value
         self.property_skills = NodeHuman.PROPERTY_SKILLS.value
         self.property_crafts = NodeHuman.PROPERTY_CRAFTS.value
-        self.label_link=LabelEdges.LABEL_SOLVE.value
-
+        self.label_link = LabelEdges.LABEL_SOLVE.value
 
         super().__init__(name)
         self._set_skills(skills)
@@ -227,7 +225,7 @@ class Technician(Human):
             self.skills = None
         else:
             if not isinstance(skills, collections.Iterable) or isinstance(skills, str):
-                    skills = [skills]
+                skills = [skills]
             self.skills = [skill.lower() for skill in skills]
 
     def _get_crafts(self):
@@ -259,7 +257,7 @@ class Technician(Human):
     def cypher_technician_name(self, variable="technician"):
         if self.name is None:
             return ""
-        return f'({variable} {self.label_human}{self.label_technician}'+ \
+        return f'({variable} {self.label_human}{self.label_technician}' + \
                "{" + f'{self.property_name}:"{self.name}"' + "})"
 
     def cypher_technician_all(self, variable="technician"):
@@ -283,8 +281,8 @@ class Technician(Human):
         query += f'\nSET {variable} {self.label_technician}'
         if self.skills is not None:
             for skill in self.skills:
-                    query += f'\nFOREACH(x in CASE WHEN "{skill}" in {variable}.{self.property_skills} THEN [] ELSE [1] END |' \
-                             f'  SET {variable}.{self.property_skills} = coalesce({variable}.{self.property_skills},[]) + "{skill}" )'
+                query += f'\nFOREACH(x in CASE WHEN "{skill}" in {variable}.{self.property_skills} THEN [] ELSE [1] END |' \
+                         f'  SET {variable}.{self.property_skills} = coalesce({variable}.{self.property_skills},[]) + "{skill}" )'
         if self.crafts is not None:
             for craft in self.crafts:
                 query += f'\nFOREACH(x in CASE WHEN "{craft}" in {variable}.{self.property_crafts} THEN [] ELSE [1] END |' \
@@ -299,21 +297,20 @@ class Technician(Human):
         return match, " OR ".join(where), res
 
     def cypher_where_properties(self, variable="technician"):
-        where, res =  super().cypher_where_properties(variable)
+        where, res = super().cypher_where_properties(variable)
 
-        if self.skills is not None :
-            # with nor in we care about even if there is 1
-            if "_" not in self.skills:
-                for s in self.skills:
+        if self.skills is not None:
+            for s in self.skills:
+                if s == "_":
+                    res.append(f'{variable}.{self.property_skills}')
+                else:
                     where.append(f'"{s}" IN {variable}.{self.property_skills}')
-            else:
-                res.append(f'{variable}.{self.property_skills}')
 
-        if self.crafts is not None :
-            if "_" not in self.crafts:
-                for c in self.crafts:
+        if self.crafts is not None:
+            for c in self.crafts:
+                if c == "_":
+                    res.append(f'{variable}.{self.property_crafts}')
+                else:
                     where.append(f'"{c}" IN {variable}.{self.property_crafts}')
-            else:
-                res.append(f'{variable}.{self.property_crafts}')
 
         return where, res

@@ -36,7 +36,8 @@ class MaintenanceWorkOrder():
             create_database --  return the query to create a new MWO
     """
 
-    def __init__(self, issue, machine=None, operators=None, technicians=None, tag_items=None, tag_problems=None, tag_solutions=None, tag_unknowns=None, tag_others=None):
+    def __init__(self, issue=None, machine=None, operators=None, technicians=None, tag_items=None, tag_problems=None,
+                 tag_solutions=None, tag_unknowns=None, tag_others=None):
 
         self.label_problem = LabelEdges.LABEL_PROBLEM.value
         self.label_solution = LabelEdges.LABEL_SOLUTION.value
@@ -145,7 +146,6 @@ class MaintenanceWorkOrder():
                 tag_others = [tag_others]
             self.tag_others = tag_others
 
-
     def __str__(self):
         return "OBJECT: %s -->\n\t\t ISSUE:\n %s" \
                "\n\t\t MACHINE:\n %s" \
@@ -154,11 +154,14 @@ class MaintenanceWorkOrder():
                "\n\t\t ITEM_TAG:\n %s" \
                "\n\t\t PROBLEM_TAGS:\n %s" \
                "\n\t\t SOLUTION_TAGS:\n %s" % \
-               (type(self), self.issue, self.machine, self.operators, self.technicians, self.tag_items, self.tag_problemts,
+               (type(self), self.issue, self.machine, self.operators, self.technicians, self.tag_items,
+                self.tag_problemts,
                 self.tag_solutions)
 
-    def cypher_mwo_graphdata(self, var_issue, var_machine, var_machine_type, var_operators, var_technicians, var_tag_items,
-                        var_tag_problemts, var_tag_solutions):
+    def cypher_mwo_graphdata(self, var_issue="issue", var_machine="machine", var_machine_type="machine_type",
+                             var_operators="operators", var_technicians="technicians", var_tag_items="items",
+                             var_tag_problems="problems", var_tag_solutions="solutions", var_tag_unknowns="unknowns",
+                             var_tag_others="others"):
         ## TODO add the code for the other tag unknown and stopword
 
         """
@@ -194,7 +197,7 @@ class MaintenanceWorkOrder():
             for i in range(0, len(self.operators)):
                 if self.operators[i]._get_name() is not None:
                     var_operator = f'{var_operators}{i}'
-                    query +=self.operators[i].cypher_operator_create_node(var_operator) + "\n"
+                    query += self.operators[i].cypher_operator_create_node(var_operator) + "\n"
                     query += f'MERGE ({var_issue})-[{self.label_requested}]->({var_operator})' + "\n"
 
         if self.technicians is not None and len(self.technicians) is not 0:
@@ -203,28 +206,28 @@ class MaintenanceWorkOrder():
                     var_technician = f'{var_technicians}{i}'
                     query += self.technicians[i].cypher_technician_create_node(var_technician) + "\n"
                     query += f'MERGE ({var_issue})-[{self.label_solve}]->({var_technician})' + "\n"
-        #
-        # if self.tag_items is not None and len(self.tag_items) is not 0:
-        #     for i in range(0, len(self.tag_items)):
-        #         if self.tag_items[i]._get_keyword() is not None:
-        #             var_tag_items = f'{var_tag_items}{i}'
-        #             query += self.tag_items[i].cypher_item_create_node(var_tag_items) + "\n"
-        #             query += f'MERGE ({var_issue})-[{self.tag_items[i].label_link}]->({var_tag_items})' + "\n"
-        #
-        # if self.tag_problems is not None and len(self.tag_problems) is not 0:
-        #     for i in range(0, len(self.tag_problems)):
-        #         if self.tag_problems[i]._get_keyword() is not None:
-        #             var_tag_problems = f'{var_tag_problems}{i}'
-        #             query += self.tag_problems[i].cypher_action_create_node(var_tag_problems) + "\n"
-        #             query += f'MERGE ({var_issue})-[{self.tag_problems[i].label_link}]->({var_tag_problems})' + "\n"
-        #
-        # if self.tag_solutions is not None and len(self.tag_solutions) is not 0:
-        #     for i in range(0, len(self.tag_solutions)):
-        #         if self.tag_solutions[i]._get_keyword() is not None:
-        #             var_tag_solutions = f'{var_tag_solutions}{i}'
-        #             query += self.tag_solutions[i].cypher_action_create_node(var_tag_solutions) + "\n"
-        #             query += f'MERGE ({var_issue})-[{self.tag_solutions[i].label_link}]->({var_tag_solutions})' + "\n"
-        #
+
+        if self.tag_items is not None and len(self.tag_items) is not 0:
+            for i in range(0, len(self.tag_items)):
+                if self.tag_items[i]._get_keyword() is not None:
+                    var_tag_items = f'{var_tag_items}{i}'
+                    query += self.tag_items[i].cypher_item_create_node(var_tag_items) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_items[i].label_link}]->({var_tag_items})' + "\n"
+
+        if self.tag_problems is not None and len(self.tag_problems) is not 0:
+            for i in range(0, len(self.tag_problems)):
+                if self.tag_problems[i]._get_keyword() is not None:
+                    var_tag_problems = f'{var_tag_problems}{i}'
+                    query += self.tag_problems[i].cypher_action_create_node(var_tag_problems) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_problems[i].label_link}]->({var_tag_problems})' + "\n"
+
+        if self.tag_solutions is not None and len(self.tag_solutions) is not 0:
+            for i in range(0, len(self.tag_solutions)):
+                if self.tag_solutions[i]._get_keyword() is not None:
+                    var_tag_solutions = f'{var_tag_solutions}{i}'
+                    query += self.tag_solutions[i].cypher_action_create_node(var_tag_solutions) + "\n"
+                    query += f'MERGE ({var_issue})-[{self.tag_solutions[i].label_link}]->({var_tag_solutions})' + "\n"
+
         # if self.tag_unknowns is not None and len(self.tag_unknowns) is not 0:
         #     for i in range(0, len(self.tag_unknowns)):
         #         if self.tag_unknowns[i]._get_keyword() is not None:
@@ -241,8 +244,8 @@ class MaintenanceWorkOrder():
 
         return query
 
-
-    def cypher_mwo_tagdata(self,var_issue, var_tag_items, var_tag_problems, var_tag_solutions, var_tag_unknowns, var_tag_others):
+    def cypher_mwo_tagdata(self, var_issue, var_tag_items, var_tag_problems, var_tag_solutions, var_tag_unknowns,
+                           var_tag_others):
         query = 'MATCH' + self.issue.cypher_issue_all(var_issue) + "\n"
 
         if self.tag_items is not None and len(self.tag_items) is not 0:

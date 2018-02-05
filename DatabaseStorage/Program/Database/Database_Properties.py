@@ -130,6 +130,9 @@ class NodeTag(Enum):
     VALUE_PROBLEM = "tag_problem"
     VALUE_SOLUTION = "tag_solution"
     VALUE_ACTION_ITEM = "tag_action_item"
+    VALUE_UNKNOWN = "tag_unknown"
+    VALUE_NA = "tag_na"
+    VALUE_STOP_WORDS = "tag_stop_words"
 
     VALUE_KEYWORD = "keyword"
     VALUE_SYNONYMS = "synonyms"

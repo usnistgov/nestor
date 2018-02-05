@@ -2,6 +2,7 @@ from datetime import datetime
 
 from Program.Database.Database_Properties import NodeIssue
 from Program.Others.MyDate import isoStringToDate
+import collections
 
 """
 EVERY DATE HAS TO BE AN INSTANCE OF DATETIME
@@ -162,11 +163,12 @@ class Issue:
         if part_in_process is "" or part_in_process is None:
             self.part_in_process = None
         else:
-            try:
+            if isinstance(part_in_process, str):
                 self.part_in_process = part_in_process.lower()
-            except AttributeError:
+            elif isinstance(part_in_process, collections.Iterable):
                 self.part_in_process = [p.lower() for p in part_in_process]
-
+            else:
+                self.part_in_process = None
     def _get_necessary_part(self):
         return self.necessary_part
 
@@ -174,10 +176,12 @@ class Issue:
         if necessary_part is "" or necessary_part is None:
             self.necessary_part = None
         else:
-            try:
+            if isinstance(necessary_part, str):
                 self.necessary_part = necessary_part.lower()
-            except AttributeError:
+            elif isinstance(necessary_part, collections.Iterable):
                 self.necessary_part = [n.lower() for n in necessary_part]
+            else:
+                self.necessary_part = None
 
     def _get_machine_down(self):
         return self.machine_down
@@ -192,8 +196,8 @@ class Issue:
         else:
             self.machine_down = None
 
-            ############################  DATE ############################
-        # TODO Dates make problem, because there is too much difference between the csv
+    ############################  DATE ############################
+    # TODO Dates make problem, because there is too much difference between the csv
 
     def _get_date_machine_down(self):
         return self.date_machine_down
@@ -202,10 +206,10 @@ class Issue:
         if date_machine_down is not None:
             if isinstance(date_machine_down, datetime):
                 self.date_machine_down = date_machine_down
-            elif date_machine_down == "_":
-                self.date_machine_down = "_"
-            else:
+            elif isinstance(date_machine_down, str):
                 self.date_machine_down = isoStringToDate(date_machine_down)
+            elif isinstance(date_machine_down, collections.Iterable):
+                self.date_machine_down = date_machine_down
         else:
             self.date_machine_down = None
 
@@ -216,13 +220,12 @@ class Issue:
         if date_machine_up is not None:
             if isinstance(date_machine_up, datetime):
                 self.date_machine_up = date_machine_up
-            elif date_machine_up == "_":
-                self.date_machine_up = "_"
-            else:
+            elif isinstance(date_machine_up, str):
                 self.date_machine_up = isoStringToDate(date_machine_up)
+            elif isinstance(date_machine_up, collections.Iterable):
+                self.date_machine_up = date_machine_up
         else:
             self.date_machine_up = None
-        #
 
     def _get_date_maintenance_work_order_close(self):
         return self.date_maintenance_work_order_close
@@ -231,10 +234,10 @@ class Issue:
         if date_maintenance_work_order_close is not None:
             if isinstance(date_maintenance_work_order_close, datetime):
                 self.date_maintenance_work_order_close = date_maintenance_work_order_close
-            elif date_maintenance_work_order_close == "_":
-                self.date_maintenance_work_order_close = "_"
-            else:
+            elif isinstance(date_maintenance_work_order_close, str):
                 self.date_maintenance_work_order_close = isoStringToDate(date_maintenance_work_order_close)
+            elif isinstance(date_maintenance_work_order_close, collections.Iterable):
+                self.date_maintenance_work_order_close = date_maintenance_work_order_close
         else:
             self.date_maintenance_work_order_close = None
 
@@ -245,13 +248,12 @@ class Issue:
         if date_maintenance_work_order_issue is not None:
             if isinstance(date_maintenance_work_order_issue, datetime):
                 self.date_maintenance_work_order_issue = date_maintenance_work_order_issue
-            elif date_maintenance_work_order_issue == "_":
-                self.date_maintenance_work_order_issue = "_"
-            else:
+            elif isinstance(date_maintenance_work_order_issue, str):
                 self.date_maintenance_work_order_issue = isoStringToDate(date_maintenance_work_order_issue)
+            elif isinstance(date_maintenance_work_order_issue, collections.Iterable):
+                self.date_maintenance_work_order_issue = date_maintenance_work_order_issue
         else:
             self.date_maintenance_work_order_issue = None
-        #
 
     def _get_date_maintenance_technician_arrives(self, ):
         return self.date_maintenance_technician_arrives
@@ -260,13 +262,12 @@ class Issue:
         if date_maintenance_technician_arrives is not None:
             if isinstance(date_maintenance_technician_arrives, datetime):
                 self.date_maintenance_technician_arrives = date_maintenance_technician_arrives
-            elif date_maintenance_technician_arrives == "_":
-                self.date_maintenance_technician_arrives = "_"
-            else:
+            elif isinstance(date_maintenance_technician_arrives, str):
                 self.date_maintenance_technician_arrives = isoStringToDate(date_maintenance_technician_arrives)
+            elif isinstance(date_maintenance_technician_arrives, collections.Iterable):
+                self.date_maintenance_technician_arrives = date_maintenance_technician_arrives
         else:
             self.date_maintenance_technician_arrives = None
-        #
 
     def _get_date_problem_solved(self):
         return self.date_problem_solved
@@ -275,10 +276,10 @@ class Issue:
         if date_problem_solved is not None:
             if isinstance(date_problem_solved, datetime):
                 self.date_problem_solved = date_problem_solved
-            elif date_problem_solved == "_":
-                self.date_problem_solved = "_"
-            else:
+            elif isinstance(date_problem_solved, str):
                 self.date_problem_solved = isoStringToDate(date_problem_solved)
+            elif isinstance(date_problem_solved, collections.Iterable):
+                self.date_problem_solved = date_problem_solved
         else:
             self.date_problem_solved = None
 
@@ -289,13 +290,12 @@ class Issue:
         if date_problem_found is not None:
             if isinstance(date_problem_found, datetime):
                 self.date_problem_found = date_problem_found
-            elif date_problem_found == "_":
-                self.date_problem_found = "_"
-            else:
+            elif isinstance(date_problem_found, str):
                 self.date_problem_found = isoStringToDate(date_problem_found)
+            elif isinstance(date_problem_found, collections.Iterable):
+                self.date_problem_found = date_problem_found
         else:
             self.date_problem_found = None
-        #
 
     def _get_date_part_ordered(self):
         return self.date_part_ordered
@@ -304,10 +304,10 @@ class Issue:
         if date_part_ordered is not None:
             if isinstance(date_part_ordered, datetime):
                 self.date_part_ordered = date_part_ordered
-            elif date_part_ordered == "_":
-                self.date_part_ordered = "_"
-            else:
+            elif isinstance(date_part_ordered, str):
                 self.date_part_ordered = isoStringToDate(date_part_ordered)
+            elif isinstance(date_part_ordered, collections.Iterable):
+                self.date_part_ordered = date_part_ordered
         else:
             self.date_part_ordered = None
 
@@ -318,15 +318,14 @@ class Issue:
         if date_maintenance_technician_begin_repair_problem is not None:
             if isinstance(date_maintenance_technician_begin_repair_problem, datetime):
                 self.date_maintenance_technician_begin_repair_problem = date_maintenance_technician_begin_repair_problem
-            elif date_maintenance_technician_begin_repair_problem == "_":
-                self.date_maintenance_technician_begin_repair_problem = "_"
-            else:
-                self.date_maintenance_technician_begin_repair_problem = isoStringToDate(
-                    date_maintenance_technician_begin_repair_problem)
+            elif isinstance(date_maintenance_technician_begin_repair_problem, str):
+                self.date_maintenance_technician_begin_repair_problem = isoStringToDate(date_maintenance_technician_begin_repair_problem)
+            elif isinstance(date_maintenance_technician_begin_repair_problem, collections.Iterable):
+                self.date_maintenance_technician_begin_repair_problem = date_maintenance_technician_begin_repair_problem
         else:
             self.date_maintenance_technician_begin_repair_problem = None
 
-############################  TIME ############################
+        ############################  TIME ############################
 
     def _get_time_to_repair(self):
         return self.time_to_repair
@@ -436,7 +435,7 @@ class Issue:
         except TypeError:
             self.time_to_turn_on = None
 
-        #
+            #
 
     def create_all_time(self):
         """
@@ -460,7 +459,7 @@ class Issue:
                f"problem: {self.problem} \n\tsolution: {self.solution} \n\t" \
                f"cause: {self.cause} \n\teffects: {self.effects} \n\t" \
                f"part_in_process: {self.part_in_process} \n\t|| necessary_part: {self.necessary_part} \n\t" \
-               f"machine_down: {self.down} \n\t" \
+               f"machine_down: {self.machine_down} \n\t" \
                f"date_machine_up: {self.date_machine_up} \n\t|| date_machine_down: {self.date_machine_down} \n\t" \
                f"date_maintenance_work_order_issue: {self.date_maintenance_work_order_issue} \n\t" \
                f"date_maintenance_work_order_close: {self.date_maintenance_work_order_close} \n\t" \
@@ -475,14 +474,13 @@ class Issue:
                f"time_to_order: {self.time_to_order} \n\ttime_lead_for_part: {self.time_lead_for_part} \n\t" \
                f"time_to_fix: {self.time_to_fix} \n\ttime_to_turn_on: {self.time_to_turn_on} \n\t"
 
-
     def cypher_issue_all(self, variable="issue"):
         query = f'({variable} {self.label_issue}'
-        if self.problem or self.solution or self.cause or self.effects or self.part_in_process or self.necessary_part\
+        if self.problem or self.solution or self.cause or self.effects or self.part_in_process or self.necessary_part \
                 or self.machine_down or self.date_machine_up or self.date_machine_down \
-                or self.date_maintenance_work_order_issue or self.date_maintenance_work_order_close\
-                or self.date_maintenance_technician_arrives or self.date_problem_found or self.date_problem_solved\
-                or self.date_part_ordered or self.date_maintenance_technician_begin_repair_problem is not None :
+                or self.date_maintenance_work_order_issue or self.date_maintenance_work_order_close \
+                or self.date_maintenance_technician_arrives or self.date_problem_found or self.date_problem_solved \
+                or self.date_part_ordered or self.date_maintenance_technician_begin_repair_problem is not None:
             query += "{"
             if self.problem is not None:
                 query += f'{self.property_problem}:"{self.problem}",'
@@ -520,116 +518,116 @@ class Issue:
         return query + ")"
 
     def cypher_issue_create_node(self, variable="issue"):
-        if self.problem and self.solution is None:
-            return ""
+        # if self.problem and self.solution is None:
+        #     return ""
         query = f'CREATE {self.cypher_issue_all(variable)}'
         return query
 
-    def cypher_kpi(self, variable ="issue"):
+    def cypher_kpi(self, variable="issue"):
 
         match = f'MATCH (issue {NodeIssue.LABEL_ISSUE.value})'
-        where, res = self.cypher_where_properties(variable= variable)
+        where, res = self.cypher_where_properties(variable=variable)
 
         return match, " OR ".join(where), res
 
-    def cypher_where_properties(self, variable = "issue"):
+    def cypher_where_properties(self, variable="issue"):
         where = []
         res = []
-        if self.problem is not None :
-            if self.problem != "_":
-                for p in self.problem:
+        if self.problem is not None:
+            for p in self.problem:
+                if p == "_":
+                    res.append(f'{variable}.{self.property_problem}')
+                else:
                     where.append(f'{variable}.{self.property_problem} = "{p}"')
-            else:
-                res.append(f'{variable}.{self.property_problem}')
-        if self.solution is not None :
-            if self.solution != "_":
-                for s in self.solution:
+        if self.solution is not None:
+            for s in self.solution:
+                if s == "_":
+                    res.append(f'{variable}.{self.property_solution}')
+                else:
                     where.append(f'{variable}.{self.property_solution} = "{s}"')
-            else:
-                res.append(f'{variable}.{self.property_solution}')
-        if self.cause is not None :
-            if self.cause != "_":
-                for c in self.cause:
+        if self.cause is not None:
+            for c in self.cause:
+                if c == "_":
+                    res.append(f'{variable}.{self.property_cause}')
+                else:
                     where.append(f'{variable}.{self.property_cause} = "{c}"')
-            else:
-                res.append(f'{variable}.{self.property_cause}')
         if self.effects is not None:
-            if self.effects != "_":
-                for e in self.effects:
+            for e in self.effects:
+                if e == "_":
+                    res.append(f'{variable}.{self.property_effects}')
+                else:
                     where.append(f'{variable}.{self.property_effects} = "{e}"')
-            else:
-                res.append(f'{variable}.{self.property_effects}')
         if self.part_in_process is not None:
-            if self.part_in_process != "_":
-                for p in self.effects:
+            for p in self.part_in_process:
+                if p == "_":
+                    res.append(f'{variable}.{self.property_part_in_process}')
+                else:
                     where.append(f'{variable}.{self.property_part_in_process} = "{p}"')
-            else:
-                res.append(f'{variable}.{self.property_part_in_process}')
         if self.necessary_part is not None:
-            if self.necessary_part != "_":
-                for n in self.effects:
+            for n in self.necessary_part:
+                if n == "_":
+                    res.append(f'{variable}.{self.property_necessary_part}')
+                else:
                     where.append(f'{variable}.{self.property_necessary_part} = "{n}"')
-            else:
-                res.append(f'{variable}.{self.property_necessary_part}')
         if self.machine_down is not None:
-            if self.machine_down != "_":
-                where.append(f'{variable}.{self.property_machine_down} = {self.machine_down}')
-            else:
-                res.append(f'{variable}.{self.property_machine_down}')
-
+            for d in self.machine_down:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_machine_down}')
+                else:
+                    where.append(f'{variable}.{self.property_machine_down} = {self.machine_down}')
         if self.date_machine_down is not None:
-            if self.date_machine_down != "_":
-                for d in self.date_machine_down:
+            for d in self.date_machine_down:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_machine_down}')
+                else:
                     where.append(f'{variable}.{self.date_machine_down} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_machine_down}')
         if self.date_machine_up is not None:
-            if self.date_machine_up != "_":
-                for d in self.date_machine_up:
+            for d in self.date_machine_up:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_machine_up}')
+                else:
                     where.append(f'{variable}.{self.date_machine_up} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_machine_up}')
         if self.date_maintenance_work_order_close is not None:
-            if self.date_maintenance_work_order_close != "_":
-                for d in self.date_maintenance_work_order_close:
+            for d in self.date_maintenance_work_order_close:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_mwo_close}')
+                else:
                     where.append(f'{variable}.{self.property_date_mwo_close} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_mwo_close}')
         if self.date_maintenance_work_order_issue is not None:
-            if self.date_maintenance_work_order_issue != "_":
-                for d in self.date_maintenance_work_order_issue:
+            for d in self.date_maintenance_work_order_issue:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_mwo_issue}')
+                else:
                     where.append(f'{variable}.{self.property_date_mwo_issue} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_mwo_issue}')
         if self.date_maintenance_technician_arrives is not None:
-            if self.date_maintenance_technician_arrives != "_":
-                for d in self.date_maintenance_technician_arrives:
+            for d in self.date_maintenance_technician_arrives:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_mt_arrives}')
+                else:
                     where.append(f'{variable}.{self.property_date_mt_arrives} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_mt_arrives}')
         if self.date_problem_solved is not None:
-            if self.date_problem_solved != "_":
-                for d in self.date_problem_solved:
+            for d in self.date_problem_solved:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_problem_solved}')
+                else:
                     where.append(f'{variable}.{self.date_problem_solved} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_problem_solved}')
         if self.date_problem_found is not None:
-            if self.date_problem_found != "_":
-                for d in self.date_problem_found:
+            for d in self.date_problem_found:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_problem_found}')
+                else:
                     where.append(f'{variable}.{self.date_problem_found} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_problem_found}')
         if self.date_part_ordered is not None:
-            if self.date_part_ordered != "_":
-                for d in self.date_part_ordered:
+            for d in self.date_part_ordered:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_part_ordered}')
+                else:
                     where.append(f'{variable}.{self.date_part_ordered} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_part_ordered}')
         if self.date_maintenance_technician_begin_repair_problem is not None:
-            if self.date_maintenance_technician_begin_repair_problem != "_":
-                for d in self.date_maintenance_technician_begin_repair_problem:
+            for d in self.date_maintenance_technician_begin_repair_problem:
+                if d == "_":
+                    res.append(f'{variable}.{self.property_date_mt_begin_repaire_problem}')
+                else:
                     where.append(f'{variable}.{self.property_date_mt_begin_repaire_problem} = "{d}"')
-            else:
-                res.append(f'{variable}.{self.property_date_mt_begin_repaire_problem}')
 
         return where, res

@@ -11,7 +11,6 @@ from tqdm import tqdm
 import os
 import pandas as pd
 
-
 """
 This files contains all the function to extract the MWOs from a CSV format to store it in a Neo4J Database
 
@@ -49,7 +48,8 @@ The localisation is a dictionary which describe the CSV file (what column contai
                     }
 """
 
-def graph_database_from_csv(database, file_path, localization, date_cleanizer = None):
+
+def graph_database_from_csv(database, file_path, localization, date_cleanizer=None):
     """
 
     :param database: the Neo4j database in which you want to store the data
@@ -89,7 +89,7 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
     :return:
     """
 
-    def create_MWO(row, localization, date_cleanizer = None):
+    def create_MWO(row, localization, date_cleanizer=None):
 
         #####   TECHNICIAN #####
         def create_technicians(row, localization):
@@ -159,7 +159,7 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
             items = []
 
             try:
-                for item in row[localization[NodeTag.VALUE_ITEM.value]].split('/'):
+                for item in row[localization[NodeTag.VALUE_ITEM.value]].split('/ '):
                     items.append(TagItem(keyword=item))
             except KeyError:
                 pass
@@ -170,27 +170,53 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
             problems = []
 
             try:
-                for problem in row[localization[NodeTag.VALUE_PROBLEM.value]].split('/'):
-                    problems.append(TagAction(keyword=problem))
+                for problem in row[localization[NodeTag.VALUE_PROBLEM.value]].split('/ '):
+                    problems.append(TagAction(keyword=problem, it_is="p"))
             except KeyError:
                 pass
 
             return problems
 
-
         def create_solutions(row, localization):
             solutions = []
 
             try:
-                for solution in row[localization[NodeTag.VALUE_SOLUTION.value]].split('/'):
-                    solutions.append(TagAction(keyword=solution))
+                for solution in row[localization[NodeTag.VALUE_SOLUTION.value]].split('/ '):
+                    solutions.append(TagAction(keyword=solution, it_is="s"))
             except KeyError:
                 pass
 
             return solutions
 
+        def create_unknown(row, localization):
+            unknowns = []
+
+            try:
+                for unknown in row[localization[NodeTag.VALUE_UNKNOWN.value]].split('/ '):
+                    unknowns.append(TagUnknown(keyword=unknown))
+            except KeyError:
+                pass
+            return unknowns
+
+        def create_other(row, localization):
+            others = []
+
+            try:
+                for other in row[localization[NodeTag.VALUE_NA.value]].split('/ '):
+                    others.append(Tag(keyword=other))
+            except KeyError:
+                pass
+
+            try:
+                for other in row[localization[NodeTag.VALUE_STOP_WORDS.value]].split('/ '):
+                    others.append(Tag(keyword=other))
+            except KeyError:
+                pass
+
+            return others
+
         #####   ISSUE #####
-        def create_issue(row, localization, date_cleanizer = None):
+        def create_issue(row, localization, date_cleanizer=None):
             issue = None
 
             try:
@@ -252,7 +278,8 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
                     pass
                 try:
                     if NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value + "2" in localization \
-                            and row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value + "2"]] is not "":
+                            and row[
+                                localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value + "2"]] is not "":
                         issue._set_date_maintenance_work_order_issue(
                             date_cleanizer(
                                 row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_ISSUE.value]],
@@ -267,7 +294,8 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
                     pass
                 try:
                     if NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value + "2" in localization \
-                            and row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value + "2"]] is not "":
+                            and row[
+                                localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value + "2"]] is not "":
                         issue._set_date_maintenance_work_order_close(
                             date_cleanizer(
                                 row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_WORK_ORDER_CLOSE.value]],
@@ -342,11 +370,13 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
                     pass
                 try:
                     if NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2" in localization \
-                            and row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2"]] is not "":
+                            and row[localization[
+                                        NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2"]] is not "":
                         issue._set_date_maintenance_technician_begin_repair_problem(
                             date_cleanizer(
                                 row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value]],
-                                row[localization[NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2"]])
+                                row[localization[
+                                    NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value + "2"]])
                         )
                     elif NodeIssue.VALUE_DATE_MAINTENANCE_TECHNICIAN_REPAIR_PROBLEM.value in localization.keys():
                         issue._set_date_maintenance_technician_begin_repair_problem(
@@ -360,13 +390,15 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
             return issue
 
         #####   CORE  #####
+        issue = create_issue(row, localization, date_cleanizer)
         technicians = create_technicians(row, localization)
         operators = create_operators(row, localization)
         machine = create_machine(row, localization)
         items = create_items(row, localization)
         problems = create_problems(row, localization)
         solutions = create_solutions(row, localization)
-        issue = create_issue(row, localization, date_cleanizer)
+        unknowns = create_unknown(row, localization)
+        others = create_other(row, localization)
 
         return MaintenanceWorkOrder(issue=issue,
                                     machine=machine,
@@ -374,27 +406,32 @@ def graph_database_from_csv(database, file_path, localization, date_cleanizer = 
                                     technicians=technicians,
                                     tag_items=items,
                                     tag_problems=problems,
-                                    tag_solutions=solutions
+                                    tag_solutions=solutions,
+                                    tag_unknowns=unknowns,
+                                    tag_others=others
                                     )
 
     with open(file_path, encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         csvfile.seek(0)
         # Only used for the tqdm
-        num_lines=0
-        for line in csvfile:                        # get the number total of row in the csv
-            num_lines +=1
-        csvfile.seek(0)                             # reset the reader at the first line
+        num_lines = 0
+        for line in csvfile:  # get the number total of row in the csv
+            num_lines += 1
+        csvfile.seek(0)  # reset the reader at the first line
 
+        count = 0
         for row in tqdm(reader, total=num_lines):
-        #for row in reader:
+            # for row in reader:
             mwo = create_MWO(row, localization, date_cleanizer)
-            query = mwo.cypher_mwo_graphdata("issue", "machine", "machine_type", "operators", "technicians", "items", "problems", "solutions")
-            database.runQuery(query=query)
+            query = mwo.cypher_mwo_graphdata()
+            query += "RETURN 1"
+            result, c = database.runQuery(query=query)
+            count += c
+        print(count, "Maintenance Word Order Created")
 
 
-
-def graph_database_from_tag_extractor(database, token_dataframe= None):
+def graph_database_from_tag_extractor(database, token_dataframe=None):
     """
     token_dataframe :
 
@@ -403,7 +440,7 @@ def graph_database_from_tag_extractor(database, token_dataframe= None):
     """
 
     for index, row in tqdm(token_dataframe.iterrows(), total=len(token_dataframe.index)):
-        issue = Issue(problem = row["Description"], solution = row["Resolution"])
+        issue = Issue(problem=row["Description"], solution=row["Resolution"])
         items = []
         problems = []
         solutions = []
@@ -441,9 +478,11 @@ def graph_database_from_tag_extractor(database, token_dataframe= None):
         except AttributeError:
             pass
 
-        mwo = MaintenanceWorkOrder(issue = issue, tag_items=items, tag_problems=problems, tag_solutions=solutions, tag_unknowns=unknowns, tag_others= others)
+        mwo = MaintenanceWorkOrder(issue=issue, tag_items=items, tag_problems=problems, tag_solutions=solutions,
+                                   tag_unknowns=unknowns, tag_others=others)
 
-        query = mwo.cypher_mwo_tagdata("issue", "tag_item", "tag_action_problem", "tag_action_solution", "tag_unknown", "tag_other")
+        query = mwo.cypher_mwo_tagdata("issue", "tag_item", "tag_action_problem", "tag_action_solution", "tag_unknown",
+                                       "tag_other")
         query += "RETURN 1"
 
         database.runQuery(query=query)
