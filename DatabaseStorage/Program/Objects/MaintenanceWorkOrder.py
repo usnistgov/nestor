@@ -1,4 +1,5 @@
 import collections
+import pandas as pd
 
 from Program.Database.Database_Properties import LabelEdges
 from Program.Database.Database_Properties import NodeHuman
@@ -284,3 +285,69 @@ class MaintenanceWorkOrder():
                     query += f'MERGE ({var_issue})-[{self.tag_others[i].label_link}]->({var_tag_others})' + "\n"
 
         return query
+
+    @staticmethod
+    def get_dataframe_database_structure(database):
+        dict = {'Tag': '(node:TAG)',
+                'Problem': '(node:TAG:ACTION)-[rel:PROBLEM]-()',
+                'Solution': '(node:TAG:ACTION)-[rel:SOLUTION]-()',
+                'Item': '(node:TAG:ITEM)',
+                'Human': '(node:HUMAN)',
+                'Operator': '(node:HUMAN:OPERATOR)',
+                'Technician': '(node:HUMAN:TECHNICIAN)',
+                'Machine': '(node:MACHINE)',
+                'Machine Type': '(node:MACHINE_TYPE)',
+                'Issue': '(node:ISSUE)',
+                'Technician and Operator': '(node:HUMAN:TECHNICIAN:OPERATOR)'
+                }
+        dataframe = pd.DataFrame(columns=['labels', 'properties'])
+        index = 0
+        for key, value in dict.items():
+            property = set()
+
+            query = f'MATCH {value} RETURN DISTINCT keys(node) as prop'
+            results, done = database.runQuery(query)
+
+            for result in results.records():
+                for r in result["prop"]:
+                    property.add(r)
+            if property :
+                dataframe.loc[index] = [key, list(property)]
+            index += 1
+
+        return dataframe
+    """
+    TRYING TO DO THAT DYNAMIC
+    
+    query = "MATCH (node)<-[relationship]-() RETURN DISTINCT labels(node) as node, type(relationship) as rel"
+    results, done = database.runQuery(query)
+    
+    index = 0
+    
+    df = pd.DataFrame(columns=['nodes','label', 'properties'])
+    for result in results.records():
+        node_labels = result["node"]
+        edge_labels = result["rel"]
+        
+        query = f'MATCH (node:{":".join(node_labels)})<-[:{edge_labels}]-() RETURN DISTINCT keys(node) as prop'
+        res, done = database.runQuery(query)
+        for p in res.records():
+            property = p["prop"]
+            
+        serie = [node_labels,edge_labels,property]
+        
+        df.loc[index]=serie
+        index +=1
+    
+    query = "MATCH (node:ISSUE)-->() RETURN DISTINCT labels(node) as node, keys(node) as prop"
+    results, done = database.runQuery(query)    
+    
+    property = set()
+    for result in results.records():
+        node_labels = result["node"]
+        for r in result["prop"]:
+            property.add(r)
+            
+    df.loc[index] = [node_labels, None, list(property)]
+        
+    """

@@ -39,7 +39,8 @@ class Tag:
         elif self.it_is == "problem":
             self.label_link = LabelEdges.LABEL_PROBLEM.value
         else:
-            self.label_link = LabelEdges.LABEL_UNKNOWN.value
+            #self.label_link = LabelEdges.LABEL_UNKNOWN.value
+            self.label_link=""
 
         self._set_keyword(keyword)
         self._set_synonyms(synonyms)
