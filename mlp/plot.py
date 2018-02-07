@@ -18,9 +18,37 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from distutils.version import StrictVersion
+import mlp.tree
+import networkx as nx
+import holoviews as hv
+
+
+def hv_net(tag_df, layout=nx.spring_layout, name=None):
+    if name is None:
+        name = 'Tag Net'
+    G, node_info, edge_info = mlp.tree.tag_df_network(tag_df)
+    pos = pd.DataFrame(layout(G)).T
+    node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
+    # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
+    #                        ],
+    #                       axis=1).reset_index()
+    # print(pos[0].values,
+    #                   pos[1].values,
+    #                   pos.index.tolist(),
+    #                   *node_info.values.T.tolist())
+    nodes = hv.Nodes((pos[0].values,
+                      pos[1].values,
+                      pos.index.tolist(),
+                      *node_info.values.T.tolist()),
+                     vdims=node_info.columns.tolist())
+
+    graph = hv.Graph((edge_info, nodes), label=name)
+
+    return graph
+
+
 
 _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')
-
 
 def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
              fillcolor='whitesmoke', linewidth=1, linecolor=None,

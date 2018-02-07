@@ -200,37 +200,6 @@ class TokenExtractor(TransformerMixin):
             print('saved locally!')
         return df
 
-        # if not Path(filename).is_file():
-        #     check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
-        #
-        #     df = pd.DataFrame({'tokens': self.vocab_,
-        #                        'NE': '',
-        #                        'alias': '',
-        #                        'notes': '',
-        #                        'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
-        #     df = df[~df.tokens.duplicated(keep='first')]
-        #     df.to_csv(filename, index=False)
-        #     print(f'New Vocab. file written to {filename}')
-        #
-        # else:
-        #     df_import = pd.read_csv(filename, index_col=0)
-        #
-        #     if update:
-        #         check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
-        #
-        #         df = pd.DataFrame({'tokens': self.vocab_,
-        #                            'NE': '',
-        #                            'alias': '',
-        #                            'notes': '',
-        #                            'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
-        #         df = df[~df.tokens.duplicated(keep='first')]
-        #         df.to_csv(filename, index=False)
-        #     else:
-        #         print('file already exists, importing...')
-        #         df = df_import
-        #
-        # return df
-
 
 def _series_itervals(s):
     for n, val in s.iteritems():
@@ -249,3 +218,29 @@ def annotation_app(fname):
     window = MyWindow(vocab_filename=fname)
     window.show()
     sys.exit(app.exec_())
+
+
+def tag_extractor(tex, raw_text, toks, vocab):
+    v_filled = vocab.fillna({'NE': 'NA',  # TODO make this optional
+                             'alias': vocab.index.to_series()}) # we want NA?
+    # make a df with one column per clf of tag
+    tags = {typ: pd.DataFrame(index=range(len(raw_text))) for typ in v_filled.NE.unique()}
+
+    # loop over the unique alias' (i.e.e all tags, by classification
+    for clf, queries in tqdm(v_filled.groupby('NE').alias.unique().iteritems(),
+                                      desc='Category Loop', total=vocab.NE.nunique()):
+        # loop over each tag, returning any instance where the alias matches
+        for query in tqdm(queries, desc=clf + ' token loop', leave=True):
+            query_idx = [tex._model.vocabulary_[i] for i in vocab[vocab.alias == query].index.tolist()]
+            match = ((toks[:, query_idx]).toarray() > 0).any(axis=1).astype(int)
+
+            # make a big dict with all of it together
+            tags[clf][query] = match
+    return tags
+
+
+def tags_to_df(tags, idx_col=None):
+    tag_df = pd.concat(tags.values(), axis=1, keys=tags.keys())
+    if idx_col is not None:
+        tag_df = tag_df.set_index(idx_col).sort_index()  # sort by idx
+    return tag_df
