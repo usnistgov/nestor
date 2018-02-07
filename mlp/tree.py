@@ -2,7 +2,7 @@
 
 import networkx as nx
 import graph_tool as gt
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.preprocessing import MultiLabelBinarizer#, minmax_scale
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -35,20 +35,44 @@ def get_onehot(df, col, topn=700):
     return itm_event
 
 
-def node_dist_mat(itm_event):
+def node_adj_mat(itm_event):
     coocc = itm_event.T.dot(itm_event)
     occ = np.diagonal(np.copy(coocc))
 
     np.fill_diagonal(coocc.values, 0)
-    dist_mat = coocc / np.dot(np.sqrt(occ).T, np.sqrt(occ))
+    adj_mat = coocc / np.dot(np.sqrt(occ).T, np.sqrt(occ))
+    return adj_mat
 
-    return dist_mat
 
+def tag_network(adj_mat, column_lvl=0):
+    G = nx.from_numpy_matrix(adj_mat.values)
+    G = nx.relabel_nodes(G, dict(zip(G.nodes(), adj_mat.columns.get_level_values(column_lvl))))
 
-def tag_network(dist_mat):
-    G = nx.from_numpy_matrix(dist_mat.values)
-    G = nx.relabel_nodes(G, dict(zip(G.nodes(), dist_mat.columns)))
     return G
+
+
+def tag_df_network(tag_df):
+
+    adj_mat = 200*node_adj_mat(tag_df)
+    G = tag_network(adj_mat, column_lvl=1)
+    # print(tag_df.sum().xs(slice(None)))
+    ct = tag_df.sum().xs(slice(None))
+    ct_std = np.log(1+(ct-ct.min(axis=0))/(ct.max(axis=0)-ct.min(axis=0)))
+    nx.set_node_attributes(G, 'count', ct.to_dict())
+    nx.set_node_attributes(G, 'size', (ct_std*(30-10) + 10).to_dict())
+    nx.set_node_attributes(G, 'NE', dict(tag_df.swaplevel(axis=1).columns.tolist()))
+
+    # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
+    #                        pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')],
+    #                       axis=1).reset_index()
+    node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
+    edge_info = adj_mat.copy()
+    edge_info.index, edge_info.columns = edge_info.index.droplevel(0), edge_info.columns.droplevel(0)
+    edge_info = edge_info.stack(level=0).reset_index()
+    edge_info.columns = ['source', 'target', 'weight']
+    edge_info = edge_info.replace(0., np.nan)
+    edge_info.weight = np.log(1+edge_info.weight)
+    return G, node_info, edge_info.dropna()
 
 
 def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
