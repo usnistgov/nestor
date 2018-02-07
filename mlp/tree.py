@@ -1,7 +1,7 @@
 """__author__ = "Thurston Sexton, nx2gt adapted from Benjamin Bengfort" """
 
 import networkx as nx
-import graph_tool as gt
+
 from sklearn.preprocessing import MultiLabelBinarizer#, minmax_scale
 import pandas as pd
 import numpy as np
@@ -156,6 +156,7 @@ def nx2gt(nxG):
     Converts a networkx graph to a graph-tool graph.
     """
     # Phase 0: Create a directed or undirected graph-tool Graph
+    import graph_tool as gt
     gtG = gt.Graph(directed=nxG.is_directed())
 
     def get_prop_type(value, key=None):
