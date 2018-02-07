@@ -1,5 +1,4 @@
 import collections
-import pandas as pd
 
 from Program.Database.Database_Properties import LabelEdges
 from Program.Database.Database_Properties import NodeHuman
@@ -287,7 +286,7 @@ class MaintenanceWorkOrder():
         return query
 
     @staticmethod
-    def get_dataframe_database_structure(database):
+    def get_dict_database_structure(database):
         dict = {'Tag': '(node:TAG)',
                 'Problem': '(node:TAG:ACTION)-[rel:PROBLEM]-()',
                 'Solution': '(node:TAG:ACTION)-[rel:SOLUTION]-()',
@@ -300,7 +299,7 @@ class MaintenanceWorkOrder():
                 'Issue': '(node:ISSUE)',
                 'Technician and Operator': '(node:HUMAN:TECHNICIAN:OPERATOR)'
                 }
-        dataframe = pd.DataFrame(columns=['labels', 'properties'])
+        d = {}
         index = 0
         for key, value in dict.items():
             property = set()
@@ -312,10 +311,10 @@ class MaintenanceWorkOrder():
                 for r in result["prop"]:
                     property.add(r)
             if property :
-                dataframe.loc[index] = [key, list(property)]
+                d[key] = property
             index += 1
 
-        return dataframe
+        return d
     """
     TRYING TO DO THAT DYNAMIC
     
