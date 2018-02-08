@@ -62,10 +62,9 @@ class Tag:
             self.keyword = None
         else:
             try:
-                keyword = keyword.replace(" ", "")
-                self.keyword = keyword.lower()
+                self.keyword = keyword.lower().lstrip()
             except AttributeError:
-                self.keyword = [k.lower() for k in keyword]
+                self.keyword = [k.lower().lstrip() for k in keyword]
 
     def _get_synonyms(self):
         """

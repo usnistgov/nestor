@@ -57,9 +57,9 @@ class Machine:
             self.name = None
         else:
             try:
-                self.name = name.lower()
+                self.name = name.lower().lstrip()
             except AttributeError:
-                self.name = [n.lower() for n in name]
+                self.name = [n.lower().lstrip() for n in name]
 
     def _get_manufacturer(self):
         """
