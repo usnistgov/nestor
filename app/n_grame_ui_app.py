@@ -70,14 +70,14 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
     def table_item_selected(self):
         items = self.vocabTableWidget.selectedItems()  # selected row
 
-        tok, clf, alias, notes = (str(i.text()) for i in items)
+        tok, clf, alias = (str(i.text()) for i in items)
         if alias is not '':
             self.aliasEdit.setText(alias)  # preferred alias
         else:
             self.aliasEdit.setText(tok)  # Default to tok
         btn = self.clf_mapper.get(clf, self.unsetButton)
         btn.toggle()  # toggle that button
-        self.notesTextEdit.setText(notes)  # show any notes
+        # self.notesTextEdit.setText(notes)  # show any notes
 
         self.one_grame_tokens_view.print_lookup_token(tok)
 
@@ -87,17 +87,17 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         Triggers with update button. Saves user annotation to self.df
         """
         items = self.vocabTableWidget.selectedItems()  # selected row
-        tok, clf, alias, notes = (str(i.text()) for i in items)
+        tok, clf, alias = (str(i.text()) for i in items)
 
         new_alias = self.aliasEdit.text()
-        new_notes = self.notesTextEdit.text()
+        # new_notes = self.notesTextEdit.text()
         new_clf = self.btn_mapper.get(self.clfButtonGroup.checkedButton().text(), pd.np.nan)
 
         tok_list = [tok]
 
         self.df.loc[tok_list, 'NE'] = new_clf
         self.df.loc[tok_list, 'alias'] = new_alias
-        self.df.loc[tok_list, 'notes'] = new_notes
+        # self.df.loc[tok_list, 'notes'] = new_notes
         self.vocabTableWidget.print_table(self.df, self.vocab_limit)
         self.vocabTableWidget.setFocus()
 

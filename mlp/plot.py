@@ -28,7 +28,7 @@ def hv_net(tag_df, layout=nx.spring_layout, name=None):
         name = 'Tag Net'
     G, node_info, edge_info = mlp.tree.tag_df_network(tag_df)
     pos = pd.DataFrame(layout(G)).T
-    node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
+    # node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
     #                        ],
     #                       axis=1).reset_index()
@@ -36,16 +36,45 @@ def hv_net(tag_df, layout=nx.spring_layout, name=None):
     #                   pos[1].values,
     #                   pos.index.tolist(),
     #                   *node_info.values.T.tolist())
+
+    # overlay = hv.Overlay(group=name)
+    # overlay = []
+    opts = {
+        'P':'crimson',
+        'S':'#7ABC32',
+        'I':'#4F81BD',
+        'U':'#ffc000',
+        'NA':'gray',
+        'X':'black'
+    }
+
     nodes = hv.Nodes((pos[0].values,
                       pos[1].values,
                       pos.index.tolist(),
                       *node_info.values.T.tolist()),
                      vdims=node_info.columns.tolist())
 
-    graph = hv.Graph((edge_info, nodes), label=name)
-
-    return graph
-
+    graph = hv.Graph(((edge_info.source.values, edge_info.target.values, edge_info.weight.values),
+                      nodes), group=name, vdims='weight')
+    # text = hv.Text(pos[0].values,
+    #                pos[1].values,
+    #                pos.index.tolist())
+    # overlay['edges'] = graph.edgepaths
+    overlay = [graph.edgepaths]
+    for clf in node_info.NE.unique():
+        # print(opts[clf])
+        mask = node_info.NE == clf
+        # print(pos.loc[mask, 0])
+        overlay += [hv.Nodes((pos.loc[mask, 0].values,
+                      pos.loc[mask, 1].values,
+                      pos[mask].index.tolist(),
+                      *node_info[mask].values.T.tolist()),
+                     vdims=node_info.columns.tolist(),
+                     group=name, label=clf).opts(style=dict(color=opts[clf]))]
+        # print(clf)
+    # return graph
+    # overlay['total'] = graph.opts(plot=dict(node_size=0))#hv.EdgePaths(edge_info, vdims='weight', group=name)#graph.edgepaths
+    return hv.Overlay(overlay, group=name)
 
 
 _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')
