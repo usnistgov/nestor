@@ -53,7 +53,7 @@ def tag_network(adj_mat, column_lvl=0):
 
 def tag_df_network(tag_df):
 
-    adj_mat = 200*node_adj_mat(tag_df)
+    adj_mat = 100*node_adj_mat(tag_df)
     G = tag_network(adj_mat, column_lvl=1)
     # print(tag_df.sum().xs(slice(None)))
     ct = tag_df.sum().xs(slice(None))
@@ -66,12 +66,20 @@ def tag_df_network(tag_df):
     #                        pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')],
     #                       axis=1).reset_index()
     node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
+    
+    # filter out the edges with less adjacency than average
+    edgeweights = adj_mat.values[np.triu_indices(min(adj_mat.shape[0], 50))]
+    thres, stdev = edgeweights.mean(), edgeweights.std()
+    mask = adj_mat < thres+0.2*stdev
     edge_info = adj_mat.copy()
+    edge_info[mask] = np.nan
+    
     edge_info.index, edge_info.columns = edge_info.index.droplevel(0), edge_info.columns.droplevel(0)
     edge_info = edge_info.stack(level=0).reset_index()
     edge_info.columns = ['source', 'target', 'weight']
     edge_info = edge_info.replace(0., np.nan)
     edge_info.weight = np.log(1+edge_info.weight)
+    
     return G, node_info, edge_info.dropna()
 
 

@@ -74,6 +74,9 @@ def hv_net(tag_df, layout=nx.spring_layout, name=None):
         # print(clf)
     # return graph
     # overlay['total'] = graph.opts(plot=dict(node_size=0))#hv.EdgePaths(edge_info, vdims='weight', group=name)#graph.edgepaths
+#     print([list(i) for i in pos.iterrows()])
+    text = [hv.Text(x, y, name, fontsize=8) for name, (x, y) in pos.iterrows()]
+    overlay += text
     return hv.Overlay(overlay, group=name)
 
 

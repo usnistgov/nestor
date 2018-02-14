@@ -231,7 +231,8 @@ def tag_extractor(tex, raw_text, toks, vocab):
                                       desc='Category Loop', total=vocab.NE.nunique()):
         # loop over each tag, returning any instance where the alias matches
         for query in tqdm(queries, desc=clf + ' token loop', leave=True):
-            query_idx = [tex._model.vocabulary_[i] for i in vocab[vocab.alias == query].index.tolist()]
+            to_map = v_filled.loc[v_filled.alias == query].index.tolist()
+            query_idx = [tex._model.vocabulary_[i] for i in to_map]
             match = ((toks[:, query_idx]).toarray() > 0).any(axis=1).astype(int)
 
             # make a big dict with all of it together
