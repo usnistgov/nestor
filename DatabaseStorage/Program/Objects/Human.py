@@ -1,8 +1,8 @@
 import collections
 
-from Program.Database.Database_Properties import NodeHuman
-from Program.Database.Database_Properties import NodeIssue
-from Program.Database.Database_Properties import LabelEdges
+from DatabaseStorage.Program.Database.Database_Properties import NodeHuman
+from DatabaseStorage.Program.Database.Database_Properties import NodeIssue
+from DatabaseStorage.Program.Database.Database_Properties import LabelEdges
 
 
 class Human:

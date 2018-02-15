@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from Program.Database.Database_Properties import NodeIssue
-from Program.Others.MyDate import isoStringToDate
+from DatabaseStorage.Program.Database.Database_Properties import NodeIssue
+from DatabaseStorage.Program.Others.MyDate import isoStringToDate
 import collections
 
 """

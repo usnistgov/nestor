@@ -1,12 +1,12 @@
 import csv
 
-from Program.Database.Database_Properties import *
-from Program.Objects.Human import *
-from Program.Objects.Issue import *
-from Program.Objects.Machine import *
-from Program.Objects.MaintenanceWorkOrder import *
-from Program.Objects.Tag import *
-from Program.Others.MyDate import clean_GS_date
+from DatabaseStorage.Program.Database.Database_Properties import *
+from DatabaseStorage.Program.Objects.Human import *
+from DatabaseStorage.Program.Objects.Issue import *
+from DatabaseStorage.Program.Objects.Machine import *
+from DatabaseStorage.Program.Objects.MaintenanceWorkOrder import *
+from DatabaseStorage.Program.Objects.Tag import *
+from DatabaseStorage.Program.Others.MyDate import clean_GS_date
 from tqdm import tqdm
 import os
 import pandas as pd

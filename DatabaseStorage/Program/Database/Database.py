@@ -1,6 +1,6 @@
 from neo4j.v1 import GraphDatabase
 
-from Program.Database.Database_Properties import *
+from DatabaseStorage.Program.Database.Database_Properties import *
 
 
 class DatabaseNeo4J(object):
