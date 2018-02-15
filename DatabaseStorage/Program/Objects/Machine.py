@@ -1,6 +1,6 @@
-from Program.Database.Database_Properties import NodeMachine
-from Program.Database.Database_Properties import LabelEdges
-from Program.Database.Database_Properties import NodeIssue
+from DatabaseStorage.Program.Database.Database_Properties import NodeMachine
+from DatabaseStorage.Program.Database.Database_Properties import NodeIssue
+from DatabaseStorage.Program.Database.Database_Properties import LabelEdges
 
 
 class Machine:

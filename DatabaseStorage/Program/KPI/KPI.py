@@ -1,5 +1,5 @@
-from Program.Others.MyDate import *
-from Program.Database.Database_Properties import *
+from DatabaseStorage.Program.Others.MyDate import *
+from DatabaseStorage.Program.Database.Database_Properties import *
 from tqdm import tqdm
 
 import pandas as pd
@@ -10,11 +10,11 @@ And return a DataFrame with the result
 """
 
 
-def cypher_from_kpi(*args):
+def cypher_from_kpi(objects):
     match = ""
     where = []
     res = []
-    for obj in args:
+    for obj in objects:
         m, w, r = obj.cypher_kpi()
         match += m + "\n"
         if w:
@@ -25,7 +25,7 @@ def cypher_from_kpi(*args):
     else:
         query = match + "\nRETURN " + ", ".join(res)
 
-    return query
+    return query, res
 
 
 def pandas_from_cypher_kpi(database, query):

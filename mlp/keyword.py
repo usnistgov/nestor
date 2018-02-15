@@ -9,6 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 # import sys
 import textacy
+from pathlib import Path
 
 
 class KeywordExtractor(object):
@@ -34,7 +35,7 @@ class KeywordExtractor(object):
                  keep_temp_files=True,
                  pd_kws=None,
                  special_replace=None,
-                 wdir='data'):
+                 wdir=None):
         """
 
         Parameters
@@ -55,7 +56,10 @@ class KeywordExtractor(object):
             which sub-folder to store data- and temp-files in
 
         """
-        self.data_directory = os.path.join(os.getcwd(), wdir)
+        # self.data_directory = os.path.join(os.getcwd(), wdir)
+        if wdir is None:
+            wdir = Path('.') / wdir
+        self.data_directory = wdir
 
         self.vocab = None
         self.vocab_filepath = None
@@ -66,16 +70,13 @@ class KeywordExtractor(object):
         self.doc_term_matrix = None
         # self.vsm.id_to_term = None
         self.vsm = None
-        self.raw_excel_filepath = os.path.join(self.data_directory, xlsx_fname)
-        assert os.path.isfile(self.raw_excel_filepath), 'Please provide a valid xlsx_fname path (in \'wdir\')'
-        raw_txt_filepath = os.path.join(self.data_directory,
-                                        'TEMP_init.txt')
-        # bigram_logs_filepath = os.path.join(self.data_directory,
-        #                                     'TEMP_bigram.csv')
-        clean_logs_filepath = os.path.join(self.data_directory,
-                                            'TEMP_clean.csv')
-        raw_csv_filepath = os.path.join(self.data_directory,
-                                        'TEMP_nlp_raw.csv')
+        self.raw_excel_filepath = self.data_directory/xlsx_fname
+
+        assert self.raw_excel_filepath.is_file(), 'Please provide a valid xlsx_fname path (in \'wdir\')'
+        raw_txt_filepath = self.data_directory/'TEMP_init.txt'
+        # bigram_logs_filepath = self.data_directory/'TEMP_bigram.csv'
+        clean_logs_filepath = self.data_directory/'TEMP_clean.csv'
+        raw_csv_filepath = self.data_directory/'TEMP_nlp_raw.csv'
 
         if nlp_cols is None:
             nlp_cols = {'RawText': 0}

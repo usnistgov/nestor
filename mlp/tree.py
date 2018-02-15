@@ -140,9 +140,6 @@ def nx2gt(nxG):
         If a key is provided, it also ensures the key is in a format that can be
         used with the PropertyMap. Returns a tuple, (type name, value, key)
         """
-        # if isinstance(key, str):
-        #     # Encode the key as ASCII
-        #     key = key.encode('ascii', errors='replace')
 
         # Deal with the value
         if isinstance(value, bool):

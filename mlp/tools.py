@@ -15,6 +15,16 @@ import re
 from html.parser import HTMLParser
 from tqdm import tqdm
 
+
+def series_itervals(s):
+    """
+    Generator for just the values in a series.
+    Useful for e.g. fitting sklearn Vectorizers
+    """
+    for n, val in s.iteritems():
+        yield val
+
+
 nlp = spacy.load('en')
 
 
@@ -107,7 +117,7 @@ def lemmatized_corpus(filename, special=None):
     """
 
     for parsed_log in nlp.pipe(line_review(filename, special=special),
-                               batch_size=10000, n_threads=4):
+                               batch_size=10000, n_threads=8):
         log = ' '
         for sent in parsed_log.sents:
             log += ' ' + ' '.join([token.lemma_ for token in sent
@@ -250,13 +260,13 @@ def write_clean_docs(raw_txt_filepath, clean_logs_filepath, data_directory='data
                                        batch_size=10000, n_threads=4):
                 # lemmatize the text, removing punctuation and whitespace
                 unigram_log = [token.lemma_ for token in parsed_log
-                               if not punct_space(token)]
-                # # remove any remaining stopwords
+                               if not (punct_space(token) or token.is_stop)]
+                # # # remove any remaining stopwords
                 # unigram_log = [term for term in unigram_log
-                #                if term not in spacy.en.STOP_WORDS]
+                #                if not term.is_stop]
                 # write the transformed review as a line in the new file
                 unigram_log = ' '.join(unigram_log)
                 if len(unigram_log) <= 1:
                     unigram_log = 'NaN'
-                    print('Replacing', unigram_log)
+                    # print('Replacing', unigram_log)
                 f.write(unigram_log + '\n')
