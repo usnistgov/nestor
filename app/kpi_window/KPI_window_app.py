@@ -19,6 +19,7 @@ from DatabaseStorage.Program.Objects.Human import *
 from DatabaseStorage.Program.Objects.Tag import *
 from DatabaseStorage.Program.Objects.Machine import *
 from DatabaseStorage.Program.Objects.Issue import *
+from DatabaseStorage.Program.Objects.MaintenanceWorkOrder import MaintenanceWorkOrder
 from DatabaseStorage.Program.Database.Database import DatabaseNeo4J
 
 
@@ -566,27 +567,8 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         self.database = database
 
         self.query, self.array_selection, self.dict_needed_plot = None, None, None
+        self.label_properties = MaintenanceWorkOrder.get_dict_database_structure(database)
 
-        print(database.get_all_labels())
-
-
-        #TODO the label_properties should be sent by the database
-        # self.hLayoutGeneral.addLayout(LayoutKpiSelection(MWO.get_dict_database_structure(self.database)))
-        self.label_properties = {'Human': {'name'},
-                'Issue': {'date_maintenance_work_order_close',
-                          'date_maintenance_work_order_issue',
-                          'description_of_problem',
-                          'description_of_solution',
-                          'machine_down',
-                          'part_in_process'},
-                'Item': {'keyword'},
-                'Machine': {'name'},
-                'Operator': {'name'},
-                'Problem': {'keyword'},
-                'Solution': {'keyword'},
-                'Tag': {'keyword'},
-                'Technician': {'name'},
-                'Technician and Operator': {'name'}}
 
         # It represent all the plot and the needed information to print print it
         self.dict_all_plots = {'Bar Plot' : ['x', 'y', 'hue'],
@@ -621,6 +603,7 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         self.query, self.array_selection = kpi.cypher_from_kpi(objects)
 
         self.dataframe = kpi.pandas_from_cypher_kpi(self.database, self.query)
+        print(self.dataframe)
 
         self.Center_view_plotSelection._set_possible_xy_values(self.array_selection)
         #self.dataframe, result = KPI.dataframe_from_query(query)

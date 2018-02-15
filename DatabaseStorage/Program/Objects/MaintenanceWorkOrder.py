@@ -297,7 +297,6 @@ class MaintenanceWorkOrder():
                 'Machine': '(node:MACHINE)',
                 'Machine Type': '(node:MACHINE_TYPE)',
                 'Issue': '(node:ISSUE)',
-                'Technician and Operator': '(node:HUMAN:TECHNICIAN:OPERATOR)'
                 }
         d = {}
         index = 0
