@@ -6,10 +6,11 @@ import csv
 import sip
 import json
 
+from DatabaseStorage.Program.KPI.Plot import MyMplCanvas
+
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 from app.kpi_window.KPI_window_skeleton import Ui_KPIWindow
-
 from matplotlib.figure import Figure
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -21,6 +22,8 @@ from DatabaseStorage.Program.Objects.Machine import *
 from DatabaseStorage.Program.Objects.Issue import *
 from DatabaseStorage.Program.Objects.MaintenanceWorkOrder import MaintenanceWorkOrder
 from DatabaseStorage.Program.Database.Database import DatabaseNeo4J
+from DatabaseStorage.Program.KPI import Plot
+
 
 
 class LayoutLeftKpiSelection:
@@ -121,7 +124,10 @@ class LayoutLeftKpiSelection:
 
 
     def create_objects(self):
-
+    """
+    Create all the objects based on the lcheckbox and the texedit
+    it return a lists of non None objects
+    """
         objects = set()
 
         human = Human()
@@ -212,7 +218,7 @@ class LayoutLeftKpiSelection:
                                 objects.add(operator)
 
                         elif name.startswith("problem."):
-                            if name.endswith(".name"):
+                            if name.endswith(".keyword"):
                                 if problem._get_keyword():
                                     problem._set_keyword(problem._get_keyword() + texts)
                                 else:
@@ -220,7 +226,7 @@ class LayoutLeftKpiSelection:
                                 objects.add(problem)
 
                         elif name.startswith("solution."):
-                            if name.endswith(".name"):
+                            if name.endswith(".keyword"):
                                 if solution._get_keyword():
                                     solution._set_keyword(solution._get_keyword() + texts)
                                 else:
@@ -228,7 +234,7 @@ class LayoutLeftKpiSelection:
                                 objects.add(solution)
 
                         elif name.startswith("tag."):
-                            if name.endswith(".name"):
+                            if name.endswith(".keyword"):
                                 if tag._get_keyword():
                                     tag._set_keyword(tag._get_keyword() + texts)
                                 else:
@@ -317,7 +323,7 @@ class LayoutLeftKpiSelection:
                                 objects.add(operator)
 
                         elif name.startswith("problem."):
-                            if name.endswith(".name"):
+                            if name.endswith(".keyword"):
                                 if problem._get_keyword():
                                     problem._set_keyword(problem._get_keyword() + texts)
                                 else:
@@ -325,7 +331,7 @@ class LayoutLeftKpiSelection:
                                 objects.add(problem)
 
                         elif name.startswith("solution."):
-                            if name.endswith(".name"):
+                            if name.endswith(".keyword"):
                                 if solution._get_keyword():
                                     solution._set_keyword(solution._get_keyword() + texts)
                                 else:
@@ -333,7 +339,7 @@ class LayoutLeftKpiSelection:
                                 objects.add(solution)
 
                         elif name.startswith("tag."):
-                            if name.endswith(".name"):
+                            if name.endswith(".keyword"):
                                 if tag._get_keyword():
                                     tag._set_keyword(tag._get_keyword() + texts)
                                 else:
@@ -347,26 +353,7 @@ class LayoutLeftKpiSelection:
                                 else:
                                     technician._set_name(texts)
                                 objects.add(technician)
-
-        for obj in objects:
-            print(obj)
         return objects
-
-    def create_needed_object(self, widget):
-        """
-        create the object for the left layout selection
-        :param widget:
-        :return:
-        """
-    #TODO be carefull when _get_ return None it might break the system
-    ##TODO change all the endswith() with the label inside the object
-
-
-        # elif name.startswith("technician and operator."):
-        #    result.append(self.technician_operator)
-        #     if name.endswith(".name"):
-        #         # self.human._set_name(self.human._get_name() + texts)
-        #         pass
 
 
 class LayoutCenterPlotSelection:
@@ -490,9 +477,13 @@ class LayoutRightPlotPrint:
         self.layout = layout
         self.parent_layout = parent_layout
         self.figure_canevas = None
+        self.dataframe= None
+        self.properties= None
+
+        self.plot= Plot.MyMplCanvas(layout = layout)
 
         self.initial_view()
-        self.print_plot()
+        #self.print_plot()
 
     def _set_dataframe(self, dataframe):
         self.dataframe = dataframe
@@ -532,12 +523,18 @@ class LayoutRightPlotPrint:
         """
         self.clean_plotLayout()
 
-        self.figure_canevas = FigureCanvas(Figure(figsize=(5, 3)))
-        self.Right_VBoxLayout_PlotView.addWidget(self.figure_canevas)
+        if self.properties["type"] == "Bar Plot":
+            self.plot = Plot.BarPlot_canevas(layout=self.Right_VBoxLayout_PlotView, parent_layout=self.parent_layout,
+                                             dataframe=self.dataframe, properties=self.properties,
+                                            width = 5, height = 4, dpi = 100)
 
-        self.plot = self.figure_canevas.figure.subplots()
-        t = np.linspace(0, 10, 501)
-        self.plot.plot(t, np.tan(t), ".")
+        elif self.properties["type"] == "Horizontal Bar Plot":
+            self.plot = Plot.HorizontalBarPlot_canevas(layout=self.Right_VBoxLayout_PlotView, parent_layout=self.parent_layout,
+                                             dataframe=self.dataframe, properties=self.properties,
+                                             width=5, height=4, dpi=100)
+
+        #self.plot = Plot.MyMplCanvas(layout=self.Right_VBoxLayout_PlotView, dataframe=self.dataframe, properties=self.properties, parent_layout=self.parent_layout, )
+
 
     def clean_plotLayout(self):
         """
@@ -571,10 +568,8 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 
 
         # It represent all the plot and the needed information to print print it
-        self.dict_all_plots = {'Bar Plot' : ['x', 'y', 'hue'],
-                          'Horizontal Bar Plot' : ['x','y','hue'],
-                          'over_time' : ['x', 'y']
-                               }
+        # might want to add stuff like a tuple with the type of QW you want for each values
+        self.dict_all_plots = Plot.dict_all_plot
 
         #here we create all our class for the different layout and the interaction with it
         self.Left_View_labelProperties = LayoutLeftKpiSelection(self.Left_gridLayout_labelProperties, self.horizontalLayoutWidget, self.label_properties)
@@ -600,21 +595,18 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         # """
 
         objects = self.Left_View_labelProperties.create_objects()
+        # for obj in objects:
+        #     print(obj)
         self.query, self.array_selection = kpi.cypher_from_kpi(objects)
+        print("----------------ARRAY---------------\n", self.array_selection)
+        print("----------------QUERY---------------\n", self.query)
 
-        self.dataframe = kpi.pandas_from_cypher_kpi(self.database, self.query)
-        print(self.dataframe)
-
-        self.Center_view_plotSelection._set_possible_xy_values(self.array_selection)
-        #self.dataframe, result = KPI.dataframe_from_query(query)
-
-
-    def query_to_dataframe(self):
-        """
-        from a array of object, it create an cypher query
-        :return:
-        """
-        pass
+        if self.array_selection:
+            self.dataframe = kpi.pandas_from_cypher_kpi(self.database, self.query)
+            self.Right_view_plorPrint._set_dataframe(self.dataframe)
+            self.Center_view_plotSelection._set_possible_xy_values(self.array_selection)
+        else:
+            Qw.QMessageBox.about(self, 'Warning', "Please select the return statement you want")
 
 
     def onClick_centerLayout_printPlotButton(self):
@@ -637,10 +629,11 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
                     dict_needed_plot[widget.objectName()] = widget.toPlainText()
                 except:
                     pass
+
         self.dict_needed_plot = dict_needed_plot
 
+        self.Right_view_plorPrint._set_plotProperties(self.dict_needed_plot)
         self.Right_view_plorPrint.print_plot()
-
 
     def onClick_saveJson(self):
         """
@@ -680,7 +673,7 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         if self.Right_view_plorPrint.plot is not None:
             name, okPressed = Qw.QInputDialog.getText(self, "Get Name", "plot name", Qw.QLineEdit.Normal, "")
             if okPressed and name != '':
-                self.Right_view_plorPrint.plot.get_figure().savefig(name + ".png")
+                self.Right_view_plorPrint.plot.fig.savefig(name + ".png")
         else:
             Qw.QMessageBox.about(self, 'cannot save', "You should create a plot first")
 
@@ -697,7 +690,6 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
                 plots_names = []
                 for plot_json in dict_line_json:
                     if "name" in plot_json:
-                        #print(plot_json['name'])
                         plots_names.append(plot_json['name'])
 
                 plot_name, okPressed = Qw.QInputDialog.getItem(self, "plot name selection", "choose your plot name", plots_names)
@@ -711,16 +703,10 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
                                 self.array_selection = plot_json["selection"]
                                 self.dict_needed_plot = plot_json["plot"]
 
-                                print(self.query)
-                                print(self.array_selection)
-                                print(self.dict_needed_plot)
-
                                 self.Center_view_plotSelection._set_possible_xy_values(self.array_selection)
                                 self.Center_view_plotSelection.Center_comboBox_select_plot.setCurrentText(plot_json["plot"]["type"])
-                                print(plot_json["plot"]["type"])
                                 for i in reversed(range(self.Center_view_plotSelection.Center_formLayout_infoPlot.count())):
                                     widget = self.Center_view_plotSelection.Center_formLayout_infoPlot.itemAt(i).widget()
-                                    print(widget)
                                     if isinstance(widget, Qw.QComboBox):
                                         if widget.objectName() in  plot_json["plot"]:
                                             widget.setCurrentText(plot_json["plot"][widget.objectName()])
