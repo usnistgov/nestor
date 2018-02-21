@@ -53,6 +53,10 @@ class LayoutLeftKpiSelection:
         self.label_properties = label_properties
         self.rowX=0
 
+        self.initial_view()
+
+    def initial_view(self):
+        self.rowX=0
         # create the label on the top of the layout
         self.groupCBox_selection = Qw.QButtonGroup()
         self.groupCBox_selection.setExclusive(False)
@@ -76,7 +80,14 @@ class LayoutLeftKpiSelection:
         self.Left_PButton_search.setObjectName("Left_PButton_search")
         self.layout.addWidget(self.Left_PButton_search, self.rowX, 1, 2, 1)
 
-
+    def clean_Layout(self):
+        """
+        clean the form layout by removing all the Widget in it
+        :return:
+        """
+        for i in reversed(range(self.layout.count())):
+            if self.layout.itemAt(i).widget() is not None:
+                self.layout.itemAt(i).widget().deleteLater()
 
     def print_form_property(self):
         """
@@ -112,22 +123,20 @@ class LayoutLeftKpiSelection:
                 QTextEdit_filter.setMaximumSize(QSize(300, 40))
                 self.layout.addWidget(QTextEdit_filter, self.rowX, 1)
 
-
-
-            #print the line to separate every node label
             self.rowX += 1
+            #print the line to separate every node label
             line = Qw.QFrame(self.parent_layout)
             line.setFrameShape(Qw.QFrame.HLine)
             line.setFrameShadow(Qw.QFrame.Sunken)
             line.setObjectName("line")
-            self.layout.addWidget(line)
+            self.layout.addWidget(line, self.rowX, 0)
 
 
     def create_objects(self):
-    """
-    Create all the objects based on the lcheckbox and the texedit
-    it return a lists of non None objects
-    """
+        """
+            Create all the objects based on the lcheckbox and the texedit
+            it return a lists of non None objects
+        """
         objects = set()
 
         human = Human()
@@ -532,6 +541,11 @@ class LayoutRightPlotPrint:
             self.plot = Plot.HorizontalBarPlot_canevas(layout=self.Right_VBoxLayout_PlotView, parent_layout=self.parent_layout,
                                              dataframe=self.dataframe, properties=self.properties,
                                              width=5, height=4, dpi=100)
+        elif self.properties["type"] == "Date Plot":
+            self.plot = Plot.DatePlot_canevas(layout=self.Right_VBoxLayout_PlotView,
+                                                   parent_layout=self.parent_layout,
+                                                   dataframe=self.dataframe, properties=self.properties,
+                                                   width=5, height=4, dpi=100)
 
         #self.plot = Plot.MyMplCanvas(layout=self.Right_VBoxLayout_PlotView, dataframe=self.dataframe, properties=self.properties, parent_layout=self.parent_layout, )
 
@@ -597,12 +611,12 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         objects = self.Left_View_labelProperties.create_objects()
         # for obj in objects:
         #     print(obj)
-        self.query, self.array_selection = kpi.cypher_from_kpi(objects)
+        self.query, array_selection = kpi.cypher_from_kpi(objects)
         print("----------------ARRAY---------------\n", self.array_selection)
         print("----------------QUERY---------------\n", self.query)
 
-        if self.array_selection:
-            self.dataframe = kpi.pandas_from_cypher_kpi(self.database, self.query)
+        if array_selection:
+            self.dataframe, self.array_selection = kpi.pandas_from_cypher_kpi(self.database, self.query, array_selection)
             self.Right_view_plorPrint._set_dataframe(self.dataframe)
             self.Center_view_plotSelection._set_possible_xy_values(self.array_selection)
         else:
@@ -684,6 +698,8 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         :return:
         """
         if self.file_jsonPlot_save:
+            self.Left_View_labelProperties.clean_Layout()
+            self.Left_View_labelProperties.initial_view()
             with open(self.file_jsonPlot_save, "r", newline='\n') as file:
                 dict_line_json = json.load(file)
                 dict_line_json.append({"test":"test"})
@@ -734,6 +750,8 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
     database = DatabaseNeo4J("bolt://127.0.0.1:7687", "neo4j", 'GREYSTONE!!')
+    #database = DatabaseNeo4J("bolt://127.0.0.1:7687", "neo4j", 'HVAC!!')
+
     window = MyWindow(database)
     window.show()
     sys.exit(app.exec_())
