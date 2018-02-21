@@ -116,8 +116,8 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         Open the csv file and save it as a dataframe using set_dataframe
         """
         try:
-            #fileName, _ = Qw.QFileDialog.getOpenFileName(self, 'Open File')
-            fileName = 'test_estimated_2g.csv'
+            fileName, _ = Qw.QFileDialog.getOpenFileName(self, 'Open File')
+            # fileName = 'test_estimated_2g.csv'
             self.set_dataframe(fileName)
             self.update_progress_bar()
             #self.csv_to_tab(fileName)
