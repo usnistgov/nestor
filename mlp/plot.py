@@ -23,11 +23,11 @@ import networkx as nx
 import holoviews as hv
 
 
-def hv_net(tag_df, layout=nx.spring_layout, name=None):
+def hv_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, padding=None):
     if name is None:
         name = 'Tag Net'
     G, node_info, edge_info = mlp.tree.tag_df_network(tag_df)
-    pos = pd.DataFrame(layout(G)).T
+    pos = pd.DataFrame(layout(G, **layout_kws)).T
     # node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
     #                        ],
@@ -77,7 +77,10 @@ def hv_net(tag_df, layout=nx.spring_layout, name=None):
 #     print([list(i) for i in pos.iterrows()])
     text = [hv.Text(x, y, name, fontsize=8) for name, (x, y) in pos.iterrows()]
     overlay += text
-    return hv.Overlay(overlay, group=name)
+    ov = hv.Overlay(overlay, group=name)
+    if padding is not None:
+        ov = ov.redim.range(**padding)
+    return ov
 
 
 _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')
