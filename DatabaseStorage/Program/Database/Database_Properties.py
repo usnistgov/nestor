@@ -78,6 +78,19 @@ class NodeIssue(Enum):
     PROPERTY_TIME_FIX = "time_to_fix"
     PROPERTY_TIME_TURN_ON = "time_to_turn_on"
 
+    PROPERTY_AVG_REPAIR = "avg_time_to_repair"
+    PROPERTY_AVG_WORK_ORDER_COMPLETION = "avg_time_work_order_completion"
+    PROPERTY_AVG_DISPATCH = "avg_time_to_dispatch"
+    PROPERTY_AVG_RETURN_OPERATION = "avg_time_to_return_to_operation"
+    PROPERTY_AVG_ISSUE_WORK_ORDER = "avg_time_to_issue_work_order"
+    PROPERTY_AVG_TRAVEL = "avg_time_to_travel"
+    PROPERTY_AVG_SOLVE_PROBLEM = "avg_time_to_solve_problem"
+    PROPERTY_AVG_DIAGNOSE = "avg_time_to_diagnose"
+    PROPERTY_AVG_ORDER = "avg_time_to_order"
+    PROPERTY_AVG_LEAD_PART = "lead_avg_time_for_part"
+    PROPERTY_AVG_FIX = "avg_time_to_fix"
+    PROPERTY_AVG_TURN_ON = "avg_time_to_turn_on"
+
 
     VALUE_DESCRIPTION_PROBLEM = "description_of_problem"
     VALUE_DESCRIPTION_SOLUTION = "description_of_solution"
