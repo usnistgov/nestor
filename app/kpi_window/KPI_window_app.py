@@ -546,6 +546,13 @@ class LayoutRightPlotPrint:
                                                    parent_layout=self.parent_layout,
                                                    dataframe=self.dataframe, properties=self.properties,
                                                    width=5, height=4, dpi=100)
+        elif self.properties["type"] == "sns Bar Plot":
+            self.plot = Plot.Seaborn_BarPlot_canevas(layout=self.Right_VBoxLayout_PlotView,
+                                              parent_layout=self.parent_layout,
+                                              dataframe=self.dataframe, properties=self.properties,
+                                              width=5, height=4, dpi=100)
+        else:
+            self.plot= Plot.MyMplCanvas()
 
         #self.plot = Plot.MyMplCanvas(layout=self.Right_VBoxLayout_PlotView, dataframe=self.dataframe, properties=self.properties, parent_layout=self.parent_layout, )
 
@@ -617,6 +624,7 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 
         if array_selection:
             self.dataframe, self.array_selection = kpi.pandas_from_cypher_kpi(self.database, self.query, array_selection)
+            self.array_selection.append("")
             self.Right_view_plorPrint._set_dataframe(self.dataframe)
             self.Center_view_plotSelection._set_possible_xy_values(self.array_selection)
         else:
