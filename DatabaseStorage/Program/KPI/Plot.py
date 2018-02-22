@@ -3,9 +3,9 @@ import PyQt5.QtWidgets as Qw
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib as mpl
 import seaborn as sns
 import pandas as pd
-from numpy.ma import arange, sin
 
 dict_all_plot = {
     'Bar Plot' : ['x', 'number', 'hue'],
@@ -67,13 +67,13 @@ class BarPlot_canevas(MyMplCanvas):
                 df = self.dataframe.sort_values(self.properties["number"], ascending=False)
                 if not self.properties["hue"] is "":
                     sns.barplot(data=df,
-                                x=self.properties["y"],
+                                x=self.properties["x"],
                                 y=self.properties["number"],
                                 hue=self.properties["hue"],
                                 ax=self.axes)
                 else:
                     sns.barplot(data=df,
-                                x=self.properties["y"],
+                                x=self.properties["x"],
                                 y=self.properties["number"],
                                 ax=self.axes)
         except (KeyError, TypeError):
@@ -96,6 +96,7 @@ class HorizontalBarPlot_canevas(MyMplCanvas):
         try :
             if not self.dataframe.empty:
                 df = self.dataframe.sort_values(self.properties["number"], ascending=False)
+                print()
                 if not self.properties["hue"] is "":
                     sns.barplot(data=df,
                                 y=self.properties["y"],
@@ -124,33 +125,55 @@ class DatePlot_canevas(MyMplCanvas):
         print the plot
         :return:
         """
-        #try:
-        if not self.dataframe.empty:
-            df = self.dataframe.sort_values(self.properties["time"], ascending=False)#.set_index(self.properties["time"])
-            #df.groupby(pd.Grouper(freq='M')).sum()
-            print(df)
-            # if not self.properties["hue"] is "":
-            #     sns.pointplot(data=df,
-            #                 x = df.,
-            #                 y = self.properties["number"],
-            #                 hue = self.properties["hue"],
-            #                 ax=self.axes)
-            # else:
-            #     sns.pointplot(data=df,
-            #                   x=self.properties["time"],
-            #                   y=self.properties["number"],
-            #                 ax = self.axes)
-        # except (KeyError, TypeError):
-        #     Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
+        def myFormatter(x, pos):
+            return pd.to_datetime(x).strftime('%b-%Y')
 
-            if not self.properties["hue"] is "":
-                sns.tsplot(data=df,
-                            # time = self.properties["time"],
-                            # value = self.properties["number"],
-                            # #hue = self.properties["hue"],
-                            ax=self.axes)
-            else:
-                sns.tsplot(data=df,
-                           # time=self.properties["time"],
-                           # value=self.properties["number"],
-                            ax = self.axes)
+        try :
+            if not self.dataframe.empty:
+                df = self.dataframe
+                df[self.properties["time"]] = pd.DatetimeIndex(df[self.properties["time"]])
+
+                if not self.properties["hue"] is "":
+                    df = df.groupby(by=[self.properties["hue"], pd.Grouper(key=self.properties["time"], freq="M")]).sum()
+                    df = df.reset_index()
+                    sns.tsplot(data=df,
+                                    time=self.properties["time"],
+                                    unit=self.properties["hue"],
+                                    condition=self.properties["hue"],
+                                    value=self.properties["number"],
+                                    ax=self.axes
+                                    )
+
+                else:
+                    df = df.groupby(by=pd.Grouper(key=self.properties["time"], freq="M")).sum()
+                    df = df.reset_index()
+                    sns.tsplot(data=df,
+                                    time=self.properties["time"],
+                                    value=self.properties["number"],
+                                    ax=self.axes
+                                    )
+
+                self.axes.xaxis.set_major_formatter(mpl.ticker.FuncFormatter(myFormatter))
+                self.fig.autofmt_xdate()
+
+        except (KeyError, TypeError):
+            Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
+
+        # if not self.dataframe.empty:
+        #     df = self.dataframe
+        #     df[self.properties["time"]] = pd.DatetimeIndex(df[self.properties["time"]])
+        #     df = df.groupby(by=[self.properties["hue"], pd.TimeGrouper(key=self.properties["time"], freq="M")]).sum()
+        #     df=df.reset_index()
+        #
+        #     ax = sns.tsplot(data=df,
+        #                     time=self.properties["time"],
+        #                     unit=self.properties["hue"],
+        #                     condition=self.properties["hue"],
+        #                     value=self.properties["number"],
+        #                     ax = self.axes
+        #                     )
+
+
+
+
+
