@@ -8,10 +8,9 @@ import pandas as pd
 from numpy.ma import arange, sin
 
 dict_all_plot = {
-    'Bar Plot' : ['x', 'height'],
-    'Horizontal Bar Plot' : ['y','width'],
-    'Date Plot' : ['date', 'over'],
-    # 'Count Plot' : ['x', 'hue']
+    'Bar Plot' : ['x', 'number', 'hue'],
+    'Horizontal Bar Plot' : ['y', 'number', 'hue'],
+    'Date Plot' : ['time', 'number', 'hue']
 }
 
 
@@ -62,9 +61,21 @@ class BarPlot_canevas(MyMplCanvas):
         print the plot
         :return:
         """
-        self.dataframe.sort_values(by="issue_count", ascending=False, inplace=True)
+
         try :
-            self.axes.bar(x=self.dataframe[self.properties["x"]], height=self.dataframe[self.properties["height"]])
+            if not self.dataframe.empty:
+                df = self.dataframe.sort_values(self.properties["number"], ascending=False)
+                if not self.properties["hue"] is "":
+                    sns.barplot(data=df,
+                                x=self.properties["y"],
+                                y=self.properties["number"],
+                                hue=self.properties["hue"],
+                                ax=self.axes)
+                else:
+                    sns.barplot(data=df,
+                                x=self.properties["y"],
+                                y=self.properties["number"],
+                                ax=self.axes)
         except (KeyError, TypeError):
             Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
 
@@ -83,8 +94,19 @@ class HorizontalBarPlot_canevas(MyMplCanvas):
         :return:
         """
         try :
-            #self.dataframe.sort_values(self.properties["width"], ascending=False, inplace=True)
-            self.axes.barh(y=self.dataframe[self.properties["y"]], width=self.dataframe[self.properties["width"]])
+            if not self.dataframe.empty:
+                df = self.dataframe.sort_values(self.properties["number"], ascending=False)
+                if not self.properties["hue"] is "":
+                    sns.barplot(data=df,
+                                y=self.properties["y"],
+                                x=self.properties["number"],
+                                hue=self.properties["hue"],
+                                ax=self.axes)
+                else:
+                    sns.barplot(data=df,
+                                y=self.properties["y"],
+                                x=self.properties["number"],
+                                ax=self.axes)
         except (KeyError, TypeError):
             Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
 
@@ -102,9 +124,33 @@ class DatePlot_canevas(MyMplCanvas):
         print the plot
         :return:
         """
-        try:
-            #print(self.dataframe[self.properties["date"]])
-            #print(self.dataframe[self.properties["over"]])
-            self.axes.plot_date(self.dataframe[self.properties["date"]], self.dataframe[self.properties["over"]], 'b-')
-        except (KeyError, TypeError):
-            Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
+        #try:
+        if not self.dataframe.empty:
+            df = self.dataframe.sort_values(self.properties["time"], ascending=False)#.set_index(self.properties["time"])
+            #df.groupby(pd.Grouper(freq='M')).sum()
+            print(df)
+            # if not self.properties["hue"] is "":
+            #     sns.pointplot(data=df,
+            #                 x = df.,
+            #                 y = self.properties["number"],
+            #                 hue = self.properties["hue"],
+            #                 ax=self.axes)
+            # else:
+            #     sns.pointplot(data=df,
+            #                   x=self.properties["time"],
+            #                   y=self.properties["number"],
+            #                 ax = self.axes)
+        # except (KeyError, TypeError):
+        #     Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
+
+            if not self.properties["hue"] is "":
+                sns.tsplot(data=df,
+                            # time = self.properties["time"],
+                            # value = self.properties["number"],
+                            # #hue = self.properties["hue"],
+                            ax=self.axes)
+            else:
+                sns.tsplot(data=df,
+                           # time=self.properties["time"],
+                           # value=self.properties["number"],
+                            ax = self.axes)
