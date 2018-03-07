@@ -29,6 +29,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
         self.vocabTableWidget.itemSelectionChanged.connect(self.table_item_selected)
         self.simthresSlider.sliderReleased.connect(self.fuzz_thres)
         self.df = None
+
         self.scores = None
         self.alias_lookup = None
         self.vocab_limit = 1000
