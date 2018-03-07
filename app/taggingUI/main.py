@@ -1,4 +1,5 @@
 import sys
+import yaml
 from app.taggingUI.openFilesUI_app import MyOpenFilesWindow
 from app.taggingUI.selectCSVHeadersUI_app import MySelectCsvHeadersWindow
 from app.taggingUI.taggingUI_app import MyTaggingToolWindow
@@ -7,6 +8,9 @@ import PyQt5.QtWidgets as Qw
 
 class Main:
     def __init__(self):
+        self.yamlPath_config = "config.yaml"
+        self.config = self.openYAMLConfig_File(self.yamlPath_config)
+
         self.window_OpenFiles = MyOpenFilesWindow()
         self.window_selectCSVHeader = MySelectCsvHeadersWindow()
         self.window_taggingTool = MyTaggingToolWindow()
@@ -53,6 +57,27 @@ class Main:
 
             self.window_selectCSVHeader.close()
             self.window_taggingTool.show()
+
+
+    def openYAMLConfig_File(self, yaml_path):
+        """
+        open a Yaml file based on the given path
+        :return: a dictionary
+        """
+        with open(yaml_path, 'r') as yamlfile:
+            config =   yaml.load(yamlfile)
+            print("yaml file open")
+        return config
+
+    def saveYAMLConfig_File(self, yaml_path, dict):
+        """
+        save a Yaml file based on the given path
+        :return: a dictionary
+        """
+        with open(yaml_path, 'w') as yamlfile:
+            yaml.dump(dict, yamlfile)
+            print("yaml file save")
+
 
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
