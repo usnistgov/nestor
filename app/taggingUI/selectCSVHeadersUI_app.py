@@ -7,10 +7,9 @@ from app.taggingUI.selectCSVHeadersUI_skeleton import Ui_MainWindow_selectCSVHea
 
 class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
-    def __init__(self, filePath_OriginalCSV= None):
+    def __init__(self):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
-        self.csvHeader = self.set_CSVHeader(filePath_OriginalCSV)
 
         self.buttonGroup_CSVHeaders = Qw.QButtonGroup()
         self.buttonGroup_CSVHeaders.setExclusive(False)
@@ -86,10 +85,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         after saving we open the tagging UI
         :return:
         """
-        self.list_header_rawText= []
-        for button in self.buttonGroup_CSVHeaders.buttons():
-            if button.isChecked():
-                self.list_header_rawText.append(button.text())
+        self.list_header_rawText= self.get_checkedButton()
 
         if self.list_header_rawText:
             return True, self.list_header_rawText
@@ -97,8 +93,38 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
             return False, None
 
+    def set_config_values(self, config_default, config_new):
+        """
+        auto check the checkbox (if the original csv fil is not changed)
+        :param config_default:
+        :param config_new:
+        :return:
+        """
+        if config_default['file']['filePath_OriginalCSV']['path'] == config_new['file']['filePath_OriginalCSV']['path']:
+            for button in self.buttonGroup_CSVHeaders.buttons():
+                if button.text() in config_default['file']['filePath_OriginalCSV']['headers']:
+                    button.setChecked(True)
 
 
+    def get_config_value(self, config):
+        """
+        replace the list of checked button from the config to the new one
+        :param config:
+        :return:
+        """
+        config['file']['filePath_OriginalCSV']['headers'] = self.get_checkedButton()
+        return config
+
+    def get_checkedButton(self):
+        """
+        return a list of the text in the button checked
+        :return:
+        """
+        checked = []
+        for button in self.buttonGroup_CSVHeaders.buttons():
+            if button.isChecked():
+                checked.append(button.text())
+        return checked
 
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)

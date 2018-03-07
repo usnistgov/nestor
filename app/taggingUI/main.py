@@ -9,7 +9,30 @@ import PyQt5.QtWidgets as Qw
 class Main:
     def __init__(self):
         self.yamlPath_config = "config.yaml"
-        self.config = self.openYAMLConfig_File(self.yamlPath_config)
+        self.config_default = self.openYAMLConfig_File(self.yamlPath_config)
+        self.config_new = {
+                            'file':
+                                {
+                                'filePath_OriginalCSV':
+                                    {
+                                    'path': None,
+                                    'headers': None,
+                                    },
+                                'filePath_1GrammCSV':
+                                    {
+                                    'path': None
+                                    },
+                                'filePath_nGrammCSV':
+                                    {
+                                    'path': None
+                                    }
+                                },
+                            'value':
+                                {
+                                'numberToken_show': None,
+                                'similarityMatrix_threshold': None
+                                }
+                            }
 
         self.window_OpenFiles = MyOpenFilesWindow()
         self.window_selectCSVHeader = MySelectCsvHeadersWindow()
@@ -18,6 +41,7 @@ class Main:
         self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)
         self.window_selectCSVHeader.pushButton_selectCSVHeaders_save.clicked.connect(self.selectWindow_to_taggingWindow)
 
+        self.window_OpenFiles.set_config_values(self.config_default)
         self.window_OpenFiles.show()
 
     def openWindow_to_selectWindow(self):
@@ -35,10 +59,13 @@ class Main:
             print(self.filePath_1GrammCSV)
             print(self.filePath_nGrammCSV)
 
+            self.config_new = self.window_OpenFiles.get_config_value(self.config_new)
             self.window_OpenFiles.close()
+
 
             self.window_selectCSVHeader.set_CSVHeader(self.filePath_OriginalCSV)
             self.window_selectCSVHeader.init_selectHeaderView()
+            self.window_selectCSVHeader.set_config_values(self.config_default, self.config_new)
             self.window_selectCSVHeader.show()
 
     def selectWindow_to_taggingWindow(self):
@@ -53,9 +80,14 @@ class Main:
 
             [print(l) for l in self.list_header_rawText]
 
-            # The TFIDF stuff go there
 
+
+            self.config_new = self.window_selectCSVHeader.get_config_value(self.config_new)
             self.window_selectCSVHeader.close()
+
+            # The TFIDF stuff go there
+            # self.window_taggingTool.set_tableView(TFIDF)
+
             self.window_taggingTool.show()
 
 

@@ -63,6 +63,28 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.lineEdit_openFiles_1GramCSV.setText("")
         self.lineEdit_openFiles_NgramCSV.setText("")
 
+    def set_config_values(self, config):
+        """
+        add to the linEdit the value stored inside the config file
+        :param config:
+        :return:
+        """
+        self.lineEdit_openFiles_OriginalCSV.setText(config['file']['filePath_OriginalCSV']['path'])
+        self.lineEdit_openFiles_1GramCSV.setText(config['file']['filePath_1GrammCSV']['path'])
+        self.lineEdit_openFiles_NgramCSV.setText(config['file']['filePath_nGrammCSV']['path'])
+
+    def get_config_value(self, config):
+        """
+        update the new config file dictionary
+        :param config:
+        :return:
+        """
+        config['file']['filePath_OriginalCSV']['path'] = self.lineEdit_openFiles_OriginalCSV.text()
+        config['file']['filePath_1GrammCSV']['path'] = self.lineEdit_openFiles_1GramCSV.text()
+        config['file']['filePath_nGrammCSV']['path'] = self.lineEdit_openFiles_NgramCSV.text()
+        return config
+
+
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
     window = MyOpenFilesWindow()
