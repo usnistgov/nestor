@@ -20,7 +20,7 @@
       <item row="0" column="0">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -201,7 +201,23 @@
              </layout>
             </item>
             <item row="1" column="0">
-             <widget class="QTableWidget_Token" name="tableWidget_1gram_TagContainer"/>
+             <widget class="QTableWidget" name="tableWidget_1gram_TagContainer">
+              <property name="editTriggers">
+               <set>QAbstractItemView::EditKeyPressed</set>
+              </property>
+              <property name="tabKeyNavigation">
+               <bool>false</bool>
+              </property>
+              <property name="dragDropOverwriteMode">
+               <bool>false</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+             </widget>
             </item>
             <item row="2" column="3" alignment="Qt::AlignRight|Qt::AlignBottom">
              <widget class="QPushButton" name="pushButton_1gram_UpdateTokenProperty">
@@ -246,7 +262,23 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QTableWidget_Token" name="tableWidget_Ngram_TagContainer"/>
+             <widget class="QTableWidget" name="tableWidget_Ngram_TagContainer">
+              <property name="editTriggers">
+               <set>QAbstractItemView::EditKeyPressed</set>
+              </property>
+              <property name="tabKeyNavigation">
+               <bool>false</bool>
+              </property>
+              <property name="dragDropOverwriteMode">
+               <bool>false</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+             </widget>
             </item>
             <item row="0" column="2" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_Ngram_PropertyEditorDescription">
@@ -426,13 +458,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QTableWidget_Token</class>
-   <extends>QTableWidget</extends>
-   <header location="global">qtablewidget_token.py</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

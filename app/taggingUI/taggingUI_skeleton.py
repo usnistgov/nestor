@@ -88,7 +88,11 @@ class Ui_MainWindow_taggingTool(object):
         self.verticalLayout_1gram_PropertiesEditor.addItem(spacerItem4)
         self.gridLayout_1gram_general.addLayout(self.verticalLayout_1gram_PropertiesEditor, 1, 3, 1, 1)
         self.tableWidget_1gram_TagContainer = QtWidgets.QTableWidget(self.tab_1gram)
-        #self.tableWidget_1gram_TagContainer = QTableWidget_Token(self.tab_1gram)
+        self.tableWidget_1gram_TagContainer.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
+        self.tableWidget_1gram_TagContainer.setTabKeyNavigation(False)
+        self.tableWidget_1gram_TagContainer.setDragDropOverwriteMode(False)
+        self.tableWidget_1gram_TagContainer.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget_1gram_TagContainer.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidget_1gram_TagContainer.setObjectName("tableWidget_1gram_TagContainer")
         self.tableWidget_1gram_TagContainer.setColumnCount(0)
         self.tableWidget_1gram_TagContainer.setRowCount(0)
@@ -119,8 +123,12 @@ class Ui_MainWindow_taggingTool(object):
         self.label_Ngram_TableTagDescription = QtWidgets.QLabel(self.tab_Ngram)
         self.label_Ngram_TableTagDescription.setObjectName("label_Ngram_TableTagDescription")
         self.gridLayout_Ngram_general.addWidget(self.label_Ngram_TableTagDescription, 0, 0, 1, 1, QtCore.Qt.AlignHCenter)
-        #self.tableWidget_Ngram_TagContainer = QTableWidget_Token(self.tab_Ngram)
         self.tableWidget_Ngram_TagContainer = QtWidgets.QTableWidget(self.tab_Ngram)
+        self.tableWidget_Ngram_TagContainer.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
+        self.tableWidget_Ngram_TagContainer.setTabKeyNavigation(False)
+        self.tableWidget_Ngram_TagContainer.setDragDropOverwriteMode(False)
+        self.tableWidget_Ngram_TagContainer.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget_Ngram_TagContainer.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidget_Ngram_TagContainer.setObjectName("tableWidget_Ngram_TagContainer")
         self.tableWidget_Ngram_TagContainer.setColumnCount(0)
         self.tableWidget_Ngram_TagContainer.setRowCount(0)
@@ -197,7 +205,7 @@ class Ui_MainWindow_taggingTool(object):
         MainWindow_taggingTool.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow_taggingTool)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow_taggingTool)
 
     def retranslateUi(self, MainWindow_taggingTool):
@@ -230,4 +238,3 @@ class Ui_MainWindow_taggingTool(object):
         self.pushButton_1gram_UpdateTokenProperty_2.setText(_translate("MainWindow_taggingTool", "Update"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Ngram), _translate("MainWindow_taggingTool", "N Gram Token"))
 
-#from qtablewidget_token.py import QTableWidget_Token
