@@ -10,6 +10,8 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
 
+        self.lineEdit_openFiles_numberTokenShow.setInputMask('9999')
+
         self.pushButton_openFiles_OriginalCSV.clicked.connect(
             lambda: self.onClick_openFile(self.lineEdit_openFiles_OriginalCSV))
         self.pushButton_openFiles_1GramCSV.clicked.connect(
@@ -72,6 +74,8 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.lineEdit_openFiles_OriginalCSV.setText(config['file']['filePath_OriginalCSV']['path'])
         self.lineEdit_openFiles_1GramCSV.setText(config['file']['filePath_1GrammCSV']['path'])
         self.lineEdit_openFiles_NgramCSV.setText(config['file']['filePath_nGrammCSV']['path'])
+        self.lineEdit_openFiles_numberTokenShow.setText(str(config['value']['numberToken_show']))
+        self.horizontalSlider__openFiles_similarityMatrixThreshold.setValue(config['value']['similarityMatrix_threshold'])
 
     def get_config_value(self, config):
         """
@@ -82,6 +86,9 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         config['file']['filePath_OriginalCSV']['path'] = self.lineEdit_openFiles_OriginalCSV.text()
         config['file']['filePath_1GrammCSV']['path'] = self.lineEdit_openFiles_1GramCSV.text()
         config['file']['filePath_nGrammCSV']['path'] = self.lineEdit_openFiles_NgramCSV.text()
+        config['value']['numberToken_show'] = self.lineEdit_openFiles_numberTokenShow.text
+        config['value']['similarityMatrix_threshold'] = self.horizontalSlider__openFiles_similarityMatrixThreshold.value()
+
         return config
 
 

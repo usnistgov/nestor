@@ -22,13 +22,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # self.scores = None
         # self.alias_lookup = None
         #
-
-        self.similarityMatrix_threshold = config['value']['similarityMatrix_threshold']
-
-        self.horizontalSlider_1gram_FindingThreshold.setValue(self.similarityMatrix_threshold)
-        self.horizontalSlider_Ngram_FindingThreshold.setValue(self.similarityMatrix_threshold)
-
-
+        #
+        # self.similarityMatrix_threshold = config['value']['similarityMatrix_threshold']
+        #
+        # self.horizontalSlider_1gram_FindingThreshold.setValue(self.similarityMatrix_threshold)
+        # self.horizontalSlider_Ngram_FindingThreshold.setValue(self.similarityMatrix_threshold)
+        #
+        #
 
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
