@@ -196,16 +196,16 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_openFiles_Save">
+         <widget class="QPushButton" name="pushButton_openFiles_Reset">
           <property name="text">
-           <string>save</string>
+           <string>reset</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_openFiles_Reset">
+         <widget class="QPushButton" name="pushButton_openFiles_Save">
           <property name="text">
-           <string>reset</string>
+           <string>save</string>
           </property>
          </widget>
         </item>

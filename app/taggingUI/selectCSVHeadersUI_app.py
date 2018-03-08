@@ -19,29 +19,13 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         self.pushButton_selectCSVHeaders_checkAll.clicked.connect(
             lambda: self.onClick_check(True))
 
-        #self.init_selectHeaderView()
-
-
-    def set_CSVHeader(self, filePath_OriginalCSV):
-        """
-        read the header of the CSV
-        Set to the class a list with the header of it
-        This list is used in the method init_selectHeaderView to create the checkboxes
-        :param filePath_OriginalCSV:
-        :return:
-        """
-        if filePath_OriginalCSV:
-            with open(filePath_OriginalCSV, "rt") as csvfile:
-                reader = csv.reader(csvfile)
-                self.headers = next(reader)
-
-
-    def init_selectHeaderView(self):
+    def set_checkBoxesValues(self, headers):
         """
         create the list of checkbox based on the header attribute
         the header is created using the method set_CSVHeader
         :return:
         """
+        self.headers = headers
 
         y_headerColumn = 0
         x = 0
@@ -78,42 +62,20 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         for button in self.buttonGroup_CSVHeaders.buttons():
             button.setChecked(check)
 
-    def get_buttonChecked(self):
-        """
-        Action when saving the check box information
-        if none are selected it create a messageBox
-        after saving we open the tagging UI
-        :return:
-        """
-        self.list_header_rawText= self.get_checkedButton()
-
-        if self.list_header_rawText:
-            return True, self.list_header_rawText
-        else:
-            Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
-            return False, None
-
-    def set_config_values(self, config_default, config_new):
-        """
-        auto check the checkbox (if the original csv fil is not changed)
-        :param config_default:
-        :param config_new:
-        :return:
-        """
-        if config_default['file']['filePath_OriginalCSV']['path'] == config_new['file']['filePath_OriginalCSV']['path']:
-            for button in self.buttonGroup_CSVHeaders.buttons():
-                if button.text() in config_default['file']['filePath_OriginalCSV']['headers']:
-                    button.setChecked(True)
-
-
-    def get_config_value(self, config):
-        """
-        replace the list of checked button from the config to the new one
-        :param config:
-        :return:
-        """
-        config['file']['filePath_OriginalCSV']['headers'] = self.get_checkedButton()
-        return config
+    # def get_buttonChecked(self):
+    #     """
+    #     Action when saving the check box information
+    #     if none are selected it create a messageBox
+    #     after saving we open the tagging UI
+    #     :return:
+    #     """
+    #     self.list_header_rawText= self.get_checkedButton()
+    #
+    #     if self.list_header_rawText:
+    #         return True, self.list_header_rawText
+    #     else:
+    #         Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
+    #         return False, None
 
     def get_checkedButton(self):
         """
@@ -125,6 +87,38 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             if button.isChecked():
                 checked.append(button.text())
         return checked
+
+    def set_config(self, config):
+        """
+        add to the window the values from the config dict
+        :param config
+        :return:
+        """
+        if config['file']['filePath_OriginalCSV']['headers'] is not None:
+            for button in self.buttonGroup_CSVHeaders.buttons():
+                if button.text() in config['file']['filePath_OriginalCSV']['headers']:
+                    button.setChecked(True)
+
+
+    def get_config(self, config):
+        """
+        replace the given config dict with a new one based on the window values
+
+        it is call when we save the view
+        :param config:
+        :return:
+        """
+        checked = []
+        for button in self.buttonGroup_CSVHeaders.buttons():
+            if button.isChecked():
+                checked.append(button.text())
+
+        if checked:
+            config['file']['filePath_OriginalCSV']['headers'] = checked
+            return True, config
+        else:
+            Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
+            return False, None
 
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
