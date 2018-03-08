@@ -1,0 +1,14 @@
+file:
+  filePath_OriginalCSV:
+    path: /Users/sam11/Git/ml-py/app/taggingUI/csv/app_vocab.csv
+    headers:
+      - token
+      - NE
+  filePath_1GrammCSV:
+    path: /Users/sam11/Git/ml-py/app/taggingUI/csv/app_vocab_mike.csv
+  filePath_nGrammCSV:
+    path: /Users/sam11/Git/ml-py/app/taggingUI/csv/app_vocab_mike.csv
+
+value:
+  numberToken_show: 1000
+  similarityMatrix_threshold: 50
