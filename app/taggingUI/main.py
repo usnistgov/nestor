@@ -1,5 +1,7 @@
 import sys
 import yaml
+import pandas as pd
+from mlp import kex
 from app.taggingUI.openFilesUI_app import MyOpenFilesWindow
 from app.taggingUI.selectCSVHeadersUI_app import MySelectCsvHeadersWindow
 from app.taggingUI.taggingUI_app import MyTaggingToolWindow
@@ -34,6 +36,10 @@ class Main:
                                 }
                             }
 
+        self.df_OriginalCSV = None
+        self.df_1GrammCSV = None
+        self.df_nGrammCSV = None
+
         self.window_OpenFiles = MyOpenFilesWindow()
         self.window_selectCSVHeader = MySelectCsvHeadersWindow()
         self.window_taggingTool = MyTaggingToolWindow(self.config_default)
@@ -62,6 +68,8 @@ class Main:
             self.config_new = self.window_OpenFiles.get_config_value(self.config_new)
             self.window_OpenFiles.close()
 
+            self.df_OriginalCSV = pd.read_csv(self.filePath_OriginalCSV)
+
 
             self.window_selectCSVHeader.set_CSVHeader(self.filePath_OriginalCSV)
             self.window_selectCSVHeader.init_selectHeaderView()
@@ -80,14 +88,23 @@ class Main:
 
             [print(l) for l in self.list_header_rawText]
 
+            # Clean the natural lang text...merge columns.
+            nlp_selector = kex.NLPSelect(columns=self.list_header_rawText)  # sklearn-style
+            raw_text = nlp_selector.transform(self.df_OriginalCSV)  # a series object
 
+            tex = kex.TokenExtractor()  # sklearn-style TF-IDF calc
+            # toks = tex.fit_transform(raw_text)  # helper list of tokens if wanted
+
+            # create vocabulary list...creates if doesnt exist. can accept fname and init kwargs
+            # filename is read and write, init is read-only
+            self.df_1GrammCSV = tex.annotation_assistant(filename=self.filePath_1GrammCSV)
 
             self.config_new = self.window_selectCSVHeader.get_config_value(self.config_new)
             self.window_selectCSVHeader.close()
 
             # The TFIDF stuff go there
-            # self.window_taggingTool.set_tableView(TFIDF)
-            dataframe = None
+            # self.window_taggingTool.set_tableView(self.df_1GrammCSV)
+            # dataframe = None
             self.window_taggingTool.tableWidget_1gram_TagContainer.set_dataframe(dataframe)
             self.window_taggingTool.tableWidget_Ngram_TagContainer.set_dataframe(dataframe)
             self.window_taggingTool.tableWidget_1gram_TagContainer.print_tableData()
