@@ -1,4 +1,5 @@
 import sys
+import os
 import PyQt5.QtWidgets as Qw
 
 from app.taggingUI.openFilesUI_skeleton import Ui_MainWindow_openFiles
@@ -35,27 +36,6 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         if fileName:
             lineEdit.setText(fileName)
 
-    def get_AllFilesPath(self):
-        """
-        Action when saving the files
-        if some are empty it create a messageBox
-        after saving we open the header selected UI
-        :return:
-        """
-        #TODO create new file if none is selected
-        if self.lineEdit_openFiles_OriginalCSV.text()\
-                and self.lineEdit_openFiles_1GramCSV.text()\
-                and self.lineEdit_openFiles_NgramCSV.text():
-            self.filePath_OriginalCSV = self.lineEdit_openFiles_OriginalCSV.text()
-            self.filePath_1GrammCSV = self.lineEdit_openFiles_1GramCSV.text()
-            self.filePath_nGrammCSV = self.lineEdit_openFiles_NgramCSV.text()
-
-            return True, self.filePath_OriginalCSV, self.filePath_1GrammCSV, self.filePath_nGrammCSV
-
-        else:
-            Qw.QMessageBox.about(self, 'Can\'t save', "You should open all the file first")
-            return False, None, None, None
-
     def onClick_Reset(self):
         """
         Action when click on reset button
@@ -66,31 +46,71 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.lineEdit_openFiles_1GramCSV.setText("")
         self.lineEdit_openFiles_NgramCSV.setText("")
 
-    def set_config_values(self, config):
+
+    def set_config(self, config):
         """
-        add to the linEdit the value stored inside the config file
+        add to the window the values from the config dict
         :param config:
         :return:
         """
+
         self.lineEdit_openFiles_OriginalCSV.setText(config['file']['filePath_OriginalCSV']['path'])
         self.lineEdit_openFiles_1GramCSV.setText(config['file']['filePath_1GrammCSV']['path'])
         self.lineEdit_openFiles_NgramCSV.setText(config['file']['filePath_nGrammCSV']['path'])
         self.lineEdit_openFiles_numberTokenShow.setText(str(config['value']['numberToken_show']))
         self.horizontalSlider__openFiles_similarityMatrixThreshold.setValue(config['value']['similarityMatrix_threshold'])
 
-    def get_config_value(self, config):
+
+
+    def get_config(self, config):
         """
-        update the new config file dictionary
-        :param config:
+        replace the given config dict with a new one based on the window values
+
+        it is call when we save the view
         :return:
         """
-        config['file']['filePath_OriginalCSV']['path'] = self.lineEdit_openFiles_OriginalCSV.text()
-        config['file']['filePath_1GrammCSV']['path'] = self.lineEdit_openFiles_1GramCSV.text()
-        config['file']['filePath_nGrammCSV']['path'] = self.lineEdit_openFiles_NgramCSV.text()
-        config['value']['numberToken_show'] = self.lineEdit_openFiles_numberTokenShow.text
-        config['value']['similarityMatrix_threshold'] = self.horizontalSlider__openFiles_similarityMatrixThreshold.value()
+        #TODO create new file if none is selected
 
-        return config
+        # if we are on a Windows machine
+        if os.name == 'nt':
+            separator = '\\'
+        else:
+            separator = '/'
+
+        if self.lineEdit_openFiles_OriginalCSV.text():
+            config['file']['filePath_OriginalCSV']['path'] = self.lineEdit_openFiles_OriginalCSV.text()
+            path_list = config['file']['filePath_OriginalCSV']['path'].split(separator)
+            name_list = path_list[-1].split('.')
+
+            if self.lineEdit_openFiles_1GramCSV.text():
+                config['file']['filePath_1GrammCSV']['path'] = self.lineEdit_openFiles_1GramCSV.text()
+            else:
+                path = path_list
+                name = "_1Gram.".join(name_list)
+                path[-1] = name
+                path = separator.join(path)
+
+                config['file']['filePath_1GrammCSV']['path'] = path
+
+            if self.lineEdit_openFiles_NgramCSV.text():
+                config['file']['filePath_nGrammCSV']['path'] = self.lineEdit_openFiles_NgramCSV.text()
+            else :
+                path = path_list
+                name = "_nGram.".join(name_list)
+                path[-1] = name
+                path = separator.join(path)
+
+                config['file']['filePath_nGrammCSV']['path'] = path
+
+            config['value']['numberToken_show'] = self.lineEdit_openFiles_numberTokenShow.text()
+            config['value']['similarityMatrix_threshold'] = self.horizontalSlider__openFiles_similarityMatrixThreshold.value()
+
+            return True, config
+
+        else:
+            Qw.QMessageBox.about(self, 'Can\'t save', "You should open all the file first")
+            return False, None
+
 
 
 if __name__ == "__main__":
