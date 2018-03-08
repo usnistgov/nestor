@@ -68,7 +68,7 @@ class MyQTableWidget(Qw.QTableWidget):
         self.setObjectName("vocabTableWidget")
         self.setColumnCount(0)
         self.setRowCount(0)
-        self.setFocus()
+
 
     def print_table(self, df, vocab_limit=1000):
         temp_df = df.reset_index()

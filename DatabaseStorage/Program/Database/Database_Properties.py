@@ -78,6 +78,19 @@ class NodeIssue(Enum):
     PROPERTY_TIME_FIX = "time_to_fix"
     PROPERTY_TIME_TURN_ON = "time_to_turn_on"
 
+    PROPERTY_AVG_REPAIR = "avg_time_to_repair"
+    PROPERTY_AVG_WORK_ORDER_COMPLETION = "avg_time_work_order_completion"
+    PROPERTY_AVG_DISPATCH = "avg_time_to_dispatch"
+    PROPERTY_AVG_RETURN_OPERATION = "avg_time_to_return_to_operation"
+    PROPERTY_AVG_ISSUE_WORK_ORDER = "avg_time_to_issue_work_order"
+    PROPERTY_AVG_TRAVEL = "avg_time_to_travel"
+    PROPERTY_AVG_SOLVE_PROBLEM = "avg_time_to_solve_problem"
+    PROPERTY_AVG_DIAGNOSE = "avg_time_to_diagnose"
+    PROPERTY_AVG_ORDER = "avg_time_to_order"
+    PROPERTY_AVG_LEAD_PART = "lead_avg_time_for_part"
+    PROPERTY_AVG_FIX = "avg_time_to_fix"
+    PROPERTY_AVG_TURN_ON = "avg_time_to_turn_on"
+
 
     VALUE_DESCRIPTION_PROBLEM = "description_of_problem"
     VALUE_DESCRIPTION_SOLUTION = "description_of_solution"
@@ -118,12 +131,26 @@ class NodeTag(Enum):
     LABEL_TAG = ":TAG"
     LABEL_ITEM = ":ITEM"
     LABEL_ACTION = ":ACTION"
+    LABEL_ACTION_ITEM = ":ACTION_ITEM"
+    LABEL_UNKNOWN = ":UNKNOWN"
 
     PROPERTY_KEYWORD = "keyword"
+    PROPERTY_SYNONYMS = "synonyms"
+    PROPERTY_PARENTS = "parents"
+    PROPERTY_LINKS = "links"
 
     VALUE_ITEM = "tag_item"
     VALUE_PROBLEM = "tag_problem"
     VALUE_SOLUTION = "tag_solution"
+    VALUE_ACTION_ITEM = "tag_action_item"
+    VALUE_UNKNOWN = "tag_unknown"
+    VALUE_NA = "tag_na"
+    VALUE_STOP_WORDS = "tag_stop_words"
+
+    VALUE_KEYWORD = "keyword"
+    VALUE_SYNONYMS = "synonyms"
+    VALUE_PARENTS = "parents"
+    VALUE_LINKS = "links"
 
 class LabelEdges(Enum):
     """
@@ -132,6 +159,7 @@ class LabelEdges(Enum):
     LABEL_PROBLEM = ":PROBLEM"
     LABEL_SOLUTION = ":SOLUTION"
     LABEL_CONTAINS = ":CONTAINS"
+    LABEL_UNKNOWN = ":UNKNOWN"
 
     LABEL_REQUESTED = ":REQUESTED_BY"
     LABEL_SOLVE = ":SOLVE_BY"
