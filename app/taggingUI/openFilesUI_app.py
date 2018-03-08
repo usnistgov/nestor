@@ -42,6 +42,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         after saving we open the header selected UI
         :return:
         """
+        #TODO create new file if none is selected
         if self.lineEdit_openFiles_OriginalCSV.text()\
                 and self.lineEdit_openFiles_1GramCSV.text()\
                 and self.lineEdit_openFiles_NgramCSV.text():
