@@ -36,7 +36,7 @@ class Main:
 
         self.window_OpenFiles = MyOpenFilesWindow()
         self.window_selectCSVHeader = MySelectCsvHeadersWindow()
-        self.window_taggingTool = MyTaggingToolWindow()
+        self.window_taggingTool = MyTaggingToolWindow(self.config_default)
 
         self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)
         self.window_selectCSVHeader.pushButton_selectCSVHeaders_save.clicked.connect(self.selectWindow_to_taggingWindow)
@@ -87,6 +87,11 @@ class Main:
 
             # The TFIDF stuff go there
             # self.window_taggingTool.set_tableView(TFIDF)
+            dataframe = None
+            self.window_taggingTool.tableWidget_1gram_TagContainer.set_dataframe(dataframe)
+            self.window_taggingTool.tableWidget_Ngram_TagContainer.set_dataframe(dataframe)
+            self.window_taggingTool.tableWidget_1gram_TagContainer.print_tableData()
+            self.window_taggingTool.tableWidget_Ngram_TagContainer.print_tableData()
 
             self.window_taggingTool.show()
 
