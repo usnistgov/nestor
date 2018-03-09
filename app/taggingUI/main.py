@@ -10,6 +10,7 @@ import PyQt5.QtWidgets as Qw
 
 class Main:
     def __init__(self):
+        #TODO create the YAML file if not exists
         self.yamlPath_config = "config.yaml"
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config)
         self.config_new = {
@@ -36,15 +37,15 @@ class Main:
                                 }
                             }
         # instanciate the dataframe
-        self.df_OriginalCSV = None
-        self.df_1GrammCSV = None
-        self.df_nGrammCSV = None
+        self.df_Original = None
+        self.df_1Gram = None
+        self.df_nGram = None
 
 
         #instanciate windows
         self.window_OpenFiles = MyOpenFilesWindow()
         self.window_selectCSVHeader = MySelectCsvHeadersWindow()
-        self.window_taggingTool = MyTaggingToolWindow(self.config_default)
+        self.window_taggingTool = MyTaggingToolWindow()
 
         # add connect to windows
         self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)
@@ -74,10 +75,10 @@ class Main:
             self.window_OpenFiles.close()
 
             # add values to the original dataframe
-            self.df_OriginalCSV = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
+            self.df_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
 
             # set the checkBox in the window
-            self.window_selectCSVHeader.set_checkBoxesValues(self.df_OriginalCSV.columns.values.tolist())
+            self.window_selectCSVHeader.set_checkBoxesValues(self.df_Original.columns.values.tolist())
 
             #if the csv file of the old and the new config are equals the header will be equals
             if self.config_default['file']['filePath_OriginalCSV']['path'] == self.config_new['file']['filePath_OriginalCSV']['path']:
@@ -103,29 +104,41 @@ class Main:
 
             # Clean the natural lang text...merge columns.
             nlp_selector = kex.NLPSelect(columns=self.config_new['file']['filePath_OriginalCSV']['headers'])  # sklearn-style
-            clean_rawText = nlp_selector.transform(self.df_OriginalCSV)  # a series object
+            clean_rawText = nlp_selector.transform(self.df_Original)  # a series object
 
             #init the token extractor and clean the raw text
             tokenExtractor = kex.TokenExtractor()  # sklearn-style TF-IDF calc
             list_tokenExtracted = tokenExtractor.fit_transform(clean_rawText)  # helper list of tokens if wanted
 
             #create the .Gram dataframe
-            self.df_1GrammCSV = tokenExtractor.annotation_assistant(filename=self.config_new['file']['filePath_1GrammCSV']['path'])
+            if self.config_new['file']['filePath_1GrammCSV']['path'] is None:
+                filename = self.config_new['file']['filePath_1GrammCSV']['path']
+                init = None
+            else:
+                filename = None
+                init = self.config_new['file']['filePath_1GrammCSV']['path']
+            self.df_1Gram = tokenExtractor.annotation_assistant(filename=filename, init = init)
+
+            # if self.config_new['file']['filePath_nGrammCSV']['path'] is None:
+            #     filename = self.config_new['file']['filePath_nGrammCSV']['path']
+            #     init = None
+            # else:
+            #     filename = None
+            #     init = self.config_new['file']['filePath_nGrammCSV']['path']
+
+            #self.df_nGram =tokenExtractor.annotation_assistant(filename=filename, init=init)
+            self.df_nGram =None
             #TODO self.df_nGrammCSV = tokenExtractor.annotation_assistant(init=self.config_new['file']['filePath_nGrammCSV']['path'])
 
             #print(self.df_1GrammCSV)
 
-            print(self.config_new)
+            #print(self.config_new)
             self.window_selectCSVHeader.close()
 
+            #send the dataframes to the tagging window
+            self.window_taggingTool.set_config(self.config_new)
 
-            # self.window_taggingTool.set_tableView(self.df_1GrammCSV)
-            # dataframe = None
-            # self.window_taggingTool.tableWidget_1gram_TagContainer.set_dataframe(dataframe)
-            # self.window_taggingTool.tableWidget_Ngram_TagContainer.set_dataframe(dataframe)
-            # self.window_taggingTool.tableWidget_1gram_TagContainer.print_tableData()
-            # self.window_taggingTool.tableWidget_Ngram_TagContainer.print_tableData()
-
+            self.window_taggingTool.set_dataframes(self.df_1Gram, self.df_nGram)
             self.window_taggingTool.show()
 
 
