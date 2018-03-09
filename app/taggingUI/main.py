@@ -11,6 +11,7 @@ import PyQt5.QtWidgets as Qw
 class Main:
     def __init__(self):
         #TODO create the YAML file if not exists
+        self.icnoPtah="NIST_logo.png"
         self.yamlPath_config = "config.yaml"
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config)
         self.config_new = {
@@ -43,9 +44,9 @@ class Main:
 
 
         #instanciate windows
-        self.window_OpenFiles = MyOpenFilesWindow()
-        self.window_selectCSVHeader = MySelectCsvHeadersWindow()
-        self.window_taggingTool = MyTaggingToolWindow()
+        self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah)
+        self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah)
+        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah)
 
         # add connect to windows
         self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)

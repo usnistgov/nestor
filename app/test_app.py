@@ -136,6 +136,7 @@ class MyWindow(Qw.QMainWindow, Ui_MainWindow):
 
     def update_progress_bar(self):
         matched = self.scores[self.df['NE'] != '']
+        print(len(matched))
         # log-"usefulness" proxy by tf-idf
         completed_pct = pd.np.log(matched+1).sum()/pd.np.log(self.scores+1).sum()
         completed_pct = matched.sum()/self.scores.sum()
