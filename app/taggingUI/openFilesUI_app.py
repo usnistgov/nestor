@@ -1,15 +1,18 @@
 import sys
 import os
 import PyQt5.QtWidgets as Qw
+from PyQt5.QtGui import QIcon
 
 from app.taggingUI.openFilesUI_skeleton import Ui_MainWindow_openFiles
 
 
 class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
-    def __init__(self):
+    def __init__(self, iconPath=None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
+        if iconPath:
+            self.setWindowIcon(QIcon(iconPath))
 
         self.lineEdit_openFiles_numberTokenShow.setInputMask('9999')
 

@@ -2,14 +2,19 @@ import sys
 import csv
 import PyQt5.QtWidgets as Qw
 from PyQt5 import QtCore as Qc
+from PyQt5.QtGui import QIcon
+
 from app.taggingUI.selectCSVHeadersUI_skeleton import Ui_MainWindow_selectCSVHeaders
 
 
 class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
-    def __init__(self):
+    def __init__(self, iconPath= None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
+
+        if iconPath:
+            self.setWindowIcon(QIcon(iconPath))
 
         self.buttonGroup_CSVHeaders = Qw.QButtonGroup()
         self.buttonGroup_CSVHeaders.setExclusive(False)
@@ -62,20 +67,6 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         for button in self.buttonGroup_CSVHeaders.buttons():
             button.setChecked(check)
 
-    # def get_buttonChecked(self):
-    #     """
-    #     Action when saving the check box information
-    #     if none are selected it create a messageBox
-    #     after saving we open the tagging UI
-    #     :return:
-    #     """
-    #     self.list_header_rawText= self.get_checkedButton()
-    #
-    #     if self.list_header_rawText:
-    #         return True, self.list_header_rawText
-    #     else:
-    #         Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
-    #         return False, None
 
     def get_checkedButton(self):
         """
