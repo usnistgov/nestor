@@ -20,8 +20,16 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.pushButton_openFiles_NgramCSV.clicked.connect(
             lambda: self.onClick_openFile(self.lineEdit_openFiles_NgramCSV))
 
+        self.horizontalSlider_openFiles_similarityMatrixThreshold.sliderMoved.connect(self.onSlider_similarityMatrixThreshold)
+        self.horizontalSlider_openFiles_similarityMatrixThreshold.sliderReleased.connect(self.onSlider_similarityMatrixThreshold)
+
         #self.pushButton_openFiles_Save.clicked.connect(self.onClick_Save)
         self.pushButton_openFiles_Reset.clicked.connect(self.onClick_Reset)
+
+    def onSlider_similarityMatrixThreshold(self):
+        self.label_openFiles_similarityMatrixThresholdValue.setText(
+            str(self.horizontalSlider_openFiles_similarityMatrixThreshold.value()) + '%')
+
 
     def onClick_openFile(self, lineEdit):
         """
@@ -58,7 +66,8 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.lineEdit_openFiles_1GramCSV.setText(config['file']['filePath_1GrammCSV']['path'])
         self.lineEdit_openFiles_NgramCSV.setText(config['file']['filePath_nGrammCSV']['path'])
         self.lineEdit_openFiles_numberTokenShow.setText(str(config['value']['numberToken_show']))
-        self.horizontalSlider__openFiles_similarityMatrixThreshold.setValue(config['value']['similarityMatrix_threshold'])
+        self.horizontalSlider_openFiles_similarityMatrixThreshold.setValue(config['value']['similarityMatrix_threshold'])
+        self.label_openFiles_similarityMatrixThresholdValue.setText(str(config['value']['similarityMatrix_threshold']) + '%')
 
 
 
@@ -103,7 +112,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
                 config['file']['filePath_nGrammCSV']['path'] = path
 
             config['value']['numberToken_show'] = self.lineEdit_openFiles_numberTokenShow.text()
-            config['value']['similarityMatrix_threshold'] = self.horizontalSlider__openFiles_similarityMatrixThreshold.value()
+            config['value']['similarityMatrix_threshold'] = self.horizontalSlider_openFiles_similarityMatrixThreshold.value()
 
             return True, config
 
