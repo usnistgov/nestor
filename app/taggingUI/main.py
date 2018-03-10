@@ -34,7 +34,8 @@ class Main:
                             'value':
                                 {
                                 'numberToken_show': None,
-                                'similarityMatrix_threshold': None
+                                'similarityMatrix_threshold': None,
+                                'similarityMatrix_alreadyChecked': None
                                 }
                             }
         # instanciate the dataframe
@@ -82,7 +83,8 @@ class Main:
             self.window_selectCSVHeader.set_checkBoxesValues(self.df_Original.columns.values.tolist())
 
             #if the csv file of the old and the new config are equals the header will be equals
-            if self.config_default['file']['filePath_OriginalCSV']['path'] == self.config_new['file']['filePath_OriginalCSV']['path']:
+            if self.config_default['file']['filePath_OriginalCSV']['path'] == self.config_new['file']['filePath_OriginalCSV']['path'] \
+                    and self.config_default['file']['filePath_OriginalCSV']['path'] is not None:
                 self.config_new['file']['filePath_OriginalCSV']['headers'] = self.config_default['file']['filePath_OriginalCSV']['headers']
 
             self.window_selectCSVHeader.set_config(self.config_new)
@@ -138,7 +140,6 @@ class Main:
             #send the dataframes to the tagging window
             self.window_taggingTool.set_config(self.config_new)
             self.window_taggingTool.set_dataframes(self.df_1Gram, self.df_nGram)
-
 
             self.window_taggingTool.show()
 

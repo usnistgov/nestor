@@ -14,8 +14,8 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
 
-        self.lineEdit_openFiles_numberTokenShow.setInputMask('9999')
-
+        self.lineEdit_openFiles_numberTokenShow.setInputMask('99999')
+        self.lineEdit_openFiles_SimilarityAlreadyChecked.setInputMask('99')
         self.pushButton_openFiles_OriginalCSV.clicked.connect(
             lambda: self.onClick_openFile(self.lineEdit_openFiles_OriginalCSV))
         self.pushButton_openFiles_1GramCSV.clicked.connect(
@@ -71,8 +71,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.lineEdit_openFiles_numberTokenShow.setText(str(config['value']['numberToken_show']))
         self.horizontalSlider_openFiles_similarityMatrixThreshold.setValue(config['value']['similarityMatrix_threshold'])
         self.label_openFiles_similarityMatrixThresholdValue.setText(str(config['value']['similarityMatrix_threshold']) + '%')
-
-
+        self.lineEdit_openFiles_SimilarityAlreadyChecked.setText(str(config['value']['similarityMatrix_alreadyChecked']))
 
     def get_config(self, config):
         """
@@ -116,6 +115,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
             config['value']['numberToken_show'] = self.lineEdit_openFiles_numberTokenShow.text()
             config['value']['similarityMatrix_threshold'] = self.horizontalSlider_openFiles_similarityMatrixThreshold.value()
+            config['value']['similarityMatrix_alreadyChecked'] = int(self.lineEdit_openFiles_SimilarityAlreadyChecked.text())
 
             return True, config
 

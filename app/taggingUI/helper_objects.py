@@ -59,7 +59,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         :return:
         """
         self.clean_checkboxes()
-
+        print("test")
         for token, score in token_list:
             btn = Qw.QCheckBox(token)
             if score >= autoMatch_score:
