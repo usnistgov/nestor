@@ -94,7 +94,6 @@ class Main:
         Open the taggingTool Window
         :return:
         """
-        # TODO GET CONFIG OF PREVIOUS
         done, self.config_new = self.window_selectCSVHeader.get_config(self.config_new)
 
         #print(self.config_new )
@@ -138,8 +137,9 @@ class Main:
 
             #send the dataframes to the tagging window
             self.window_taggingTool.set_config(self.config_new)
-
             self.window_taggingTool.set_dataframes(self.df_1Gram, self.df_nGram)
+
+
             self.window_taggingTool.show()
 
 

@@ -16,8 +16,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
     def __init__(self,iconPath=None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
+
+        #TODO make the "areyoysure" exit action
+        self.actionExit.triggered.connect(self.close_application)
+
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
+
+        self.saved = False
 
         #TODO add this to the yaml file
         self.similarityThreshold_alreadyChecked = 100
@@ -47,12 +53,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.buttonGroup_1Gram_similarityPattern = myObjects.QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
         self.tableWidget_1gram_TagContainer.__class__ = myObjects.QTableWidget_token
         self.tableWidget_Ngram_TagContainer.__class__ = myObjects.QTableWidget_token
+
         self.tabWidget.setCurrentIndex(0)
 
         self.tableWidget_1gram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_table1Gram)
         self.horizontalSlider_1gram_FindingThreshold.sliderMoved.connect(self.onSliderMoved_similarityPattern)
         self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onSliderMoved_similarityPattern)
         self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton)
+        self.pushButton_1gram_SaveTableView.clicked.connect(self.onClick_saveButton)
 
 
     def onSelectedItem_table1Gram(self):
@@ -69,49 +77,38 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.buttonGroup_1Gram_similarityPattern.set_checkBoxes(matches, self.similarityThreshold_alreadyChecked)
         self.update_progress_bar()
 
+    def onClick_saveButton(self):
+        """
+        save the dataframe to the CSV file
+        :return:
+        """
+        self.saved = True
+        self.dataframe_1Gram.to_csv(self.config['file']['filePath_1GrammCSV']['path'])
+
 
     def onClick_updateButton(self):
         """
         Triggers with update button. Saves user annotation to self.df
         """
         try:
+            self.saved = False
             items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
 
             new_alias = self.lineEdit_1gram_AliasEditor.text()
             new_notes = self.textEdit_1gram_NoteEditor.toPlainText()
             new_clf = self.buttonDictionary_1Gram.get(self.buttonGroup_1Gram_Classification.checkedButton().text(), pd.np.nan)
+            self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, token, new_alias, new_clf, new_notes)
+            self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
+            for btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
+                self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), new_alias, new_clf,
+                                                                   new_notes)
 
-            #for btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
+            self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+            self.update_progress_bar()
 
         except IndexError:
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
-
-
-        #
-        # tok_list = [tok]
-        #
-        # for btn in self.vertCheckButtonGroup.buttons():
-        #     s = btn.text()
-        #     if btn.isChecked():
-        #         tok_list += [s]
-        #     else:
-        #         if new_alias == self.df.loc[s, 'alias']:
-        #             self.df.loc[s, 'NE'] = ''
-        #             self.df.loc[s, 'alias'] = ''
-        #             self.df.loc[s, 'notes'] = ''
-        #
-        # self.df.loc[tok_list, 'NE'] = new_clf
-        # self.df.loc[tok_list, 'alias'] = new_alias
-        # self.df.loc[tok_list, 'notes'] = new_notes
-        # self.vocabTableWidget.print_table(self.df, self.vocab_limit)
-        # self.vocabTableWidget.setFocus()
-        #
-        # row = self.vocabTableWidget.currentRow()
-        # self.vocabTableWidget.selectRow(row+1)
-        # #print(new_clf, new_alias, new_notes)
-        #
-        # self.update_progress_bar()
 
 
     def onSliderMoved_similarityPattern(self):
@@ -119,22 +116,29 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         when the slider change, print the good groupboxes
         :return:
         """
-        #TODO get the checkbox already checked and rechecked it
+        #TODO make the checked box chexked still checked
+        #btn_checked = []
+        #for button_text in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
+        #    btn_checked.append((button_text.text(), self.dataframe_1Gram.loc[button_text.text(), 'score']* 20 / 100))
+        #    print(btn_checked)
+
         threshold = self.horizontalSlider_1gram_FindingThreshold.value()
+
 
         try:
             token = self.tableWidget_1gram_TagContainer.selectedItems()[0].text()
             matches = self.get_similarityMatches(token)
-
+           # matches = set(matches + btn_checked)
             self.buttonGroup_1Gram_similarityPattern.set_checkBoxes(matches, self.similarityThreshold_alreadyChecked)
 
         except IndexError:
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
-    def set_dataframeItemValue(self, dataframe, item, alias, classification, notes):
-        dataframe[item]["alias"] = alias
-        dataframe[item]["notes"] = notes
-        dataframe[item]["NE"] = classification
+    def set_dataframeItemValue(self, dataframe, token, alias, classification, notes):
+        dataframe.loc[token,"alias"] = alias
+        dataframe.loc[token,"notes"] = notes
+        dataframe.loc[token,"NE"] = classification
+        return dataframe
 
     def set_dataframes(self, dataframe_1Gram = None, dataframe_NGram = None):
         """
@@ -145,10 +149,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         self.dataframe_1Gram=dataframe_1Gram
         self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
-        self.tableWidget_1gram_TagContainer.printDataframe_tableView(int(self.config['value']['numberToken_show']))
+        self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+
         self.dataframe_NGram=dataframe_NGram
         self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
-        self.tableWidget_Ngram_TagContainer.printDataframe_tableView(int(self.config['value']['numberToken_show']))
+        self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
 
         self.scores = self.dataframe_1Gram['score']
         self.update_progress_bar()
@@ -210,6 +215,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         self.config=config
+        self.tableWidget_1gram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
+        #self.tableWidget_Ngram_TagContainer.set_vocabLimit()
+
         self.horizontalSlider_1gram_FindingThreshold.setValue(config['value']['similarityMatrix_threshold'])
 
         pass
@@ -224,6 +232,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         pass
+
 
 
 if __name__ == "__main__":
