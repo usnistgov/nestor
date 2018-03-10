@@ -18,14 +18,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.setupUi(self)
 
         #TODO make the "areyoysure" exit action
-        self.actionExit.triggered.connect(self.close_application)
+        #self.actionExit.triggered.connect(self.close_application)
 
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
 
         self.saved = False
-
-        #TODO add this to the yaml file
         self.similarityThreshold_alreadyChecked = 100
 
         self.classificationDictionary_1Gram = {
@@ -216,6 +214,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         self.config=config
         self.tableWidget_1gram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
+        self.similarityThreshold_alreadyChecked = config['value']['similarityMatrix_alreadyChecked']
         #self.tableWidget_Ngram_TagContainer.set_vocabLimit()
 
         self.horizontalSlider_1gram_FindingThreshold.setValue(config['value']['similarityMatrix_threshold'])
