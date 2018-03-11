@@ -51,7 +51,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         self.layout = layout
         self.spacer=None
 
-    def set_checkBoxes(self, token_list, autoMatch_score):
+    def set_checkBoxes(self, token_list, autoMatch_score, token_cheked = []):
         """
         create and print the checkboxes
         :param token_list:
@@ -59,7 +59,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         :return:
         """
         self.clean_checkboxes()
-        print("test")
         for token, score in token_list:
             btn = Qw.QCheckBox(token)
             if score >= autoMatch_score:
@@ -67,6 +66,11 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             self.addButton(btn)
             self.layout.addWidget(btn)
 
+        #TODO not working 100% if you but the threshold up to this and down after it remove the checked
+        for token, score in token_cheked:
+            for btn in self.buttons():
+                if token == btn.text() and btn.isChecked() == False:
+                    btn.toggle()
         self.spacer = Qw.QSpacerItem(20, 40, Qw.QSizePolicy.Minimum, Qw.QSizePolicy.Expanding)
         self.layout.addSpacerItem(self.spacer)
 
