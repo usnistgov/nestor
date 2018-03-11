@@ -55,6 +55,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tabWidget.setCurrentIndex(0)
 
         self.tableWidget_1gram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_table1Gram)
+        #TODO if the user only click on the slider it did not update the checkboxes
         self.horizontalSlider_1gram_FindingThreshold.sliderMoved.connect(self.onSliderMoved_similarityPattern)
         self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onSliderMoved_similarityPattern)
         self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton)
@@ -73,6 +74,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         matches = self.get_similarityMatches(token)
 
         self.buttonGroup_1Gram_similarityPattern.set_checkBoxes(matches, self.similarityThreshold_alreadyChecked)
+        print("pass")
         self.update_progress_bar()
 
     def onClick_saveButton(self):
@@ -115,10 +117,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         #TODO make the checked box chexked still checked
-        #btn_checked = []
-        #for button_text in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
-        #    btn_checked.append((button_text.text(), self.dataframe_1Gram.loc[button_text.text(), 'score']* 20 / 100))
-        #    print(btn_checked)
+        btn_checked = []
+        for button_text in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
+            btn_checked.append((button_text.text(), self.dataframe_1Gram.loc[button_text.text(), 'score']* 20 / 100))
+        print(btn_checked)
 
         threshold = self.horizontalSlider_1gram_FindingThreshold.value()
 
@@ -126,8 +128,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         try:
             token = self.tableWidget_1gram_TagContainer.selectedItems()[0].text()
             matches = self.get_similarityMatches(token)
+            print(matches)
            # matches = set(matches + btn_checked)
-            self.buttonGroup_1Gram_similarityPattern.set_checkBoxes(matches, self.similarityThreshold_alreadyChecked)
+            self.buttonGroup_1Gram_similarityPattern.set_checkBoxes(matches, self.similarityThreshold_alreadyChecked, btn_checked)
 
         except IndexError:
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
