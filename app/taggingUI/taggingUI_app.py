@@ -43,6 +43,24 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'not yet classified': pd.np.nan
         }
 
+        self.classificationDictionary_NGram = {
+            'S I': self.radioButton_Ngram_SolutionEditor,
+            'P I': self.radioButton_Ngram_ProblemEditor,
+            'I': self.radioButton_Ngram_ItemEditor,
+            'U': self.radioButton_Ngram_UnknownEditor,
+            'X': self.radioButton_Ngram_StopWordEditor,
+            '': self.radioButton_Ngram_NotClassifiedEditor
+        }
+
+        self.buttonDictionary_NGram = {
+            'Item': 'I',
+            'Problem Item': 'P I',
+            'Solution Item': 'S I',
+            'Unknown': 'U',
+            'Stop-word': 'X',
+            'not yet classified': pd.np.nan
+        }
+
         self.dataframe_1Gram = None
         self.dataframe_NGram = None
         #self.alias_lookup = None
@@ -54,6 +72,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tabWidget.setCurrentIndex(0)
 
         self.tableWidget_1gram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_table1Gram)
+        self.tableWidget_Ngram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_tableNGram)
         self.horizontalSlider_1gram_FindingThreshold.sliderMoved.connect(self.onSliderMoved_similarityPattern)
         self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onSliderMoved_similarityPattern)
         self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton)
@@ -68,12 +87,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
         token, classification, alias, notes = (str(i.text()) for i in items)
 
-        self.set_editor_value(alias, token, notes, classification)
+        self.set_editorValue_1Gram(alias, token, notes, classification)
         matches = self.get_similarityMatches(token)
 
         self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_initial(matches, self.similarityThreshold_alreadyChecked)
         self.buttonGroup_1Gram_similarityPattern.set_checkedBoxes(self.dataframe_1Gram, alias)
-        self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
+
+    def onSelectedItem_tableNGram(self):
+        """
+
+        :return:
+        """
+        items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
+        token, classification, alias, notes = (str(i.text()) for i in items)
+
+        self.set_editorValue_NGram(alias, token, notes, classification)
+
+        #TODO create the layout composition
 
     def onClick_saveButton(self):
         """
@@ -108,9 +138,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                                        '', '')
 
             self.tableWidget_1gram_TagContainer.printDataframe_tableView()
-            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
 
-        except IndexError:
+            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
+            row = self.tableWidget_1gram_TagContainer.currentRow()
+            self.tableWidget_1gram_TagContainer.selectRow(row + 1)
+
+
+        except (IndexError, ValueError):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
 
@@ -164,7 +198,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
 
         self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
-        print('---------------------------------------')
         self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
 
     def update_progress_bar(self, progressBar, dataframe):
@@ -178,9 +211,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         completed_pct = matched.sum()/scores.sum()
         progressBar.setValue(100*completed_pct)
 
-    def set_editor_value(self, alias, token, notes, classification):
+    def set_editorValue_1Gram(self, alias, token, notes, classification):
         """
-        print all the information from the token to the right layout
+        print all the information from the token to the right layout 1Gram
         (alias, button, notes)
         :param alias:
         :param token:
@@ -201,6 +234,25 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #classification
         btn = self.classificationDictionary_1Gram.get(classification)
         btn.toggle()  # toggle that button
+
+    def set_editorValue_NGram(self, alias, token, notes, classification):
+        """
+        print all the information from the token to the right layout NGram
+        (alias, button, notes)
+        """
+        # alias
+        if alias is None:
+            self.lineEdit_Ngram_AliasEditor.setText(alias)
+        else:
+            self.lineEdit_Ngram_AliasEditor.setText(token)
+
+        # notes
+        self.textEdit_Ngram_NoteEditor.setText(notes)
+
+        # classification
+        btn = self.classificationDictionary_NGram.get(classification)
+        btn.toggle()  # toggle that button
+
 
     def get_similarityMatches(self, token):
         """
