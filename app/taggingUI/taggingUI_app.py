@@ -223,7 +223,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.horizontalSlider_1gram_FindingThreshold.setValue(config['value']['similarityMatrix_threshold'])
 
-        pass
 
 
     def get_config(self, config):

@@ -12,3 +12,18 @@ file:
 value:
   numberToken_show: 1000
   similarityMatrix_threshold: 50
+  similarityMatrix_alreadyChecked : 90
+
+NE_Info:
+  NE_map:
+    {I I: I,
+    S I: S I,
+    P I: P I,
+    I S: S I,
+    I P: P I,
+    S S: X,
+    P P: X,
+    S P: X,
+    P S: X
+    }
+  NE_types: IPSUX
