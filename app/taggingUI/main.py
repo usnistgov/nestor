@@ -68,11 +68,11 @@ class Main:
         done, self.config_new = self.window_OpenFiles.get_config(self.config_new)
 
         if done:
-            # print(self.config_new['file']['filePath_OriginalCSV']['path'])
+            print(self.config_new['file']['filePath_OriginalCSV']['path'])
             print(self.config_new['file']['filePath_1GrammCSV']['path'])
-            # print(self.config_new['file']['filePath_nGrammCSV']['path'] )
-            # print(self.config_new['value']['numberToken_show'])
-            # print(self.config_new['value']['similarityMatrix_threshold'])
+            print(self.config_new['file']['filePath_nGrammCSV']['path'] )
+            print(self.config_new['value']['numberToken_show'])
+            print(self.config_new['value']['similarityMatrix_threshold'])
 
             self.window_OpenFiles.close()
 
@@ -98,11 +98,9 @@ class Main:
         """
         done, self.config_new = self.window_selectCSVHeader.get_config(self.config_new)
 
-        #print(self.config_new )
-
         if done:
 
-            # [print(l) for l in self.config_new['file']['filePath_OriginalCSV']['headers']]
+            [print(l) for l in self.config_new['file']['filePath_OriginalCSV']['headers']]
 
             # Clean the natural lang text...merge columns.
             nlp_selector = kex.NLPSelect(columns=self.config_new['file']['filePath_OriginalCSV']['headers'])  # sklearn-style
@@ -113,36 +111,19 @@ class Main:
             list_tokenExtracted = tokenExtractor.fit_transform(clean_rawText)  # helper list of tokens if wanted
 
             #create the 1Gram dataframe
-            # if self.config_new['file']['filePath_1GrammCSV']['path'] is None:
-            #     filename = self.config_new['file']['filePath_1GrammCSV']['path']
-            #     # init = None
-            # else:
-            #     filename = None
-            #     # init = self.config_new['file']['filePath_1GrammCSV']['path']
             filename1 = self.config_new['file']['filePath_1GrammCSV']['path']
             self.df_1Gram = tokenExtractor.annotation_assistant(filename=filename1)
-            # print(self.df_1Gram.head())
             clean_rawText_1Gram = kex.token_to_alias(clean_rawText, self.df_1Gram)
-            # print(clean_rawText_1Gram)
             nGram_tokenExtractor = kex.TokenExtractor(ngram_range=(2, 2))
             list_tokenExtracted = nGram_tokenExtractor.fit_transform(clean_rawText_1Gram)
 
-            # if self.config_new['file']['filePath_nGrammCSV']['path'] is None:
-            #     filename = self.config_new['file']['filePath_nGrammCSV']['path']
-            #     init = None
-            # else:
-            #     filename = None
-            #     init = self.config_new['file']['filePath_nGrammCSV']['path']
-            # print(init, filename)
+            #create the two gram dataframe
             filename2 = self.config_new['file']['filePath_nGrammCSV']['path']
             self.df_nGram = nGram_tokenExtractor.annotation_assistant(filename=filename2)
-            #
-            # #TODO get NE info from congif.yaml
-            NE_types = self.config_default['NE_info']['NE_types']  # NEED TO CHANGE
-            NE_map_rules = self.config_default['NE_info']['NE_map']  # NEED TO CHANGE
-            # print(NE_map_rules, NE_types)
+
+            NE_types = self.config_default['NE_info']['NE_types']
+            NE_map_rules = self.config_default['NE_info']['NE_map']
             self.df_nGram = kex.ngram_automatch(self.df_1Gram, self.df_nGram, NE_types, NE_map_rules)
-            # self.df_nGram = None
 
             self.window_selectCSVHeader.close()
 

@@ -2,6 +2,8 @@ import sys
 from PyQt5.QtCore import QCoreApplication, Qt, QSize
 from PyQt5 import QtGui
 import PyQt5.QtWidgets as Qw
+from sympy.core.tests.test_arit import same_and_same_prec
+
 
 class QTableWidget_token(Qw.QTableWidget):
 
@@ -30,7 +32,6 @@ class QTableWidget_token(Qw.QTableWidget):
 
         if self.dataframe is not None:
             temp_df = self.dataframe.reset_index()
-            # temp_df.fillna('', inplace=True)
             nrows, ncols = temp_df.shape
             self.setColumnCount(ncols - 1)  # ignore score column
             self.setRowCount(min([nrows, self.vocab_limite]))
@@ -69,6 +70,18 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
 
         self.spacer = Qw.QSpacerItem(20, 40, Qw.QSizePolicy.Minimum, Qw.QSizePolicy.Expanding)
         self.layout.addSpacerItem(self.spacer)
+
+    def set_checkedBoxes(self, dataframe, alias):
+        """
+        lookup in the dataframe if a token has the same alias and toggle it if it is not
+        :return:
+        """
+        same_tok = None
+
+        for btn in self.buttons():
+            if dataframe.loc[btn.text(), 'alias'] == alias and btn.isChecked() == False:
+                btn.toggle()
+
 
     def set_checkBoxes_rechecked(self, token_list, btn_checked):
         """

@@ -244,7 +244,7 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
     # first we need to substitute alias' for their NE identifier
     NE_dict = vocab.NE.fillna('U').to_dict()
     NE_dict.update(vocab.fillna('U').reset_index()[['NE', 'alias']].drop_duplicates().set_index('alias').NE.to_dict())
-    print(set(list(NE_dict.values())))
+    #print(set(list(NE_dict.values())))
     NE_sub = sorted(NE_dict, key=len, reverse=True)
     # print(NE_sub)
     # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
@@ -253,14 +253,14 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
     NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
 
     # now we have NE-soup/DNA of the original text.
-    print(NE_text.unique())
+    #print(NE_text.unique())
     voc2.loc[:, 'NE'] = NE_text.tolist()
 
     # all combinations of NE types
     NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
     NE_map.update(NE_map_rules)
-    print(NE_map)
-    print(voc2.NE.unique())
+    #print(NE_map)
+    #print(voc2.NE.unique())
     # apply rule substitutions
     voc2['NE'] = voc2.NE.apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
     # voc2['score'] = tex2.scores_  # should already happen?
