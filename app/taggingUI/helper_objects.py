@@ -10,7 +10,7 @@ class QTableWidget_token(Qw.QTableWidget):
         #TODO set the resiz of the collumn and line to false
         #TODO set the original collunm size based on the header size
 
-    def set_vocabLimit(self,vocab_limite ):
+    def set_vocabLimit(self,vocab_limite):
         self.vocab_limite = vocab_limite
 
     def set_dataframe(self, dataframe):
@@ -30,7 +30,7 @@ class QTableWidget_token(Qw.QTableWidget):
 
         if self.dataframe is not None:
             temp_df = self.dataframe.reset_index()
-            temp_df.fillna('', inplace=True)
+            # temp_df.fillna('', inplace=True)
             nrows, ncols = temp_df.shape
             self.setColumnCount(ncols - 1)  # ignore score column
             self.setRowCount(min([nrows, self.vocab_limite]))

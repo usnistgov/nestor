@@ -100,6 +100,7 @@ class TokenExtractor(TransformerMixin):
     def fit(self, dask_documents, y=None):
         X = _series_itervals(dask_documents)
         self._model.fit(X)
+
         return self
 
     def fit_transform(self, dask_documents, y=None):
@@ -166,7 +167,7 @@ class TokenExtractor(TransformerMixin):
             df_import = pd.read_csv(init, index_col=0)
             df.update(df_import)
             print('intialized successfully!')
-            # df.fillna('', inplace=True)
+            df.fillna('', inplace=True)
 
 
         if filename is not None:
@@ -222,19 +223,24 @@ def tags_to_df(tags, idx_col=None):
 
 
 def token_to_alias(raw_text, vocab):
-    thes_dict = vocab[vocab.alias.notna()].alias.to_dict()
+
+    thes_dict = vocab[vocab.alias.replace('', np.nan).notna()].alias.to_dict()
+    # print(thes_dict)
     substr = sorted(thes_dict, key=len, reverse=True)
-    # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
-    # matcher = lambda s: re.escape(s)
-    rx = re.compile(r'\b(' + '|'.join(map(re.escape, substr)) + r')\b')
-    clean_text = raw_text.str.replace(rx, lambda match: thes_dict[match.group(0)])
+    if substr:
+        # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
+        # matcher = lambda s: re.escape(s)
+        rx = re.compile(r'\b(' + '|'.join(map(re.escape, substr)) + r')\b')
+        clean_text = raw_text.str.replace(rx, lambda match: thes_dict[match.group(0)])
     # clean_text.compute()[:4]
+    else:
+        clean_text=raw_text
     return clean_text
 
 def ngram_automatch(vocab, voc2, NE_types, NE_map_rules):
 
     # first we need to substitute alias' for their NE identifier
-    NE_dict = vocab.NE.fillna('U').to_dict()
+    NE_dict = vocab.NE.replace('', np.nan).fillna('U').to_dict()
     NE_dict.update(vocab.fillna('U').reset_index()[['NE', 'alias']].drop_duplicates().set_index('alias').NE.to_dict())
     NE_sub = sorted(NE_dict, key=len, reverse=True)
 
@@ -248,7 +254,7 @@ def ngram_automatch(vocab, voc2, NE_types, NE_map_rules):
     # all combinations of NE types
     NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
     NE_map.update(NE_map_rules)
-    print(NE_map)
+    # print(NE_map)
     # apply rule substitutions
     voc2['NE'] = voc2.NE.apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
     # voc2['score'] = tex2.scores_  # should already happen?
