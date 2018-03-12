@@ -149,6 +149,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :param dataframe_NGram:
         :return:
         """
+        # print('NEW TEST ALERT')
+        # print(dataframe_1Gram)
         self.dataframe_1Gram=dataframe_1Gram
         self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
         self.tableWidget_1gram_TagContainer.printDataframe_tableView()
@@ -164,7 +166,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         set the value of the progress bar based on the dataframe score
         """
-        matched = self.scores[self.dataframe_1Gram['NE'].notna()]
+        # matched = self.scores[self.dataframe_1Gram['NE'].notna()]
+        # print(self.dataframe_1Gram.head())
+        matched = self.scores[self.dataframe_1Gram['NE'] != '']
         #TODO THURSTON which one?
         #completed_pct = pd.np.log(matched+1).sum()/pd.np.log(self.scores+1).sum()
         completed_pct = matched.sum()/self.scores.sum()
@@ -218,6 +222,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         self.config=config
         self.tableWidget_1gram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
+        self.tableWidget_Ngram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
         self.similarityThreshold_alreadyChecked = config['value']['similarityMatrix_alreadyChecked']
         #self.tableWidget_Ngram_TagContainer.set_vocabLimit()
 

@@ -1,6 +1,7 @@
 file:
   filePath_OriginalCSV:
-    path: /Users/sam11/Git/ml-py/data/gs_data/gs_data.csv
+    path: /home/tbsexton/Documents/Projects/DiagnosticKB/MaintenanceLanguageProcessing/data/gs_data/gs_data.csv
+
     headers:
       - Description
       - Resolution
@@ -14,7 +15,7 @@ value:
   similarityMatrix_threshold: 50
   similarityMatrix_alreadyChecked : 90
 
-NE_Info:
+NE_info:
   NE_map:
     {I I: I,
     S I: S I,
