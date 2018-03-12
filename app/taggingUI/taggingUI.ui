@@ -20,7 +20,7 @@
       <item row="0" column="0">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -355,9 +355,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_Ngram_ProblemEditor">
+               <widget class="QRadioButton" name="radioButton_Ngram_ProblemItemEditor">
                 <property name="text">
-                 <string>Problem</string>
+                 <string>Problem Item</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
@@ -365,9 +365,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_Ngram_SolutionEditor">
+               <widget class="QRadioButton" name="radioButton_Ngram_SolutionItemEditor">
                 <property name="text">
-                 <string>Solution</string>
+                 <string>Solution Item</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
@@ -472,7 +472,7 @@
             <item row="2" column="2">
              <layout class="QGridLayout" name="gridLayout_Ngram_ActionButton">
               <item row="0" column="0" alignment="Qt::AlignHCenter">
-               <widget class="QPushButton" name="pushButton_1gram_UpdateTokenProperty_2">
+               <widget class="QPushButton" name="pushButton_Ngram_UpdateTokenProperty">
                 <property name="text">
                  <string>Update</string>
                 </property>
