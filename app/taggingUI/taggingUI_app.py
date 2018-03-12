@@ -45,7 +45,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.dataframe_1Gram = None
         self.dataframe_NGram = None
-        self.score = None
         #self.alias_lookup = None
 
         self.buttonGroup_1Gram_similarityPattern = myObjects.QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
@@ -74,7 +73,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_initial(matches, self.similarityThreshold_alreadyChecked)
         self.buttonGroup_1Gram_similarityPattern.set_checkedBoxes(self.dataframe_1Gram, alias)
-        self.update_progress_bar()
+        self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
 
     def onClick_saveButton(self):
         """
@@ -109,7 +108,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                                        '', '')
 
             self.tableWidget_1gram_TagContainer.printDataframe_tableView()
-            self.update_progress_bar()
+            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
 
         except IndexError:
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
@@ -164,19 +163,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
 
-        self.scores = self.dataframe_1Gram['score']
-        self.update_progress_bar()
+        self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
+        print('---------------------------------------')
+        self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
 
-    def update_progress_bar(self):
+    def update_progress_bar(self, progressBar, dataframe):
         """
         set the value of the progress bar based on the dataframe score
         """
-
-        matched = self.scores[self.dataframe_1Gram['NE'] != '']
+        scores = dataframe['score']
+        matched = scores[dataframe['NE'] != '']
         #TODO THURSTON which one?
         #completed_pct = pd.np.log(matched+1).sum()/pd.np.log(self.scores+1).sum()
-        completed_pct = matched.sum()/self.scores.sum()
-        self.progressBar_1gram_TagComplete.setValue(100*completed_pct)
+        completed_pct = matched.sum()/scores.sum()
+        progressBar.setValue(100*completed_pct)
 
     def set_editor_value(self, alias, token, notes, classification):
         """
