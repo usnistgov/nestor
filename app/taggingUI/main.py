@@ -112,7 +112,7 @@ class Main:
             tokenExtractor = kex.TokenExtractor()  # sklearn-style TF-IDF calc
             list_tokenExtracted = tokenExtractor.fit_transform(clean_rawText)  # helper list of tokens if wanted
 
-            #create the .Gram dataframe
+            #create the 1Gram dataframe
             if self.config_new['file']['filePath_1GrammCSV']['path'] is None:
                 filename = self.config_new['file']['filePath_1GrammCSV']['path']
                 init = None
@@ -121,15 +121,25 @@ class Main:
                 init = self.config_new['file']['filePath_1GrammCSV']['path']
             self.df_1Gram = tokenExtractor.annotation_assistant(filename=filename, init = init)
 
-            # if self.config_new['file']['filePath_nGrammCSV']['path'] is None:
-            #     filename = self.config_new['file']['filePath_nGrammCSV']['path']
-            #     init = None
-            # else:
-            #     filename = None
-            #     init = self.config_new['file']['filePath_nGrammCSV']['path']
+            clean_rawText_1Gram = kex.token_to_alias(clean_rawText, self.df_1Gram)
+            nGram_tokenExtractor = kex.TokenExtractor(ngram_range=(2, 2))
+            nGram_tokenExtractor.fit(clean_rawText_1Gram)
 
-            #self.df_nGram =tokenExtractor.annotation_assistant(filename=filename, init=init)
-            self.df_nGram =None
+            if self.config_new['file']['filePath_nGrammCSV']['path'] is None:
+                filename = self.config_new['file']['filePath_nGrammCSV']['path']
+                init = None
+            else:
+                filename = None
+                init = self.config_new['file']['filePath_nGrammCSV']['path']
+
+            self.df_nGram = nGram_tokenExtractor.annotation_assistant(filename=filename, init=init)
+
+            #TODO get NE info from congif.yaml
+            NE_types = None  # NEED TO CHANGE
+            NE_map_rules = None  # NEED TO CHANGE
+            self.df_nGram = kex.ngram_automatch(self.df_1Gram, self.df_nGram, NE_types, NE_map_rules)
+
+            # self.df_nGram =None
             #TODO self.df_nGrammCSV = tokenExtractor.annotation_assistant(init=self.config_new['file']['filePath_nGrammCSV']['path'])
 
             #print(self.df_1GrammCSV)
