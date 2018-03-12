@@ -1,8 +1,518 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'taggingUI_skeleton.py'
-#
-# Created by: PyQt5 UI code generator 5.6
-#
-# WARNING! All changes made in this file will be lost!
-
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow_taggingTool</class>
+ <widget class="QMainWindow" name="MainWindow_taggingTool">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>651</width>
+    <height>595</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_general">
+      <item row="0" column="0">
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab_1gram">
+         <attribute name="title">
+          <string>1 Gram Token</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_1gram_general">
+            <item row="2" column="1">
+             <widget class="QSlider" name="horizontalSlider_1gram_FindingThreshold">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <layout class="QVBoxLayout" name="verticalLayout_1gram_SimilarityPattern"/>
+            </item>
+            <item row="0" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
+             <widget class="QLabel" name="label_1gram_PatternFindingDescription">
+              <property name="text">
+               <string>Similar Pattern</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
+             <widget class="QLabel" name="label_1gram_PropertyEditorDescription">
+              <property name="text">
+               <string>Property Editor</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_1gram_TableTagDescription">
+              <property name="text">
+               <string>Tag Annotation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <layout class="QVBoxLayout" name="verticalLayout_1gram_PropertiesEditor">
+              <item>
+               <widget class="QLabel" name="label_1gram_AliasDescription">
+                <property name="text">
+                 <string>Preferred Alias</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_1gram_AliasEditor"/>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_1gram_ItemEditor">
+                <property name="text">
+                 <string>Item</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_1Gram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_1gram_ProblemEditor">
+                <property name="text">
+                 <string>Problem</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_1Gram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_1gram_SolutionEditor">
+                <property name="text">
+                 <string>Solution</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_1Gram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_1gram_UnknownEditor">
+                <property name="text">
+                 <string>Ambiguous (Unknown)</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_1Gram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_1gram_StopWordEditor">
+                <property name="text">
+                 <string>Stop-word</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_1Gram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_1gram_NotClassifiedEditor">
+                <property name="text">
+                 <string>not yet classified</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_1Gram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_1gram_NoteDescription">
+                <property name="text">
+                 <string>Notes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTextEdit" name="textEdit_1gram_NoteEditor">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="tabChangesFocus">
+                 <bool>false</bool>
+                </property>
+                <property name="lineWrapColumnOrWidth">
+                 <number>4</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <widget class="QTableWidget" name="tableWidget_1gram_TagContainer">
+              <property name="editTriggers">
+               <set>QAbstractItemView::EditKeyPressed</set>
+              </property>
+              <property name="tabKeyNavigation">
+               <bool>false</bool>
+              </property>
+              <property name="dragDropOverwriteMode">
+               <bool>false</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <layout class="QGridLayout" name="gridLayout_1gram_ActionButton">
+              <item row="0" column="0" alignment="Qt::AlignHCenter">
+               <widget class="QPushButton" name="pushButton_1gram_UpdateTokenProperty">
+                <property name="text">
+                 <string>Update</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" alignment="Qt::AlignHCenter">
+               <widget class="QPushButton" name="pushButton_1gram_SaveTableView">
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <widget class="QProgressBar" name="progressBar_1gram_TagComplete">
+              <property name="value">
+               <number>24</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_Ngram">
+         <attribute name="title">
+          <string>N Gram Token</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_Ngram_general">
+            <item row="0" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_Ngram_TableTagDescription">
+              <property name="text">
+               <string>Tag Annotation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QTableWidget" name="tableWidget_Ngram_TagContainer">
+              <property name="editTriggers">
+               <set>QAbstractItemView::EditKeyPressed</set>
+              </property>
+              <property name="tabKeyNavigation">
+               <bool>false</bool>
+              </property>
+              <property name="dragDropOverwriteMode">
+               <bool>false</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderStretchLastSection">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+            <item row="0" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_Ngram_PropertyEditorDescription">
+              <property name="text">
+               <string>Property Editor</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <layout class="QVBoxLayout" name="verticalLayout_Ngram_CompositionDisplay"/>
+            </item>
+            <item row="0" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_Ngram_CompositionDescription">
+              <property name="text">
+               <string>Composition</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <layout class="QVBoxLayout" name="verticalLayout_Ngram_PropertiesEditor">
+              <item>
+               <widget class="QLabel" name="label_Ngram_AliasDescription">
+                <property name="text">
+                 <string>Preferred Alias</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_Ngram_AliasEditor"/>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_ItemEditor">
+                <property name="text">
+                 <string>Item</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_ProblemEditor">
+                <property name="text">
+                 <string>Problem</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_SolutionEditor">
+                <property name="text">
+                 <string>Solution</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_UnknownEditor">
+                <property name="text">
+                 <string>Ambiguous (Unknown)</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_StopWordEditor">
+                <property name="text">
+                 <string>Stop-word</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_NotClassifiedEditor">
+                <property name="text">
+                 <string>not yet classified</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_Ngram_NoteDescription">
+                <property name="text">
+                 <string>Notes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QTextEdit" name="textEdit_Ngram_NoteEditor">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>50</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0" alignment="Qt::AlignBottom">
+             <widget class="QProgressBar" name="progressBar_Ngram_TagComplete">
+              <property name="value">
+               <number>24</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <layout class="QGridLayout" name="gridLayout_Ngram_ActionButton">
+              <item row="0" column="0" alignment="Qt::AlignHCenter">
+               <widget class="QPushButton" name="pushButton_1gram_UpdateTokenProperty_2">
+                <property name="text">
+                 <string>Update</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" alignment="Qt::AlignHCenter">
+               <widget class="QPushButton" name="pushButton_Ngram_SaveTableView">
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>651</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup_NGram_Classification"/>
+  <buttongroup name="buttonGroup_1Gram_Classification"/>
+ </buttongroups>
+</ui>
