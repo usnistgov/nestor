@@ -69,7 +69,7 @@ class Main:
 
         if done:
             # print(self.config_new['file']['filePath_OriginalCSV']['path'])
-            # print(self.config_new['file']['filePath_1GrammCSV']['path'])
+            print(self.config_new['file']['filePath_1GrammCSV']['path'])
             # print(self.config_new['file']['filePath_nGrammCSV']['path'] )
             # print(self.config_new['value']['numberToken_show'])
             # print(self.config_new['value']['similarityMatrix_threshold'])
