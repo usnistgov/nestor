@@ -40,7 +40,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Solution': 'S',
             'Ambiguous (Unknown)': 'U',
             'Stop-word': 'X',
-            'not yet classified': pd.np.nan
+            'not yet classified': ''
         }
 
         self.classificationDictionary_NGram = {
@@ -58,7 +58,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Solution Item': 'S I',
             'Unknown': 'U',
             'Stop-word': 'X',
-            'not yet classified': pd.np.nan
+            'not yet classified': ''
         }
 
         self.dataframe_1Gram = None
@@ -77,7 +77,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onSliderMoved_similarityPattern)
         self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_1Gram)
         self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_NGram)
-        self.pushButton_1gram_SaveTableView.clicked.connect(self.onClick_saveButton)
+        self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
+        self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
 
 
     def onSelectedItem_table1Gram(self):
@@ -106,13 +107,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         #TODO create the layout composition
 
-    def onClick_saveButton(self):
+    def onClick_saveButton(self, dataframe, path):
         """
         save the dataframe to the CSV file
         :return:
         """
         self.saved = True
-        self.dataframe_1Gram.to_csv(self.config['file']['filePath_1GrammCSV']['path'])
+        dataframe.to_csv(path)
 
 
     def onClick_updateButton_1Gram(self):
