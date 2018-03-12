@@ -71,7 +71,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.lineEdit_openFiles_numberTokenShow.setText(str(config['value']['numberToken_show']))
         self.horizontalSlider_openFiles_similarityMatrixThreshold.setValue(config['value']['similarityMatrix_threshold'])
         self.label_openFiles_similarityMatrixThresholdValue.setText(str(config['value']['similarityMatrix_threshold']) + '%')
-        self.lineEdit_openFiles_SimilarityAlreadyChecked.setText(str(config['value']['similarityMatrix_alreadyChecked']))
+        # self.lineEdit_openFiles_SimilarityAlreadyChecked.setText(str(config['value']['similarityMatrix_alreadyChecked']))
 
     def get_config(self, config):
         """

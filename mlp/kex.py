@@ -11,12 +11,12 @@ import string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
-
+from itertools import product
 
 
 class Transformer(TransformerMixin):
     """
-    Base class for pure transformers that don't need a fit method
+    Base class for pure transformers that don't need a fit method (returns self)
     """
 
     def fit(self, X, y=None, **fit_params):
@@ -53,21 +53,21 @@ class NLPSelect(Transformer):
                     special_replace=self.special_replace)
 
     def transform(self, X, y=None):
-        if isinstance(self.columns, list):
+        if isinstance(self.columns, list):  # user passed a list of column labels
             if all([isinstance(x, int) for x in self.columns]):
-                nlp_cols = list(X.columns[self.columns])
+                nlp_cols = list(X.columns[self.columns])  # select columns by user-input indices
             elif all([isinstance(x, str) for x in self.columns]):
-                nlp_cols = self.columns
+                nlp_cols = self.columns  # select columns by user-input names
             else:
-                print("Select error: mixed or wrong column type.")
+                print("Select error: mixed or wrong column type.")  # can't do both
                 raise Exception
-        elif isinstance(self.columns, int):
+        elif isinstance(self.columns, int):  # take in a single index
             nlp_cols = [X.columns[self.columns]]
         else:
-            nlp_cols = [self.columns]
+            nlp_cols = [self.columns]  # allow...duck-typing I guess? Don't remember.
 
         raw_text = X.loc[:, nlp_cols].fillna('')  # fill nan's
-        if len(self.columns) > 1:  # more than one column, cat them
+        if len(self.columns) > 1:  # more than one column, concat them
             raw_text = raw_text.add(' ').sum(axis=1).str[:-1]
         raw_text = raw_text.str.lower()  # all lowercase
         raw_text = raw_text.str.replace('\n', ' ')  # no hanging newlines
@@ -76,6 +76,7 @@ class NLPSelect(Transformer):
         raw_text = raw_text.str.replace('[{}]'.format(string.punctuation), ' ')
         if self.special_replace is not None:
             rx = re.compile('|'.join(map(re.escape, self.special_replace)))
+            # allow user-input special replacements.
             raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
         return raw_text
 
@@ -135,35 +136,6 @@ class TokenExtractor(TransformerMixin):
         scores = self._tf_tot[self.ranks_]
         return scores/scores.sum()
 
-    # def annotation_assistant(self,
-    #                          filename,
-    #                          gui=True):
-    #     if not Path(filename).is_file():
-    #         check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
-    #
-    #         df = pd.DataFrame({'tokens': self.vocab_,
-    #                            'NE': '',
-    #                            'alias': '',
-    #                            'notes': '',
-    #                            'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
-    #         df = df[~df.tokens.duplicated(keep='first')]
-    #         df.to_csv(filename, index=False)
-    #         print(f'New Vocab. file written to {filename}')
-    #         if gui:
-    #             print('opening gui with blank, pre-formatted .csv file...')
-    #             annotation_app(filename)
-    #
-    #     elif gui:
-    #         print('opening pre-existing vocab file in the GUI...')
-    #         annotation_app(filename)
-    #         # df = pd.read_csv(filename, index_col=0)
-    #         # return df
-    #     else:
-    #         print('file already exists, importing...')
-    #         # raise Exception
-    #     df = pd.read_csv(filename, index_col=0)
-    #     return df
-
     def annotation_assistant(self, filename=None, init=None):
         try:
             check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
@@ -195,6 +167,8 @@ class TokenExtractor(TransformerMixin):
             df.update(df_import)
             print('intialized successfully!')
             # df.fillna('', inplace=True)
+
+
         if filename is not None:
             df.to_csv(filename)
             print('saved locally!')
@@ -245,3 +219,37 @@ def tags_to_df(tags, idx_col=None):
     if idx_col is not None:
         tag_df = tag_df.set_index(idx_col).sort_index()  # sort by idx
     return tag_df
+
+
+def token_to_alias(raw_text, vocab):
+    thes_dict = vocab[vocab.alias.notna()].alias.to_dict()
+    substr = sorted(thes_dict, key=len, reverse=True)
+    # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
+    # matcher = lambda s: re.escape(s)
+    rx = re.compile(r'\b(' + '|'.join(map(re.escape, substr)) + r')\b')
+    clean_text = raw_text.str.replace(rx, lambda match: thes_dict[match.group(0)])
+    # clean_text.compute()[:4]
+    return clean_text
+
+def ngram_automatch(vocab, voc2, NE_types, NE_map_rules):
+
+    # first we need to substitute alias' for their NE identifier
+    NE_dict = vocab.NE.fillna('U').to_dict()
+    NE_dict.update(vocab.fillna('U').reset_index()[['NE', 'alias']].drop_duplicates().set_index('alias').NE.to_dict())
+    NE_sub = sorted(NE_dict, key=len, reverse=True)
+
+    # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
+    # matcher = lambda s: re.escape(s)
+    NErx = re.compile(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
+    NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
+    # now we have NE-soup/DNA of the original text.
+    voc2.loc[:, 'NE'] = NE_text.tolist()
+
+    # all combinations of NE types
+    NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
+    NE_map.update(NE_map_rules)
+    print(NE_map)
+    # apply rule substitutions
+    voc2['NE'] = voc2.NE.apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
+    # voc2['score'] = tex2.scores_  # should already happen?
+    return voc2
