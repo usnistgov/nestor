@@ -44,8 +44,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         }
 
         self.classificationDictionary_NGram = {
-            'S I': self.radioButton_Ngram_SolutionEditor,
-            'P I': self.radioButton_Ngram_ProblemEditor,
+            'S I': self.radioButton_Ngram_SolutionItemEditor,
+            'P I': self.radioButton_Ngram_ProblemItemEditor,
             'I': self.radioButton_Ngram_ItemEditor,
             'U': self.radioButton_Ngram_UnknownEditor,
             'X': self.radioButton_Ngram_StopWordEditor,
@@ -75,7 +75,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tableWidget_Ngram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_tableNGram)
         self.horizontalSlider_1gram_FindingThreshold.sliderMoved.connect(self.onSliderMoved_similarityPattern)
         self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onSliderMoved_similarityPattern)
-        self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton)
+        self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_1Gram)
+        self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_NGram)
         self.pushButton_1gram_SaveTableView.clicked.connect(self.onClick_saveButton)
 
 
@@ -114,9 +115,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dataframe_1Gram.to_csv(self.config['file']['filePath_1GrammCSV']['path'])
 
 
-    def onClick_updateButton(self):
+    def onClick_updateButton_1Gram(self):
         """
-        Triggers with update button. Saves user annotation to self.df
+        Triggers with update button. Saves user annotation to the dataframe
         """
         try:
             self.saved = False
@@ -140,12 +141,36 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.tableWidget_1gram_TagContainer.printDataframe_tableView()
 
             self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
-            row = self.tableWidget_1gram_TagContainer.currentRow()
-            self.tableWidget_1gram_TagContainer.selectRow(row + 1)
+            self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
 
 
         except (IndexError, ValueError):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
+
+    def onClick_updateButton_NGram(self):
+        """
+        Triggers with update button. Saves user annotation to the dataframe
+        """
+        #TODO
+        try :
+            self.saved = False
+            items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
+            token, classification, alias, notes = (str(i.text()) for i in items)
+
+            new_alias = self.lineEdit_Ngram_AliasEditor.text()
+            new_notes = self.textEdit_Ngram_NoteEditor.toPlainText()
+            new_clf = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(),
+                                                      pd.np.nan)
+            self.dataframe_NGram = self.set_dataframeItemValue(self.dataframe_NGram, token, new_alias, new_clf, new_notes)
+            self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
+
+            self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
+            self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
+            self.tableWidget_Ngram_TagContainer.selectRow(self.tableWidget_Ngram_TagContainer.currentRow() + 1)
+
+        except (IndexError, ValueError):
+            Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
+        pass
 
 
     def onSliderMoved_similarityPattern(self):
