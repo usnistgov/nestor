@@ -59,7 +59,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         :param autoMatch_score:
         :return:
         """
-        #TODO check existing identical aliases to toggle beforehand
         self.clean_checkboxes()
         for token, score in token_list:
             btn = Qw.QCheckBox(token)
