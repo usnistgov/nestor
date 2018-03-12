@@ -29,6 +29,9 @@ class MyQButtonGroup(Qw.QButtonGroup):
             # btn = Qw.QCheckBox(f'{n} - ' + match)
             btn = Qw.QCheckBox(match)
             # print(type(match), type(tok))
+            print("------------------")
+            print(match)
+            print(tok)
             same_tok = df.loc[match, 'alias'] == df.loc[tok, 'alias']
             no_alias = df.loc[match, 'alias'] != ''
             # print(df.loc[match, 'alias'], df.loc[tok, 'alias'])

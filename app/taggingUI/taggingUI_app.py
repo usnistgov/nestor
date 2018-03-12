@@ -73,7 +73,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         matches = self.get_similarityMatches(token)
 
         self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_initial(matches, self.similarityThreshold_alreadyChecked)
-        print("pass")
+        self.buttonGroup_1Gram_similarityPattern.set_checkedBoxes(self.dataframe_1Gram, alias)
         self.update_progress_bar()
 
     def onClick_saveButton(self):
@@ -99,9 +99,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             new_clf = self.buttonDictionary_1Gram.get(self.buttonGroup_1Gram_Classification.checkedButton().text(), pd.np.nan)
             self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, token, new_alias, new_clf, new_notes)
             self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
-            for btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
-                self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), new_alias, new_clf,
+
+            for btn in self.buttonGroup_1Gram_similarityPattern.buttons():
+                if btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
+                    self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), new_alias, new_clf,
                                                                    new_notes)
+                else:
+                    self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), '',
+                                                                       '', '')
 
             self.tableWidget_1gram_TagContainer.printDataframe_tableView()
             self.update_progress_bar()
@@ -166,8 +171,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         set the value of the progress bar based on the dataframe score
         """
-        # matched = self.scores[self.dataframe_1Gram['NE'].notna()]
-        # print(self.dataframe_1Gram.head())
+
         matched = self.scores[self.dataframe_1Gram['NE'] != '']
         #TODO THURSTON which one?
         #completed_pct = pd.np.log(matched+1).sum()/pd.np.log(self.scores+1).sum()
@@ -224,7 +228,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tableWidget_1gram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
         self.tableWidget_Ngram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
         self.similarityThreshold_alreadyChecked = config['value']['similarityMatrix_alreadyChecked']
-        #self.tableWidget_Ngram_TagContainer.set_vocabLimit()
 
         self.horizontalSlider_1gram_FindingThreshold.setValue(config['value']['similarityMatrix_threshold'])
 
