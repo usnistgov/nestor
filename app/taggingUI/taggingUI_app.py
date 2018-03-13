@@ -23,7 +23,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
 
-        self.saved = False
         self.similarityThreshold_alreadyChecked = 100
 
         self.classificationDictionary_1Gram = {
@@ -79,16 +78,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_NGram)
         self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
         self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
-        self.pushButton_Ngram_Refresh.clicked.connect(self.onClick_refresh)
+        self.tabWidget.currentChanged.connect(self.onClick_selectTab)
 
-    def onClick_refresh(self):
+    def onClick_selectTab(self, index):
         """
         when click on refrech button in the Ngram view
         It refrech the Ngram Dataframe based on the 1Gram
         :return:
         """
-        filename2 = self.config['file']['filePath_nGrammCSV']['path']
-        self.dataframe_nGram = nGram_tokenExtractor.annotation_assistant(filename=filename2)
+        if index == 1:
+            print(index)
+
 
         #TODO THURSTON i do not understand your logic about the tokenExtractor object
 
@@ -125,7 +125,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         save the dataframe to the CSV file
         :return:
         """
-        self.saved = True
         dataframe.to_csv(path)
 
 
@@ -134,7 +133,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Triggers with update button. Saves user annotation to the dataframe
         """
         try:
-            self.saved = False
             items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
 
@@ -168,7 +166,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         #TODO
         try :
-            self.saved = False
             items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
 
