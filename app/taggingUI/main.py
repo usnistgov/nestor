@@ -1,12 +1,15 @@
 import sys
 import yaml
 import pandas as pd
+from PyQt5.QtCore import Qt
+
 from mlp import kex
 from app.taggingUI.openFilesUI_app import MyOpenFilesWindow
 from app.taggingUI.selectCSVHeadersUI_app import MySelectCsvHeadersWindow
 from app.taggingUI.taggingUI_app import MyTaggingToolWindow
 
 import PyQt5.QtWidgets as Qw
+
 
 class Main:
     def __init__(self):
@@ -153,8 +156,27 @@ class Main:
             yaml.dump(dict, yamlfile)
             print("yaml file save")
 
+    # def close_application(self):
+    #     """
+    #     Trigger when closing the application
+    #     :return:
+    #     """
+    #     choice = Qw.QMessageBox.question(self, 'Shut it Down',
+    #                               'Do you want to save your changes before closing?',
+    #                                  Qw.QMessageBox.Yes | Qw.QMessageBox.No)
+    #
+    #     if choice == Qw.QMessageBox.Yes:
+    #         self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram)
+    #         self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram)
+    #         print('exiting program...')
+    #         app.exec_()
+    #
+    #     self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
+
+
 
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
     main = Main()
     sys.exit(app.exec_())
+
