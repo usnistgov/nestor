@@ -39,9 +39,9 @@ class Main:
                                 }
                             }
         # instanciate the dataframe
-        self.df_Original = None
-        self.df_1Gram = None
-        self.df_nGram = None
+        self.dataframe_Original = None
+        self.dataframe_1Gram = None
+        self.dataframe_nGram = None
 
 
         #instanciate windows
@@ -77,10 +77,10 @@ class Main:
             self.window_OpenFiles.close()
 
             # add values to the original dataframe
-            self.df_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
+            self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
 
             # set the checkBox in the window
-            self.window_selectCSVHeader.set_checkBoxesValues(self.df_Original.columns.values.tolist())
+            self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())
 
             #if the csv file of the old and the new config are equals the header will be equals
             if self.config_default['file']['filePath_OriginalCSV']['path'] == self.config_new['file']['filePath_OriginalCSV']['path'] \
@@ -104,32 +104,32 @@ class Main:
 
             # Clean the natural lang text...merge columns.
             nlp_selector = kex.NLPSelect(columns=self.config_new['file']['filePath_OriginalCSV']['headers'])  # sklearn-style
-            clean_rawText = nlp_selector.transform(self.df_Original)  # a series object
+            clean_rawText = nlp_selector.transform(self.dataframe_Original)  # a series object
 
             #init the token extractor and clean the raw text
-            tokenExtractor = kex.TokenExtractor()  # sklearn-style TF-IDF calc
-            list_tokenExtracted = tokenExtractor.fit_transform(clean_rawText)  # helper list of tokens if wanted
+            tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
+            list_tokenExtracted = tokenExtractor_1Gram.fit_transform(clean_rawText)  # helper list of tokens if wanted
 
             #create the 1Gram dataframe
             filename1 = self.config_new['file']['filePath_1GrammCSV']['path']
-            self.df_1Gram = tokenExtractor.annotation_assistant(filename=filename1)
-            clean_rawText_1Gram = kex.token_to_alias(clean_rawText, self.df_1Gram)
-            nGram_tokenExtractor = kex.TokenExtractor(ngram_range=(2, 2))
-            list_tokenExtracted = nGram_tokenExtractor.fit_transform(clean_rawText_1Gram)
+            self.dataframe_1Gram = tokenExtractor_1Gram.annotation_assistant(filename=filename1)
+            clean_rawText_1Gram = kex.token_to_alias(clean_rawText, self.dataframe_1Gram)
+            tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
+            list_tokenExtracted = tokenExtractor_nGram.fit_transform(clean_rawText_1Gram)
 
-            #create the two gram dataframe
+            #create the n gram dataframe
             filename2 = self.config_new['file']['filePath_nGrammCSV']['path']
-            self.df_nGram = nGram_tokenExtractor.annotation_assistant(filename=filename2)
+            self.dataframe_nGram = tokenExtractor_nGram.annotation_assistant(filename=filename2)
 
             NE_types = self.config_default['NE_info']['NE_types']
             NE_map_rules = self.config_default['NE_info']['NE_map']
-            self.df_nGram = kex.ngram_automatch(self.df_1Gram, self.df_nGram, NE_types, NE_map_rules)
+            self.dataframe_nGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_nGram, NE_types, NE_map_rules)
 
             self.window_selectCSVHeader.close()
 
             #send the dataframes to the tagging window
             self.window_taggingTool.set_config(self.config_new)
-            self.window_taggingTool.set_dataframes(self.df_1Gram, self.df_nGram)
+            self.window_taggingTool.set_dataframes(self.dataframe_1Gram, self.dataframe_nGram)
 
             self.window_taggingTool.show()
 
@@ -140,7 +140,7 @@ class Main:
         :return: a dictionary
         """
         with open(yaml_path, 'r') as yamlfile:
-            config =   yaml.load(yamlfile)
+            config = yaml.load(yamlfile)
             print("yaml file open")
         return config
 

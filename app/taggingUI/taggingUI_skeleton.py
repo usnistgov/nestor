@@ -219,6 +219,9 @@ class Ui_MainWindow_taggingTool(object):
         self.pushButton_Ngram_SaveTableView.setObjectName("pushButton_Ngram_SaveTableView")
         self.gridLayout_Ngram_ActionButton.addWidget(self.pushButton_Ngram_SaveTableView, 0, 1, 1, 1, QtCore.Qt.AlignHCenter)
         self.gridLayout_Ngram_general.addLayout(self.gridLayout_Ngram_ActionButton, 2, 2, 1, 1)
+        self.pushButton_Ngram_Refresh = QtWidgets.QPushButton(self.tab_Ngram)
+        self.pushButton_Ngram_Refresh.setObjectName("pushButton_Ngram_Refresh")
+        self.gridLayout_Ngram_general.addWidget(self.pushButton_Ngram_Refresh, 2, 1, 1, 1, QtCore.Qt.AlignHCenter)
         self.gridLayout_7.addLayout(self.gridLayout_Ngram_general, 0, 0, 1, 1)
         self.tabWidget.addTab(self.tab_Ngram, "")
         self.gridLayout_general.addWidget(self.tabWidget, 0, 0, 1, 1)
@@ -266,5 +269,6 @@ class Ui_MainWindow_taggingTool(object):
         self.label_Ngram_NoteDescription.setText(_translate("MainWindow_taggingTool", "Notes"))
         self.pushButton_Ngram_UpdateTokenProperty.setText(_translate("MainWindow_taggingTool", "Update"))
         self.pushButton_Ngram_SaveTableView.setText(_translate("MainWindow_taggingTool", "Save"))
+        self.pushButton_Ngram_Refresh.setText(_translate("MainWindow_taggingTool", "Refresh"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Ngram), _translate("MainWindow_taggingTool", "N Gram Token"))
 

@@ -68,7 +68,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.buttonGroup_1Gram_similarityPattern = myObjects.QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
         self.tableWidget_1gram_TagContainer.__class__ = myObjects.QTableWidget_token
         self.tableWidget_Ngram_TagContainer.__class__ = myObjects.QTableWidget_token
-
+        self.middleLayout_Ngram_Composition = myObjects.CompositionNGramItem(self.verticalLayout_Ngram_CompositionDisplay)
         self.tabWidget.setCurrentIndex(0)
 
         self.tableWidget_1gram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_table1Gram)
@@ -79,11 +79,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_NGram)
         self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
         self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
+        self.pushButton_Ngram_Refresh.clicked.connect(self.onClick_refresh)
+
+    def onClick_refresh(self):
+        """
+        when click on refrech button in the Ngram view
+        It refrech the Ngram Dataframe based on the 1Gram
+        :return:
+        """
+        filename2 = self.config['file']['filePath_nGrammCSV']['path']
+        self.dataframe_nGram = nGram_tokenExtractor.annotation_assistant(filename=filename2)
+
+        #TODO THURSTON i do not understand your logic about the tokenExtractor object
 
 
     def onSelectedItem_table1Gram(self):
         """
-        action when we select an item from the table view
+        action when we select an item from the 1Gram table view
         :return:
         """
         items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
@@ -97,15 +109,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def onSelectedItem_tableNGram(self):
         """
-
+        action when we select an item from the NGram table view
         :return:
         """
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
         token, classification, alias, notes = (str(i.text()) for i in items)
 
         self.set_editorValue_NGram(alias, token, notes, classification)
+        self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, token)
 
-        #TODO create the layout composition
+
 
     def onClick_saveButton(self, dataframe, path):
         """
@@ -135,7 +148,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 if btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
                     self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), new_alias, new_clf,
                                                                    new_notes)
-                else:
+
+                elif self.dataframe_1Gram.loc[btn.text()]['alias'] == alias:
                     self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), '',
                                                                        '', '')
 
