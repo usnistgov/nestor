@@ -8,9 +8,10 @@ from app.taggingUI.openFilesUI_skeleton import Ui_MainWindow_openFiles
 
 class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
-    def __init__(self, iconPath=None):
+    def __init__(self, iconPath=None, closeFunction=None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
+        self.closeFunction = closeFunction
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
 
@@ -123,6 +124,14 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
             Qw.QMessageBox.about(self, 'Can\'t save', "You should open all the file first")
             return False, None
 
+    # def closeEvent(self, event):
+    #     """
+    #     trigger when we close the window
+    #     :param event:
+    #     :return:
+    #     """
+    #
+    #     self.closeFunction(self)
 
 
 if __name__ == "__main__":

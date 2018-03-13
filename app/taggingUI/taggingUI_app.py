@@ -13,9 +13,10 @@ from app.taggingUI.taggingUI_skeleton import Ui_MainWindow_taggingTool
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
-    def __init__(self,iconPath=None):
+    def __init__(self,iconPath=None, closeFunction=None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
+        self.closeFunction = closeFunction
 
         #TODO make the "areyoysure" exit action
         #self.actionExit.triggered.connect(self.close_application)
@@ -331,6 +332,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         pass
+
+    def closeEvent(self, event):
+        """
+        trigger when we close the window
+        :param event:
+        :return:
+        """
+
+        self.closeFunction()
 
 
 
