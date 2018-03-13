@@ -16,31 +16,44 @@ class Main:
         #TODO create the YAML file if not exists
         self.icnoPtah="NIST_logo.png"
         self.yamlPath_config = "config.yaml"
-        self.config_default = self.openYAMLConfig_File(self.yamlPath_config)
         self.config_new = {
-                            'file':
-                                {
-                                'filePath_OriginalCSV':
-                                    {
-                                    'path': None,
-                                    'headers': None,
-                                    },
-                                'filePath_1GrammCSV':
-                                    {
-                                    'path': None
-                                    },
-                                'filePath_nGrammCSV':
-                                    {
-                                    'path': None
-                                    }
-                                },
-                            'value':
-                                {
-                                'numberToken_show': None,
-                                'similarityMatrix_threshold': None,
-                                'similarityMatrix_alreadyChecked': None
-                                }
-                            }
+            'file':
+                {
+                    'filePath_OriginalCSV':
+                        {
+                            'path': None,
+                            'headers': None,
+                        },
+                    'filePath_1GrammCSV':
+                        {
+                            'path': None
+                        },
+                    'filePath_nGrammCSV':
+                        {
+                            'path': None
+                        }
+                },
+            'value':
+                {
+                    'numberToken_show': 1000,
+                    'similarityMatrix_threshold': 50,
+                    'similarityMatrix_alreadyChecked': 99
+                },
+            'NE_info': {
+                'NE_map': {'I I': 'I',
+                           'S I': 'S I',
+                           'P I': 'P I',
+                           'I S': 'S I',
+                           'I P': 'P I',
+                           'S S': 'X',
+                           'P P': 'X',
+                           'S P': 'X',
+                           'P S': 'X'},
+                'NE_types': 'IPSUX'
+            }
+        }
+        self.config_default = self.openYAMLConfig_File(self.yamlPath_config, self.config_new)
+
         # instanciate the dataframe
         self.dataframe_Original = None
         self.dataframe_1Gram = None
@@ -48,9 +61,9 @@ class Main:
 
 
         #instanciate windows
-        self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah)
-        self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah)
-        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah)
+        self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah, self.close_otherWindow)
+        self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow)
+        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow)
 
         # add connect to windows
         self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)
@@ -137,15 +150,22 @@ class Main:
             self.window_taggingTool.show()
 
 
-    def openYAMLConfig_File(self, yaml_path):
+    def openYAMLConfig_File(self, yaml_path, dict=None):
         """
         open a Yaml file based on the given path
         :return: a dictionary
         """
-        with open(yaml_path, 'r') as yamlfile:
-            config = yaml.load(yamlfile)
-            print("yaml file open")
-        return config
+        try:
+            with open(yaml_path, 'r') as yamlfile:
+                config = yaml.load(yamlfile)
+                print("yaml file open")
+            return config
+        except FileNotFoundError:
+            with open(yaml_path, 'w') as yamlfile:
+                yaml.dump(dict, yamlfile)
+                print("yaml file created")
+            return dict
+
 
     def saveYAMLConfig_File(self, yaml_path, dict):
         """
@@ -156,23 +176,38 @@ class Main:
             yaml.dump(dict, yamlfile)
             print("yaml file save")
 
-    # def close_application(self):
-    #     """
-    #     Trigger when closing the application
-    #     :return:
-    #     """
-    #     choice = Qw.QMessageBox.question(self, 'Shut it Down',
-    #                               'Do you want to save your changes before closing?',
-    #                                  Qw.QMessageBox.Yes | Qw.QMessageBox.No)
-    #
-    #     if choice == Qw.QMessageBox.Yes:
-    #         self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram)
-    #         self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram)
-    #         print('exiting program...')
-    #         app.exec_()
-    #
-    #     self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
 
+    def close_taggingUIWindow(self):
+        """
+        Trigger when closing the window tagginUI
+        :return:
+        """
+        choice = Qw.QMessageBox.question(self.window_taggingTool, 'Shut it Down',
+                                  'Do you want to save your changes before closing?',
+                                     Qw.QMessageBox.Yes | Qw.QMessageBox.No)
+
+        self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
+        if choice == Qw.QMessageBox.Yes:
+            self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram, self.config_new['file']['filePath_1GrammCSV']['path'])
+            self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram, self.config_new['file']['filePath_nGrammCSV']['path'])
+            print('exiting program...')
+            app.exec_()
+
+
+    def close_otherWindow(self, window):
+        """
+        trigger when closing the other window
+        :return:
+        """
+        self.config_new = window.get_config(self.config_new)
+        choice = Qw.QMessageBox.question(self.window_taggingTool, 'Shut it Down',
+                                         'Do you want to save the new configuration file?',
+                                         Qw.QMessageBox.Yes | Qw.QMessageBox.No)
+
+        if choice == Qw.QMessageBox.Yes:
+            self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
+            print('exiting program...')
+            app.exec_()
 
 
 if __name__ == "__main__":

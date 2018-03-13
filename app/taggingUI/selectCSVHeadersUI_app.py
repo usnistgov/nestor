@@ -9,9 +9,10 @@ from app.taggingUI.selectCSVHeadersUI_skeleton import Ui_MainWindow_selectCSVHea
 
 class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
-    def __init__(self, iconPath= None):
+    def __init__(self, iconPath= None, closeFunction=None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
+        self.closeFunction = closeFunction
 
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
@@ -110,6 +111,14 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         else:
             Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
             return False, None
+
+    # def closeEvent(self, event):
+    #     """
+    #     trigger when we close the window
+    #     :param event:
+    #     :return:
+    #     """
+    #     self.closeFunction(self)
 
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
