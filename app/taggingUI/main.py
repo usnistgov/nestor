@@ -200,12 +200,12 @@ class Main:
         :return:
         """
         self.config_new = window.get_config(self.config_new)
+        self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
         choice = Qw.QMessageBox.question(self.window_taggingTool, 'Shut it Down',
                                          'Do you want to save the new configuration file?',
                                          Qw.QMessageBox.Yes | Qw.QMessageBox.No)
 
         if choice == Qw.QMessageBox.Yes:
-            self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
             print('exiting program...')
             app.exec_()
 
