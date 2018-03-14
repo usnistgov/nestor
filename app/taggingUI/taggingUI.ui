@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>651</width>
-    <height>571</height>
+    <width>806</width>
+    <height>693</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -217,6 +217,12 @@
             </item>
             <item row="1" column="0">
              <widget class="QTableWidget" name="tableWidget_1gram_TagContainer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="editTriggers">
                <set>QAbstractItemView::EditKeyPressed</set>
               </property>
@@ -269,7 +275,7 @@
          </attribute>
          <layout class="QGridLayout" name="gridLayout_7">
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_Ngram_general">
+           <layout class="QGridLayout" name="gridLayout_Ngram_general" columnstretch="2,1,0">
             <item row="0" column="0" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_Ngram_TableTagDescription">
               <property name="text">
@@ -279,6 +285,12 @@
             </item>
             <item row="1" column="0">
              <widget class="QTableWidget" name="tableWidget_Ngram_TagContainer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="editTriggers">
                <set>QAbstractItemView::EditKeyPressed</set>
               </property>
@@ -310,7 +322,11 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <layout class="QVBoxLayout" name="verticalLayout_Ngram_CompositionDisplay"/>
+             <layout class="QVBoxLayout" name="verticalLayout_Ngram_CompositionDisplay">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetMaximumSize</enum>
+              </property>
+             </layout>
             </item>
             <item row="0" column="1" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_Ngram_CompositionDescription">
@@ -355,9 +371,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_Ngram_ProblemItemEditor">
+               <widget class="QRadioButton" name="radioButton_Ngram_ProblemEditor">
                 <property name="text">
-                 <string>Problem Item</string>
+                 <string>Problem</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
@@ -365,9 +381,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_Ngram_SolutionItemEditor">
+               <widget class="QRadioButton" name="radioButton_Ngram_SolutionEditor">
                 <property name="text">
-                 <string>Solution Item</string>
+                 <string>Solution</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
@@ -402,9 +418,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_Ngram_ProblemEditor">
+               <widget class="QRadioButton" name="radioButton_Ngram_ProblemItemEditor">
                 <property name="text">
-                 <string>Problem</string>
+                 <string>Problem Item</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
@@ -412,13 +428,20 @@
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="radioButton_Ngram_SolutionEditor">
+               <widget class="QRadioButton" name="radioButton_Ngram_SolutionItemEditor">
                 <property name="text">
-                 <string>Solution</string>
+                 <string>Solution Item</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
                 </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -529,8 +552,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>651</width>
-     <height>22</height>
+     <width>806</width>
+     <height>24</height>
     </rect>
    </property>
   </widget>
@@ -539,7 +562,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_NGram_Classification"/>
   <buttongroup name="buttonGroup_1Gram_Classification"/>
+  <buttongroup name="buttonGroup_NGram_Classification"/>
  </buttongroups>
 </ui>

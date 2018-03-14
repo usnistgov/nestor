@@ -106,12 +106,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
         tokens, classification, alias, notes = (str(i.text()) for i in items)
 
+        labels = tokens.split(' ')  # the ngram component 1-gram parts
         self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, tokens)
+
         # if evety 1gramm is I the I are split with an underscore
-        types = self.dataframe_1Gram.loc[tokens.split(' '), 'NE'].unique()
+        existing = self.dataframe_1Gram.index.intersection(labels)  # only currently existing tokens (pandas0.21 dep)
+        types = self.dataframe_1Gram.loc[existing, 'NE'].unique()  # the unique NE's corresponding to the ngram parts
         onlyI = (types != ['I']).sum() == 0
         if onlyI:
-            tokens = '_'.join(tokens.split(' '))
+            tokens = '_'.join(labels)  # II is just I....replace ' '-->'_'
 
         self.set_editorValue_NGram(alias, tokens, notes, classification)
 
@@ -293,10 +296,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
 
         # TODO THURSTON which one should we keep
+        # method 1: only find related terms with same 1st letter (way, way less computation)
         mask = self.dataframe_1Gram.index.str[0] == token[0]
         matches = zz.extractBests(token, self.dataframe_1Gram.index[mask],
                                   limit=20)[:int(self.horizontalSlider_1gram_FindingThreshold.value() * 20 / 100)]
-        #matches = self.alias_lookup[token][:int(self.horizontalSlider_1gram_FindingThreshold.value()*1/10)]
+
+        # # method 2: find all matching terms
+        # matches = self.alias_lookup[token][:int(self.horizontalSlider_1gram_FindingThreshold.value()*1/10)]
 
         return matches
 
