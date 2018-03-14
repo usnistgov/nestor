@@ -215,10 +215,11 @@ class CompositionNGramItem():
         :return:
         """
         self.clearLayout(self.layout)
-        for token_1gram in token_Ngram.split(" "):
-            item = dataframe.loc[(dataframe['alias'] == token_1gram).idxmax()]
 
-            synonyms = dataframe.index[dataframe['alias'] == token_1gram].tolist()
+        for token_1gram in token_Ngram.split(" "):
+            match = dataframe[(dataframe['alias'] == token_1gram)|(dataframe.index == token_1gram)]
+            item = match.iloc[0]
+            synonyms = match.index.tolist()
 
             gridLayout = Qw.QGridLayout()
             gridLayout.setObjectName("gridLayout_Ngram_Composition" + token_1gram)
