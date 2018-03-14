@@ -261,10 +261,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
 
         #alias
-        if alias is None:
-            self.lineEdit_1gram_AliasEditor.setText(alias)
-        else:
+        if alias is '':
             self.lineEdit_1gram_AliasEditor.setText(token)
+        else:
+            self.lineEdit_1gram_AliasEditor.setText(alias)
 
         #notes
         self.textEdit_1gram_NoteEditor.setText(notes)
@@ -279,10 +279,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         (alias, button, notes)
         """
         # alias
-        if alias is None:
-            self.lineEdit_Ngram_AliasEditor.setText(alias)
-        else:
+        if alias is '':
             self.lineEdit_Ngram_AliasEditor.setText(token)
+        else:
+            self.lineEdit_Ngram_AliasEditor.setText(alias)
 
         # notes
         self.textEdit_Ngram_NoteEditor.setText(notes)

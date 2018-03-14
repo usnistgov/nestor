@@ -149,7 +149,6 @@ class Main:
 
             self.window_taggingTool.show()
 
-
     def openYAMLConfig_File(self, yaml_path, dict=None):
         """
         open a Yaml file based on the given path
