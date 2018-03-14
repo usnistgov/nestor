@@ -23,6 +23,12 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
             lambda: self.onClick_openFile(self.lineEdit_openFiles_1GramCSV))
         self.pushButton_openFiles_NgramCSV.clicked.connect(
             lambda: self.onClick_openFile(self.lineEdit_openFiles_NgramCSV))
+        self.pushButton_openFiles_RemoveOriginalCSV.clicked.connect(
+            lambda : self.onClick_removePath(self.lineEdit_openFiles_OriginalCSV))
+        self.pushButton_openFiles_Remove1GramCSV.clicked.connect(
+            lambda: self.onClick_removePath(self.lineEdit_openFiles_1GramCSV))
+        self.pushButton_openFiles_RemoveNgramCSV.clicked.connect(
+            lambda: self.onClick_removePath(self.lineEdit_openFiles_NgramCSV))
 
         self.horizontalSlider_openFiles_similarityMatrixThreshold.sliderMoved.connect(self.onSlider_similarityMatrixThreshold)
         self.horizontalSlider_openFiles_similarityMatrixThreshold.sliderReleased.connect(self.onSlider_similarityMatrixThreshold)
@@ -34,6 +40,13 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.label_openFiles_similarityMatrixThresholdValue.setText(
             str(self.horizontalSlider_openFiles_similarityMatrixThreshold.value()) + '%')
 
+    def onClick_removePath(self, lineEdit):
+        """
+        when click on a X button remove the file path
+        :param lineEdit:
+        :return:
+        """
+        lineEdit.setText("")
 
     def onClick_openFile(self, lineEdit):
         """
@@ -54,9 +67,9 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         remove all text in LineEdit
         :return:
         """
-        self.lineEdit_openFiles_OriginalCSV.setText("")
-        self.lineEdit_openFiles_1GramCSV.setText("")
-        self.lineEdit_openFiles_NgramCSV.setText("")
+        self.onClick_removePath(self.lineEdit_openFiles_OriginalCSV)
+        self.onClick_removePath(self.lineEdit_openFiles_1GramCSV)
+        self.onClick_removePath(self.lineEdit_openFiles_NgramCSV)
 
 
     def set_config(self, config):
@@ -81,8 +94,6 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         it is call when we save the view
         :return:
         """
-        #TODO create new file if none is selected
-
         # if we are on a Windows machine
         if os.name == 'nt':
             separator = '\\'
