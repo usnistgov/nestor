@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>651</width>
-    <height>595</height>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -388,6 +388,33 @@
                <widget class="QRadioButton" name="radioButton_Ngram_StopWordEditor">
                 <property name="text">
                  <string>Stop-word</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_ProblemEditor">
+                <property name="text">
+                 <string>Problem</string>
+                </property>
+                <attribute name="buttonGroup">
+                 <string notr="true">buttonGroup_NGram_Classification</string>
+                </attribute>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_Ngram_SolutionEditor">
+                <property name="text">
+                 <string>Solution</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
