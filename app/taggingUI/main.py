@@ -54,7 +54,11 @@ class Main:
         }
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config, self.config_new)
 
+        self.tokenExtractor_1Gram = None
+        self.tokenExtractor_nGram = None
+
         # instanciate the dataframe
+        self.clean_rawText = None
         self.dataframe_Original = None
         self.dataframe_1Gram = None
         self.dataframe_nGram = None
@@ -81,7 +85,8 @@ class Main:
         :return:
         """
         if index == 1:
-            #self.dataframe_nGram =
+            # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(init = NEED THIS)
+            self.update_ngram_from_1gram(init=self.dataframe_nGram)
             self.window_taggingTool.set_dataframes(dataframe_NGram=self.dataframe_nGram)
 
     def openWindow_to_selectWindow(self):
@@ -131,26 +136,30 @@ class Main:
 
             # Clean the natural lang text...merge columns.
             nlp_selector = kex.NLPSelect(columns=self.config_new['file']['filePath_OriginalCSV']['headers'])  # sklearn-style
-            clean_rawText = nlp_selector.transform(self.dataframe_Original)  # a series object
+            self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # a series object
 
             #init the token extractor and clean the raw text
-            tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
-            list_tokenExtracted = tokenExtractor_1Gram.fit_transform(clean_rawText)  # helper list of tokens if wanted
+            self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
+            list_tokenExtracted = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)  # helper list of tokens if wanted
 
             #create the 1Gram dataframe
             filename1 = self.config_new['file']['filePath_1GrammCSV']['path']
-            self.dataframe_1Gram = tokenExtractor_1Gram.annotation_assistant(filename=filename1)
-            clean_rawText_1Gram = kex.token_to_alias(clean_rawText, self.dataframe_1Gram)
-            tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
-            list_tokenExtracted = tokenExtractor_nGram.fit_transform(clean_rawText_1Gram)
+            self.dataframe_1Gram = self.tokenExtractor_1Gram.generate_vocabulary_df(filename=filename1)
 
-            #create the n gram dataframe
             filename2 = self.config_new['file']['filePath_nGrammCSV']['path']
-            self.dataframe_nGram = tokenExtractor_nGram.annotation_assistant(filename=filename2)
+            self.update_ngram_from_1gram(filename=filename2)
 
-            NE_types = self.config_default['NE_info']['NE_types']
-            NE_map_rules = self.config_default['NE_info']['NE_map']
-            self.dataframe_nGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_nGram, NE_types, NE_map_rules)
+            # clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
+            # self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
+            # list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(clean_rawText_1Gram)
+            #
+            # #create the n gram dataframe
+            # filename2 = self.config_new['file']['filePath_nGrammCSV']['path']
+            # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(filename=filename2)
+            #
+            # NE_types = self.config_default['NE_info']['NE_types']
+            # NE_map_rules = self.config_default['NE_info']['NE_map']
+            # self.dataframe_nGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_nGram, NE_types, NE_map_rules)
 
             self.window_selectCSVHeader.close()
 
@@ -159,6 +168,22 @@ class Main:
             self.window_taggingTool.set_dataframes(self.dataframe_1Gram, self.dataframe_nGram)
 
             self.window_taggingTool.show()
+
+    def update_ngram_from_1gram(self, filename=None, init=None):
+
+        clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
+        self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
+        list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(clean_rawText_1Gram)
+
+        # create the n gram dataframe
+
+        self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(filename=filename, init=init)
+
+        NE_types = self.config_default['NE_info']['NE_types']
+        NE_map_rules = self.config_default['NE_info']['NE_map']
+        self.dataframe_nGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_nGram, NE_types, NE_map_rules)
+        print('Updated Ngram definitions from latest 1-gram vocabulary!')
+
 
     def openYAMLConfig_File(self, yaml_path, dict=None):
         """

@@ -137,7 +137,23 @@ class TokenExtractor(TransformerMixin):
         scores = self._tf_tot[self.ranks_]
         return scores/scores.sum()
 
-    def annotation_assistant(self, filename=None, init=None):
+    def generate_vocabulary_df(self, filename=None, init=None):
+        """
+
+        Parameters
+        ----------
+        filename: str, optional
+            the file location to read/write a csv containing a formatted vocabulary list
+        init: str or pandas.Dataframe, optional
+            file location of csv or dataframe of existing vocab list to read and update
+            token classification values from
+
+        Returns
+        -------
+        vocab: pandas.Dataframe
+            the correctly formatted vocabulary list for token:NE, alias matching
+        """
+
         try:
             check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
         except NotFittedError:
@@ -164,7 +180,10 @@ class TokenExtractor(TransformerMixin):
             df.NE = np.nan
             df.alias = np.nan
             df.notes = np.nan
-            df_import = pd.read_csv(init, index_col=0)
+            if isinstance(init, str) and Path(init).is_file():  # filename is passed
+                df_import = pd.read_csv(init, index_col=0)
+            else:  # assume is inputted pandas df
+                df_import = init.copy()
             df.update(df_import)
             print('intialized successfully!')
             df.fillna('', inplace=True)
@@ -196,8 +215,9 @@ def annotation_app(fname):
 
 
 def tag_extractor(tex, raw_text, toks, vocab):
-    v_filled = vocab.fillna({'NE': 'NA',  # TODO make this optional
-                             'alias': vocab.index.to_series()}) # we want NA?
+    v_filled = vocab.replace({'NE':{'':np.nan},
+                              'alias':{'':np.nan}}).fillna({'NE': 'NA',  # TODO make this optional
+                                                            'alias': vocab.index.to_series()})  # we want NA?
     # make a df with one column per clf of tag
     tags = {typ: pd.DataFrame(index=range(len(raw_text))) for typ in v_filled.NE.unique()}
 
@@ -244,17 +264,16 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
     # first we need to substitute alias' for their NE identifier
     NE_dict = vocab.NE.fillna('U').to_dict()
     NE_dict.update(vocab.fillna('U').reset_index()[['NE', 'alias']].drop_duplicates().set_index('alias').NE.to_dict())
-    #print(set(list(NE_dict.values())))
     NE_sub = sorted(NE_dict, key=len, reverse=True)
-    # print(NE_sub)
-    # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
-    # matcher = lambda s: re.escape(s)
+
     NErx = re.compile(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
     NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
 
     # now we have NE-soup/DNA of the original text.
     #print(NE_text.unique())
-    voc2.loc[:, 'NE'] = NE_text.tolist()
+    mask =  voc2.alias.replace('', np.nan).isna() # don't overwrite the NE's the user has input (i.e. alias != NaN)
+    voc2.loc[mask, 'NE'] = NE_text[mask].tolist()
+    print(mask.sum(), 'NaN values found to fill with automatch')
 
     # all combinations of NE types
     NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
@@ -262,6 +281,6 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
     #print(NE_map)
     #print(voc2.NE.unique())
     # apply rule substitutions
-    voc2['NE'] = voc2.NE.apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
+    voc2.loc[mask, 'NE'] = voc2.loc[mask, 'NE'].apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
     # voc2['score'] = tex2.scores_  # should already happen?
     return voc2
