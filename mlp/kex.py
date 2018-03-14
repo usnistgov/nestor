@@ -53,6 +53,7 @@ class NLPSelect(Transformer):
                     special_replace=self.special_replace)
 
     def transform(self, X, y=None):
+        print(X.head())
         if isinstance(self.columns, list):  # user passed a list of column labels
             if all([isinstance(x, int) for x in self.columns]):
                 nlp_cols = list(X.columns[self.columns])  # select columns by user-input indices
@@ -67,8 +68,9 @@ class NLPSelect(Transformer):
             nlp_cols = [self.columns]  # allow...duck-typing I guess? Don't remember.
 
         raw_text = X.loc[:, nlp_cols].fillna('')  # fill nan's
-        if len(self.columns) > 1:  # more than one column, concat them
-            raw_text = raw_text.add(' ').sum(axis=1).str[:-1]
+        # if len(nlp_cols) > 1:  # more than one column, concat them
+        raw_text = raw_text.add(' ').sum(axis=1).str[:-1]
+        print(raw_text.head())
         raw_text = raw_text.str.lower()  # all lowercase
         raw_text = raw_text.str.replace('\n', ' ')  # no hanging newlines
 

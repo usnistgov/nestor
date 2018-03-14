@@ -132,10 +132,12 @@ class Main:
 
         if done:
 
-            [print(l) for l in self.config_new['file']['filePath_OriginalCSV']['headers']]
+            # [print(l) for l in self.config_new['file']['filePath_OriginalCSV']['headers']]
 
             # Clean the natural lang text...merge columns.
-            nlp_selector = kex.NLPSelect(columns=self.config_new['file']['filePath_OriginalCSV']['headers'])  # sklearn-style
+            columns = self.config_new['file']['filePath_OriginalCSV']['headers']
+            print(columns)
+            nlp_selector = kex.NLPSelect(columns=columns)  # sklearn-style
             self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # a series object
 
             #init the token extractor and clean the raw text
