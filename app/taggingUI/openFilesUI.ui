@@ -19,6 +19,13 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <layout class="QGridLayout" name="gridLayout_openFiles_OriginalCSV">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_openFiles_OriginalCSV">
+          <property name="text">
+           <string>Select your original csv file</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="0">
          <widget class="QLineEdit" name="lineEdit_openFiles_OriginalCSV">
           <property name="enabled">
@@ -26,17 +33,17 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="1" column="2">
          <widget class="QPushButton" name="pushButton_openFiles_OriginalCSV">
           <property name="text">
            <string>open</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_openFiles_OriginalCSV">
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pushButton_openFiles_RemoveOriginalCSV">
           <property name="text">
-           <string>Select your original csv file</string>
+           <string>X</string>
           </property>
          </widget>
         </item>
@@ -51,13 +58,6 @@
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_openFiles_1GramCSV">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_openFiles_1GramCSV">
-          <property name="text">
-           <string>select the csv file to save your 1 gram token</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0">
          <widget class="QLineEdit" name="lineEdit_openFiles_1GramCSV">
           <property name="enabled">
@@ -65,10 +65,24 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="1" column="2">
          <widget class="QPushButton" name="pushButton_openFiles_1GramCSV">
           <property name="text">
            <string>open</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_openFiles_1GramCSV">
+          <property name="text">
+           <string>select the csv file to save your 1 gram token</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="pushButton_openFiles_Remove1GramCSV">
+          <property name="text">
+           <string>X</string>
           </property>
          </widget>
         </item>
@@ -83,14 +97,7 @@
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_openFiles_NgramCSV">
-        <item row="2" column="0">
-         <widget class="QLineEdit" name="lineEdit_openFiles_NgramCSV">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
+        <item row="2" column="2">
          <widget class="QPushButton" name="pushButton_openFiles_NgramCSV">
           <property name="text">
            <string>open</string>
@@ -101,6 +108,20 @@
          <widget class="QLabel" name="label_openFiles_NgramCSV">
           <property name="text">
            <string>select the csv file to save your N gram token</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLineEdit" name="lineEdit_openFiles_NgramCSV">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="pushButton_openFiles_RemoveNgramCSV">
+          <property name="text">
+           <string>X</string>
           </property>
          </widget>
         </item>
@@ -264,7 +285,7 @@
      <x>0</x>
      <y>0</y>
      <width>651</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
