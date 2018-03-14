@@ -80,7 +80,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
         self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
 
-
     def onSelectedItem_table1Gram(self):
         """
         action when we select an item from the 1Gram table view
@@ -105,16 +104,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, tokens)
         # if evety 1gramm is I the I are split with an underscore
-        onlyI = True
-        for token in tokens.split(' '):
-            if self.dataframe_1Gram.loc[(self.dataframe_1Gram['alias'] == token).idxmax()]['NE'] != 'I':
-                onlyI = False
+        types = self.dataframe_1Gram.loc[tokens.split(' '), 'NE'].unique()
+        onlyI = (types != ['I']).sum() == 0
         if onlyI:
             tokens = '_'.join(tokens.split(' '))
 
         self.set_editorValue_NGram(alias, tokens, notes, classification)
-
-
 
     def onClick_saveButton(self, dataframe, path):
         """
@@ -122,7 +117,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         dataframe.to_csv(path)
-
 
     def onClick_updateButton_1Gram(self):
         """
@@ -179,7 +173,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         except (IndexError, ValueError):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
         pass
-
 
     def onSliderMoved_similarityPattern(self):
         """
