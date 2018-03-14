@@ -103,6 +103,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
         tokens, classification, alias, notes = (str(i.text()) for i in items)
 
+        self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, tokens)
         # if evety 1gramm is I the I are split with an underscore
         onlyI = True
         for token in tokens.split(' '):
@@ -112,7 +113,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             tokens = '_'.join(tokens.split(' '))
 
         self.set_editorValue_NGram(alias, tokens, notes, classification)
-        self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, tokens)
 
 
 
