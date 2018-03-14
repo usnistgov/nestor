@@ -49,6 +49,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'I': self.radioButton_Ngram_ItemEditor,
             'U': self.radioButton_Ngram_UnknownEditor,
             'X': self.radioButton_Ngram_StopWordEditor,
+            'P': self.radioButton_Ngram_ProblemEditor,
+            'S': self.radioButton_Ngram_SolutionEditor,
             '': self.radioButton_Ngram_NotClassifiedEditor
         }
 
@@ -58,6 +60,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Solution Item': 'S I',
             'Unknown': 'U',
             'Stop-word': 'X',
+            'Problem': 'P',
+            'Solution': 'S',
             'not yet classified': ''
         }
 
