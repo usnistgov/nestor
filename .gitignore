@@ -14,3 +14,4 @@ app/__pycache__/__init__.cpython-36.pyc
 .idea/modules.xml
 .idea/mlp.iml
 .idea/misc.xml
+*.pyc

@@ -79,19 +79,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_NGram)
         self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
         self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
-        self.tabWidget.currentChanged.connect(self.onClick_selectTab)
-
-    def onClick_selectTab(self, index):
-        """
-        when click on refrech button in the Ngram view
-        It refrech the Ngram Dataframe based on the 1Gram
-        :return:
-        """
-        if index == 1:
-            print(index)
-
-
-        #TODO THURSTON i do not understand your logic about the tokenExtractor object
 
 
     def onSelectedItem_table1Gram(self):
@@ -235,16 +222,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         # print('NEW TEST ALERT')
         # print(dataframe_1Gram)
-        self.dataframe_1Gram=dataframe_1Gram
-        self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
-        self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+        if dataframe_1Gram is not None:
+            self.dataframe_1Gram=dataframe_1Gram
+            self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
+            self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
 
-        self.dataframe_NGram=dataframe_NGram
-        self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
-        self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
-
-        self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
-        self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
+        if dataframe_NGram is not None:
+            self.dataframe_NGram=dataframe_NGram
+            self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
+            self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
+            self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
 
     def update_progress_bar(self, progressBar, dataframe):
         """
