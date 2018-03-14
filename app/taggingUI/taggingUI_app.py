@@ -114,10 +114,18 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
-        token, classification, alias, notes = (str(i.text()) for i in items)
+        tokens, classification, alias, notes = (str(i.text()) for i in items)
 
-        self.set_editorValue_NGram(alias, token, notes, classification)
-        self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, token)
+        # if evety 1gramm is I the I are split with an underscore
+        onlyI = True
+        for token in tokens.split(' '):
+            if self.dataframe_1Gram.loc[(self.dataframe_1Gram['alias'] == token).idxmax()]['NE'] != 'I':
+                onlyI = False
+        if onlyI:
+            tokens = '_'.join(tokens.split(' '))
+
+        self.set_editorValue_NGram(alias, tokens, notes, classification)
+        self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, tokens)
 
 
 
