@@ -68,10 +68,21 @@ class Main:
         # add connect to windows
         self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)
         self.window_selectCSVHeader.pushButton_selectCSVHeaders_save.clicked.connect(self.selectWindow_to_taggingWindow)
+        self.window_taggingTool.tabWidget.currentChanged.connect(self.onClick_windowTaggingTool_selectTab)
 
         #send the old config value to initialize the view
         self.window_OpenFiles.set_config(self.config_default)
         self.window_OpenFiles.show()
+
+    def onClick_windowTaggingTool_selectTab(self, index):
+        """
+        when changing the tab in the taggingUI window (from the 1gram to the Ngram)
+        Update the Ngram Dataframe and print it back
+        :return:
+        """
+        if index == 1:
+            #self.dataframe_nGram =
+            self.window_taggingTool.set_dataframes(dataframe_NGram=self.dataframe_nGram)
 
     def openWindow_to_selectWindow(self):
         """
