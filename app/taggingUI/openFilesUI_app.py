@@ -1,6 +1,8 @@
 import sys
 import os
 import PyQt5.QtWidgets as Qw
+from PyQt5.QtCore import Qt
+
 from PyQt5.QtGui import QIcon
 
 from app.taggingUI.openFilesUI_skeleton import Ui_MainWindow_openFiles
