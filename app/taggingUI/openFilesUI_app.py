@@ -40,7 +40,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
     def onSlider_similarityMatrixThreshold(self):
         self.label_openFiles_similarityMatrixThresholdValue.setText(
-            str(self.horizontalSlider_openFiles_similarityMatrixThreshold.value()) + '%')
+            str(100 - self.horizontalSlider_openFiles_similarityMatrixThreshold.value()) + '%')
 
     def onClick_removePath(self, lineEdit):
         """

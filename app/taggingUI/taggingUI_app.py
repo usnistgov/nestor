@@ -69,6 +69,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dataframe_1Gram = None
         self.dataframe_NGram = None
         #self.alias_lookup = None
+        self.similarityThreshold_alreadyChecked = 99
 
         self.buttonGroup_1Gram_similarityPattern = myObjects.QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
         self.tableWidget_1gram_TagContainer.__class__ = myObjects.QTableWidget_token
@@ -96,8 +97,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.set_editorValue_1Gram(alias, token, notes, classification)
         matches = self.get_similarityMatches(token)
 
-        self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_initial(matches, self.similarityThreshold_alreadyChecked)
-        self.buttonGroup_1Gram_similarityPattern.set_checkedBoxes(self.dataframe_1Gram, alias)
+        self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_initial(matches, self.similarityThreshold_alreadyChecked,self.dataframe_1Gram, alias)
+        #self.buttonGroup_1Gram_similarityPattern.autoChecked(self.dataframe_1Gram, alias)
 
     def onSelectedItem_tableNGram(self):
         """
