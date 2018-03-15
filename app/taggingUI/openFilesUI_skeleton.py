@@ -31,8 +31,9 @@ class Ui_MainWindow_openFiles(object):
         self.pushButton_openFiles_OriginalCSV.setObjectName("pushButton_openFiles_OriginalCSV")
         self.gridLayout_openFiles_OriginalCSV.addWidget(self.pushButton_openFiles_OriginalCSV, 1, 2, 1, 1)
         self.pushButton_openFiles_RemoveOriginalCSV = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_openFiles_RemoveOriginalCSV.setMaximumSize(QtCore.QSize(20, 20))
         self.pushButton_openFiles_RemoveOriginalCSV.setObjectName("pushButton_openFiles_RemoveOriginalCSV")
-        self.gridLayout_openFiles_OriginalCSV.addWidget(self.pushButton_openFiles_RemoveOriginalCSV, 1, 1, 1, 1)
+        self.gridLayout_openFiles_OriginalCSV.addWidget(self.pushButton_openFiles_RemoveOriginalCSV, 1, 1, 1, 1, QtCore.Qt.AlignRight)
         self.verticalLayout.addLayout(self.gridLayout_openFiles_OriginalCSV)
         self.line1 = QtWidgets.QFrame(self.centralwidget)
         self.line1.setFrameShape(QtWidgets.QFrame.HLine)
@@ -52,6 +53,7 @@ class Ui_MainWindow_openFiles(object):
         self.label_openFiles_1GramCSV.setObjectName("label_openFiles_1GramCSV")
         self.gridLayout_openFiles_1GramCSV.addWidget(self.label_openFiles_1GramCSV, 0, 0, 1, 1)
         self.pushButton_openFiles_Remove1GramCSV = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_openFiles_Remove1GramCSV.setMaximumSize(QtCore.QSize(20, 20))
         self.pushButton_openFiles_Remove1GramCSV.setObjectName("pushButton_openFiles_Remove1GramCSV")
         self.gridLayout_openFiles_1GramCSV.addWidget(self.pushButton_openFiles_Remove1GramCSV, 1, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_openFiles_1GramCSV)
@@ -73,6 +75,7 @@ class Ui_MainWindow_openFiles(object):
         self.lineEdit_openFiles_NgramCSV.setObjectName("lineEdit_openFiles_NgramCSV")
         self.gridLayout_openFiles_NgramCSV.addWidget(self.lineEdit_openFiles_NgramCSV, 2, 0, 1, 1)
         self.pushButton_openFiles_RemoveNgramCSV = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_openFiles_RemoveNgramCSV.setMaximumSize(QtCore.QSize(20, 20))
         self.pushButton_openFiles_RemoveNgramCSV.setObjectName("pushButton_openFiles_RemoveNgramCSV")
         self.gridLayout_openFiles_NgramCSV.addWidget(self.pushButton_openFiles_RemoveNgramCSV, 2, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_openFiles_NgramCSV)
@@ -130,7 +133,7 @@ class Ui_MainWindow_openFiles(object):
         self.verticalLayout_2.addLayout(self.verticalLayout)
         MainWindow_openFiles.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow_openFiles)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 651, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 651, 21))
         self.menubar.setObjectName("menubar")
         MainWindow_openFiles.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow_openFiles)
@@ -160,4 +163,14 @@ class Ui_MainWindow_openFiles(object):
         self.lineEdit_openFiles_SimilarityAlreadyChecked.setText(_translate("MainWindow_openFiles", "99"))
         self.pushButton_openFiles_Reset.setText(_translate("MainWindow_openFiles", "reset"))
         self.pushButton_openFiles_Save.setText(_translate("MainWindow_openFiles", "save"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow_openFiles = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow_openFiles()
+    ui.setupUi(MainWindow_openFiles)
+    MainWindow_openFiles.show()
+    sys.exit(app.exec_())
 

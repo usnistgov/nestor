@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtCore import QCoreApplication, Qt, QSize
 from PyQt5 import QtGui
 import PyQt5.QtWidgets as Qw
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from fuzzywuzzy import process as zz
 import pandas as pd
@@ -305,6 +306,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # matches = self.alias_lookup[token][:int(self.horizontalSlider_1gram_FindingThreshold.value()*1/10)]
 
         return matches
+
+    def keyPressEvent(self, event):
+        """
+        listenr on the keyboard
+        :param e:
+        :return:
+        """
+
+        if event.key() == Qt.Key_Return:
+            if self.tabWidget.currentIndex() == 0:
+                self.onClick_updateButton_1Gram()
+            elif self.tabWidget.currentIndex() ==1:
+                self.onClick_updateButton_NGram()
 
 
     def set_config(self, config):
