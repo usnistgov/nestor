@@ -130,7 +130,7 @@ class Ui_MainWindow_openFiles(object):
         self.verticalLayout_2.addLayout(self.verticalLayout)
         MainWindow_openFiles.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow_openFiles)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 651, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 651, 24))
         self.menubar.setObjectName("menubar")
         MainWindow_openFiles.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow_openFiles)
@@ -142,7 +142,7 @@ class Ui_MainWindow_openFiles(object):
 
     def retranslateUi(self, MainWindow_openFiles):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow_openFiles.setWindowTitle(_translate("MainWindow_openFiles", "MainWindow"))
+        MainWindow_openFiles.setWindowTitle(_translate("MainWindow_openFiles", "Open Files"))
         self.label_openFiles_OriginalCSV.setText(_translate("MainWindow_openFiles", "Select your original csv file"))
         self.pushButton_openFiles_OriginalCSV.setText(_translate("MainWindow_openFiles", "open"))
         self.pushButton_openFiles_RemoveOriginalCSV.setText(_translate("MainWindow_openFiles", "X"))
@@ -158,6 +158,16 @@ class Ui_MainWindow_openFiles(object):
         self.lineEdit_openFiles_numberTokenShow.setText(_translate("MainWindow_openFiles", "1000"))
         self.label_openFiles_SimilarityAlreadyChecked.setText(_translate("MainWindow_openFiles", "Pattern already checked (%)"))
         self.lineEdit_openFiles_SimilarityAlreadyChecked.setText(_translate("MainWindow_openFiles", "99"))
-        self.pushButton_openFiles_Reset.setText(_translate("MainWindow_openFiles", "reset"))
-        self.pushButton_openFiles_Save.setText(_translate("MainWindow_openFiles", "save"))
+        self.pushButton_openFiles_Reset.setText(_translate("MainWindow_openFiles", "clear all"))
+        self.pushButton_openFiles_Save.setText(_translate("MainWindow_openFiles", "Next"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow_openFiles = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow_openFiles()
+    ui.setupUi(MainWindow_openFiles)
+    MainWindow_openFiles.show()
+    sys.exit(app.exec_())
 

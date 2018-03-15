@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Open Files</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -262,14 +262,14 @@
         <item>
          <widget class="QPushButton" name="pushButton_openFiles_Reset">
           <property name="text">
-           <string>reset</string>
+           <string>clear all</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_openFiles_Save">
           <property name="text">
-           <string>save</string>
+           <string>Next</string>
           </property>
          </widget>
         </item>
@@ -285,7 +285,7 @@
      <x>0</x>
      <y>0</y>
      <width>651</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

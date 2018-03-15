@@ -38,7 +38,7 @@ class Ui_MainWindow_selectCSVHeaders(object):
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
         MainWindow_selectCSVHeaders.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow_selectCSVHeaders)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 494, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 494, 24))
         self.menubar.setObjectName("menubar")
         MainWindow_selectCSVHeaders.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow_selectCSVHeaders)
@@ -50,8 +50,18 @@ class Ui_MainWindow_selectCSVHeaders(object):
 
     def retranslateUi(self, MainWindow_selectCSVHeaders):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow_selectCSVHeaders.setWindowTitle(_translate("MainWindow_selectCSVHeaders", "MainWindow"))
-        self.pushButton_selectCSVHeaders_save.setText(_translate("MainWindow_selectCSVHeaders", "save"))
+        MainWindow_selectCSVHeaders.setWindowTitle(_translate("MainWindow_selectCSVHeaders", "Text Columns?"))
+        self.pushButton_selectCSVHeaders_save.setText(_translate("MainWindow_selectCSVHeaders", "Next"))
         self.pushButton_selectCSVHeaders_checkAll.setText(_translate("MainWindow_selectCSVHeaders", "check all"))
         self.pushButton_selectCSVHeaders_uncheckAll.setText(_translate("MainWindow_selectCSVHeaders", "uncheck all"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow_selectCSVHeaders = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow_selectCSVHeaders()
+    ui.setupUi(MainWindow_selectCSVHeaders)
+    MainWindow_selectCSVHeaders.show()
+    sys.exit(app.exec_())
 
