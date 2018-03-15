@@ -105,6 +105,7 @@ class Main:
             print(self.config_new['file']['filePath_nGrammCSV']['path'] )
             print(self.config_new['value']['numberToken_show'])
             print(self.config_new['value']['similarityMatrix_threshold'])
+            print(self.config_new['value']['similarityMatrix_alreadyChecked'])
 
             self.window_OpenFiles.close()
 
@@ -136,7 +137,6 @@ class Main:
 
             # Clean the natural lang text...merge columns.
             columns = self.config_new['file']['filePath_OriginalCSV']['headers']
-            print(columns)
             nlp_selector = kex.NLPSelect(columns=columns)  # sklearn-style
             self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # a series object
 
@@ -150,18 +150,6 @@ class Main:
 
             filename2 = self.config_new['file']['filePath_nGrammCSV']['path']
             self.update_ngram_from_1gram(filename=filename2)
-
-            # clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
-            # self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
-            # list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(clean_rawText_1Gram)
-            #
-            # #create the n gram dataframe
-            # filename2 = self.config_new['file']['filePath_nGrammCSV']['path']
-            # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(filename=filename2)
-            #
-            # NE_types = self.config_default['NE_info']['NE_types']
-            # NE_map_rules = self.config_default['NE_info']['NE_map']
-            # self.dataframe_nGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_nGram, NE_types, NE_map_rules)
 
             self.window_selectCSVHeader.close()
 

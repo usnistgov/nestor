@@ -53,7 +53,6 @@ class NLPSelect(Transformer):
                     special_replace=self.special_replace)
 
     def transform(self, X, y=None):
-        print(X.head())
         if isinstance(self.columns, list):  # user passed a list of column labels
             if all([isinstance(x, int) for x in self.columns]):
                 nlp_cols = list(X.columns[self.columns])  # select columns by user-input indices
@@ -70,7 +69,6 @@ class NLPSelect(Transformer):
         raw_text = X.loc[:, nlp_cols].fillna('')  # fill nan's
         # if len(nlp_cols) > 1:  # more than one column, concat them
         raw_text = raw_text.add(' ').sum(axis=1).str[:-1]
-        print(raw_text.head())
         raw_text = raw_text.str.lower()  # all lowercase
         raw_text = raw_text.str.replace('\n', ' ')  # no hanging newlines
 
@@ -247,7 +245,6 @@ def tags_to_df(tags, idx_col=None):
 def token_to_alias(raw_text, vocab):
 
     thes_dict = vocab[vocab.alias.replace('', np.nan).notna()].alias.to_dict()
-    # print(thes_dict)
     substr = sorted(thes_dict, key=len, reverse=True)
     if substr:
         # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
@@ -272,16 +269,12 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
     NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
 
     # now we have NE-soup/DNA of the original text.
-    #print(NE_text.unique())
     mask =  voc2.alias.replace('', np.nan).isna() # don't overwrite the NE's the user has input (i.e. alias != NaN)
     voc2.loc[mask, 'NE'] = NE_text[mask].tolist()
-    print(mask.sum(), 'NaN values found to fill with automatch')
 
     # all combinations of NE types
     NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
     NE_map.update(NE_map_rules)
-    #print(NE_map)
-    #print(voc2.NE.unique())
     # apply rule substitutions
     voc2.loc[mask, 'NE'] = voc2.loc[mask, 'NE'].apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
     # voc2['score'] = tex2.scores_  # should already happen?
