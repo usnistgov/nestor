@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Text Columns?</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -22,7 +22,7 @@
         <item row="1" column="2" alignment="Qt::AlignBottom">
          <widget class="QPushButton" name="pushButton_selectCSVHeaders_save">
           <property name="text">
-           <string>save</string>
+           <string>Next</string>
           </property>
          </widget>
         </item>
@@ -68,7 +68,7 @@
      <x>0</x>
      <y>0</y>
      <width>494</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>EATT Knowledge:  TagTool</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -20,7 +20,7 @@
       <item row="0" column="0">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -495,6 +495,12 @@
                   <height>50</height>
                  </size>
                 </property>
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Sunken</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -541,6 +547,24 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="tab_report">
+         <attribute name="title">
+          <string>Report</string>
+         </attribute>
+         <widget class="QLabel" name="label">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>30</y>
+            <width>111</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Not Implemented</string>
+          </property>
+         </widget>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -556,8 +580,99 @@
      <height>24</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen_new_csv"/>
+    <addaction name="actionOpen_1Gram_Vocab"/>
+    <addaction name="actionOpen_NGram_Vocab"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_All"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionThreshold"/>
+    <addaction name="actionDev_Mode"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionTutorial"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionAbout_TagTool"/>
+    <addaction name="actionNIST"/>
+    <addaction name="actionSID"/>
+    <addaction name="actionAuthors"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen_1Gram_Vocab">
+   <property name="text">
+    <string>open 1Gram Vocab</string>
+   </property>
+  </action>
+  <action name="actionOpen_NGram_Vocab">
+   <property name="text">
+    <string>open NGram Vocab</string>
+   </property>
+  </action>
+  <action name="actionOpen_new_csv">
+   <property name="text">
+    <string>open new csv</string>
+   </property>
+  </action>
+  <action name="actionSave_All">
+   <property name="text">
+    <string>Save All</string>
+   </property>
+  </action>
+  <action name="actionThreshold">
+   <property name="text">
+    <string>Threshold</string>
+   </property>
+  </action>
+  <action name="actionDev_Mode">
+   <property name="text">
+    <string>Dev. Mode</string>
+   </property>
+  </action>
+  <action name="actionTutorial">
+   <property name="text">
+    <string>Tutorial</string>
+   </property>
+  </action>
+  <action name="actionNIST">
+   <property name="text">
+    <string>NIST</string>
+   </property>
+  </action>
+  <action name="actionSID">
+   <property name="text">
+    <string>SID</string>
+   </property>
+  </action>
+  <action name="actionAuthors">
+   <property name="text">
+    <string>Authors</string>
+   </property>
+  </action>
+  <action name="actionAbout_TagTool">
+   <property name="text">
+    <string>about TagTool</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
