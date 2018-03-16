@@ -10,11 +10,12 @@ import pandas as pd
 
 from app.taggingUI import helper_objects as myObjects
 from app.taggingUI.taggingUI_skeleton import Ui_MainWindow_taggingTool
+from app.taggingUI.termsOfUse_skeleton import Ui_Dialog
 
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
-    def __init__(self,iconPath=None, closeFunction=None):
+    def __init__(self, iconPath=None, closeFunction=None):
         Qw.QMainWindow.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
@@ -85,6 +86,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_NGram)
         self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
         self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
+
+        self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath)
+        self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)
 
     def onSelectedItem_table1Gram(self):
         """
@@ -355,6 +359,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
 
         self.closeFunction()
+
+
+class TermsOfServiceDialog(Qw.QDialog, Ui_Dialog):
+
+    def __init__(self, iconPath=None, closeFunction=None):
+        Qw.QDialog.__init__(self)
+        self.setupUi(self)
+        self.closeFunction = closeFunction
+
+        if iconPath:
+            self.setWindowIcon(QIcon(iconPath))
 
 
 
