@@ -87,8 +87,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
         self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
 
-        self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath)
-        self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)
+        # Load up the terms of service class/window
+        self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath) # doesn't need a close button, just "x" out
+        self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
 
     def onSelectedItem_table1Gram(self):
         """
@@ -362,7 +363,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
 class TermsOfServiceDialog(Qw.QDialog, Ui_Dialog):
-
+    """
+    Class to open window showing NIST license. FUTURE: any other versioning information.
+    """
     def __init__(self, iconPath=None, closeFunction=None):
         Qw.QDialog.__init__(self)
         self.setupUi(self)
