@@ -116,7 +116,7 @@ class Ui_MainWindow_taggingTool(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tableWidget_1gram_TagContainer.sizePolicy().hasHeightForWidth())
         self.tableWidget_1gram_TagContainer.setSizePolicy(sizePolicy)
-        self.tableWidget_1gram_TagContainer.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
+        self.tableWidget_1gram_TagContainer.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget_1gram_TagContainer.setTabKeyNavigation(False)
         self.tableWidget_1gram_TagContainer.setDragDropOverwriteMode(False)
         self.tableWidget_1gram_TagContainer.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
@@ -156,7 +156,7 @@ class Ui_MainWindow_taggingTool(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tableWidget_Ngram_TagContainer.sizePolicy().hasHeightForWidth())
         self.tableWidget_Ngram_TagContainer.setSizePolicy(sizePolicy)
-        self.tableWidget_Ngram_TagContainer.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
+        self.tableWidget_Ngram_TagContainer.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget_Ngram_TagContainer.setTabKeyNavigation(False)
         self.tableWidget_Ngram_TagContainer.setDragDropOverwriteMode(False)
         self.tableWidget_Ngram_TagContainer.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
@@ -279,7 +279,7 @@ class Ui_MainWindow_taggingTool(object):
         self.gridLayout_2.addLayout(self.gridLayout_general, 0, 0, 1, 1)
         MainWindow_taggingTool.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow_taggingTool)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 806, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 806, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -333,7 +333,7 @@ class Ui_MainWindow_taggingTool(object):
         self.menubar.addAction(self.menuAbout.menuAction())
 
         self.retranslateUi(MainWindow_taggingTool)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow_taggingTool)
 
     def retranslateUi(self, MainWindow_taggingTool):
@@ -386,14 +386,4 @@ class Ui_MainWindow_taggingTool(object):
         self.actionSID.setText(_translate("MainWindow_taggingTool", "SID"))
         self.actionAuthors.setText(_translate("MainWindow_taggingTool", "Authors"))
         self.actionAbout_TagTool.setText(_translate("MainWindow_taggingTool", "about TagTool"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow_taggingTool = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow_taggingTool()
-    ui.setupUi(MainWindow_taggingTool)
-    MainWindow_taggingTool.show()
-    sys.exit(app.exec_())
 

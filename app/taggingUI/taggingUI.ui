@@ -20,7 +20,7 @@
       <item row="0" column="0">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -238,7 +238,7 @@
                </sizepolicy>
               </property>
               <property name="editTriggers">
-               <set>QAbstractItemView::EditKeyPressed</set>
+               <set>QAbstractItemView::NoEditTriggers</set>
               </property>
               <property name="tabKeyNavigation">
                <bool>false</bool>
@@ -306,7 +306,7 @@
                </sizepolicy>
               </property>
               <property name="editTriggers">
-               <set>QAbstractItemView::EditKeyPressed</set>
+               <set>QAbstractItemView::NoEditTriggers</set>
               </property>
               <property name="tabKeyNavigation">
                <bool>false</bool>
@@ -598,7 +598,7 @@
      <x>0</x>
      <y>0</y>
      <width>806</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
