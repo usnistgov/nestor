@@ -8,6 +8,7 @@ from app.taggingUI.openFilesUI_app import MyOpenFilesWindow
 from app.taggingUI.selectCSVHeadersUI_app import MySelectCsvHeadersWindow
 from app.taggingUI.taggingUI_app import MyTaggingToolWindow
 
+
 import PyQt5.QtWidgets as Qw
 
 
@@ -68,6 +69,7 @@ class Main:
         self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah, self.close_otherWindow)
         self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow)
         self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow)
+
 
         # add connect to windows
         self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)
