@@ -4,19 +4,25 @@ from PyQt5 import QtGui
 import PyQt5.QtWidgets as Qw
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
+from PyQt5 import uic
 from fuzzywuzzy import process as zz
+
 import pandas as pd
 
 
 from app.taggingUI import helper_objects as myObjects
-from app.taggingUI.taggingUI_skeleton import Ui_MainWindow_taggingTool
-from app.taggingUI.termsOfUse_skeleton import Ui_Dialog
+# from app.taggingUI.taggingUI_skeleton import Ui_MainWindow_taggingTool
+# from app.taggingUI.termsOfUse_skeleton import Ui_Dialog
+
+qtDesignerFile_taggingTool = 'taggingUI.ui'
+Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(qtDesignerFile_taggingTool)
 
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def __init__(self, iconPath=None, closeFunction=None):
         Qw.QMainWindow.__init__(self)
+        Ui_MainWindow_taggingTool.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
 
@@ -362,12 +368,18 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.closeFunction()
 
 
-class TermsOfServiceDialog(Qw.QDialog, Ui_Dialog):
+# Now the ToS dialog .ui file
+qtDesignerFile_tosDialog = 'termsOfUse.ui'
+Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_tosDialog)
+
+
+class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
     """
     Class to instantiate window showing NIST license. FUTURE: any other versioning information.
     """
     def __init__(self, iconPath=None, closeFunction=None):
         Qw.QDialog.__init__(self)
+        Ui_MainWindow_tosDialog.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
 
