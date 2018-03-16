@@ -2,16 +2,21 @@ import sys
 import os
 import PyQt5.QtWidgets as Qw
 from PyQt5.QtCore import Qt
+from PyQt5 import uic
 
 from PyQt5.QtGui import QIcon
 
-from app.taggingUI.openFilesUI_skeleton import Ui_MainWindow_openFiles
+# from app.taggingUI.openFilesUI_skeleton import Ui_MainWindow_openFiles
+
+qtDesignerFile_openFiles = 'openFilesUI.ui'
+Ui_MainWindow_openFiles, QtBaseClass_openFiles = uic.loadUiType(qtDesignerFile_openFiles)
 
 
 class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
     def __init__(self, iconPath=None, closeFunction=None):
         Qw.QMainWindow.__init__(self)
+        Ui_MainWindow_openFiles.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
         if iconPath:
