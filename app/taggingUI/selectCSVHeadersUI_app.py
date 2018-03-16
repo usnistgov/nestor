@@ -3,14 +3,18 @@ import csv
 import PyQt5.QtWidgets as Qw
 from PyQt5 import QtCore as Qc
 from PyQt5.QtGui import QIcon
+from PyQt5 import uic
 
-from app.taggingUI.selectCSVHeadersUI_skeleton import Ui_MainWindow_selectCSVHeaders
+# from app.taggingUI.selectCSVHeadersUI_skeleton import Ui_MainWindow_selectCSVHeaders
+qtDesignerFile_selectCSVHeaders = 'selectCSVHeadersUI.ui'
+Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(qtDesignerFile_selectCSVHeaders)
 
 
 class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
     def __init__(self, iconPath= None, closeFunction=None):
         Qw.QMainWindow.__init__(self)
+        Ui_MainWindow_selectCSVHeaders.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
 
