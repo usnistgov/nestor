@@ -362,6 +362,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
 class TermsOfServiceDialog(Qw.QDialog, Ui_Dialog):
+    """
+    class used to instantiate the term of use window
+    """
 
     def __init__(self, iconPath=None, closeFunction=None):
         Qw.QDialog.__init__(self)
