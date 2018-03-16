@@ -364,7 +364,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 class TermsOfServiceDialog(Qw.QDialog, Ui_Dialog):
     """
-    Class to open window showing NIST license. FUTURE: any other versioning information.
+    Class to instantiate window showing NIST license. FUTURE: any other versioning information.
     """
     def __init__(self, iconPath=None, closeFunction=None):
         Qw.QDialog.__init__(self)

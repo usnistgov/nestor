@@ -14,7 +14,6 @@ import PyQt5.QtWidgets as Qw
 
 class Main:
     def __init__(self):
-        #TODO create the YAML file if not exists
         self.icnoPtah="NIST_logo.png"
         self.yamlPath_config = "config.yaml"
         self.config_new = {
@@ -162,6 +161,12 @@ class Main:
             self.window_taggingTool.show()
 
     def update_ngram_from_1gram(self, filename=None, init=None):
+        """
+        update the Bgram dataframe from the new 1gram input
+        :param filename:
+        :param init:
+        :return:
+        """
 
         clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
         self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
