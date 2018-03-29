@@ -2,6 +2,7 @@ import sys
 import yaml
 import pandas as pd
 from PyQt5.QtCore import Qt
+import chardet
 
 from mlp import kex
 from app.taggingUI.openFilesUI_app import MyOpenFilesWindow
@@ -65,15 +66,9 @@ class Main:
 
 
         #instanciate windows
-        self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah, self.close_otherWindow)
-        self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow)
-        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow)
-
-
-        # add connect to windows
-        self.window_OpenFiles.pushButton_openFiles_Save.clicked.connect(self.openWindow_to_selectWindow)
-        self.window_selectCSVHeader.pushButton_selectCSVHeaders_save.clicked.connect(self.selectWindow_to_taggingWindow)
-        self.window_taggingTool.tabWidget.currentChanged.connect(self.onClick_windowTaggingTool_selectTab)
+        self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah, self.close_otherWindow, self.openWindow_to_selectWindow)
+        self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow, self.selectWindow_to_taggingWindow)
+        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow, self.onClick_windowTaggingTool_selectTab)
 
         #send the old config value to initialize the view
         self.window_OpenFiles.set_config(self.config_default)
@@ -111,7 +106,12 @@ class Main:
             self.window_OpenFiles.close()
 
             # add values to the original dataframe
-            self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
+            try:
+                self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
+            except UnicodeDecodeError:
+                print("Searching the good encoding")
+                encoding = chardet.detect(open(self.config_new['file']['filePath_OriginalCSV']['path'], 'rb').read())['encoding']
+                self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'], encoding=encoding)
 
             # set the checkBox in the window
             self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())

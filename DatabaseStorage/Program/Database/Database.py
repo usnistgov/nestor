@@ -33,6 +33,7 @@ class DatabaseNeo4J(object):
         :param query: a string representing a cypher query
         :return: the result of the query
         """
+        print(query)
         result = None
         with self._driver.session() as session:
             result = session.write_transaction(self._execute_code, query)
