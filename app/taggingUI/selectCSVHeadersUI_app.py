@@ -1,22 +1,24 @@
 import sys
 import csv
 import PyQt5.QtWidgets as Qw
-from PyQt5 import QtCore as Qc
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
 from PyQt5 import uic
 
 # from app.taggingUI.selectCSVHeadersUI_skeleton import Ui_MainWindow_selectCSVHeaders
+from PyQt5.QtGui import QIcon
+
 qtDesignerFile_selectCSVHeaders = 'selectCSVHeadersUI.ui'
 Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(qtDesignerFile_selectCSVHeaders)
 
 
 class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
-    def __init__(self, iconPath= None, closeFunction=None):
+    def __init__(self, iconPath= None, closeFunction=None, nextWindow=None):
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_selectCSVHeaders.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
+        self.nextWindowFunction = nextWindow
 
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
@@ -28,6 +30,9 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             lambda: self.onClick_check(False))
         self.pushButton_selectCSVHeaders_checkAll.clicked.connect(
             lambda: self.onClick_check(True))
+
+        self.pushButton_selectCSVHeaders_save.clicked.connect(self.nextWindowFunction)
+
 
     def set_checkBoxesValues(self, headers):
         """
@@ -116,6 +121,15 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
             return False, None
 
+    def keyPressEvent(self, event):
+        """
+        listenr on the keyboard
+        :param e:
+        :return:
+        """
+
+        if event.key() == Qt.Key_Return:
+            self.nextWindowFunction()
     # def closeEvent(self, event):
     #     """
     #     trigger when we close the window

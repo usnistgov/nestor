@@ -14,11 +14,12 @@ Ui_MainWindow_openFiles, QtBaseClass_openFiles = uic.loadUiType(qtDesignerFile_o
 
 class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
-    def __init__(self, iconPath=None, closeFunction=None):
+    def __init__(self, iconPath=None, closeFunction=None, nextWindow=None):
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_openFiles.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
+        self.nextWindowFunction = nextWindow
         if iconPath:
             self.setWindowIcon(QIcon(iconPath))
 
@@ -42,6 +43,8 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
         #self.pushButton_openFiles_Save.clicked.connect(self.onClick_Save)
         self.pushButton_openFiles_Reset.clicked.connect(self.onClick_Reset)
+
+        self.pushButton_openFiles_Save.clicked.connect(self.nextWindowFunction)
 
     def onSlider_similarityMatrixThreshold(self):
         self.label_openFiles_similarityMatrixThresholdValue.setText(
@@ -141,6 +144,16 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         else:
             Qw.QMessageBox.about(self, 'Can\'t save', "You should open all the file first")
             return False, None
+
+    def keyPressEvent(self, event):
+        """
+        listenr on the keyboard
+        :param e:
+        :return:
+        """
+
+        if event.key() == Qt.Key_Return:
+            self.nextWindowFunction()
 
     # def closeEvent(self, event):
     #     """

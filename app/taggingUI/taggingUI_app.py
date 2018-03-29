@@ -20,7 +20,7 @@ Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(qtDesignerFi
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
-    def __init__(self, iconPath=None, closeFunction=None):
+    def __init__(self, iconPath=None, closeFunction=None, changeTag=None):
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_taggingTool.__init__(self)
         self.setupUi(self)
@@ -96,6 +96,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # Load up the terms of service class/window
         self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath) # doesn't need a close button, just "x" out
         self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
+
+        self.tabWidget.currentChanged.connect(changeTag)
+
 
     def onSelectedItem_table1Gram(self):
         """
