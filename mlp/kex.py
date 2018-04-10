@@ -269,7 +269,6 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
         check_is_fitted(transformer._model, 'vocabulary_', 'The tfidf vector is not fitted')
         toks = transformer.transform(raw_text)
     except NotFittedError:
-
         toks = transformer.fit_transform(raw_text)
 
     vocab = generate_vocabulary_df(transformer, init=vocab_df)
