@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtCore import QCoreApplication, Qt, QSize
 from PyQt5 import QtGui
 import PyQt5.QtWidgets as Qw
-from sympy.core.tests.test_arit import same_and_same_prec
+# from sympy.core.tests.test_arit import same_and_same_prec
 
 
 class QTableWidget_token(Qw.QTableWidget):

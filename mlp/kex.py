@@ -1,10 +1,13 @@
+"""
+author: Thurston Sexton
+"""
 import numpy as np
 import pandas as pd
 from tqdm import tqdm_notebook as tqdm
 from pathlib import Path
 
-import dask.dataframe as dd
-import dask
+# import dask.dataframe as dd
+# import dask
 import re
 import sys
 import string
@@ -137,84 +140,140 @@ class TokenExtractor(TransformerMixin):
         scores = self._tf_tot[self.ranks_]
         return scores/scores.sum()
 
-    def generate_vocabulary_df(self, filename=None, init=None):
-        """
 
-        Parameters
-        ----------
-        filename: str, optional
-            the file location to read/write a csv containing a formatted vocabulary list
-        init: str or pandas.Dataframe, optional
-            file location of csv or dataframe of existing vocab list to read and update
-            token classification values from
+def generate_vocabulary_df(transformer, filename=None, init=None):
+    """
+    Helper method to create a formatted pandas.DataFrame and/or a .csv containing
+    the token--tag/alias--classification relationship. Formatted as jargon/slang tokens,
+    the Named Entity classifications, preferred labels, notes, and tf-idf summed scores:
 
-        Returns
-        -------
-        vocab: pandas.Dataframe
-            the correctly formatted vocabulary list for token:NE, alias matching
-        """
+    tokens | NE | alias | notes | scores
 
-        try:
-            check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
-        except NotFittedError:
-            if (filename is not None) and Path(filename).is_file():
-                print('No model fitted, but file already exists. Importing...')
-                return pd.read_csv(filename, index_col=0)
-            else:
-                raise
+    This is intended to be filled out in excel or using the Tagging Tool.
 
-        df = pd.DataFrame({'tokens': self.vocab_,
-                           'NE': '',
-                           'alias': '',
-                           'notes': '',
-                           'score': self.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
-        df = df[~df.tokens.duplicated(keep='first')]
-        df.set_index('tokens', inplace=True)
+    Parameters
+    ----------
+    transformer: object TokenExtractor
+        the (TRAINED) token extractor used to generate the ranked list of vocab.
+    filename: str, optional
+        the file location to read/write a csv containing a formatted vocabulary list
+    init: str or pandas.Dataframe, optional
+        file location of csv or dataframe of existing vocab list to read and update
+        token classification values from
 
-        if init is None:
-            if (filename is not None) and Path(filename).is_file():
-                init = filename
-                print('attempting to initialize with pre-existing vocab')
+    Returns
+    -------
+    vocab: pandas.Dataframe
+        the correctly formatted vocabulary list for token:NE, alias matching
+    """
 
-        if init is not None:
-            df.NE = np.nan
-            df.alias = np.nan
-            df.notes = np.nan
-            if isinstance(init, str) and Path(init).is_file():  # filename is passed
-                df_import = pd.read_csv(init, index_col=0)
-            else:  # assume is inputted pandas df
-                df_import = init.copy()
-            df.update(df_import)
-            print('intialized successfully!')
-            df.fillna('', inplace=True)
+    try:
+        check_is_fitted(transformer._model, 'vocabulary_', 'The tfidf vector is not fitted')
+    except NotFittedError:
+        if (filename is not None) and Path(filename).is_file():
+            print('No model fitted, but file already exists. Importing...')
+            return pd.read_csv(filename, index_col=0)
+        elif (init is not None) and Path(init).is_file():
+            print('No model fitted, but file already exists. Importing...')
+            return pd.read_csv(init, index_col=0)
+        else:
+            raise
+
+    df = pd.DataFrame({'tokens': transformer.vocab_,
+                       'NE': '',
+                       'alias': '',
+                       'notes': '',
+                       'score': transformer.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
+    df = df[~df.tokens.duplicated(keep='first')]
+    df.set_index('tokens', inplace=True)
+
+    if init is None:
+        if (filename is not None) and Path(filename).is_file():
+            init = filename
+            print('attempting to initialize with pre-existing vocab')
+
+    if init is not None:
+        df.NE = np.nan
+        df.alias = np.nan
+        df.notes = np.nan
+        if isinstance(init, Path) and init.is_file():  # filename is passed
+            df_import = pd.read_csv(init, index_col=0)
+        else:  # assume input pandas df
+            df_import = init.copy()
+        df.update(df_import)
+        print('intialized successfully!')
+        df.fillna('', inplace=True)
 
 
-        if filename is not None:
-            df.to_csv(filename)
-            print('saved locally!')
-        return df
+    if filename is not None:
+        df.to_csv(filename)
+        print('saved locally!')
+    return df
 
 
 def _series_itervals(s):
+    """wrapper that turns a pandas/dask dataframe into a generator of values only (for sklearn)"""
     for n, val in s.iteritems():
         yield val
 
 
-def annotation_app(fname):
-    import PyQt5.QtWidgets as qw
-    from app.test_app import MyWindow
-    app = 0
-    app = qw.QApplication(sys.argv)
-    # if not qw.QApplication.instance():
-    #     app = qw.QApplication(sys.argv)
-    # else:
-    #     app = qw.QApplication.instance()
-    window = MyWindow(vocab_filename=fname)
-    window.show()
-    sys.exit(app.exec_())
+def _get_readable_tag_df(tag_df):
+    """ helper function to take binary tag co-occurrence matrix and make comma-sep readable columns"""
+    temp_df = pd.DataFrame(index=tag_df.index)  # empty init
+    for clf, clf_df in tag_df.drop('NA', axis=1).T.groupby(level=0):  # loop over top-level classes (ignore NA)
+        join_em = lambda strings: ', '.join([x for x in strings if x != ''])  # func to join str
+        strs = np.where(clf_df.T == 1, clf_df.T.columns.droplevel(0).values, '').T
+        temp_df[clf] = pd.DataFrame(strs).apply(join_em)
+    return temp_df
 
 
-def tag_extractor(tex, raw_text, toks, vocab):
+def _get_tag_completeness(tag_df):
+    """get tagging statistic/array, as the completeness ratio for each MWO"""
+    tag_comp = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))
+    print(f'Tag completeness: {tag_comp.mean():.2f} +/- {tag_comp.std():.2f}')
+
+    tag_empt = ((tag_df['I'].sum(axis=1) == 0) & (tag_df['P'].sum(axis=1) == 0) & (tag_df['S'].sum(axis=1) == 0)).sum()
+    print(f'Empty Docs: {tag_empt}, or {tag_empt/len(tag_df):.2%}')
+    return tag_comp, tag_empt
+
+
+def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
+    """
+    Wrapper for the TokenExtractor to streamline the generation of tags from text.
+    Determines the documents in <raw_text> that contain each of the tags in <vocab>,
+    using a TokenExtractor transformer object (i.e. the tfidf vocabulary).
+
+    As implemented, this function expects an existing transformer object, though in
+    the future this will be changed to a class-like functionality (e.g. sklearn's
+    AdaBoostClassifier, etc) which wraps a transformer into a new one.
+
+    Parameters
+    ----------
+    transformer: object KeywordExtractor
+        instantiated, can be pre-trained
+    raw_text: pandas.Series
+        contains jargon/slang-filled raw text to be tagged
+    vocab_df: pandas.DataFrame, optional
+        An existing vocabulary dataframe or .csv filename, expected in the format of
+        kex.generate_vocabulary_df().
+    readable: bool, default False
+        whether to return readable, categorized, comma-sep str format (takes longer)
+
+    Returns
+    -------
+    pandas.DataFrame, extracted tags for each document, whether binary indicator (default)
+    or in readable, categorized, comma-sep str format (readable=True, takes longer)
+    """
+
+    try:
+        check_is_fitted(transformer._model, 'vocabulary_', 'The tfidf vector is not fitted')
+        toks = transformer.transform(raw_text)
+    except NotFittedError:
+
+        toks = transformer.fit_transform(raw_text)
+
+    vocab = generate_vocabulary_df(transformer, init=vocab_df)
+
     v_filled = vocab.replace({'NE':{'':np.nan},
                               'alias':{'':np.nan}}).fillna({'NE': 'NA',  # TODO make this optional
                                                             'alias': vocab.index.to_series()})  # we want NA?
@@ -224,26 +283,47 @@ def tag_extractor(tex, raw_text, toks, vocab):
     # loop over the unique alias' (i.e.e all tags, by classification
     for clf, queries in tqdm(v_filled.groupby('NE').alias.unique().iteritems(),
                                       desc='Category Loop', total=vocab.NE.nunique()):
-        # loop over each tag, returning any instance where the alias matches
+        # loop over each tag, returning any token where the alias matches
         for query in tqdm(queries, desc=clf + ' token loop', leave=True):
-            to_map = v_filled.loc[v_filled.alias == query].index.tolist()
-            query_idx = [tex._model.vocabulary_[i] for i in to_map]
+            to_map = v_filled.loc[v_filled.alias == query].index.tolist()  # the tokens
+            query_idx = [transformer._model.vocabulary_[i] for i in to_map]
+            # make a binary indicator for the tag, 1 if any of the tokens occurred, 0 if not.
             match = ((toks[:, query_idx]).toarray() > 0).any(axis=1).astype(int)
 
             # make a big dict with all of it together
             tags[clf][query] = match
-    return tags
 
+    def tags_to_df(tags, idx_col=None):
+        tag_df = pd.concat(tags.values(), axis=1, keys=tags.keys())
+        if idx_col is not None:  # not used currently...let the user do this himself
+            tag_df = tag_df.set_index(idx_col).sort_index()  # sort by idx
+        return tag_df
 
-def tags_to_df(tags, idx_col=None):
-    tag_df = pd.concat(tags.values(), axis=1, keys=tags.keys())
-    if idx_col is not None:
-        tag_df = tag_df.set_index(idx_col).sort_index()  # sort by idx
+    tag_df = tags_to_df(tags)
+
+    if readable:
+        tag_df = _get_readable_tag_df(tag_df)
+
     return tag_df
 
 
 def token_to_alias(raw_text, vocab):
+    """
+    Replaces known tokens with their "tag" form, i.e. the alias' in some
+    known vocabulary list
 
+    Parameters
+    ----------
+    raw_text: pandas.Series
+        contains text with known jargon, slang, etc
+    vocab: pandas.DataFrame
+        contains alias' keyed on known slang, jargon, etc.
+
+    Returns
+    -------
+    pd.Series
+        new text, with all slang/jargon replaced with unified representations
+    """
     thes_dict = vocab[vocab.alias.replace('', np.nan).notna()].alias.to_dict()
     substr = sorted(thes_dict, key=len, reverse=True)
     if substr:
@@ -255,6 +335,7 @@ def token_to_alias(raw_text, vocab):
     else:
         clean_text=raw_text
     return clean_text
+
 
 def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
 

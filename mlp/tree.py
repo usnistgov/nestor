@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
+
 def get_relevant(df, col, topn=20):
     """
 

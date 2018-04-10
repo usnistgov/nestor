@@ -1,29 +1,18 @@
-import sys
-from PyQt5.QtCore import QCoreApplication, Qt, QSize
-from PyQt5 import QtGui
-import PyQt5.QtWidgets as Qw
-import csv
-import sip
 import json
+import sip
+import sys
 
-from DatabaseStorage.Program.KPI.Plot import MyMplCanvas
+import PyQt5.QtWidgets as Qw
+from PyQt5.QtCore import QSize
 
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 from app.kpi_window.KPI_window_skeleton import Ui_KPIWindow
-from matplotlib.figure import Figure
-import numpy as np
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from DatabaseStorage.Program.KPI import KPI as kpi
-from DatabaseStorage.Program.Objects.Human import *
-from DatabaseStorage.Program.Objects.Tag import *
-from DatabaseStorage.Program.Objects.Machine import *
-from DatabaseStorage.Program.Objects.Issue import *
-from DatabaseStorage.Program.Objects.MaintenanceWorkOrder import MaintenanceWorkOrder
-from DatabaseStorage.Program.Database.Database import DatabaseNeo4J
-from DatabaseStorage.Program.KPI import Plot
-
+from database.Objects.Tag import *
+from database.Objects.Machine import *
+from database.Objects.MaintenanceWorkOrder import MaintenanceWorkOrder
+from database.Database.Database import DatabaseNeo4J
+from database.KPI import Plot
 
 
 class LayoutLeftKpiSelection:
@@ -535,22 +524,22 @@ class LayoutRightPlotPrint:
         if self.properties["type"] == "Bar Plot":
             self.plot = Plot.BarPlot_canevas(layout=self.Right_VBoxLayout_PlotView, parent_layout=self.parent_layout,
                                              dataframe=self.dataframe, properties=self.properties,
-                                            width = 5, height = 4, dpi = 100)
+                                             width = 5, height = 4, dpi = 100)
 
         elif self.properties["type"] == "Horizontal Bar Plot":
             self.plot = Plot.HorizontalBarPlot_canevas(layout=self.Right_VBoxLayout_PlotView, parent_layout=self.parent_layout,
-                                             dataframe=self.dataframe, properties=self.properties,
-                                             width=5, height=4, dpi=100)
+                                                       dataframe=self.dataframe, properties=self.properties,
+                                                       width=5, height=4, dpi=100)
         elif self.properties["type"] == "Date Plot":
             self.plot = Plot.DatePlot_canevas(layout=self.Right_VBoxLayout_PlotView,
-                                                   parent_layout=self.parent_layout,
-                                                   dataframe=self.dataframe, properties=self.properties,
-                                                   width=5, height=4, dpi=100)
-        elif self.properties["type"] == "sns Bar Plot":
-            self.plot = Plot.Seaborn_BarPlot_canevas(layout=self.Right_VBoxLayout_PlotView,
                                               parent_layout=self.parent_layout,
                                               dataframe=self.dataframe, properties=self.properties,
                                               width=5, height=4, dpi=100)
+        elif self.properties["type"] == "sns Bar Plot":
+            self.plot = Plot.Seaborn_BarPlot_canevas(layout=self.Right_VBoxLayout_PlotView,
+                                                     parent_layout=self.parent_layout,
+                                                     dataframe=self.dataframe, properties=self.properties,
+                                                     width=5, height=4, dpi=100)
         else:
             self.plot= Plot.MyMplCanvas()
 
@@ -618,12 +607,12 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         objects = self.Left_View_labelProperties.create_objects()
         # for obj in objects:
         #     print(obj)
-        self.query, array_selection = kpi.cypher_from_kpi(objects)
+        self.query, array_selection = KPI.cypher_from_kpi(objects)
         print("----------------ARRAY---------------\n", self.array_selection)
         print("----------------QUERY---------------\n", self.query)
 
         if array_selection:
-            self.dataframe, self.array_selection = kpi.pandas_from_cypher_kpi(self.database, self.query, array_selection)
+            self.dataframe, self.array_selection = KPI.pandas_from_cypher_kpi(self.database, self.query, array_selection)
             self.array_selection.append("")
             self.Right_view_plorPrint._set_dataframe(self.dataframe)
             self.Center_view_plotSelection._set_possible_xy_values(self.array_selection)

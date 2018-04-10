@@ -8,6 +8,7 @@ from mlp import kex
 from app.taggingUI.openFilesUI_app import MyOpenFilesWindow
 from app.taggingUI.selectCSVHeadersUI_app import MySelectCsvHeadersWindow
 from app.taggingUI.taggingUI_app import MyTaggingToolWindow
+from pathlib import Path
 
 
 import PyQt5.QtWidgets as Qw
@@ -146,10 +147,10 @@ class Main:
             list_tokenExtracted = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)  # helper list of tokens if wanted
 
             #create the 1Gram dataframe
-            filename1 = self.config_new['file']['filePath_1GrammCSV']['path']
-            self.dataframe_1Gram = self.tokenExtractor_1Gram.generate_vocabulary_df(filename=filename1)
+            filename1 = Path(self.config_new['file']['filePath_1GrammCSV']['path'])
+            self.dataframe_1Gram = kex.generate_vocabulary_df(self.tokenExtractor_1Gram, filename=filename1)
 
-            filename2 = self.config_new['file']['filePath_nGrammCSV']['path']
+            filename2 = Path(self.config_new['file']['filePath_nGrammCSV']['path'])
             self.update_ngram_from_1gram(filename=filename2)
 
             self.window_selectCSVHeader.close()
@@ -174,7 +175,7 @@ class Main:
 
         # create the n gram dataframe
 
-        self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(filename=filename, init=init)
+        self.dataframe_nGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=filename, init=init)
 
         NE_types = self.config_default['NE_info']['NE_types']
         NE_map_rules = self.config_default['NE_info']['NE_map']
