@@ -16,7 +16,7 @@ import PyQt5.QtWidgets as Qw
 
 class Main:
     def __init__(self):
-        self.icnoPtah="NIST_logo.png"
+        self.icnoPtah=None
         self.yamlPath_config = "config.yaml"
         self.config_new = {
             'file':
