@@ -75,6 +75,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.dataframe_1Gram = None
         self.dataframe_NGram = None
+        self.tokenExtractor_nGram = None
+        self.tokenExtractor_1Gram = None
+
+        self.dataframe_completeness=None
         #self.alias_lookup = None
         self.similarityThreshold_alreadyChecked = 99
 
@@ -93,12 +97,38 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_1Gram, self.config['file']['filePath_1GrammCSV']['path']))
         self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_NGram, self.config['file']['filePath_nGrammCSV']['path']))
 
+        self.pushButton_report_saveTrack.clicked.connect(self.onClick_saveTrack)
+        self.pushButton_report_saveNewCsv.clicked.connect(self.onClick_saveNewCsv)
+        self.pushButton_report_saveBinnaryCsv.clicked.connect(self.onClick_saveBinnaryCsv)
+
         # Load up the terms of service class/window
         self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath) # doesn't need a close button, just "x" out
         self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
 
         self.tabWidget.currentChanged.connect(changeTag)
 
+
+    def onClick_saveTrack(self):
+        """
+        save the current completness of the token in a dataframe
+        :return:
+        """
+        print("keep track")
+        self.dataframe_completeness = None
+
+    def onClick_saveNewCsv(self):
+        """
+        generate a new csv with the original csv and the generated token for the document
+        :return:
+        """
+        print("saveNewCsv")
+
+    def onClick_saveBinnaryCsv(self):
+        """
+        generate a new csv with the document and the tag occurences (0 if not 1 if )
+        :return:
+        """
+        print("saveBinnaryCsv")
 
     def onSelectedItem_table1Gram(self):
         """
@@ -108,8 +138,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
         token, classification, alias, notes = (str(i.text()) for i in items)
 
-        self.set_editorValue_1Gram(alias, token, notes, classification)
-        matches = self.get_similarityMatches(token)
+        self._set_editorValue_1Gram(alias, token, notes, classification)
+        matches = self._get_similarityMatches(token)
 
         self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_initial(matches, self.similarityThreshold_alreadyChecked,self.dataframe_1Gram, alias)
         #self.buttonGroup_1Gram_similarityPattern.autoChecked(self.dataframe_1Gram, alias)
@@ -132,7 +162,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if onlyI:
             tokens = '_'.join(labels)  # II is just I....replace ' '-->'_'
 
-        self.set_editorValue_NGram(alias, tokens, notes, classification)
+        self._set_editorValue_NGram(alias, tokens, notes, classification)
 
     def onClick_saveButton(self, dataframe, path):
         """
@@ -152,16 +182,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             new_alias = self.lineEdit_1gram_AliasEditor.text()
             new_notes = self.textEdit_1gram_NoteEditor.toPlainText()
             new_clf = self.buttonDictionary_1Gram.get(self.buttonGroup_1Gram_Classification.checkedButton().text(), pd.np.nan)
-            self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, token, new_alias, new_clf, new_notes)
+            self.dataframe_1Gram = self._set_dataframeItemValue(self.dataframe_1Gram, token, new_alias, new_clf, new_notes)
             self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
 
             for btn in self.buttonGroup_1Gram_similarityPattern.buttons():
                 if btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
-                    self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), new_alias, new_clf,
-                                                                   new_notes)
+                    self.dataframe_1Gram = self._set_dataframeItemValue(self.dataframe_1Gram, btn.text(), new_alias, new_clf,
+                                                                        new_notes)
 
                 elif self.dataframe_1Gram.loc[btn.text()]['alias'] == alias:
-                    self.dataframe_1Gram = self.set_dataframeItemValue(self.dataframe_1Gram, btn.text(), '',
+                    self.dataframe_1Gram = self._set_dataframeItemValue(self.dataframe_1Gram, btn.text(), '',
                                                                        '', '')
 
             self.tableWidget_1gram_TagContainer.printDataframe_tableView()
@@ -177,7 +207,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         Triggers with update button. Saves user annotation to the dataframe
         """
-        #TODO
         try :
             items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
@@ -186,7 +215,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             new_notes = self.textEdit_Ngram_NoteEditor.toPlainText()
             new_clf = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(),
                                                       pd.np.nan)
-            self.dataframe_NGram = self.set_dataframeItemValue(self.dataframe_NGram, token, new_alias, new_clf, new_notes)
+            self.dataframe_NGram = self._set_dataframeItemValue(self.dataframe_NGram, token, new_alias, new_clf, new_notes)
             self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
 
             self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
@@ -208,13 +237,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         try:
             token = self.tableWidget_1gram_TagContainer.selectedItems()[0].text()
-            matches = self.get_similarityMatches(token)
+            matches = self._get_similarityMatches(token)
             self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_rechecked(matches, btn_checked)
 
         except IndexError:
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
-    def set_dataframeItemValue(self, dataframe, token, alias, classification, notes):
+    def _set_dataframeItemValue(self, dataframe, token, alias, classification, notes):
         """
         update the value of the dataframe
         :param dataframe:
@@ -229,7 +258,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         dataframe.loc[token,"NE"] = classification
         return dataframe
 
-    def set_dataframes(self, dataframe_1Gram = None, dataframe_NGram = None):
+    def _set_dataframes(self, dataframe_1Gram = None, dataframe_NGram = None):
         """
         set the dataframe for the window
         :param dataframe_1Gram:
@@ -250,6 +279,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
             self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
 
+    def _set_tokenExtractor(self, tokenExtractor_1Gram = None, tokenExtractor_nGram=None):
+        """
+        set both token extractore
+        Needed for the report tab
+        """
+        self.tokenExtractor_1Gram = tokenExtractor_1Gram
+        self.tokenExtractor_nGram = tokenExtractor_nGram
+
     def update_progress_bar(self, progressBar, dataframe):
         """
         set the value of the progress bar based on the dataframe score
@@ -261,7 +298,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         completed_pct = matched.sum()/scores.sum()
         progressBar.setValue(100*completed_pct)
 
-    def set_editorValue_1Gram(self, alias, token, notes, classification):
+    def _set_editorValue_1Gram(self, alias, token, notes, classification):
         """
         print all the information from the token to the right layout 1Gram
         (alias, button, notes)
@@ -285,7 +322,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         btn = self.classificationDictionary_1Gram.get(classification)
         btn.toggle()  # toggle that button
 
-    def set_editorValue_NGram(self, alias, token, notes, classification):
+    def _set_editorValue_NGram(self, alias, token, notes, classification):
         """
         print all the information from the token to the right layout NGram
         (alias, button, notes)
@@ -304,7 +341,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         btn.toggle()  # toggle that button
 
 
-    def get_similarityMatches(self, token):
+    def _get_similarityMatches(self, token):
         """
         get the list of token similar to the given token
         :param token:
@@ -336,7 +373,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.onClick_updateButton_NGram()
 
 
-    def set_config(self, config):
+    def _set_config(self, config):
         """
         add to the window the values from the config dict
         :param config
@@ -351,7 +388,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
 
-    def get_config(self, config):
+    def _get_config(self, config):
         """
         replace the given config dict with a new one based on the window values
 

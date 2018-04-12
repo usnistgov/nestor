@@ -63,7 +63,7 @@ class Main:
         self.clean_rawText = None
         self.dataframe_Original = None
         self.dataframe_1Gram = None
-        self.dataframe_nGram = None
+        self.dataframe_NGram = None
 
 
         #instanciate windows
@@ -83,8 +83,8 @@ class Main:
         """
         if index == 1:
             # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(init = NEED THIS)
-            self.update_ngram_from_1gram(init=self.dataframe_nGram)
-            self.window_taggingTool.set_dataframes(dataframe_NGram=self.dataframe_nGram)
+            self.update_ngram_from_1gram(init=self.dataframe_NGram)
+            self.window_taggingTool._set_dataframes(dataframe_NGram=self.dataframe_NGram)
 
     def openWindow_to_selectWindow(self):
         """
@@ -97,12 +97,12 @@ class Main:
         done, self.config_new = self.window_OpenFiles.get_config(self.config_new)
 
         if done:
-            print(self.config_new['file']['filePath_OriginalCSV']['path'])
-            print(self.config_new['file']['filePath_1GrammCSV']['path'])
-            print(self.config_new['file']['filePath_nGrammCSV']['path'] )
-            print(self.config_new['value']['numberToken_show'])
-            print(self.config_new['value']['similarityMatrix_threshold'])
-            print(self.config_new['value']['similarityMatrix_alreadyChecked'])
+            # print(self.config_new['file']['filePath_OriginalCSV']['path'])
+            # print(self.config_new['file']['filePath_1GrammCSV']['path'])
+            # print(self.config_new['file']['filePath_nGrammCSV']['path'] )
+            # print(self.config_new['value']['numberToken_show'])
+            # print(self.config_new['value']['similarityMatrix_threshold'])
+            # print(self.config_new['value']['similarityMatrix_alreadyChecked'])
 
             self.window_OpenFiles.close()
 
@@ -156,8 +156,9 @@ class Main:
             self.window_selectCSVHeader.close()
 
             #send the dataframes to the tagging window
-            self.window_taggingTool.set_config(self.config_new)
-            self.window_taggingTool.set_dataframes(self.dataframe_1Gram, self.dataframe_nGram)
+            self.window_taggingTool._set_config(self.config_new)
+            self.window_taggingTool._set_dataframes(self.dataframe_1Gram, self.dataframe_NGram)
+            self.window_taggingTool._set_tokenExtractor(tokenExtractor_1Gram= self.tokenExtractor_1Gram)
 
             self.window_taggingTool.show()
 
@@ -175,11 +176,14 @@ class Main:
 
         # create the n gram dataframe
 
-        self.dataframe_nGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=filename, init=init)
+        self.dataframe_NGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=filename, init=init)
 
         NE_types = self.config_default['NE_info']['NE_types']
         NE_map_rules = self.config_default['NE_info']['NE_map']
-        self.dataframe_nGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_nGram, NE_types, NE_map_rules)
+        self.dataframe_NGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_NGram, NE_types, NE_map_rules)
+
+        self.window_taggingTool._set_tokenExtractor(tokenExtractor_nGram=self.tokenExtractor_nGram)
+
         print('Updated Ngram definitions from latest 1-gram vocabulary!')
 
 
@@ -232,7 +236,7 @@ class Main:
         trigger when closing the other window
         :return:
         """
-        self.config_new = window.get_config(self.config_new)
+        self.config_new = window._get_config(self.config_new)
         self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
         choice = Qw.QMessageBox.question(self.window_taggingTool, 'Shut it Down',
                                          'Do you want to save the new configuration file?',

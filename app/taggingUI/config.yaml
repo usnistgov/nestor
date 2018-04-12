@@ -1,30 +1,11 @@
-file:
-  filePath_OriginalCSV:
-    path: /Users/sam11/Git/ml-py/data/gs_data/gs_data.csv
-
-    headers:
-      - Description
-      - Resolution
-  filePath_1GrammCSV:
-    path: /Users/sam11/Git/ml-py/data/gs_data/vocab.csv
-  filePath_nGrammCSV:
-    path: #/Users/sam11/Git/ml-py/app/taggingUI/csv/app_vocab_mike.csv
-
-value:
-  numberToken_show: 1000
-  similarityMatrix_threshold: 50
-  similarityMatrix_alreadyChecked : 90
-
 NE_info:
-  NE_map:
-    {I I: I,
-    S I: S I,
-    P I: P I,
-    I S: S I,
-    I P: P I,
-    S S: X,
-    P P: X,
-    S P: X,
-    P S: X
-    }
+  NE_map: {I I: I, I P: P I, I S: S I, P I: P I, P P: X, P S: X, S I: S I, S P: X,
+    S S: X}
   NE_types: IPSUX
+file:
+  filePath_1GrammCSV: {path: /Users/sam11/Git/ml-py/data/gs_data/vocab.csv}
+  filePath_OriginalCSV:
+    headers: [Description, Resolution]
+    path: /Users/sam11/Git/ml-py/data/gs_data/gs_data.csv
+  filePath_nGrammCSV: {path: /Users/sam11/Git/ml-py/data/gs_data/gs_data_nGram.csv}
+value: {numberToken_show: '1000', similarityMatrix_alreadyChecked: 99, similarityMatrix_threshold: 50}
