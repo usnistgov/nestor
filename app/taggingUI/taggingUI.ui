@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>817</width>
+    <width>834</width>
     <height>693</height>
    </rect>
   </property>
@@ -577,7 +577,7 @@
            <layout class="QGridLayout" name="gridLayout_report_general">
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_report_action">
-              <item row="1" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="label_report_saveNewCsv">
                 <property name="text">
                  <string>New file with columns [I,P,S,X,U]. Tags are comma-
@@ -593,21 +593,7 @@ separated for readability. NA tags ommitted.
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveTrack">
-                <property name="text">
-                 <string>save the track of my progresse</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveNewCsv">
-                <property name="text">
-                 <string>create new CSV</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
+              <item row="3" column="0">
                <widget class="QLabel" name="label_report_saveBinnary">
                 <property name="text">
                  <string>New file with hierarchical columns [I,P,S,X,U]
@@ -617,10 +603,42 @@ computationally and for vizualization. . </string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="0" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveTrack">
+                <property name="text">
+                 <string>save the track of my progresse</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <layout class="QGridLayout" name="gridLayout_report_docsInfo">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_report_tagCompleteness">
+                  <property name="text">
+                   <string>Tag completeness:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_report_emptyDocs">
+                  <property name="text">
+                   <string>Empty Docs:</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="3" column="1">
                <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
                 <property name="text">
                  <string>create a Binnary CSV</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveNewCsv">
+                <property name="text">
+                 <string>create new CSV</string>
                 </property>
                </widget>
               </item>
@@ -644,7 +662,7 @@ computationally and for vizualization. . </string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>817</width>
+     <width>834</width>
      <height>22</height>
     </rect>
    </property>

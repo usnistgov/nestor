@@ -140,8 +140,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         # do statistics
         self.dataframe_completeness, tag_empt = kex._get_tag_completeness(tag_df)
-        #self.completenessPlot._set_dataframe(self.dataframe_completeness)
-        #self.completenessPlot.plot_it()
+
+        self.label_report_tagCompleteness.setText("Tag completeness:")
+        self.label_report_emptyDocs.setText("Empty Docs:")
+        self.completenessPlot._set_dataframe(self.dataframe_completeness)
+        self.completenessPlot.plot_it()
 
         return tag_readable, tag_df
 
