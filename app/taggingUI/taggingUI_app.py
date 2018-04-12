@@ -8,7 +8,7 @@ from PyQt5 import uic
 from fuzzywuzzy import process as zz
 
 import pandas as pd
-
+from mlp import kex
 
 from app.taggingUI import helper_objects as myObjects
 # from app.taggingUI.taggingUI_skeleton import Ui_MainWindow_taggingTool
@@ -77,6 +77,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dataframe_NGram = None
         self.tokenExtractor_nGram = None
         self.tokenExtractor_1Gram = None
+        self.tag_df = None
+        self.tag_readable = None
 
         self.dataframe_completeness=None
         #self.alias_lookup = None
@@ -117,7 +119,25 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         print("keep track")
-        self.dataframe_completeness = None
+        # do 1-grams
+        tags_df = kex.tag_extractor(self.tokenExtractor_1Gram,
+                                         clean_rawText,  #TODO
+                                         vocab_df=self.dataframe_1Gram)
+        # self.tags_read = kex._get_readable_tag_df(self.tags_df)
+
+        # do 2-grams
+        tags2_df = kex.tag_extractor(self.tokenExtractor_nGram,
+                                          clean_rawText_1Gram,  #TODO
+                                          vocab_df=self.dataframe_NGram)
+
+        # merge 1 and 2-grams.
+        self.tag_df = tags_df.join(tags2_df)
+        self.tag_readable = kex._get_readable_tag_df(self.tag_df)
+        tag_df = self.tag_df.loc[:, ['I', 'P', 'S', 'U', 'X']]
+        self.tag_readable.head(10)
+
+        # do statistics
+        self.dataframe_completeness, tag_empt = kex._get_tag_completeness(self.tag_df)
         self.completenessPlot._set_dataframe(self.dataframe_completeness)
         self.completenessPlot.plot_it()
 
@@ -127,12 +147,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         print("saveNewCsv")
+        if self.tag_readable is not None:
+            print('yay me!')
 
     def onClick_saveBinnaryCsv(self):
         """
         generate a new csv with the document and the tag occurences (0 if not 1 if )
         :return:
         """
+        if self.tag_df is not None:
+            print('you are a robot...')
         print("saveBinnaryCsv")
 
     def onSelectedItem_table1Gram(self):
