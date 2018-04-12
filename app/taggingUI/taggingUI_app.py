@@ -77,6 +77,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dataframe_NGram = None
         self.tokenExtractor_nGram = None
         self.tokenExtractor_1Gram = None
+        self.clean_rawText_1Gram=None
+        self.dataframe_1Gram=None
         self.tag_df = None
         self.tag_readable = None
 
@@ -121,33 +123,37 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         print("keep track")
         # do 1-grams
         tags_df = kex.tag_extractor(self.tokenExtractor_1Gram,
-                                         clean_rawText,  #TODO
+                                         self.clean_rawText,
                                          vocab_df=self.dataframe_1Gram)
         # self.tags_read = kex._get_readable_tag_df(self.tags_df)
 
         # do 2-grams
         tags2_df = kex.tag_extractor(self.tokenExtractor_nGram,
-                                          clean_rawText_1Gram,  #TODO
+                                          self.clean_rawText_1Gram,
                                           vocab_df=self.dataframe_NGram)
 
         # merge 1 and 2-grams.
-        self.tag_df = tags_df.join(tags2_df)
-        self.tag_readable = kex._get_readable_tag_df(self.tag_df)
-        tag_df = self.tag_df.loc[:, ['I', 'P', 'S', 'U', 'X']]
-        self.tag_readable.head(10)
+        tag_df = tags_df.join(tags2_df)
+        tag_readable = kex._get_readable_tag_df(tag_df)
+        tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'X']]
+        tag_readable.head(10)
 
         # do statistics
-        self.dataframe_completeness, tag_empt = kex._get_tag_completeness(self.tag_df)
-        self.completenessPlot._set_dataframe(self.dataframe_completeness)
-        self.completenessPlot.plot_it()
+        self.dataframe_completeness, tag_empt = kex._get_tag_completeness(tag_df)
+        #self.completenessPlot._set_dataframe(self.dataframe_completeness)
+        #self.completenessPlot.plot_it()
+
+        return tag_readable, tag_df
 
     def onClick_saveNewCsv(self):
         """
         generate a new csv with the original csv and the generated token for the document
         :return:
         """
+        tag_readable, tag_df = self.onClick_saveTrack()
+
         print("saveNewCsv")
-        if self.tag_readable is not None:
+        if tag_readable is not None:
             print('yay me!')
 
     def onClick_saveBinnaryCsv(self):
@@ -155,7 +161,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         generate a new csv with the document and the tag occurences (0 if not 1 if )
         :return:
         """
-        if self.tag_df is not None:
+        tag_readable, tag_df = self.onClick_saveTrack()
+
+        if tag_df is not None:
             print('you are a robot...')
         print("saveBinnaryCsv")
 
@@ -313,8 +321,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         set both token extractore
         Needed for the report tab
         """
-        self.tokenExtractor_1Gram = tokenExtractor_1Gram
-        self.tokenExtractor_nGram = tokenExtractor_nGram
+        if tokenExtractor_1Gram is not None:
+            self.tokenExtractor_1Gram = tokenExtractor_1Gram
+        if tokenExtractor_nGram is not None:
+            self.tokenExtractor_nGram = tokenExtractor_nGram
+
+    def _set_cleanRawText(self, clean_rawText=None, clean_rawText_1Gram=None):
+        """
+        set the clean raw text
+        Needed for the report tab
+        :param clean_rawText:
+        :param clean_rawText_1Gram:
+        :return:
+        """
+        if clean_rawText is not None:
+            self.clean_rawText= clean_rawText
+        if clean_rawText_1Gram is not None:
+            self.clean_rawText_1Gram=clean_rawText_1Gram
 
     def update_progress_bar(self, progressBar, dataframe):
         """

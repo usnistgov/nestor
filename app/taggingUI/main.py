@@ -165,6 +165,7 @@ class Main:
             self.window_taggingTool._set_config(self.config_new)
             self.window_taggingTool._set_dataframes(self.dataframe_1Gram, self.dataframe_NGram)
             self.window_taggingTool._set_tokenExtractor(tokenExtractor_1Gram= self.tokenExtractor_1Gram)
+            self.window_taggingTool._set_cleanRawText(clean_rawText=self.clean_rawText)
 
             self.window_taggingTool.show()
 
@@ -176,9 +177,9 @@ class Main:
         :return:
         """
 
-        clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
+        self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
         self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
-        list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(clean_rawText_1Gram)
+        list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
 
         # create the n gram dataframe
 
@@ -189,6 +190,7 @@ class Main:
         self.dataframe_NGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_NGram, NE_types, NE_map_rules)
 
         self.window_taggingTool._set_tokenExtractor(tokenExtractor_nGram=self.tokenExtractor_nGram)
+        self.window_taggingTool._set_cleanRawText(clean_rawText_1Gram=self.clean_rawText_1Gram)
 
         print('Updated Ngram definitions from latest 1-gram vocabulary!')
 
