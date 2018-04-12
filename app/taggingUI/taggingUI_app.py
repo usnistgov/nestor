@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5 import uic
 from fuzzywuzzy import process as zz
-
+from pathlib import Path
 import pandas as pd
 from mlp import kex
 
@@ -120,7 +120,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         save the current completness of the token in a dataframe
         :return:
         """
-        print("keep track")
+        print("progress saving; calculating the extracted tags and statistics...")
         # do 1-grams
         tags_df = kex.tag_extractor(self.tokenExtractor_1Gram,
                                          self.clean_rawText,
@@ -134,41 +134,53 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         # merge 1 and 2-grams.
         tag_df = tags_df.join(tags2_df)
-        tag_readable = kex._get_readable_tag_df(tag_df)
-        tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'X']]
-        tag_readable.head(10)
+        self.tag_readable = kex._get_readable_tag_df(tag_df)
+        self.relation_df = tag_df.loc[:, ['P I', 'S I']]
+        self.tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'X', 'NA']]
+        # tag_readable.head(10)
 
         # do statistics
-        self.dataframe_completeness, tag_empt = kex._get_tag_completeness(tag_df)
+        tag_comp, tag_empt = kex._get_tag_completeness(self.tag_df)
 
-        self.label_report_tagCompleteness.setText("Tag completeness:")
-        self.label_report_emptyDocs.setText("Empty Docs:")
-        self.completenessPlot._set_dataframe(self.dataframe_completeness)
+        self.label_report_tagCompleteness.setText(f'Tag completeness: {tag_comp.mean():.2%} +/- {tag_comp.std():.2%}')
+        self.label_report_emptyDocs.setText(f'Empty Docs: {tag_empt} of {len(self.tag_df)}, or {tag_empt/len(self.tag_df):.2%}')
+
+        self.completenessPlot._set_dataframe(tag_comp)
         self.completenessPlot.plot_it()
 
-        return tag_readable, tag_df
+        self.dataframe_completeness = tag_comp
+        # return tag_readable, tag_df
 
     def onClick_saveNewCsv(self):
         """
         generate a new csv with the original csv and the generated token for the document
         :return:
         """
-        tag_readable, tag_df = self.onClick_saveTrack()
+        # tag_readable, tag_df = self.onClick_saveTrack()
+        #TODO add this stuff to the original csv data
+        if self.tag_readable is None:
+            self.onClick_saveTrack()
+        fname = Path('..')/'READABLE_TAGS.csv'
+        print("Saving a Readable csv with tagged documents. ", str(fname))
+        self.tag_readable.to_csv(fname)
+        print('DONE!')
 
-        print("saveNewCsv")
-        if tag_readable is not None:
-            print('yay me!')
 
     def onClick_saveBinnaryCsv(self):
         """
         generate a new csv with the document and the tag occurences (0 if not 1 if )
         :return:
         """
-        tag_readable, tag_df = self.onClick_saveTrack()
+        # tag_readable, tag_df = self.onClick_saveTrack()
 
-        if tag_df is not None:
-            print('you are a robot...')
-        print("saveBinnaryCsv")
+        if self.tag_df is None:
+            self.onClick_saveTrack()
+        fname = Path('..')/'BINARY_TAGS.csv'
+        print("Saving a Binary csv with tagged documents. ", str(fname))
+        self.tag_df.to_csv(fname)
+        print('DONE')
+
+
 
     def onSelectedItem_table1Gram(self):
         """

@@ -86,10 +86,10 @@ class Main:
             # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(init = NEED THIS)
             self.update_ngram_from_1gram(init=self.dataframe_NGram)
             self.window_taggingTool._set_dataframes(dataframe_NGram=self.dataframe_NGram)
-        elif index == 2:
-            df = self.window_taggingTool.dataframe_completeness
-            self.window_taggingTool.completenessPlot._set_dataframe(df)
-            self.window_taggingTool.completenessPlot.plot_it()
+        # elif index == 2:
+        #     df = self.window_taggingTool.dataframe_completeness
+        #     self.window_taggingTool.completenessPlot._set_dataframe(df)
+        #     self.window_taggingTool.completenessPlot.plot_it()
 
 
     def openWindow_to_selectWindow(self):
