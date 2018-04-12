@@ -4,6 +4,11 @@ from PyQt5 import QtGui
 import PyQt5.QtWidgets as Qw
 # from sympy.core.tests.test_arit import same_and_same_prec
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib as mpl
+import seaborn as sns
+
 
 class QTableWidget_token(Qw.QTableWidget):
 
@@ -241,3 +246,61 @@ class CompositionNGramItem():
                 else:
                     self.clearLayout(item.layout())
         self.nb_onegrame = 0
+
+
+
+class MyMplCanvas(FigureCanvas):
+    """
+    the canvas used to print the plot in the right layout of the KPI UI
+    All the characteristic in common for all the plot should be in this class
+    """
+
+    def __init__(self, layout=None, parent_layout=None, dataframe=None, width=5, height=4, dpi=100):
+        self._set_dataframe(dataframe)
+        self.layout = layout
+
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
+
+        FigureCanvas.__init__(self, self.fig)
+        self.setParent(parent_layout)
+        self.layout.addWidget(self, 0,0,1,1)
+
+        self.plot_it()
+
+        FigureCanvas.setSizePolicy(self,Qw.QSizePolicy.Expanding, Qw.QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+    def _set_dataframe(self, dataframe):
+        """
+        set the dataframe
+        :param dataframe:
+        :return:
+        """
+        self.dataframe=dataframe
+
+    def plot_it(self):
+        """
+        print the plot here we have the original plot
+        :return:
+        """
+        print("plot")
+        pass
+
+        # try :
+        #     if not self.dataframe.empty:
+        #         df = self.dataframe.sort_values(self.properties["number"], ascending=False)
+        #         if not self.properties["hue"] is "":
+        #             sns.barplot(data=df,
+        #                         x=self.properties["x"],
+        #                         y=self.properties["number"],
+        #                         hue=self.properties["hue"],
+        #                         ax=self.axes)
+        #         else:
+        #             sns.barplot(data=df,
+        #                         x=self.properties["x"],
+        #                         y=self.properties["number"],
+        #                         ax=self.axes)
+        # except (KeyError, TypeError):
+        #     Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
+

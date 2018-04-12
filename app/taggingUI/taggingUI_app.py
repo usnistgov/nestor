@@ -101,6 +101,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_report_saveNewCsv.clicked.connect(self.onClick_saveNewCsv)
         self.pushButton_report_saveBinnaryCsv.clicked.connect(self.onClick_saveBinnaryCsv)
 
+        self.completenessPlot= myObjects.MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self. dataframe_completeness)
+
+
         # Load up the terms of service class/window
         self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath) # doesn't need a close button, just "x" out
         self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
@@ -115,6 +118,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         print("keep track")
         self.dataframe_completeness = None
+        self.completenessPlot._set_dataframe(self.dataframe_completeness)
+        self.completenessPlot.plot_it()
 
     def onClick_saveNewCsv(self):
         """

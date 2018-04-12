@@ -628,6 +628,9 @@ computationally and for vizualization. . </string>
             </item>
            </layout>
           </item>
+          <item row="1" column="0">
+           <layout class="QGridLayout" name="gridLayout_report_progressPlot"/>
+          </item>
          </layout>
         </widget>
        </widget>
