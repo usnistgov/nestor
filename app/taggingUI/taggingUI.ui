@@ -577,23 +577,23 @@
            <layout class="QGridLayout" name="gridLayout_report_general">
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_report_action">
-              <item row="2" column="0">
+              <item row="4" column="0">
                <widget class="QLabel" name="label_report_saveNewCsv">
                 <property name="text">
                  <string>New file with columns [I,P,S,X,U]. Tags are comma-
 separated for readability. NA tags ommitted. 
- It will be save in your csv folder as _new</string>
+ It will be save in your csv folder as READABLE_TAGS</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_report_keepTrack">
                 <property name="text">
-                 <string>Save your progress</string>
+                 <string>Save your progress. DO THIS BEFORE SAVING A CSV!</string>
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="5" column="0">
                <widget class="QLabel" name="label_report_saveBinnary">
                 <property name="text">
                  <string>New file with hierarchical columns [I,P,S,X,U]
@@ -606,7 +606,7 @@ computationally and for vizualization. . </string>
               <item row="0" column="1">
                <widget class="QPushButton" name="pushButton_report_saveTrack">
                 <property name="text">
-                 <string>save the track of my progresse</string>
+                 <string>UPDATE TAG EXTRACTION</string>
                 </property>
                </widget>
               </item>
@@ -615,30 +615,44 @@ computationally and for vizualization. . </string>
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_report_tagCompleteness">
                   <property name="text">
-                   <string>Tag completeness:</string>
+                   <string>Tag PPV:</string>
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0">
+                <item row="3" column="0">
                  <widget class="QLabel" name="label_report_emptyDocs">
                   <property name="text">
                    <string>Empty Docs:</string>
                   </property>
                  </widget>
                 </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_report_completeDocs">
+                  <property name="text">
+                   <string>Complete Docs: </string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
-              <item row="3" column="1">
+              <item row="5" column="1">
                <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
                 <property name="text">
-                 <string>create a Binnary CSV</string>
+                 <string>create a binary CSV</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="4" column="1">
                <widget class="QPushButton" name="pushButton_report_saveNewCsv">
                 <property name="text">
                  <string>create new CSV</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" colspan="3">
+               <widget class="Line" name="line_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
@@ -646,8 +660,15 @@ computationally and for vizualization. . </string>
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <layout class="QGridLayout" name="gridLayout_report_progressPlot"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="Line" name="line_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -663,7 +684,7 @@ computationally and for vizualization. . </string>
      <x>0</x>
      <y>0</y>
      <width>834</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -763,7 +784,7 @@ computationally and for vizualization. . </string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_NGram_Classification"/>
   <buttongroup name="buttonGroup_1Gram_Classification"/>
+  <buttongroup name="buttonGroup_NGram_Classification"/>
  </buttongroups>
 </ui>

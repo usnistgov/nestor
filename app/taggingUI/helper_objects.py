@@ -288,7 +288,12 @@ class MyMplCanvas(FigureCanvas):
         if self.dataframe is not None:
             # with sns.axes_style('ticks') as style, \
             #         sns.plotting_context('poster') as context:
-            sns.distplot(self.dataframe.dropna(), bins=15, kde_kws={'cut': 0}, ax=self.axes)
+            sns.distplot(self.dataframe.dropna(),
+                         bins=8,
+                         # kde_kws={'cut': 0},
+                         hist_kws={'align': 'mid'},
+                         kde=False,
+                         ax=self.axes)
             self.axes.set_xlim(0.1, 1.0)
             self.axes.set_xlabel('precision (PPV)')
         plt.show()

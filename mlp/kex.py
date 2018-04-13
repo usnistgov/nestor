@@ -229,12 +229,15 @@ def _get_readable_tag_df(tag_df):
 
 def _get_tag_completeness(tag_df):
     """get tagging statistic/array, as the completeness ratio for each MWO"""
-    tag_comp = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))
-    print(f'Tag completeness: {tag_comp.mean():.2f} +/- {tag_comp.std():.2f}')
+    tag_pct = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))
+    print(f'Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}')
+
+    tag_comp = (tag_df['NA'].sum(axis=1) == 0).sum()
+    print(f'Complete Docs: {tag_comp}, or {tag_comp/len(tag_df):.2%}')
 
     tag_empt = ((tag_df['I'].sum(axis=1) == 0) & (tag_df['P'].sum(axis=1) == 0) & (tag_df['S'].sum(axis=1) == 0)).sum()
     print(f'Empty Docs: {tag_empt}, or {tag_empt/len(tag_df):.2%}')
-    return tag_comp, tag_empt
+    return tag_pct, tag_comp, tag_empt
 
 
 def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):

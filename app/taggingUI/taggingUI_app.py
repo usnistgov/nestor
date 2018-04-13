@@ -117,7 +117,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # do 2-grams
         tags2_df = kex.tag_extractor(self.tokenExtractor_nGram,
                                           self.clean_rawText_1Gram,
-                                          vocab_df=self.dataframe_NGram)
+                                          vocab_df=self.dataframe_NGram[self.dataframe_NGram.alias.notna()])
 
         # merge 1 and 2-grams.
         tag_df = tags_df.join(tags2_df)
@@ -127,15 +127,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # tag_readable.head(10)
 
         # do statistics
-        tag_comp, tag_empt = kex._get_tag_completeness(self.tag_df)
+        tag_pct, tag_comp, tag_empt = kex._get_tag_completeness(self.tag_df)
 
-        self.label_report_tagCompleteness.setText(f'Tag completeness: {tag_comp.mean():.2%} +/- {tag_comp.std():.2%}')
+        self.label_report_tagCompleteness.setText(f'Tag PPV: {tag_pct.mean():.2%} +/- {tag_pct.std():.2%}')
+        self.label_report_completeDocs.setText(f'Complete Docs: {tag_comp} of {len(self.tag_df)}, or {tag_comp/len(tag_df):.2%}')
         self.label_report_emptyDocs.setText(f'Empty Docs: {tag_empt} of {len(self.tag_df)}, or {tag_empt/len(self.tag_df):.2%}')
 
-        self.completenessPlot._set_dataframe(tag_comp)
+        self.completenessPlot._set_dataframe(tag_pct)
         self.completenessPlot.plot_it()
 
-        self.dataframe_completeness = tag_comp
+        self.dataframe_completeness = tag_pct
         # return tag_readable, tag_df
 
     def onClick_saveNewCsv(self):
