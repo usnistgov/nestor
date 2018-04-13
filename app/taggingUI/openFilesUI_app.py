@@ -1,15 +1,8 @@
-import sys
-import os
-import PyQt5.QtWidgets as Qw
-from PyQt5.QtCore import Qt
-from PyQt5 import uic
+from app.taggingUI import *
 
-from PyQt5.QtGui import QIcon
-
-# from app.taggingUI.openFilesUI_skeleton import Ui_MainWindow_openFiles
-
-qtDesignerFile_openFiles = 'openFilesUI.ui'
-Ui_MainWindow_openFiles, QtBaseClass_openFiles = uic.loadUiType(qtDesignerFile_openFiles)
+fname = 'openFilesUI.ui'
+qtDesignerFile_openFiles = Path('./app/taggingUI')/fname
+Ui_MainWindow_openFiles, QtBaseClass_openFiles = uic.loadUiType(str(qtDesignerFile_openFiles))
 
 
 class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):

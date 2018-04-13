@@ -1,18 +1,4 @@
-import sys
-import yaml
-import pandas as pd
-from PyQt5.QtCore import Qt
-import chardet
-
-from mlp import kex
-from app.taggingUI.openFilesUI_app import MyOpenFilesWindow
-from app.taggingUI.selectCSVHeadersUI_app import MySelectCsvHeadersWindow
-from app.taggingUI.taggingUI_app import MyTaggingToolWindow
-from pathlib import Path
-
-
-import PyQt5.QtWidgets as Qw
-
+from app.taggingUI import *
 
 class Main:
     def __init__(self):

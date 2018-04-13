@@ -1,14 +1,8 @@
-import sys
-import csv
-import PyQt5.QtWidgets as Qw
-from PyQt5.QtCore import Qt
-from PyQt5 import uic
+from app.taggingUI import *
 
-# from app.taggingUI.selectCSVHeadersUI_skeleton import Ui_MainWindow_selectCSVHeaders
-from PyQt5.QtGui import QIcon
-
-qtDesignerFile_selectCSVHeaders = 'selectCSVHeadersUI.ui'
-Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(qtDesignerFile_selectCSVHeaders)
+fname = 'selectCSVHeadersUI.ui'
+qtDesignerFile_selectCSVHeaders = Path('./app/taggingUI')/fname
+Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(str(qtDesignerFile_selectCSVHeaders))
 
 
 class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):

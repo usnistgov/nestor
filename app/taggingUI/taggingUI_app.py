@@ -1,21 +1,8 @@
-import sys
-from PyQt5.QtCore import QCoreApplication, Qt, QSize
-from PyQt5 import QtGui
-import PyQt5.QtWidgets as Qw
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
-from PyQt5 import uic
-from fuzzywuzzy import process as zz
-from pathlib import Path
-import pandas as pd
-from mlp import kex
+from app.taggingUI import *
 
-from app.taggingUI import helper_objects as myObjects
-# from app.taggingUI.taggingUI_skeleton import Ui_MainWindow_taggingTool
-# from app.taggingUI.termsOfUse_skeleton import Ui_Dialog
-
-qtDesignerFile_taggingTool = 'taggingUI.ui'
-Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(qtDesignerFile_taggingTool)
+fname = 'taggingUI.ui'
+qtDesignerFile_taggingTool = Path('./app/taggingUI')/fname
+Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(str(qtDesignerFile_taggingTool))
 
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
@@ -476,7 +463,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
 # Now the ToS dialog .ui file
-qtDesignerFile_tosDialog = 'termsOfUse.ui'
+fname2 = 'termsOfUse.ui'
+qtDesignerFile_tosDialog = Path('./app/taggingUI')/fname2
 Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_tosDialog)
 
 
@@ -495,8 +483,8 @@ class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
 
 
 
-if __name__ == "__main__":
-    app = Qw.QApplication(sys.argv)
-    window = MyTaggingToolWindow()
-    window.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     app = Qw.QApplication(sys.argv)
+#     window = MyTaggingToolWindow()
+#     window.show()
+#     sys.exit(app.exec_())
