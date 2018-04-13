@@ -284,30 +284,13 @@ class MyMplCanvas(FigureCanvas):
         print the plot here we have the original plot
         :return:
         """
-        # print("plot")
-        # pass
-        plt.sca(self.axes)
-        plt.clf()
+        self.axes.clear()
         if self.dataframe is not None:
             # with sns.axes_style('ticks') as style, \
             #         sns.plotting_context('poster') as context:
             sns.distplot(self.dataframe.dropna(), bins=15, kde_kws={'cut': 0}, ax=self.axes)
             self.axes.set_xlim(0.1, 1.0)
             self.axes.set_xlabel('precision (PPV)')
-        # try :
-        #     if not self.dataframe.empty:
-        #         df = self.dataframe.sort_values(self.properties["number"], ascending=False)
-        #         if not self.properties["hue"] is "":
-        #             sns.barplot(data=df,
-        #                         x=self.properties["x"],
-        #                         y=self.properties["number"],
-        #                         hue=self.properties["hue"],
-        #                         ax=self.axes)
-        #         else:
-        #             sns.barplot(data=df,
-        #                         x=self.properties["x"],
-        #                         y=self.properties["number"],
-        #                         ax=self.axes)
         plt.show()
         self.draw()
         self.resize_event()
