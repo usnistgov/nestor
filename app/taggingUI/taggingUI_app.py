@@ -109,12 +109,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         print("progress saving; calculating the extracted tags and statistics...")
         # do 1-grams
+        print('\n ONE GRAMS...')
         tags_df = kex.tag_extractor(self.tokenExtractor_1Gram,
                                          self.clean_rawText,
                                          vocab_df=self.dataframe_1Gram)
         # self.tags_read = kex._get_readable_tag_df(self.tags_df)
 
         # do 2-grams
+        print('\n TWO GRAMS...')
         tags2_df = kex.tag_extractor(self.tokenExtractor_nGram,
                                           self.clean_rawText_1Gram,
                                           vocab_df=self.dataframe_NGram[self.dataframe_NGram.alias.notna()])
