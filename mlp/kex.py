@@ -3,7 +3,21 @@ author: Thurston Sexton
 """
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+# from tqdm import tqdm
+import sys
+try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
+    ipy_str = str(type(get_ipython()))
+    if 'zmqshell' in ipy_str:
+        from tqdm import tqdm_notebook as tqdm
+    if 'terminal' in ipy_str:
+        from tqdm import tqdm
+except:
+    if sys.stderr.isatty():
+        from tqdm import tqdm
+    else:
+        def tqdm(iterable, **kwargs):
+            return iterable
+
 from pathlib import Path
 
 # import dask.dataframe as dd
@@ -284,22 +298,30 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
 
     # loop over the unique alias' (i.e.e all tags, by classification
     groups = v_filled.groupby('NE').alias.unique().iteritems()
-    with tqdm(total=vocab.NE.nunique(), file=sys.stdout, position=0) as pbar1:
-        for clf, queries in groups:
-            # loop over each tag, returning any token where the alias matches
-            pbar1.set_description(f'Category: {clf}')
-            pbar1.update(1)
-            with tqdm(total=len(queries), file=sys.stdout, position=1, leave=False) as pbar2:
-                for query in queries:
-                    # pbar2.set_description(clf + ' token loop'
-                    pbar2.update(1)
-                    to_map = v_filled.loc[v_filled.alias == query].index.tolist()  # the tokens
-                    query_idx = [transformer._model.vocabulary_[i] for i in to_map]
-                    # make a binary indicator for the tag, 1 if any of the tokens occurred, 0 if not.
-                    match = ((toks[:, query_idx]).toarray() > 0).any(axis=1).astype(int)
+    for clf, queries in tqdm(groups,
+                             total=vocab.NE.nunique(),
+                             file=sys.stdout,
+                             position=0,
+                             desc='Category Loop'):
+        # loop over each tag, returning any token where the alias matches
+        # pbar1.set_description(f'Category: {clf}')
+        # pbar1.update(1)
 
-                    # make a big dict with all of it together
-                    tags[clf][query] = match
+        for query in tqdm(queries,
+                          total=len(queries),
+                          file=sys.stdout,
+                          position=1,
+                          leave=False,
+                          desc=clf + ' token loop'):
+            # pbar2.set_description(clf + ' token loop'
+            # pbar2.update(1)
+            to_map = v_filled.loc[v_filled.alias == query].index.tolist()  # the tokens
+            query_idx = [transformer._model.vocabulary_[i] for i in to_map]
+            # make a binary indicator for the tag, 1 if any of the tokens occurred, 0 if not.
+            match = ((toks[:, query_idx]).toarray() > 0).any(axis=1).astype(int)
+
+            # make a big dict with all of it together
+            tags[clf][query] = match
 
     def tags_to_df(tags, idx_col=None):
         tag_df = pd.concat(tags.values(), axis=1, keys=tags.keys())
@@ -353,7 +375,7 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
     NE_dict = vocab.NE.fillna('U').to_dict()
     NE_dict.update(vocab.fillna('U').reset_index()[['NE', 'alias']].drop_duplicates().set_index('alias').NE.to_dict())
     NE_sub = sorted(NE_dict, key=len, reverse=True)
-    print(NE_sub)
+    # print(NE_sub)
     # print(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
     NErx = re.compile(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
     NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
@@ -364,8 +386,10 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
 
     # all combinations of NE types
     NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
+    for typ in NE_types:
+        NE_map[typ] = typ
     NE_map.update(NE_map_rules)
-
+    # print(NE_map)
     # apply rule substitutions
     voc2.loc[mask, 'NE'] = voc2.loc[mask, 'NE'].apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
     # voc2['score'] = tex2.scores_  # should already happen?

@@ -289,7 +289,7 @@ class MyMplCanvas(FigureCanvas):
             # with sns.axes_style('ticks') as style, \
             #         sns.plotting_context('poster') as context:
             sns.distplot(self.dataframe.dropna(),
-                         bins=8,
+                         bins=10,
                          # kde_kws={'cut': 0},
                          hist_kws={'align': 'mid'},
                          kde=False,

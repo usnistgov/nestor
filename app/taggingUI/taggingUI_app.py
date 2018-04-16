@@ -122,7 +122,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                           vocab_df=self.dataframe_NGram[self.dataframe_NGram.alias.notna()])
 
         # merge 1 and 2-grams.
-        tag_df = tags_df.join(tags2_df)
+        tag_df = tags_df.join(tags2_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
         self.tag_readable = kex._get_readable_tag_df(tag_df)
         self.relation_df = tag_df.loc[:, ['P I', 'S I']]
         self.tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'X', 'NA']]
