@@ -59,7 +59,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Solution': 'S',
             'not yet classified': ''
         }
-
+        self.dataframe_Original=None
         self.dataframe_1Gram = None
         self.dataframe_NGram = None
         self.tokenExtractor_nGram = None
@@ -300,13 +300,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         dataframe.loc[token,"NE"] = classification
         return dataframe
 
-    def _set_dataframes(self, dataframe_1Gram = None, dataframe_NGram = None):
+    def _set_dataframes(self, dataframe_1Gram = None, dataframe_NGram = None, dataframe_Original=None):
         """
         set the dataframe for the window
         :param dataframe_1Gram:
         :param dataframe_NGram:
         :return:
         """
+        if dataframe_Original is not None:
+            self.dataframe_Original= dataframe_Original
         # print('NEW TEST ALERT')
         # print(dataframe_1Gram)
         if dataframe_1Gram is not None:

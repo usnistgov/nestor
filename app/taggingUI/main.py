@@ -101,6 +101,7 @@ class Main:
             # add values to the original dataframe
             try:
                 self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
+                self.window_taggingTool._set_dataframes(dataframe_Original=self.dataframe_Original)
             except UnicodeDecodeError:
                 print("Searching the good encoding")
                 encoding = chardet.detect(open(self.config_new['file']['filePath_OriginalCSV']['path'], 'rb').read())['encoding']
