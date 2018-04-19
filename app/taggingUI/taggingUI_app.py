@@ -124,6 +124,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # merge 1 and 2-grams.
         tag_df = tags_df.join(tags2_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
         self.tag_readable = kex._get_readable_tag_df(tag_df)
+
         self.relation_df = tag_df.loc[:, ['P I', 'S I']]
         self.tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'X', 'NA']]
         # tag_readable.head(10)
@@ -150,9 +151,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #TODO add this stuff to the original csv data
         if self.tag_readable is None:
             self.onClick_saveTrack()
-        fname = Path('..')/'READABLE_TAGS.csv'
+        fname = Path('.')/'READABLE_TAGS.csv'
         print("Saving a Readable csv with tagged documents. ", str(fname))
-        self.tag_readable.to_csv(fname)
+        self.dataframe_Original.join(self.tag_readable).to_csv(fname)
         print('DONE!')
 
 
