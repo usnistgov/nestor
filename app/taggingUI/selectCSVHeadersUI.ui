@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>MainWindow_selectCSVHeaders</class>
  <widget class="QMainWindow" name="MainWindow_selectCSVHeaders">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>494</width>
-    <height>478</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Text Columns?</string>
   </property>
@@ -67,7 +59,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>494</width>
+     <width>303</width>
      <height>24</height>
     </rect>
    </property>

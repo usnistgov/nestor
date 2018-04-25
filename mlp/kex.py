@@ -8,6 +8,7 @@ import sys
 try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
     ipy_str = str(type(get_ipython()))
     if 'zmqshell' in ipy_str:
+        print('')
         from tqdm import tqdm_notebook as tqdm
     if 'terminal' in ipy_str:
         from tqdm import tqdm
@@ -99,8 +100,59 @@ class NLPSelect(Transformer):
 
 
 class TokenExtractor(TransformerMixin):
+    """
+    A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
+    total tf-idf score, and getting a list of vocabulary.
 
-    def __init__(self, **tf_idfkwargs):
+    Parameters
+    ----------
+    tfidf_kwargs: arguments to pass to sklearn's TfidfVectorizer
+    Valid options modified here (see sklearn docs for more options) are:
+
+        input : string {'filename', 'file', 'content'}, default='content'
+            If 'filename', the sequence passed as an argument to fit is
+            expected to be a list of filenames that need reading to fetch
+            the raw content to analyze.
+
+            If 'file', the sequence items must have a 'read' method (file-like
+            object) that is called to fetch the bytes in memory.
+
+            Otherwise the input is expected to be the sequence strings or
+            bytes items are expected to be analyzed directly.
+
+        ngram_range : tuple (min_n, max_n), default=(1,1)
+            The lower and upper boundary of the range of n-values for different
+            n-grams to be extracted. All values of n such that min_n <= n <= max_n
+            will be used.
+
+        stop_words : string {'english'} (default), list, or None
+            If a string, it is passed to _check_stop_list and the appropriate stop
+            list is returned. 'english' is currently the only supported string
+            value.
+
+            If a list, that list is assumed to contain stop words, all of which
+            will be removed from the resulting tokens.
+            Only applies if ``analyzer == 'word'``.
+
+            If None, no stop words will be used. max_df can be set to a value
+            in the range [0.7, 1.0) to automatically detect and filter stop
+            words based on intra corpus document frequency of terms.
+
+        max_features : int or None, default=5000
+            If not None, build a vocabulary that only consider the top
+            max_features ordered by term frequency across the corpus.
+
+            This parameter is ignored if vocabulary is not None.
+
+        smooth_idf : boolean, default=False
+            Smooth idf weights by adding one to document frequencies, as if an
+            extra document was seen containing every term in the collection
+            exactly once. Prevents zero divisions.
+
+        sublinear_tf : boolean, default=True
+            Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
+    """
+    def __init__(self, **tfidf_kwargs):
 
         self.default_kws = dict({'input': 'content',
                                  'ngram_range': (1, 1),
@@ -109,22 +161,25 @@ class TokenExtractor(TransformerMixin):
                                  'smooth_idf': False,
                                  'max_features': 5000})
 
-        self.default_kws.update(tf_idfkwargs)
+        self.default_kws.update(tfidf_kwargs)
         # super(TfidfVectorizer, self).__init__(**tf_idfkwargs)
         self._model = TfidfVectorizer(**self.default_kws)
+        self._tf_tot = None
 
-
-    def fit(self, dask_documents, y=None):
-        X = _series_itervals(dask_documents)
-        self._model.fit(X)
+    def fit(self, X, y=None):
+        documents = _series_itervals(X)
+        self._model.fit(documents)
 
         return self
 
-    def fit_transform(self, dask_documents, y=None):
-        X = _series_itervals(dask_documents)
+    def fit_transform(self, X, y=None, **fit_params):
+        documents = _series_itervals(X)
         # X is already a transformed view of dask_documents so
         # we set copy to False
-        X_tf = self._model.fit_transform(X)
+        if y is None:
+            X_tf = self._model.fit_transform(documents)
+        else:
+            X_tf = self._model.fit_transform(documents, y)
         self._tf_tot = np.array(X_tf.sum(axis=0))[0]
         return X_tf
 
@@ -243,13 +298,17 @@ def _get_readable_tag_df(tag_df):
 
 def _get_tag_completeness(tag_df):
     """get tagging statistic/array, as the completeness ratio for each MWO"""
-    tag_pct = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))
+    tag_pct = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))  #TODO: if they tag everything?
+    all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
+
     print(f'Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}')
 
-    tag_comp = (tag_df['NA'].sum(axis=1) == 0).sum()
+    tag_comp = (tag_df.get('NA', all_empt).sum(axis=1) == 0).sum()
     print(f'Complete Docs: {tag_comp}, or {tag_comp/len(tag_df):.2%}')
 
-    tag_empt = ((tag_df['I'].sum(axis=1) == 0) & (tag_df['P'].sum(axis=1) == 0) & (tag_df['S'].sum(axis=1) == 0)).sum()
+    tag_empt = ((tag_df.get('I', all_empt).sum(axis=1) == 0) &\
+                (tag_df.get('P', all_empt).sum(axis=1) == 0) &\
+                (tag_df.get('S', all_empt).sum(axis=1) == 0)).sum()
     print(f'Empty Docs: {tag_empt}, or {tag_empt/len(tag_df):.2%}')
     return tag_pct, tag_comp, tag_empt
 
@@ -304,9 +363,6 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
                              position=0,
                              desc='Category Loop'):
         # loop over each tag, returning any token where the alias matches
-        # pbar1.set_description(f'Category: {clf}')
-        # pbar1.update(1)
-
         for query in tqdm(queries,
                           total=len(queries),
                           file=sys.stdout,

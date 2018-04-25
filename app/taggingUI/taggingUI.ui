@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>MainWindow_taggingTool</class>
  <widget class="QMainWindow" name="MainWindow_taggingTool">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>834</width>
-    <height>693</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>EATT Knowledge:  TagTool</string>
   </property>
@@ -573,11 +565,43 @@
           <string>Report</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_4">
+          <item row="4" column="0">
+           <layout class="QGridLayout" name="gridLayout_report_progressPlot"/>
+          </item>
+          <item row="3" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <layout class="QGridLayout" name="gridLayout_report_docsInfo">
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_report_emptyDocs">
+                <property name="text">
+                 <string>Empty Docs:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_report_completeDocs">
+                <property name="text">
+                 <string>Complete Docs: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_report_tagCompleteness">
+                <property name="text">
+                 <string>Tag PPV:</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_report_general">
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_report_action">
-              <item row="4" column="0">
+              <item row="5" column="0">
                <widget class="QLabel" name="label_report_saveNewCsv">
                 <property name="text">
                  <string>New file with columns [I,P,S,X,U]. Tags are comma-
@@ -593,7 +617,7 @@ separated for readability. NA tags ommitted.
                 </property>
                </widget>
               </item>
-              <item row="5" column="0">
+              <item row="7" column="0">
                <widget class="QLabel" name="label_report_saveBinnary">
                 <property name="text">
                  <string>New file with hierarchical columns [I,P,S,X,U]
@@ -610,39 +634,14 @@ computationally and for vizualization. . </string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2">
-               <layout class="QGridLayout" name="gridLayout_report_docsInfo">
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_report_tagCompleteness">
-                  <property name="text">
-                   <string>Tag PPV:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="label_report_emptyDocs">
-                  <property name="text">
-                   <string>Empty Docs:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_report_completeDocs">
-                  <property name="text">
-                   <string>Complete Docs: </string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="5" column="1">
+              <item row="7" column="1">
                <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
                 <property name="text">
                  <string>create a binary CSV</string>
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
+              <item row="5" column="1">
                <widget class="QPushButton" name="pushButton_report_saveNewCsv">
                 <property name="text">
                  <string>create new CSV</string>
@@ -656,15 +655,67 @@ computationally and for vizualization. . </string>
                 </property>
                </widget>
               </item>
+              <item row="4" column="0">
+               <spacer name="verticalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="6" column="0">
+               <spacer name="verticalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
              </layout>
             </item>
            </layout>
           </item>
+          <item row="5" column="0">
+           <widget class="Line" name="line_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="0">
-           <layout class="QGridLayout" name="gridLayout_report_progressPlot"/>
+           <spacer name="verticalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Minimum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item row="1" column="0">
-           <widget class="Line" name="line_8">
+           <widget class="Line" name="line_7">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -683,13 +734,19 @@ computationally and for vizualization. . </string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>834</width>
+     <width>648</width>
      <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>File</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>false</bool>
     </property>
     <addaction name="actionOpen_new_csv"/>
     <addaction name="actionOpen_1Gram_Vocab"/>
@@ -698,6 +755,9 @@ computationally and for vizualization. . </string>
     <addaction name="actionSave_All"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
@@ -705,6 +765,9 @@ computationally and for vizualization. . </string>
     <addaction name="actionDev_Mode"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Help</string>
     </property>
@@ -715,9 +778,6 @@ computationally and for vizualization. . </string>
      <string>About</string>
     </property>
     <addaction name="actionAbout_TagTool"/>
-    <addaction name="actionNIST"/>
-    <addaction name="actionSID"/>
-    <addaction name="actionAuthors"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -762,7 +822,7 @@ computationally and for vizualization. . </string>
   </action>
   <action name="actionNIST">
    <property name="text">
-    <string>NIST</string>
+    <string>&lt;a href=\&quot;https://www.nist.gov/&quot;&gt;NIST&lt;/a&gt;</string>
    </property>
   </action>
   <action name="actionSID">

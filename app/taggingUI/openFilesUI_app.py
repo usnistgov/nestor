@@ -11,6 +11,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_openFiles.__init__(self)
         self.setupUi(self)
+        self.setGeometry(20, 20, 544, 433)
         self.closeFunction = closeFunction
         self.nextWindowFunction = nextWindow
         if iconPath:

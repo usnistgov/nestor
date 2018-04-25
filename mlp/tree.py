@@ -261,7 +261,7 @@ def nx2gt(nxG):
         # Set the vertex properties, not forgetting the id property
         data['id'] = str(node)
         for key, value in data.items():
-            gtG.vp[key][v] = value # vp is short for vertex_properties
+            gtG.vp[key][v] = value  # vp is short for vertex_properties
 
     # Add the edges
     for src, dst, data in nxG.edges_iter(data=True):

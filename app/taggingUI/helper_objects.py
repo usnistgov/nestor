@@ -255,7 +255,7 @@ class MyMplCanvas(FigureCanvas):
     All the characteristic in common for all the plot should be in this class
     """
 
-    def __init__(self, layout=None, parent_layout=None, dataframe=None, width=5, height=4, dpi=100):
+    def __init__(self, layout=None, parent_layout=None, dataframe=None, width=4, height=3, dpi=100):
         self._set_dataframe(dataframe)
         self.layout = layout
 

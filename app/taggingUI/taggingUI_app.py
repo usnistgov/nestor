@@ -12,7 +12,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Ui_MainWindow_taggingTool.__init__(self)
         self.setupUi(self)
         self.closeFunction = closeFunction
-
+        self.setGeometry(20, 20, 648, 705)
         #TODO make the "areyoysure" exit action
         #self.actionExit.triggered.connect(self.close_application)
 
@@ -166,9 +166,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         if self.tag_df is None:
             self.onClick_saveTrack()
-        fname = Path('..')/'BINARY_TAGS.csv'
-        print("Saving a Binary csv with tagged documents. ", str(fname))
-        self.tag_df.to_csv(fname)
+        fname = Path('.')
+        print("Saving a Binary csv with tagged documents. ", str(fname.absolute()))
+        self.tag_df.to_csv(fname/'BINARY_TAGS.csv')
+        self.relation_df.to_csv(fname / 'BINARY_RELATIONS.csv')
+
         print('DONE')
 
 

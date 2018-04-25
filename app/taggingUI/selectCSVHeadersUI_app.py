@@ -11,6 +11,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_selectCSVHeaders.__init__(self)
         self.setupUi(self)
+        self.setGeometry(20, 20, 300, 350)
         self.closeFunction = closeFunction
         self.nextWindowFunction = nextWindow
 
