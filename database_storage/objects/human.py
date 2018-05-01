@@ -75,7 +75,7 @@ class Human:
         :return: a string - Cypher Query : (human:HUMAN{name:"x"})
             OR empty string if the HUMAN has no NAME
         """
-        if self.name is None:
+        if not self.name:
             return ""
         return f'({self.cypher_human_label(variable_human)}' + \
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
@@ -87,7 +87,7 @@ class Human:
         :return: a string - Cypher Query : (operator:HUMAN{name:"x"})
         """
         query = f'({self.cypher_human_label(variable_human)}'
-        if self.name is not None:
+        if self.name:
             query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "}"
         query += ")"
 
@@ -100,7 +100,7 @@ class Human:
          :param variable_human: default "human" to refer to a specific HUMAN
          :return: a string - Cypher Query : MERGE (technician:HUMAN{name:"x"})
          """
-        if self.name is None:
+        if not self.name:
             return ""
         query = f'MERGE {self.cypher_human_name(variable_human)}'
         return query
@@ -173,7 +173,7 @@ class Operator(Human):
         :return: a string - Cypher Query : (operator:HUMAN:OPERATOR{name:"x"})
             OR empty string if the OPERATOR has no NAME
         """
-        if self.name is None:
+        if not self.name:
             return ""
         return f'({self.cypher_operator_label(variable_operator)}' + \
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
@@ -186,7 +186,7 @@ class Operator(Human):
         """
 
         query = f'({self.cypher_operator_label(variable_operator)}'
-        if self.name is not None:
+        if self.name:
             query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "}"
         query += ")"
 
@@ -297,7 +297,7 @@ class Technician(Human):
          :return: a string - Cypher Query : (operator:HUMAN:TECHNICIAN{name:"x"})
              OR empty string if the TECHNICIAN has no NAME
          """
-        if self.name is None:
+        if not self.name:
             return ""
         return f'({self.cypher_technician_whereReturn(variable_technician)}' + \
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
@@ -331,11 +331,11 @@ class Technician(Human):
                 in the database, SKILLS and CRAFTS are array, so we add values to the array if not already in
          """
         query = self.cypher_human_merge(variable_technician)
-        if self.skills is not None:
+        if self.skills:
             for skill in self.skills:
                 query += f'\nFOREACH(x in CASE WHEN "{skill}" in {variable_technician}.{self.databaseInfoHuman["properties"]["skills"]} THEN [] ELSE [1] END |' \
                          f'  SET {variable_technician}.{self.databaseInfoHuman["properties"]["skills"]} = coalesce({variable_technician}.{self.databaseInfoHuman["properties"]["skills"]},[]) + "{skill}" )'
-        if self.crafts is not None:
+        if self.crafts:
             for craft in self.crafts:
                 query += f'\nFOREACH(x in CASE WHEN "{craft}" in {variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]} THEN [] ELSE [1] END |' \
                          f'  SET {variable}.{self.databaseInfoHuman["properties"]["crafts"]} = coalesce({variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]},[]) + "{craft}" )'

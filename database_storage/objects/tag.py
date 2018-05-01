@@ -126,7 +126,7 @@ class Tag:
          :return: a string - Cypher Query : (tag:TAG{keyword:"x"})
              OR empty string if the TAG has no KEYWORD
          """
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_tag_label(variable_tag)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -156,10 +156,10 @@ class Tag:
                                             SET tag.synonyms = ["x","y"]
                 in the database, SYNONYMS is an array, so we add values to the array if not already in
          """
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         query = f'\nMERGE {self.cypher_tag_keyword(variable_tag)}'
-        if self.synonyms is not None:
+        if self.synonyms:
             for synonym in self.synonyms:
                 query += f'\nFOREACH(x in CASE WHEN "{synonym}" in {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} THEN [] ELSE [1] END |' \
                          f' SET {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} = coalesce({variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]},[]) + "{synonym}" )'
@@ -249,7 +249,7 @@ class TagOneGram(Tag):
              OR empty string if the TAGONEGRAM has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_oneGramTag_label(variable_tagOnGram)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -264,9 +264,9 @@ class TagOneGram(Tag):
         query = f'({self.cypher_oneGramTag_label(variable_tagOnGram)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"
@@ -380,7 +380,7 @@ class TagItem(TagOneGram):
              OR empty string if the TAGITEM has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_itemTag_label(variable_tagItem)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -394,9 +394,9 @@ class TagItem(TagOneGram):
         query = f'({self.cypher_itemTag_label(variable_tagItem)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"
@@ -484,7 +484,7 @@ class TagProblem(TagOneGram):
              OR empty string if the TAGPROBLEM has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_problemTag_label(variable_tagProblem)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -498,9 +498,9 @@ class TagProblem(TagOneGram):
         query = f'({self.cypher_problemTag_label(variable_tagProblem)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"
@@ -587,7 +587,7 @@ class TagSolution(TagOneGram):
              OR empty string if the TAGSOLUTION has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_solutionTag_label(variable_tagSolution)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -601,9 +601,9 @@ class TagSolution(TagOneGram):
         query = f'({self.cypher_solutionTag_label(variable_tagSolution)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"
@@ -691,7 +691,7 @@ class TagUnknown(TagOneGram):
              OR empty string if the TAGUNKNOWN has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_unknownTag_label(variable_tagUnknown)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -705,9 +705,9 @@ class TagUnknown(TagOneGram):
         query = f'({self.cypher_unknownTag_label(variable_tagUnknown)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"
@@ -809,7 +809,7 @@ class TagNGram(Tag):
              OR empty string if the TAGNGRAM has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_nGramTag_label(variable_tagNGram)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -823,9 +823,9 @@ class TagNGram(Tag):
         query = f'({self.cypher_nGramTag_label(variable_tagNGram)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"
@@ -915,7 +915,7 @@ class TagProblemItem(TagNGram):
              OR empty string if the TAGPROBLEMITEM has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_problemItemTag_label(variable_tagProblemItem)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -929,9 +929,9 @@ class TagProblemItem(TagNGram):
         query = f'({self.cypher_problemItemTag_label(variable_tagProblemItem)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"
@@ -1019,7 +1019,7 @@ class TagSolutionItem(TagNGram):
              OR empty string if the TAGSOLUTIONITEM has no KEYWORD
          """
 
-        if self.keyword is None:
+        if not self.keyword:
             return ""
         return f'({self.cypher_solutionItemTag_label(variable_tagSolutionItem)}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
@@ -1033,9 +1033,9 @@ class TagSolutionItem(TagNGram):
         query = f'({self.cypher_solutionItemTag_label(variable_tagSolutionItem)}'
         if self.keyword or self.synonyms is not None:
             query += "{"
-            if self.keyword is not None:
+            if self.keyword:
                 query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
-            if self.synonyms is not None:
+            if self.synonyms:
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
             query = query[:-1] + "}"
         return query + ")"

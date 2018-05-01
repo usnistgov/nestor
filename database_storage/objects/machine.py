@@ -122,7 +122,7 @@ class Machine:
          :return: a string - Cypher Query : (machine:MACHINE{name:"x"})
              OR empty string if the MACHINE has no NAME
          """
-        if self.name is None:
+        if not self.name:
             return ""
         return f'({self.cypher_machine_label(variable_machine)}' + \
                "{" + f'{self.databaseInfoMachine["properties"]["name"]}:"{self.name}"' + "})"
@@ -136,11 +136,11 @@ class Machine:
         query = f'({self.cypher_machine_label(variable_machine)}'
         if self.name or self.manufacturer or self.location is not None:
             query += "{"
-            if self.name is not None:
+            if self.name:
                 query += f'{self.databaseInfoMachine["properties"]["name"]}:"{self.name}",'
-            if self.manufacturer is not None:
+            if self.manufacturer:
                 query += f'{self.databaseInfoMachine["properties"]["manufacturer"]}:"{self.manufacturer}",'
-            if self.location is not None:
+            if self.location:
                 query += f'{self.databaseInfoMachine["properties"]["location"]}:"{self.location}",'
             query = query[:-1] + "}"
         return query + ")"
@@ -154,12 +154,12 @@ class Machine:
                                             SET machine.manufacturer = "x"
                                             SET machine.location = "x"
          """
-        if self.name is None:
+        if not self.name:
             return ""
         query = f'\nMERGE {self.cypher_machine_name(variable_machine)}'
-        if self.manufacturer is not None:
+        if self.manufacturer:
             query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["manufacturer"]} = "{self.manufacturer}"'
-        if self.location is not None:
+        if self.location:
             query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["location"]} = "{self.location}"'
         return query
 
@@ -216,7 +216,7 @@ class Machine:
          :return: a string - Cypher Query : (machine_type:MACHINE_TYPE{type:"x"})
              OR empty string if the MACHINE_TYPE has no TYPE
          """
-        if self.machine_type is None:
+        if not self.machine_type:
             return ""
         return f'( {self.cypher_machinetype_label(variable_machinetype)}' + \
                "{" + f'{self.databaseInfoMachine["properties"]["type"]}:"{self.machine_type}"' + "})"
@@ -228,7 +228,7 @@ class Machine:
         :return: a string - Cypher Query : (machine_type:MACHINE_TYPE{type:"x"})
         """
         query = f'( {self.cypher_machinetype_label(variable_machinetype)}'
-        if self.machine_type is not None:
+        if self.machine_type:
             query += "{" + f'{self.databaseInfoMachine["properties"]["type"]}:"{self.machine_type}"' + "}"
         query += ")"
 
@@ -242,7 +242,7 @@ class Machine:
          :param variable_machinetype: default "machine_type" to refer to a specific MACHINE_TYPE
          :return: a string - Cypher Query : MERGE (machine_type:MACHINE_TYPE{type:"x"})
          """
-        if self.name is None:
+        if not self.name:
             return ""
         query = f'\nMERGE {self.cypher_machinetype_type(variable_machinetype)}'
         return query
