@@ -1,7 +1,15 @@
 segments_6
+
+#   special folder
 **/__pycache__/**
-**.pyc
 **.idea/**
+data/**
+
+#   special file type
+**.pyc
 **.csv
-data/*
+**.yaml
+
+# exception
 !data/public
+!database_storage/database/DatabaseSchema.yaml
