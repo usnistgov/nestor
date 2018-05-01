@@ -1,8 +1,11 @@
 segments_6
 
-#   special folder
+#   special folder cache or others
 **/__pycache__/**
 **.idea/**
+**/.ipynb_checkpoints
+
+# data folder
 data/**
 
 #   special file type
