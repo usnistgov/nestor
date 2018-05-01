@@ -2,5 +2,6 @@ segments_6
 **/__pycache__/**
 **.pyc
 **.idea/**
+**.csv
 data/*
 !data/public
