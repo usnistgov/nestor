@@ -39,6 +39,7 @@ class Issue:
         - part_in_process: a String or array of string
         - necessary_part: a String or array of string
         - machine_down: a boolean or array of boolean
+        - cost: an integer or array of integers
 
         - date_machine_up: a DateTime or array of DateTime
         - date_machine_down: a DateTime or array of DateTime
@@ -81,6 +82,7 @@ class Issue:
 
     def __init__(self, problem=None, solution=None, cause=None, effects=None,
                  part_in_process=None, necessary_part=None, machine_down=None,
+                 cost=None,
 
                  date_machine_up=None, date_machine_down=None,
                  date_workorder_start=None, date_workorder_completion=None,
@@ -95,6 +97,7 @@ class Issue:
         self._set_cause(cause)
         self._set_effects(effects)
         self._set_machine_down(machine_down)
+        self._set_cost(cost)
 
         self._set_part_in_process(part_in_process)
         self._set_necessary_part(necessary_part)
@@ -193,6 +196,16 @@ class Issue:
             self.machine_down = "_"
         else:
             self.machine_down = None
+
+    def _get_cost(self):
+        return self.cost
+
+    def _set_cost(self, cost):
+        try:
+            self.cost = int(cost)
+        except ValueError:
+            self.cost = None
+
 
     ############################  DATE ############################
     # TODO Dates make problem, because there is too much difference between the csv
@@ -453,6 +466,7 @@ class Issue:
             (self.machine_down is None) and
             (self.date_machine_down is None) and
             (self.date_machine_up is None) and
+            (self.cost is None) and
             (self.date_workorder_completion is None) and
             (self.date_workorder_start is None) and
             (self.date_maintenance_technician_arrive is None) and
@@ -472,6 +486,7 @@ class Issue:
                f'\tpart_in_process  =  {self.part_in_process}\n' \
                f'\tnecessary_part  =  {self.necessary_part}\n' \
                f'\tmachine_down  =  {self.machine_down}\n' \
+               f'\tcost  =  {self.cost}\n' \
                f'\tdate_machine_up  =  {self.date_machine_up}\n' \
                f'\tdate_machine_down  =  {self.date_machine_down}\n' \
                f'\tdate_workorder_start  =  {self.date_workorder_start}\n' \
@@ -540,6 +555,8 @@ class Issue:
                 query += f'{self.databaseInfoIssue["properties"]["machine_down"]}:"{self.machine_down}",'
             if self.date_machine_up:
                 query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:"{self.date_machine_up}",'
+            if self.cost:
+                query += f'{self.databaseInfoIssue["properties"]["cost"]}:{self.cost},'
             if self.date_machine_down:
                 query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:"{self.date_machine_down }",'
             if self.date_workorder_start:
@@ -617,6 +634,13 @@ class Issue:
                     cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["necessary_part"]}')
                 else:
                     cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["necessary_part"]} = "{ p }"')
+        if self.cost:
+            #TODO be carefull about the "="
+            for c in self.cost:
+                if c == "_":
+                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["cost"]}')
+                else:
+                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["cost"]} = { c }')
         if self.date_machine_down:
             for d in self.date_machine_down:
                 if d == "_":

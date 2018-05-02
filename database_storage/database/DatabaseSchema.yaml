@@ -9,6 +9,7 @@ issue:
     machine_down: machine_down
     necessary_part: necessary_part
     part_in_process: part_in_process
+    cost: cost
 
     date_machine_down: date_machine_down
     date_workorder_start : date_maintenanceworkorder_start

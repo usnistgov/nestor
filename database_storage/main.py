@@ -39,6 +39,7 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
             - machine_down
             - necessary_part
             - part_in_process
+            - cost
             - date_machine_down
             - date_maintenanceworkorder_start
             - date_maintenance_technician_arrive
@@ -111,6 +112,10 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
                 pass
             try:
                 issue._set_machine_down(row[propertyToHeader_issue['machine_down']])
+            except KeyError:
+                pass
+            try:
+                issue._set_cost(row[propertyToHeader_issue['cost']])
             except KeyError:
                 pass
             #TODO add a date clenizer for only 1 value

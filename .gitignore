@@ -16,3 +16,4 @@ data/**
 # exception
 !data/public
 !database_storage/database/DatabaseSchema.yaml
+.idea/

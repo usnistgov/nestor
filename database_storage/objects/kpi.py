@@ -61,6 +61,7 @@ class Kpi:
                     'machine_down': None,
                     'necessary_part': None,
                     'part_in_process': None,
+                    'cost': None,
 
                     'date_machine_down': None,
                     'date_workorder_start': None,
@@ -151,6 +152,7 @@ class Kpi:
             part_in_process=dict["issue"]["part_in_process"],
             necessary_part=dict["issue"]["necessary_part"],
             machine_down=dict["issue"]["machine_down"],
+            cost=dict["issue"]["cost"],
             date_machine_up=dict["issue"]["date_machine_up"],
             date_machine_down=dict["issue"]["date_machine_down"],
             date_workorder_start=dict["issue"]["date_workorder_start"],
