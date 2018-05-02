@@ -464,25 +464,35 @@ class Issue:
 
     def __str__(self):
         self.create_all_time()
-        return f"OBJECT: {type(self)}\n\t" \
-               f"problem: {self.problem} \n\tsolution: {self.solution} \n\t" \
-               f"cause: {self.cause} \n\teffects: {self.effects} \n\t" \
-               f"part_in_process: {self.part_in_process} \n\t|| necessary_part: {self.necessary_part} \n\t" \
-               f"machine_down: {self.machine_down} \n\t" \
-               f"date_machine_up: {self.date_machine_up} \n\t|| date_machine_down: {self.date_machine_down} \n\t" \
-               f"date_workorder_start: {self.date_workorder_start} \n\t" \
-               f"date_workorder_completion: {self.date_workorder_completion} \n\t" \
-               f"date_maintenance_technician_arrives: {self.date_maintenance_technician_arrive} \n\t" \
-               f"date_problem_found: {self.date_problem_found} \n\tdate_problem_solved: {self.date_problem_solve} \n\t" \
-               f"date_part_ordered: {self.date_part_ordered} \n\t" \
-               f"date_part_received: {self.date_part_received} \n\t" \
-               f"time_to_repair: {self.time_to_repair} \n\ttime_work_order_completion: {self.time_work_order_completion} \n\t" \
-               f"time_to_dispatch: {self.time_to_dispatch} \n\ttime_to_return_to_operation: {self.time_to_return_to_operation} \n\t" \
-               f"time_to_issue_work_order: {self.time_to_issue_work_order} \n\ttime_to_travel: {self.time_to_travel} \n\t" \
-               f"time_to_solve_problem: {self.time_to_solve_problem} \n\ttime_to_diagnose: {self.time_to_diagnose} \n\t" \
-               f"time_to_order: {self.time_to_order} \n\ttime_lead_for_part: {self.time_lead_for_part} \n\t" \
-               f"time_to_fix: {self.time_to_fix} \n\ttime_to_turn_on: {self.time_to_turn_on} \n\t"
-
+        return f'object  =  {type(self)}\n' \
+               f'\tproblem  =  {self.problem}\n' \
+               f'\tsolution  =  {self.solution}\n' \
+               f'\tcause  =  {self.cause}\n' \
+               f'\teffects  =  {self.effects}\n' \
+               f'\tpart_in_process  =  {self.part_in_process}\n' \
+               f'\tnecessary_part  =  {self.necessary_part}\n' \
+               f'\tmachine_down  =  {self.machine_down}\n' \
+               f'\tdate_machine_up  =  {self.date_machine_up}\n' \
+               f'\tdate_machine_down  =  {self.date_machine_down}\n' \
+               f'\tdate_workorder_start  =  {self.date_workorder_start}\n' \
+               f'\tdate_workorder_completion  =  {self.date_workorder_completion}\n' \
+               f'\tdate_maintenance_technician_arrive  =  {self.date_maintenance_technician_arrive}\n' \
+               f'\tdate_problem_found  =  {self.date_problem_found}\n' \
+               f'\tdate_problem_solve  =  {self.date_problem_solve}\n' \
+               f'\tdate_part_ordered  =  {self.date_part_ordered}\n' \
+               f'\tdate_part_received  =  {self.date_part_received}\n' \
+               f'\ttime_to_repair  =  {self.time_to_repair}\n' \
+               f'\ttime_work_order_completion  =  {self.time_work_order_completion}\n' \
+               f'\ttime_to_dispatch  =  {self.time_to_dispatch}\n' \
+               f'\ttime_to_return_to_operation  =  {self.time_to_return_to_operation}\n' \
+               f'\ttime_to_issue_work_order  =  {self.time_to_issue_work_order}\n' \
+               f'\ttime_to_travel  =  {self.time_to_travel}\n' \
+               f'\ttime_to_solve_problem  =  {self.time_to_solve_problem}\n' \
+               f'\ttime_to_diagnose  =  {self.time_to_diagnose}\n' \
+               f'\ttime_to_order  =  {self.time_to_order}\n' \
+               f'\ttime_lead_for_part  =  {self.time_lead_for_part}\n' \
+               f'\ttime_to_fix  =  {self.time_to_fix}\n' \
+               f'\ttime_to_turn_on  =  {self.time_to_turn_on}'
 
     def cypher_issue_label(self, variable_issue="issue"):
         """

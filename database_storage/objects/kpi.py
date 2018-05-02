@@ -41,7 +41,7 @@ class Kpi:
                 We store it into a dictionary so that it can easily be saved and shared
                 It looks like the dictionary fulldict that is the base of it and set up all the possible values
 
-           It contains getter and setter for every properties, it is highly recommend to use the setter
+           It contains getter and setter from a dict -self.fuldict like- for every properties, it is highly recommend to use the setter
             because it represent the data as a standard way - the way it is store in the database
            It contains a string representation
            It contains a boolean representation
@@ -139,119 +139,199 @@ class Kpi:
 
         updateDict(self.fullDict, kpiDict)
 
+    def _get_issue(self):
+        return self.issue
 
-    def createObjects(self):
+    def _set_issue(self, dict):
         self.issue = Issue(
-            problem= self.fullDict["issue"]["description_problem"],
-            solution= self.fullDict["issue"]["description_solution"],
-            cause= self.fullDict["issue"]["description_cause"],
-            effects= self.fullDict["issue"]["description_effect"],
-            part_in_process= self.fullDict["issue"]["part_in_process"],
-            necessary_part= self.fullDict["issue"]["necessary_part"],
-            machine_down= self.fullDict["issue"]["machine_down"],
-            date_machine_up= self.fullDict["issue"]["date_machine_up"],
-            date_machine_down= self.fullDict["issue"]["date_machine_down"],
-            date_workorder_start= self.fullDict["issue"]["date_workorder_start"],
-            date_workorder_completion= self.fullDict["issue"]["date_workorder_completion"],
-            date_maintenance_technician_arrive= self.fullDict["issue"]["date_maintenance_technician_arrive"],
-            date_problem_found= self.fullDict["issue"]["date_problem_found"],
-            date_problem_solved= self.fullDict["issue"]["date_problem_solve"],
-            date_part_ordered= self.fullDict["issue"]["date_part_ordered"],
-            date_part_received= self.fullDict["issue"]["date_part_received"],
+            problem=dict["issue"]["description_problem"],
+            solution=dict["issue"]["description_solution"],
+            cause=dict["issue"]["description_cause"],
+            effects=dict["issue"]["description_effect"],
+            part_in_process=dict["issue"]["part_in_process"],
+            necessary_part=dict["issue"]["necessary_part"],
+            machine_down=dict["issue"]["machine_down"],
+            date_machine_up=dict["issue"]["date_machine_up"],
+            date_machine_down=dict["issue"]["date_machine_down"],
+            date_workorder_start=dict["issue"]["date_workorder_start"],
+            date_workorder_completion=dict["issue"]["date_workorder_completion"],
+            date_maintenance_technician_arrive=dict["issue"]["date_maintenance_technician_arrive"],
+            date_problem_found=dict["issue"]["date_problem_found"],
+            date_problem_solved=dict["issue"]["date_problem_solve"],
+            date_part_ordered=dict["issue"]["date_part_ordered"],
+            date_part_received=dict["issue"]["date_part_received"],
             databaseInfo=self.database.schema
         )
 
+    def _get_human(self):
+        return self.human
+
+    def _set_human(self, dict):
         self.human = Human(
-            name= self.fullDict["human"]["name"],
+            name=dict["human"]["name"],
             databaseInfo=self.database.schema
         )
 
+    def _get_operator(self):
+        return self.operator
+
+    def _set_operator(self, dict):
         self.operator = Operator(
-            name= self.fullDict["operator"]["name"],
+            name=dict["operator"]["name"],
             databaseInfo=self.database.schema
         )
 
+    def _get_technician(self):
+        return self.technician
+
+    def _set_technician(self, dict):
         self.technician = Technician(
-            name= self.fullDict["technician"]["name"],
-            skills= self.fullDict["technician"]["skills"],
-            crafts= self.fullDict["technician"]["crafts"],
+            name=dict["technician"]["name"],
+            skills=dict["technician"]["skills"],
+            crafts=dict["technician"]["crafts"],
             databaseInfo=self.database.schema
         )
 
+    def _get_machine(self):
+        return self.machine
+
+    def _set_machine(self, dict):
         self.machine = Machine(
-            name= self.fullDict["machine"]["name"],
-            manufacturer= self.fullDict["machine"]["manufacturer"],
-            locasion= self.fullDict["machine"]["location"],
-            machine_type= self.fullDict["machine_type"]["type"],
+            name=dict["machine"]["name"],
+            manufacturer=dict["machine"]["manufacturer"],
+            locasion=dict["machine"]["location"],
+            machine_type=dict["machine_type"]["type"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag(self):
+        return self.tag
+
+    def _set_tag(self, dict):
         self.tag = Tag(
-            keyword= self.fullDict["tag"]["keyword"],
-            synonyms= self.fullDict["tag"]["synonyms"],
+            keyword=dict["tag"]["keyword"],
+            synonyms=dict["tag"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_oneGram(self):
+        return self.tag_oneGram
+
+    def _set_tag_oneGram(self, dict):
         self.tag_oneGram = TagOneGram(
-            keyword= self.fullDict["tag_oneGram"]["keyword"],
-            synonyms= self.fullDict["tag_oneGram"]["synonyms"],
+            keyword=dict["tag_oneGram"]["keyword"],
+            synonyms=dict["tag_oneGram"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_nGram(self):
+        return self.tag_nGram
+
+    def _set_tag_nGram(self, dict):
         self.tag_nGram = TagNGram(
-            keyword= self.fullDict["tag_nGram"]["keyword"],
-            synonyms= self.fullDict["tag_nGram"]["synonyms"],
+            keyword=dict["tag_nGram"]["keyword"],
+            synonyms=dict["tag_nGram"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_item(self):
+        return self.tag_item
+
+    def _set_tag_item(self, dict):
         self.tag_item = TagItem(
-            keyword= self.fullDict["tag_item"]["keyword"],
-            synonyms= self.fullDict["tag_item"]["synonyms"],
+            keyword=dict["tag_item"]["keyword"],
+            synonyms=dict["tag_item"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_itemAsProblem(self):
+        return self.tag_itemAsProblem
+
+    def _set_tag_itemAsProblem(self, dict):
         self.tag_itemAsProblem = TagItem(
-            keyword=self.fullDict["tag_itemAsProblem"]["keyword"],
-            synonyms=self.fullDict["tag_itemAsProblem"]["synonyms"],
+            keyword=dict["tag_itemAsProblem"]["keyword"],
+            synonyms=dict["tag_itemAsProblem"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_itemAsSolution(self):
+        return self.tag_itemAsSolution
+
+    def _set_tag_itemAsSolution(self, dict):
         self.tag_itemAsSolution = TagItem(
-            keyword=self.fullDict["tag_itemAsSolution"]["keyword"],
-            synonyms=self.fullDict["tag_itemAsSolution"]["synonyms"],
+            keyword=dict["tag_itemAsSolution"]["keyword"],
+            synonyms=dict["tag_itemAsSolution"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_problem(self):
+        return self.tag_problem
+
+    def _set_tag_problem(self, dict):
         self.tag_problem = TagProblem(
-            keyword= self.fullDict["tag_problem"]["keyword"],
-            synonyms= self.fullDict["tag_problem"]["synonyms"],
+            keyword=dict["tag_problem"]["keyword"],
+            synonyms=dict["tag_problem"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_solution(self):
+        return self.tag_solution
+
+    def _set_tag_solution(self, dict):
         self.tag_solution = TagSolution(
-            keyword= self.fullDict["tag_solution"]["keyword"],
-            synonyms= self.fullDict["tag_solution"]["synonyms"],
+            keyword=dict["tag_solution"]["keyword"],
+            synonyms=dict["tag_solution"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_unknown(self):
+        return self.tag_unknown
+
+    def _set_tag_unknown(self, dict):
         self.tag_unknown = TagUnknown(
-            keyword= self.fullDict["tag_unknown"]["keyword"],
-            synonyms= self.fullDict["tag_unknown"]["synonyms"],
+            keyword=dict["tag_unknown"]["keyword"],
+            synonyms=dict["tag_unknown"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_problemItem(self):
+        return self.tag_problemItem
+
+    def _set_tag_problemItem(self, dict):
         self.tag_problemItem = TagProblemItem(
-            keyword= self.fullDict["tag_poblemItem"]["keyword"],
-            synonyms= self.fullDict["tag_poblemItem"]["synonyms"],
+            keyword=dict["tag_poblemItem"]["keyword"],
+            synonyms=dict["tag_poblemItem"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def _get_tag_solutionItem(self):
+        return self.tag_solutionItem
+
+    def _set_tag_solutionItem(self, dict):
         self.tag_solutionItem = TagSolutionItem(
-            keyword= self.fullDict["tag_solutionItem"]["keyword"],
-            synonyms= self.fullDict["tag_solutionItem"]["synonyms"],
+            keyword=dict["tag_solutionItem"]["keyword"],
+            synonyms=dict["tag_solutionItem"]["synonyms"],
             databaseInfo=self.database.schema
         )
 
+    def createObjectsFromDict(self):
+
+        self._set_issue(self.fullDict)
+        self._set_human(self.fullDict)
+        self._set_operator(self.fullDict)
+        self._set_technician(self.fullDict)
+        self._set_machine(self.fullDict)
+        self._set_tag(self.fullDict)
+        self._set_tag_oneGram(self.fullDict)
+        self._set_tag_nGram(self.fullDict)
+        self._set_tag_item(self.fullDict)
+        self._set_tag_itemAsProblem(self.fullDict)
+        self._set_tag_itemAsSolution(self.fullDict)
+        self._set_tag_problem(self.fullDict)
+        self._set_tag_solution(self.fullDict)
+        self._set_tag_unknown(self.fullDict)
+        self._set_tag_problemItem(self.fullDict)
+        self._set_tag_solutionItem(self.fullDict)
 
     def __bool__(self):
         return not (
@@ -263,6 +343,8 @@ class Kpi:
             (self.tag is None) and
             (self.tag_oneGram is None) and
             (self.tag_item is None) and
+            (self.tag_itemAsProblem is None) and
+            (self.tag_itemAsSolution is None) and
             (self.tag_problem is None) and
             (self.tag_solution is None) and
             (self.tag_unknown is None) and
@@ -270,6 +352,25 @@ class Kpi:
             (self.tag_problemItem is None) and
             (self.tag_solutionItem is None)
         )
+
+    def __str__(self):
+        return  f'object  =  {type(self)}\n' \
+                f'ISSUE  :\n\t{self.issue}\n'\
+                f'MACHINE  :\n\t{self.machine}\n'\
+                f'HUMAN  :\n\t{self.human}\n'\
+                f'TECHNICIAN  :\n\t{self.technician}\n'\
+                f'OPERATOR  :\n\t{self.operator}\n'\
+                f'TAG  :\n\t{self.tag}\n'\
+                f'TAG_ONEGRAM  :\n\t{self.tag_oneGram}\n'\
+                f'TAG_ ITEM :\n\t{self.tag_item}\n'\
+                f'TAG_ ITEMasPROBLEM :\n\t{self.tag_itemAsProblem}\n'\
+                f'TAG_ ITEMasSOLUTION :\n\t{self.tag_itemAsSolution}\n'\
+                f'TAG_PROBLEM  :\n\t{self.tag_problem}\n'\
+                f'TAG_SOLUTION  :\n\t{self.tag_solution}\n'\
+                f'TAG_UNKNOWN  :\n\t{self.tag_unknown}\n'\
+                f'TAG_NGRAM  :\n\t{self.tag_nGram}\n'\
+                f'TAG_PROBLEMITEM  :\n\t{self.tag_problemItem}\n'\
+                f'TAG_SOLUTIONITEM  :\n\t{self.tag_solutionItem}\n'
 
     def tree_itemsHierarchie(self, child=False, parent=False):
         """

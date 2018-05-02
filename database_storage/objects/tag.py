@@ -106,10 +106,10 @@ class Tag:
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo}\n\t" \
+        return  f'object  =  {type(self)}\n'\
+                f'\tkeyword  =  {self.keyword}\n'\
+                f'\tsynonyms  =  {self.synonyms}\n'\
+                f'\tsimilarTo  =  {self.similarTo}'\
 
     def cypher_tag_label(self, variable_tag="tag"):
         """
@@ -228,10 +228,7 @@ class TagOneGram(Tag):
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo}\n\t" \
+        return f'{super().__str__()}'
 
     def cypher_oneGramTag_label(self, variable_tagOnGram="onegram_tag"):
         """
@@ -358,11 +355,8 @@ class TagItem(TagOneGram):
 
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo} \n\t" \
-               f"children: {self.children}\n\t"
+        return f'{super().__str__()}\n'\
+               f'\tchildren  =  {self.children}'
 
     def cypher_itemTag_label(self, variable_tagItem="tag_item"):
         """
@@ -463,10 +457,7 @@ class TagProblem(TagOneGram):
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo} "
+        return f'{super().__str__()}'
 
     def cypher_problemTag_label(self, variable_tagProblem="tag_problem"):
         """
@@ -566,10 +557,7 @@ class TagSolution(TagOneGram):
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo} "
+        return f'{super().__str__()}'
 
     def cypher_solutionTag_label(self, variable_tagSolution="tag_solution"):
         """
@@ -670,10 +658,7 @@ class TagUnknown(TagOneGram):
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo} "
+        return f'{super().__str__()}'
 
     def cypher_unknownTag_label(self, variable_tagUnknown="tag_unknown"):
         """
@@ -788,10 +773,14 @@ class TagNGram(Tag):
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo}\n\t" \
+        str = f'{super().__str__()}\n'\
+                f'\tcomposedOf  =  \n'
+        if self.composedOf_oneGrams:
+            for tag in self.composedOf_oneGrams:
+                str += f'\t{tag.__str__()}\n'
+        else:
+            str += "\tNO COMPOSEDOF"
+        return str
 
     def cypher_nGramTag_label(self, variable_tagNGram="ngram_tag"):
         """
@@ -894,10 +883,7 @@ class TagProblemItem(TagNGram):
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo}\n\t" \
+        return f'{super().__str__()}'
 
     def cypher_problemItemTag_label(self, variable_tagProblemItem="problemitem_tag"):
         """
@@ -998,10 +984,7 @@ class TagSolutionItem(TagNGram):
         )
 
     def __str__(self):
-        return f"OBJECT: {type(self)}\n\t" \
-               f"Keyword: {self.keyword}\n\t" \
-               f"Synonyms: {self.synonyms}\n\t" \
-               f"similarTo: {self.similarTo}\n\t" \
+        return f'{super().__str__()}'
 
     def cypher_solutionItemTag_label(self, variable_tagSolutionItem="solutionitem_tag"):
         """

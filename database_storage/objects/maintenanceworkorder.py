@@ -174,16 +174,60 @@ class MaintenanceWorkOrder():
         )
 
     def __str__(self):
-        return "OBJECT: %s -->\n\t\t ISSUE:\n %s" \
-               "\n\t\t MACHINE:\n %s" \
-               "\n\t\t OPERATORS: \n %s" \
-               "\n\t\t TECHNICIAN:\n %s" \
-               "\n\t\t ITEM_TAG:\n %s" \
-               "\n\t\t PROBLEM_TAGS:\n %s" \
-               "\n\t\t SOLUTION_TAGS:\n %s" % \
-               (type(self), self.issue, self.machine, self.operators, self.technicians, self.tag_items,
-                self.tag_problemts,
-                self.tag_solutions)
+        str =   f'object  =  {type(self)}\n\n' \
+                f'ISSUE  :\n\t{self.issue}\n\n' \
+                f'MACHINE  :\n\t{self.machine}\n\n'
+        str += f'OPERATORs  :\n'
+        if self.operators:
+            for ope in self.operators:
+                str += f'\t{ope.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+        str += f'TECHNICIANs  :\n'
+        if self.technicians:
+            for tec in self.technicians:
+                str += f'\t{tec.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+        str += f'TAG_ITEMs  :\n'
+        if self.tag_items:
+            for ti in self.tag_items:
+                str += f'\t{ti.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+        str += f'TAG_PROBLEMs  :\n'
+        if self.tag_problems:
+            for tp in self.tag_problems:
+                str += f'\t{tp.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+        str += f'TAG_SOLUTIONs  :\n'
+        if self.tag_solutions:
+            for ts in self.tag_solutions:
+                str += f'\t{ts.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+        str += f'TAG_UNKNOWNs  :\n'
+        if self.tag_unknowns:
+            for tu in self.tag_unknowns:
+                str += f'\t{tu.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+        str += f'TAG_PROBLEMITEMs  :\n'
+        if self.tag_problemItems:
+            for tps in self.tag_problemItems:
+                str += f'\t{tps.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+        str += f'TAG_SOLUTIONITEMs  :\n'
+        if self.tag_solutionItems:
+            for tsi in self.tag_solutionItems:
+                str += f'\t{tsi.__str__()}\n\n'
+        else:
+            str += "\tNO OPERATOR\n\n"
+
+        return str
+
 
     def cypher_mwo_createIssueOtherRelationship(self, var_issue="issue", var_machine="machine", var_machine_type="machine_type",
                                                 var_operators="operators", var_technicians="technicians", var_tag_items="tag_items",

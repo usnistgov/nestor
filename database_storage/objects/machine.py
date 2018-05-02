@@ -101,11 +101,11 @@ class Machine:
             )
 
     def __str__(self):
-        return f"{type(self)}\n\t" \
-               f"Name: {self.name}\n\t" \
-               f"Manufacturer: {self.manufacturer}\n\t" \
-               f"Location: {self.location}\n\t" \
-               f"Type: {self.machine_type}"
+        return  f'object  =  {type(self)}\n'\
+                f'\tname  =  {self.name}\n'\
+                f'\tmanufacturer  =  {self.manufacturer}\n'\
+                f'\tlocation  =  {self.location}\n'\
+                f'\tmachine_type  =  {self.machine_type}\n'
 
     def cypher_machine_label(self, variable_machine="machine"):
         """

@@ -417,6 +417,7 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
                                    tag_solutionsItems = solutionItems,
                                    databaseInfo=database.schema
         )
+
         queries = []
         #create nodes and the relationship between issue and node
         queries.append(mwo.cypher_mwo_createIssueOtherRelationship())

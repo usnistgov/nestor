@@ -57,8 +57,8 @@ class Human:
         return not (self.name is None)
 
     def __str__(self):
-        return f"{type(self)}\n\t" \
-               f"Name: {self.name}"
+        return  f'object  =  {type(self)}\n'\
+                f'\tname  =  {self.name}'
 
     def cypher_human_label(self, variable_human="human"):
         """
@@ -155,8 +155,8 @@ class Operator(Human):
         return not (self.name is None)
 
     def __str__(self):
-        return f"{type(self)}\n\t" \
-               f"Name: {self.name}"
+        return f'{super().__str__()}'
+
 
     def cypher_operator_label(self, variable_operator="operator"):
         """
@@ -277,10 +277,9 @@ class Technician(Human):
         )
 
     def __str__(self):
-        return f"{type(self)}\n\t" \
-               f"Name: {self.name}\n\t" \
-               f"Skills: {self.skills}\n\t" \
-               f"Crafts: {self.crafts}"
+        return  f'{super().__str__()}\n'\
+                f'\tskills  =  {self.skills}\n'\
+                f'\tcrafts  =  {self.crafts}'
 
     def cypher_technician_label(self, variable_technician="technician"):
         """
