@@ -466,8 +466,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :param event:
         :return:
         """
-
-        self.closeFunction()
+        self.closeFunction(event)
 
 
 # Now the ToS dialog .ui file

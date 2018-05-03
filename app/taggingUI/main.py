@@ -209,21 +209,27 @@ class Main:
             print("yaml file save")
 
 
-    def close_taggingUIWindow(self):
+    def close_taggingUIWindow(self, event):
         """
         Trigger when closing the window tagginUI
         :return:
         """
         choice = Qw.QMessageBox.question(self.window_taggingTool, 'Shut it Down',
                                   'Do you want to save your changes before closing?',
-                                     Qw.QMessageBox.Yes | Qw.QMessageBox.No)
+                                     Qw.QMessageBox.Save | Qw.QMessageBox.Close | Qw.QMessageBox.Cancel)
 
-        self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
-        if choice == Qw.QMessageBox.Yes:
+
+        if choice == Qw.QMessageBox.Save:
+            print("save and close")
             self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram, self.config_new['file']['filePath_1GrammCSV']['path'])
             self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram, self.config_new['file']['filePath_nGrammCSV']['path'])
-            print('exiting program...')
-            app.exec_()
+
+        elif choice == Qw.QMessageBox.Cancel:
+            print("It's ok if you miss clicked we got your back!!!")
+            event.ignore()
+        else:
+            print("close without saving")
+            pass
 
 
     def close_otherWindow(self, window):
