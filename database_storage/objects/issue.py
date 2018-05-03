@@ -201,10 +201,18 @@ class Issue:
         return self.cost
 
     def _set_cost(self, cost):
-        try:
-            self.cost = int(cost)
-        except (ValueError, TypeError):
-            self.cost = None
+        if isinstance(cost, list):
+            self.cost = []
+            for c in cost:
+                if c =="_":
+                    self.cost.append(c)
+                else:
+                    self.cost.append(int(c))
+        else:
+            try:
+                self.cost = int(cost)
+            except (ValueError, TypeError):
+                self.cost = None
 
 
     ############################  DATE ############################
