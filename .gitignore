@@ -14,6 +14,6 @@ data/
 **.yaml
 
 # exception
-!data/public/*
+!data/public/
 !database_storage/database/DatabaseSchema.yaml
-
+!data/public/*.yaml
