@@ -121,7 +121,7 @@ class Issue:
 
     def _set_problem(self, problem):
         if isinstance(problem, str):
-            self.problem = problem.replace('"', '\\"').lstrip()
+            self.problem = problem.replace('\\','\\\\').replace('"', '\\"').lstrip()
         elif isinstance(problem, list):
             self.problem = [p.replace('"','\\"').lstrip() for p in problem]
         else:
@@ -203,7 +203,7 @@ class Issue:
     def _set_cost(self, cost):
         try:
             self.cost = int(cost)
-        except ValueError:
+        except (ValueError, TypeError):
             self.cost = None
 
 
