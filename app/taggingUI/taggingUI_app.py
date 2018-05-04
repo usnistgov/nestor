@@ -203,9 +203,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # if evety 1gramm is I the I are split with an underscore
         existing = self.dataframe_1Gram.index.intersection(labels)  # only currently existing tokens (pandas0.21 dep)
         types = self.dataframe_1Gram.loc[existing, 'NE'].unique()  # the unique NE's corresponding to the ngram parts
-        onlyI = (types != ['I']).sum() == 0
-        if onlyI:
+        if not (''.join(types) == "PI" or ''.join(types) == "SI" or ''.join(types) == "IS" or ''.join(types) == "IP" ):
             tokens = '_'.join(labels)  # II is just I....replace ' '-->'_'
+
 
         self._set_editorValue_NGram(alias, tokens, notes, classification)
 
@@ -256,10 +256,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
 
+
             new_alias = self.lineEdit_Ngram_AliasEditor.text()
             new_notes = self.textEdit_Ngram_NoteEditor.toPlainText()
             new_clf = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(),
                                                       pd.np.nan)
+
+            if classification != 'P I' and classification != 'S I':
+                new_alias = new_alias.replace(' ','_')
+
             self.dataframe_NGram = self._set_dataframeItemValue(self.dataframe_NGram, token, new_alias, new_clf, new_notes)
             self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
 

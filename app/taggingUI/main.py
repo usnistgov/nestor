@@ -218,7 +218,7 @@ class Main:
                                   'Do you want to save your changes before closing?',
                                      Qw.QMessageBox.Save | Qw.QMessageBox.Close | Qw.QMessageBox.Cancel)
 
-
+        self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
         if choice == Qw.QMessageBox.Save:
             print("save and close")
             self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram, self.config_new['file']['filePath_1GrammCSV']['path'])
