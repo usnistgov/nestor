@@ -163,43 +163,6 @@ class Machine:
             query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["location"]} = "{self.location}"'
         return query
 
-    def cypher_machine_whereReturn(self, variable_machine="machine"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_machine: default "machine" to match a specific MACHINE
-        :return: a tuple of arrays - where properties, return properties :
-            (['machine.name = "bob','machine.manufacturer = "3", 'machine.location = "y"']['machine.location'])
-        """
-        cypherWhere = []
-        cypherReturn = []
-        if self.name:
-            for n in self.name:
-                if n == "_":
-                    cypherReturn.append(f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]}')
-                else:
-                    cypherWhere.append(f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]} = "{n}"')
-        if self.location:
-            for l in self.location:
-                if l == "_":
-                    cypherReturn.append(f'{variable_machine}.{self.databaseInfoMachine["properties"]["nalocationme"]}')
-                else:
-                    cypherWhere.append(f'{variable_machine}.{self.databaseInfoMachine["properties"]["location"]} = "{l}"')
-        if self.manufacturer:
-            for m in self.manufacturer:
-                if m == "_":
-                    cypherReturn.append(f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacturer"]}')
-                else:
-                    cypherWhere.append(f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacturer"]} = "{m}"')
-
-        return cypherWhere, cypherReturn
-
-
-
     def cypher_machinetype_label(self, variable_machinetype="machine_type"):
         """
         Create a Cypher query with the given variable and all label for the node MACHINE_TYPE
@@ -247,26 +210,56 @@ class Machine:
         query = f'\nMERGE {self.cypher_machinetype_type(variable_machinetype)}'
         return query
 
-
-    def cypher_machinetype_whereReturn(self, variable_machinetype="machine_type"):
+    def cypher_where(self, operation, variable_machine="machine", variable_machinetype="machine_type"):
         """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE_TYPE
+        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE
         Used to filter the database based on specifics properties values
 
         For this case, the properties of this object might be an array
         If a value in an array is "_" this property will be added to the return statement
 
-        :param variable_machinetype: default "machine_type" to match a specific MACHINE_TYPE
+        :param variable_machine: default "machine" to match a specific MACHINE
         :return: a tuple of arrays - where properties, return properties :
-            (['machine_type.type = "bob','machine_type.type = "3"]['machine_type.type'])
+            (['machine.name = "bob','machine.manufacturer = "3", 'machine.location = "y"']['machine.location'])
         """
-        cypherWhere = []
-        cypherReturn = []
-        if self.machine_type:
-            for t in self.machine_type:
-                if t == "_":
-                    cypherReturn.append(f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]}')
-                else:
-                    cypherWhere.append(f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]} = "{t}"')
+        cypherWhere = None
+        if operation == "IS NULL" or operation == "IS NOT NULL":
+            if self.name:
+                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]} {operation}'
+            elif self.location:
+                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["location"]} {operation}'
+            elif self.manufacturer:
+                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacture"]} {operation}'
+            elif self.machine_type:
+                cypherWhere = f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]} {operation}'
+        else:
+            if self.name:
+                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]} {operation} "{self.name}"'
+            elif self.location:
+                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["location"]} {operation} "{self.location}"'
+            elif self.manufacturer:
+                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacture"]} {operation} "{self.manufacturer}"'
+            elif self.machine_type:
+                cypherWhere = f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]} {operation} "{self.machine_type}"'
 
-        return cypherWhere, cypherReturn
+        return cypherWhere
+
+
+    def cypher_match(self, operation, variable_machine="machine", variable_machinetype="machine_type"):
+        """
+        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE
+        Used to filter the database based on specifics properties values
+
+        For this case, the properties of this object might be an array
+        If a value in an array is "_" this property will be added to the return statement
+
+        :param variable_machine: default "machine" to match a specific MACHINE
+        :return: a tuple of arrays - where properties, return properties :
+            (['machine.name = "bob','machine.manufacturer = "3", 'machine.location = "y"']['machine.location'])
+        """
+        cypherMatch = []
+        cypherMatch.append(f'({self.cypher_machine_label(variable_machine)})')
+        if self.machine_type:
+            cypherMatch.append(f'({self.cypher_machinetype_label(variable_machinetype)})')
+
+        return cypherMatch
