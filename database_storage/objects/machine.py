@@ -210,18 +210,16 @@ class Machine:
         query = f'\nMERGE {self.cypher_machinetype_type(variable_machinetype)}'
         return query
 
+    def cypher_match(self, variable_machine="machine", variable_machinetype="machine_type"):
+        cypherMatch = []
+        cypherMatch.append(f'({self.cypher_machine_label(variable_machine)})')
+        if self.machine_type:
+            cypherMatch.append(f'({self.cypher_machinetype_label(variable_machinetype)})')
+
+        return cypherMatch
+
+
     def cypher_where(self, operation, variable_machine="machine", variable_machinetype="machine_type"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_machine: default "machine" to match a specific MACHINE
-        :return: a tuple of arrays - where properties, return properties :
-            (['machine.name = "bob','machine.manufacturer = "3", 'machine.location = "y"']['machine.location'])
-        """
         cypherWhere = None
         if operation == "IS NULL" or operation == "IS NOT NULL":
             if self.name:
@@ -245,21 +243,13 @@ class Machine:
         return cypherWhere
 
 
-    def cypher_match(self, operation, variable_machine="machine", variable_machinetype="machine_type"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_machine: default "machine" to match a specific MACHINE
-        :return: a tuple of arrays - where properties, return properties :
-            (['machine.name = "bob','machine.manufacturer = "3", 'machine.location = "y"']['machine.location'])
-        """
-        cypherMatch = []
-        cypherMatch.append(f'({self.cypher_machine_label(variable_machine)})')
-        if self.machine_type:
-            cypherMatch.append(f'({self.cypher_machinetype_label(variable_machinetype)})')
-
-        return cypherMatch
+    def cypher_return(self, variable_machine="machine", variable_machinetype="machine_type"):
+        if self.name is True:
+            return f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]}'
+        if self.manufacturer is True:
+            return f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacturer"]}'
+        if self.location is True:
+            return f'{variable_machine}.{self.databaseInfoMachine["properties"]["location"]}'
+        if self.machine_type is True:
+            return f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]}'
+        return None
