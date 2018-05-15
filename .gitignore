@@ -12,6 +12,7 @@ data/**
 **.pyc
 **.csv
 **.yaml
+**/reveal.js
 
 # exception
 !data/public

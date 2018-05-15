@@ -21,12 +21,12 @@ from neo4j.v1 import GraphDatabase
 
 class DatabaseNeo4J(object):
     """
-    The class database this object is specialy created for Neo4J database
-    it is instanciate using:
+    The class database this object is specially created for Neo4J database
+    it is instantiate using:
         - uri: the server url
         - user: the user of the database
-        - password: the passsword of the use
-        - schema : a dictionary the desrcibe the schame of the databse (node label, edges label, properies name) -see the YAML file database_storage/database/DatabaseSchema.yaml-
+        - password: the password of the use
+        - schema : a dictionary the desrcibe the schame of the database (node label, edges label, properies name) -see the YAML file database_storage/database/DatabaseSchema.yaml-
 
     It also contains the methods to transform the result from self.runQuery() into dataframe
 
