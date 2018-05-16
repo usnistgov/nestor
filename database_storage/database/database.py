@@ -74,9 +74,17 @@ class DatabaseNeo4J(object):
         Create the indexs on the database for the properties often asked
         :return: 1 if it works
         """
+        self.runQuery(f'CREATE INDEX ON {self.schema["issue"]["label"]["issue"]}({self.schema["issue"]["properties"]["description_problem"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["human"]["label"]["human"]}({self.schema["human"]["properties"]["name"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["machine"]["label"]["machine"]}({self.schema["machine"]["properties"]["name"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["tag"]}({self.schema["tag"]["properties"]["keyword"]})')
+        self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["onegram"]}({self.schema["tag"]["properties"]["keyword"]})')
+        self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["item"]}({self.schema["tag"]["properties"]["keyword"]})')
+        self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["problem"]}({self.schema["tag"]["properties"]["keyword"]})')
+        self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["solution"]}({self.schema["tag"]["properties"]["keyword"]})')
+        self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["unknown"]}({self.schema["tag"]["properties"]["keyword"]})')
+        self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["problem_item"]}({self.schema["tag"]["properties"]["keyword"]})')
+        self.runQuery(f'CREATE INDEX ON {self.schema["tag"]["label"]["solution_item"]}({self.schema["tag"]["properties"]["keyword"]})')
         return 1
 
     def dropIndexes(self):

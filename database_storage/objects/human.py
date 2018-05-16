@@ -39,6 +39,7 @@ class Human:
     """
     def __init__(self, name=None,  databaseInfo=None):
         self.databaseInfoHuman = databaseInfo['human']
+        self.label = self.databaseInfoHuman['label']['human']
 
         self._set_name(name)
 
@@ -57,16 +58,9 @@ class Human:
         return not (self.name is None)
 
     def __str__(self):
-        return  f'object  =  {type(self)}\n'\
+        return  f'object  =  {type(self)}\n' \
+                f'\tlabel  =  {self.label}\n' \
                 f'\tname  =  {self.name}'
-
-    def cypher_human_label(self, variable_human="human"):
-        """
-        Create a Cypher query with the given variable and all label for the node HUMAN
-        :param variable_human: default "human" to refer to a special node
-        :return: a string - Cypher Query : human:HUMAN
-        """
-        return f'{variable_human}{self.databaseInfoHuman["label"]["human"]}'
 
     def cypher_human_name(self, variable_human="human"):
         """
@@ -77,7 +71,7 @@ class Human:
         """
         if not self.name:
             return ""
-        return f'({self.cypher_human_label(variable_human)}' + \
+        return f'({variable_human}{self.label}' + \
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_human_all(self, variable_human="human"):
@@ -86,7 +80,7 @@ class Human:
         :param variable_human: default "human" to refer to a specific HUMAN
         :return: a string - Cypher Query : (operator:HUMAN{name:"x"})
         """
-        query = f'({self.cypher_human_label(variable_human)}'
+        query = f'({variable_human}{self.label}'
         if self.name:
             query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "}"
         query += ")"
@@ -150,6 +144,7 @@ class Operator(Human):
 
     def __init__(self, name=None, databaseInfo=None):
         super().__init__(name, databaseInfo=databaseInfo)
+        self.label += self.databaseInfoHuman['label']['operator']
 
     def __bool__(self):
         return not (self.name is None)
@@ -157,14 +152,6 @@ class Operator(Human):
     def __str__(self):
         return f'{super().__str__()}'
 
-
-    def cypher_operator_label(self, variable_operator="operator"):
-        """
-        Create a Cypher query with the given variable and all label for the node OPERATOR
-        :param variable_operator: default "operator" to refer to a special node
-        :return: a string - Cypher Query : operator:HUMAN:OPERATOR
-        """
-        return f'{self.cypher_human_label(variable_operator)}{self.databaseInfoHuman["label"]["operator"]}'
 
     def cypher_operator_name(self, variable_operator="operator"):
         """
@@ -175,7 +162,7 @@ class Operator(Human):
         """
         if not self.name:
             return ""
-        return f'({self.cypher_operator_label(variable_operator)}' + \
+        return f'({variable_operator}{self.label}' + \
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_operator_all(self, variable_operator="operator"):
@@ -185,7 +172,7 @@ class Operator(Human):
         :return: a string - Cypher Query : (operator:HUMAN:OPERATOR{name:"x"})
         """
 
-        query = f'({self.cypher_operator_label(variable_operator)}'
+        query = f'({variable_operator}{self.label}'
         if self.name:
             query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "}"
         query += ")"
@@ -244,6 +231,7 @@ class Technician(Human):
     def __init__(self, name=None, skills=None, crafts=None, databaseInfo=None):
 
         super().__init__(name, databaseInfo=databaseInfo)
+        self.label += self.databaseInfoHuman['label']['technician']
         self._set_skills(skills)
         self._set_crafts(crafts)
 
@@ -281,14 +269,6 @@ class Technician(Human):
                 f'\tskills  =  {self.skills}\n'\
                 f'\tcrafts  =  {self.crafts}'
 
-    def cypher_technician_label(self, variable_technician="technician"):
-        """
-        Create a Cypher query with the given variable and all label for the node TECHNICIAN
-        :param variable_technician: default "technician" to refer to a special node
-        :return: a string - Cypher Query : technician:HUMAN:TECHNICIAN
-        """
-        return f'{self.cypher_human_label(variable_technician)}{self.databaseInfoHuman["label"]["technician"]}'
-
     def cypher_technician_name(self, variable_technician="technician"):
         """
          Create a Cypher query to return the specific node TECHNICIAN define by the property NAME
@@ -298,7 +278,7 @@ class Technician(Human):
          """
         if not self.name:
             return ""
-        return f'({self.cypher_technician_whereReturn(variable_technician)}' + \
+        return f'({variable_technician}{self.label}' + \
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_technician_all(self, variable_technician="technician"):
@@ -307,7 +287,7 @@ class Technician(Human):
         :param variable_technician: default "technician" to refer to a specific TECHNICIAN
         :return: a string - Cypher Query : (operator:HUMAN:TECHNICIAN{name:"x", skills:["x","y"], crafts:["x"]})
         """
-        query = f'({self.cypher_technician_whereReturn(variable_technician)}'
+        query = f'({variable_technician}{self.label}'
         if self.name or self.skills or self.crafts is not None:
             query += "{"
             if self.name is not None:

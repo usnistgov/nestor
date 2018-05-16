@@ -42,6 +42,8 @@ class Machine:
 
     def __init__(self, name=None, manufacturer=None, locasion=None, machine_type=None, databaseInfo=None):
         self.databaseInfoMachine = databaseInfo['machine']
+        self.label = self.databaseInfoMachine['label']['machine']
+        self.labelType = self.databaseInfoMachine['label']['type']
 
         self._set_name(name)
         self._set_manufacturer(manufacturer)
@@ -101,19 +103,13 @@ class Machine:
             )
 
     def __str__(self):
-        return  f'object  =  {type(self)}\n'\
+        return  f'object  =  {type(self)}\n' \
+                f'\tlabel  =  {self.label}\n' \
+                f'\tlabelType  =  {self.labelType}\n' \
                 f'\tname  =  {self.name}\n'\
                 f'\tmanufacturer  =  {self.manufacturer}\n'\
                 f'\tlocation  =  {self.location}\n'\
                 f'\tmachine_type  =  {self.machine_type}\n'
-
-    def cypher_machine_label(self, variable_machine="machine"):
-        """
-        Create a Cypher query with the given variable and all label for the node MACHINE
-        :param variable_machine: default "machine" to refer to a special node
-        :return: a string - Cypher Query : machine:MACHINE
-        """
-        return f'{variable_machine}{self.databaseInfoMachine["label"]["machine"]}'
 
     def cypher_machine_name(self, variable_machine="machine"):
         """
@@ -124,7 +120,7 @@ class Machine:
          """
         if not self.name:
             return ""
-        return f'({self.cypher_machine_label(variable_machine)}' + \
+        return f'({variable_machine}{self.label}' + \
                "{" + f'{self.databaseInfoMachine["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_machine_all(self, variable_machine="machine"):
@@ -133,7 +129,7 @@ class Machine:
         :param variable_machine: default "machine" to refer to a specific MACHINE
         :return: a string - Cypher Query : (machine:MACHINE{name:"x", manufacturer:"x", location:"x"})
         """
-        query = f'({self.cypher_machine_label(variable_machine)}'
+        query = f'({variable_machine}{self.label}'
         if self.name or self.manufacturer or self.location is not None:
             query += "{"
             if self.name:
@@ -163,15 +159,6 @@ class Machine:
             query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["location"]} = "{self.location}"'
         return query
 
-    def cypher_machinetype_label(self, variable_machinetype="machine_type"):
-        """
-        Create a Cypher query with the given variable and all label for the node MACHINE_TYPE
-        :param variable_machinetype: default "machine_type" to refer to the node
-        :return: a string - Cypher Query : machine_type:MACHINE_TYPE
-        """
-        return f'{variable_machinetype}{self.databaseInfoMachine["label"]["type"]}'
-
-
     def cypher_machinetype_type(self, variable_machinetype="machine_type"):
         """
          Create a Cypher query to return the specific node MACHINE_TYPE define by the property TYPE
@@ -181,7 +168,7 @@ class Machine:
          """
         if not self.machine_type:
             return ""
-        return f'( {self.cypher_machinetype_label(variable_machinetype)}' + \
+        return f'({variable_machinetype}{self.labelType}' + \
                "{" + f'{self.databaseInfoMachine["properties"]["type"]}:"{self.machine_type}"' + "})"
 
     def cypher_machinetype_all(self, variable_machinetype="machine_type"):
@@ -190,7 +177,7 @@ class Machine:
         :param variable_machinetype: default "machine_type" to refer to a specific MACHINE_TYPE
         :return: a string - Cypher Query : (machine_type:MACHINE_TYPE{type:"x"})
         """
-        query = f'( {self.cypher_machinetype_label(variable_machinetype)}'
+        query = f'({variable_machinetype}{self.labelType}'
         if self.machine_type:
             query += "{" + f'{self.databaseInfoMachine["properties"]["type"]}:"{self.machine_type}"' + "}"
         query += ")"
@@ -209,47 +196,3 @@ class Machine:
             return ""
         query = f'\nMERGE {self.cypher_machinetype_type(variable_machinetype)}'
         return query
-
-    def cypher_match(self, variable_machine="machine", variable_machinetype="machine_type"):
-        cypherMatch = []
-        cypherMatch.append(f'({self.cypher_machine_label(variable_machine)})')
-        if self.machine_type:
-            cypherMatch.append(f'({self.cypher_machinetype_label(variable_machinetype)})')
-
-        return cypherMatch
-
-
-    def cypher_where(self, operation, variable_machine="machine", variable_machinetype="machine_type"):
-        cypherWhere = None
-        if operation == "IS NULL" or operation == "IS NOT NULL":
-            if self.name:
-                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]} {operation}'
-            elif self.location:
-                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["location"]} {operation}'
-            elif self.manufacturer:
-                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacture"]} {operation}'
-            elif self.machine_type:
-                cypherWhere = f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]} {operation}'
-        else:
-            if self.name:
-                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]} {operation} "{self.name}"'
-            elif self.location:
-                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["location"]} {operation} "{self.location}"'
-            elif self.manufacturer:
-                cypherWhere = f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacture"]} {operation} "{self.manufacturer}"'
-            elif self.machine_type:
-                cypherWhere = f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]} {operation} "{self.machine_type}"'
-
-        return cypherWhere
-
-
-    def cypher_return(self, variable_machine="machine", variable_machinetype="machine_type"):
-        if self.name is True:
-            return f'{variable_machine}.{self.databaseInfoMachine["properties"]["name"]}'
-        if self.manufacturer is True:
-            return f'{variable_machine}.{self.databaseInfoMachine["properties"]["manufacturer"]}'
-        if self.location is True:
-            return f'{variable_machine}.{self.databaseInfoMachine["properties"]["location"]}'
-        if self.machine_type is True:
-            return f'{variable_machinetype}.{self.databaseInfoMachine["properties"]["type"]}'
-        return None

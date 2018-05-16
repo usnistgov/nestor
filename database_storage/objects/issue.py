@@ -91,6 +91,7 @@ class Issue:
                  date_part_ordered=None, date_part_received=None,
                  databaseInfo=None):
         self.databaseInfoIssue = databaseInfo['issue']
+        self.label = self.databaseInfoIssue['label']['issue']
 
         self._set_problem(problem)
         self._set_solution(solution)
@@ -487,6 +488,7 @@ class Issue:
     def __str__(self):
         self.create_all_time()
         return f'object  =  {type(self)}\n' \
+               f'\tlabel  =  {self.label}\n' \
                f'\tproblem  =  {self.problem}\n' \
                f'\tsolution  =  {self.solution}\n' \
                f'\tcause  =  {self.cause}\n' \
@@ -517,14 +519,6 @@ class Issue:
                f'\ttime_to_fix  =  {self.time_to_fix}\n' \
                f'\ttime_to_turn_on  =  {self.time_to_turn_on}'
 
-    def cypher_issue_label(self, variable_issue="issue"):
-        """
-        Create a Cypher query with the given variable and all label for the node ISSUE
-        :param variable_issue: default "issue" to refer to a special node
-        :return: a string - Cypher Query : issue:ISSUE
-        """
-        return f'{variable_issue}{self.databaseInfoIssue["label"]["issue"]}'
-
     def cypher_issue_all(self, variable_issue="issue"):
         """
         Create a Cypher query to return the specific node ISSUE define by all the possible properties
@@ -540,7 +534,7 @@ class Issue:
         :return: a string - Cypher Query : (issue:ISSUE{description_of_problem:"x", description_of_solution:"x", ...})
         """
 
-        query = f'({self.cypher_issue_label(variable_issue)}'
+        query = f'({variable_issue}{self.label}'
         if self.problem or self.solution or self.cause or self.effects or self.part_in_process or self.necessary_part \
                 or self.machine_down or self.date_machine_up or self.date_machine_down \
                 or self.date_workorder_start or self.date_workorder_completion \

@@ -52,6 +52,7 @@ class Tag:
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         self.databaseInfoTag = databaseInfo['tag']
+        self.label = self.databaseInfoTag['label']['tag']
 
         self._set_keyword(keyword)
         self._set_synonyms(synonyms)
@@ -107,17 +108,10 @@ class Tag:
 
     def __str__(self):
         return  f'object  =  {type(self)}\n'\
+                f'\tlabel  =  {self.label}\n'\
                 f'\tkeyword  =  {self.keyword}\n'\
                 f'\tsynonyms  =  {self.synonyms}\n'\
                 f'\tsimilarTo  =  {self.similarTo}'\
-
-    def cypher_tag_label(self, variable_tag="tag"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAG
-        :param variable_tag: default "tag" to refer to a special node
-        :return: a string - Cypher Query : tag:TAG
-        """
-        return f'{variable_tag}{self.databaseInfoTag["label"]["tag"]}'
 
     def cypher_tag_keyword(self, variable_tag="tag"):
         """
@@ -128,7 +122,7 @@ class Tag:
          """
         if not self.keyword:
             return ""
-        return f'({self.cypher_tag_label(variable_tag)}' + \
+        return f'({variable_tag}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_tag_all(self, variable_tag="tag"):
@@ -137,7 +131,7 @@ class Tag:
         :param variable_tag: default "tag" to refer to a specific TAG
         :return: a string - Cypher Query : (tag:TAG{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_tag_label(variable_tag)}'
+        query = f'({variable_tag}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword is not None:
@@ -220,6 +214,7 @@ class TagOneGram(Tag):
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label +=self.databaseInfoTag['label']['onegram']
 
     def __bool__(self):
         return not (
@@ -229,14 +224,6 @@ class TagOneGram(Tag):
 
     def __str__(self):
         return f'{super().__str__()}'
-
-    def cypher_oneGramTag_label(self, variable_tagOnGram="onegram_tag"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGONEGRAM
-        :param variable_tagOnGram: default "onegram_tag" to refer to a special node
-        :return: a string - Cypher Query : onegram_tag:TAG:TAGONEGRAM
-        """
-        return f'{self.cypher_tag_label(variable_tagOnGram)}{self.databaseInfoTag["label"]["onegram"]}'
 
     def cypher_oneGramTag_keyword(self, variable_tagOnGram="onegram_tag"):
         """
@@ -248,7 +235,7 @@ class TagOneGram(Tag):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_oneGramTag_label(variable_tagOnGram)}' + \
+        return f'({variable_tagOnGram}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_oneGramTag_all(self, variable_tagOnGram="onegram_tag"):
@@ -258,7 +245,7 @@ class TagOneGram(Tag):
         :return: a string - Cypher Query : (onegram_tag:TAG:TAGONEGRAM{keyword:"x", synonyms:["x","y"]})
         """
 
-        query = f'({self.cypher_oneGramTag_label(variable_tagOnGram)}'
+        query = f'({variable_tagOnGram}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
@@ -324,6 +311,7 @@ class TagItem(TagOneGram):
     def __init__(self, keyword=None, synonyms=None, similarTo=None, children=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
         self._set_children(children, databaseInfo)
+        self.label += self.databaseInfoTag['label']['item']
 
     def _get_children(self):
         return self.children
@@ -358,14 +346,6 @@ class TagItem(TagOneGram):
         return f'{super().__str__()}\n'\
                f'\tchildren  =  {self.children}'
 
-    def cypher_itemTag_label(self, variable_tagItem="tag_item"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGITEM
-        :param variable_tagItem: default "tag_item" to refer to a special node
-        :return: a string - Cypher Query : tag_item:TAG:TAGONEGRAM:TAGITEM
-        """
-        return f'{self.cypher_oneGramTag_label(variable_tagItem)}{self.databaseInfoTag["label"]["item"]}'
-
     def cypher_itemTag_keyword(self, variable_tagItem="tag_item"):
         """
          Create a Cypher query to return the specific node TAGITEM define by the property KEYWORD
@@ -376,7 +356,7 @@ class TagItem(TagOneGram):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_itemTag_label(variable_tagItem)}' + \
+        return f'({variable_tagItem}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_itemTag_all(self, variable_tagItem="tag_item"):
@@ -385,7 +365,7 @@ class TagItem(TagOneGram):
         :param variable_tagItem: default "tag_item" to refer to a specific TAGITEM
         :return: a string - Cypher Query : (tag_item:TAG:TAGONEGRAM:TAGITEM{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_itemTag_label(variable_tagItem)}'
+        query = f'({variable_tagItem}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
@@ -449,6 +429,7 @@ class TagProblem(TagOneGram):
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['problem']
 
     def __bool__(self):
         return not (
@@ -458,14 +439,6 @@ class TagProblem(TagOneGram):
 
     def __str__(self):
         return f'{super().__str__()}'
-
-    def cypher_problemTag_label(self, variable_tagProblem="tag_problem"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGPROBLEM
-        :param variable_tagProblem: default "tag_problem" to refer to a special node
-        :return: a string - Cypher Query : tag_problem:TAG:TAGONEGRAM:TAGPROBLEM
-        """
-        return f'{self.cypher_oneGramTag_label(variable_tagProblem)}{self.databaseInfoTag["label"]["problem"]}'
 
     def cypher_problemTag_keyword(self, variable_tagProblem="tag_problem"):
         """
@@ -477,7 +450,7 @@ class TagProblem(TagOneGram):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_problemTag_label(variable_tagProblem)}' + \
+        return f'({variable_tagProblem}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_problemTag_all(self, variable_tagProblem="tag_problem"):
@@ -486,7 +459,7 @@ class TagProblem(TagOneGram):
         :param variable_tagProblem: default "tag_problem" to refer to a specific TAGPROBLEM
         :return: a string - Cypher Query : (tag_problem:TAG:TAGONEGRAM:TAGPROBLEM{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_problemTag_label(variable_tagProblem)}'
+        query = f'({variable_tagProblem}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
@@ -549,6 +522,7 @@ class TagSolution(TagOneGram):
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['solution']
 
     def __bool__(self):
         return not (
@@ -558,14 +532,6 @@ class TagSolution(TagOneGram):
 
     def __str__(self):
         return f'{super().__str__()}'
-
-    def cypher_solutionTag_label(self, variable_tagSolution="tag_solution"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGSOLUTION
-        :param variable_tagSolution: default "tag_solution" to refer to a special node
-        :return: a string - Cypher Query : tag_solution:TAG:TAGONEGRAM:TAGSOLUTION
-        """
-        return f'{self.cypher_oneGramTag_label(variable_tagSolution)}{self.databaseInfoTag["label"]["solution"]}'
 
     def cypher_solutionTag_keyword(self, variable_tagSolution="tag_solution"):
         """
@@ -577,7 +543,7 @@ class TagSolution(TagOneGram):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_solutionTag_label(variable_tagSolution)}' + \
+        return f'({variable_tagSolution}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_solutionTag_all(self, variable_tagSolution="tag_solution"):
@@ -586,7 +552,7 @@ class TagSolution(TagOneGram):
         :param variable_tagSolution: default "tag_solution" to refer to a specific TAGSOLUTION
         :return: a string - Cypher Query : (tag_solution:TAG:TAGONEGRAM:TAGSOLUTION{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_solutionTag_label(variable_tagSolution)}'
+        query = f'({variable_tagSolution}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
@@ -650,6 +616,7 @@ class TagUnknown(TagOneGram):
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['unknown']
 
     def __bool__(self):
         return not (
@@ -659,14 +626,6 @@ class TagUnknown(TagOneGram):
 
     def __str__(self):
         return f'{super().__str__()}'
-
-    def cypher_unknownTag_label(self, variable_tagUnknown="tag_unknown"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGUNKNOWN
-        :param variable_tagUnknown: default "tag_unknown" to refer to a special node
-        :return: a string - Cypher Query : tag_unknown:TAG:TAGONEGRAM:TAGUNKNOWN
-        """
-        return f'{self.cypher_oneGramTag_label(variable_tagUnknown)}{self.databaseInfoTag["label"]["unknown"]}'
 
     def cypher_unknownTag_keyword(self, variable_tagUnknown="tag_unknown"):
         """
@@ -678,7 +637,7 @@ class TagUnknown(TagOneGram):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_unknownTag_label(variable_tagUnknown)}' + \
+        return f'({variable_tagUnknown}{self.label}'+ \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_unknownTag_all(self, variable_tagUnknown="tag_unknown"):
@@ -687,7 +646,7 @@ class TagUnknown(TagOneGram):
         :param variable_tagUnknown: default "tag_unknown" to refer to a specific TAGUNKNOWN
         :return: a string - Cypher Query : (tag_unknown:TAG:TAGONEGRAM:TAGUNKNOWN{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_unknownTag_label(variable_tagUnknown)}'
+        query = f'({variable_tagUnknown}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
@@ -751,6 +710,7 @@ class TagNGram(Tag):
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['ngram']
         self._set_OneGrams(databaseInfo)
 
     def _get_OneGrams(self):
@@ -782,14 +742,6 @@ class TagNGram(Tag):
             str += "\tNO COMPOSEDOF"
         return str
 
-    def cypher_nGramTag_label(self, variable_tagNGram="ngram_tag"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGNGRAM
-        :param variable_tagNGram: default "ngram_tag" to refer to a special node
-        :return: a string - Cypher Query : ngram_tag:TAG:TAGNGRAM
-        """
-        return f'{self.cypher_tag_label(variable_tagNGram)}{self.databaseInfoTag["label"]["ngram"]}'
-
     def cypher_nGramTag_keyword(self, variable_tagNGram="ngram_tag"):
         """
          Create a Cypher query to return the specific node TAGNGRAM define by the property KEYWORD
@@ -800,7 +752,7 @@ class TagNGram(Tag):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_nGramTag_label(variable_tagNGram)}' + \
+        return f'({variable_tagNGram}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_nGramTag_all(self, variable_tagNGram="ngram_tag"):
@@ -809,7 +761,7 @@ class TagNGram(Tag):
         :param variable_tagNGram: default "ngram_tag" to refer to a specific TAGNGRAM
         :return: a string - Cypher Query : (ngram_tag:TAG:TAGNGRAM{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_nGramTag_label(variable_tagNGram)}'
+        query = f'({variable_tagNGram}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
@@ -874,6 +826,7 @@ class TagProblemItem(TagNGram):
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['problem_item']
 
     def __bool__(self):
         return not (
@@ -885,14 +838,6 @@ class TagProblemItem(TagNGram):
     def __str__(self):
         return f'{super().__str__()}'
 
-    def cypher_problemItemTag_label(self, variable_tagProblemItem="problemitem_tag"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGPROBLEMITEM
-        :param variable_tagProblemItem: default "problemitem_tag" to refer to a special node
-        :return: a string - Cypher Query : problemitem_tag:TAG:TAGNGRAM:TAGPROBLEMITEM
-        """
-        return f'{self.cypher_nGramTag_label(variable_tagProblemItem)}{self.databaseInfoTag["label"]["problem_item"]}'
-
     def cypher_problemItemTag_keyword(self, variable_tagProblemItem="problemitem_tag"):
         """
          Create a Cypher query to return the specific node TAGPROBLEMITEM define by the property KEYWORD
@@ -903,7 +848,7 @@ class TagProblemItem(TagNGram):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_problemItemTag_label(variable_tagProblemItem)}' + \
+        return f'({variable_tagProblemItem}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_problemItemTag_all(self, variable_tagProblemItem="problemitem_tag"):
@@ -912,7 +857,7 @@ class TagProblemItem(TagNGram):
         :param variable_tagProblemItem: default "problemitem_tag" to refer to a specific TAGPROBLEMITEM
         :return: a string - Cypher Query : (problemitem_tag:TAG:TAGNGRAM:TAGPROBLEMITEM{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_problemItemTag_label(variable_tagProblemItem)}'
+        query =f'({variable_tagProblemItem}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
@@ -975,6 +920,7 @@ class TagSolutionItem(TagNGram):
 
     def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
         super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['solution_item']
 
     def __bool__(self):
         return not (
@@ -986,14 +932,6 @@ class TagSolutionItem(TagNGram):
     def __str__(self):
         return f'{super().__str__()}'
 
-    def cypher_solutionItemTag_label(self, variable_tagSolutionItem="solutionitem_tag"):
-        """
-        Create a Cypher query with the given variable and all label for the node TAGSOLUTIONITEM
-        :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a special node
-        :return: a string - Cypher Query : solutionitem_tag:TAG:TAGNGRAM::TAGSOLUTIONITEM
-        """
-        return f'{self.cypher_nGramTag_label(variable_tagSolutionItem)}{self.databaseInfoTag["label"]["solution_item"]}'
-
     def cypher_solutionItemTag_keyword(self, variable_tagSolutionItem="solutionitem_tag"):
         """
          Create a Cypher query to return the specific node TAGSOLUTIONITEM define by the property KEYWORD
@@ -1004,7 +942,7 @@ class TagSolutionItem(TagNGram):
 
         if not self.keyword:
             return ""
-        return f'({self.cypher_solutionItemTag_label(variable_tagSolutionItem)}' + \
+        return f'({variable_tagSolutionItem}{self.label}' + \
                "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
 
     def cypher_solutionItemTag_all(self, variable_tagSolutionItem="solutionitem_tag"):
@@ -1013,7 +951,7 @@ class TagSolutionItem(TagNGram):
         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAGSOLUTIONITEM
         :return: a string - Cypher Query : (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x", synonyms:["x","y"]})
         """
-        query = f'({self.cypher_solutionItemTag_label(variable_tagSolutionItem)}'
+        query = f'({variable_tagSolutionItem}{self.label}'
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
