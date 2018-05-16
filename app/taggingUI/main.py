@@ -1,5 +1,6 @@
 from app.taggingUI import *
 
+
 class Main:
     def __init__(self):
         self.icnoPtah=None

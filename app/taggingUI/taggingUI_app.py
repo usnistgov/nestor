@@ -94,12 +94,27 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.completenessPlot= myObjects.MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self. dataframe_completeness)
 
+        self.buttonGroup_NGram_Classification.buttonClicked.connect(self.onClick_changeClassification)
+
 
         # Load up the terms of service class/window
         self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath) # doesn't need a close button, just "x" out
         self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
 
         self.tabWidget.currentChanged.connect(changeTag)
+
+
+    def onClick_changeClassification(self, btn):
+        new_clf = self.buttonDictionary_NGram.get(btn.text())
+        items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
+        tokens, classification, alias, notes = (str(i.text()) for i in items)
+
+        if not alias:
+            if new_clf in ['I','S','P']:
+                labels = tokens.split(' ')  # the ngram component 1-gram parts
+                #self.lineEdit_Ngram_AliasEditor.setStyleSheet("QLineEdit{background: red;}")
+
+                self.lineEdit_Ngram_AliasEditor.setText("_".join(labels))
 
 
     def onClick_saveTrack(self):
@@ -197,15 +212,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
         tokens, classification, alias, notes = (str(i.text()) for i in items)
 
-        labels = tokens.split(' ')  # the ngram component 1-gram parts
         self.middleLayout_Ngram_Composition.printView(self.dataframe_1Gram, tokens)
 
-        # if evety 1gramm is I the I are split with an underscore
-        existing = self.dataframe_1Gram.index.intersection(labels)  # only currently existing tokens (pandas0.21 dep)
-        types = self.dataframe_1Gram.loc[existing, 'NE'].unique()  # the unique NE's corresponding to the ngram parts
-        if not (''.join(types) == "PI" or ''.join(types) == "SI" or ''.join(types) == "IS" or ''.join(types) == "IP" ):
-            tokens = '_'.join(labels)  # II is just I....replace ' '-->'_'
-
+        if not alias:
+            if classification in ['P','S','I']:
+                labels = tokens.split(' ')
+                alias = '_'.join(labels)
 
         self._set_editorValue_NGram(alias, tokens, notes, classification)
 
@@ -261,9 +273,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             new_notes = self.textEdit_Ngram_NoteEditor.toPlainText()
             new_clf = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(),
                                                       pd.np.nan)
-
-            if classification != 'P I' and classification != 'S I':
-                new_alias = new_alias.replace(' ','_')
 
             self.dataframe_NGram = self._set_dataframeItemValue(self.dataframe_NGram, token, new_alias, new_clf, new_notes)
             self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
