@@ -75,7 +75,7 @@ class Kpi:
                 self.cypherMatch.update(cypherMatch)
         else:
             self.cypherMatch = set()
-        print(self.cypherMatch)
+
 
     def _get_cypherWhere(self):
         return self.cypherWhere
@@ -134,7 +134,7 @@ class Kpi:
 
         return tmp
 
-    def __invert__(self):
+    def __neg__(self):
         tmp = Kpi()
 
         cypherMatch = self.cypherMatch
@@ -172,7 +172,7 @@ class Kpi:
             query = f'MATCH {" ,".join(self.cypherMatch)}\n'
             if self.cypherWhere:
                 query += f'WHERE {self.cypherWhere}\n'
-            query += f'RETURN {", ".join(self.cypherReturn)}'
+            query += f'RETURN DISTINCT {", ".join(self.cypherReturn)}'
         else:
             query = None
         return query
@@ -181,7 +181,10 @@ class Kpi:
         if self.operator == "IS NULL" or self.operator == "IS NOT NULL":
             return f'{variable}.{property} {self.operator}'
         else:
-            return f'{variable}.{property} {self.operator} "{value}"'
+            if isinstance(value, int):
+                return f'{variable}.{property} {self.operator} {value}'
+            else:
+                return f'{variable}.{property} {self.operator} "{value}"'
 
 
 class MachineKpi(Machine, Kpi):

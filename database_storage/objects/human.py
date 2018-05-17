@@ -143,7 +143,7 @@ class Operator(Human):
     """
 
     def __init__(self, name=None, databaseInfo=None):
-        super().__init__(name, databaseInfo=databaseInfo)
+        super().__init__(name=name, databaseInfo=databaseInfo)
         self.label += self.databaseInfoHuman['label']['operator']
 
     def __bool__(self):
@@ -230,7 +230,7 @@ class Technician(Human):
 
     def __init__(self, name=None, skills=None, crafts=None, databaseInfo=None):
 
-        super().__init__(name, databaseInfo=databaseInfo)
+        super().__init__(name=name, databaseInfo=databaseInfo)
         self.label += self.databaseInfoHuman['label']['technician']
         self._set_skills(skills)
         self._set_crafts(crafts)
