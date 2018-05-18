@@ -19,6 +19,8 @@ Description:
 
 """
 
+from database_storage.helper import standardizeString
+
 class Machine:
     """
     A MACHINE define every information that refer to the node MACHINE and MACHINE_TYPE in our database.
@@ -55,9 +57,7 @@ class Machine:
 
     def _set_name(self, name):
         if isinstance(name, str):
-            self.name = name.lower().lstrip().replace('"','\\"')
-        elif isinstance(name, list):
-            self.name = [n.lower().lstrip().replace('"','\\"') for n in name]
+            self.name = standardizeString(name).lower()
         else:
             self.name = None
 
@@ -66,9 +66,7 @@ class Machine:
 
     def _set_manufacturer(self, manufacturer):
         if isinstance(manufacturer, str):
-            self.manufacturer = manufacturer.lower().lstrip().replace('"','\\"')
-        elif isinstance(manufacturer, list):
-            self.manufacturer = [m.lower().lstrip().replace('"','\\"') for m in manufacturer]
+            self.manufacturer = standardizeString(manufacturer).lower()
         else:
             self.manufacturer = None
 
@@ -77,9 +75,7 @@ class Machine:
 
     def _set_locasion(self, location):
         if isinstance(location, str):
-            self.location = location.lower().lstrip().replace('"','\\"')
-        elif isinstance(location, list):
-            self.location = [l.lower().lstrip().replace('"','\\"') for l in location]
+            self.location = standardizeString(location).lower()
         else:
             self.location = None
 
@@ -88,9 +84,7 @@ class Machine:
 
     def _set_machine_type(self, machine_type):
         if isinstance(machine_type, str):
-            self.machine_type = machine_type.lower().lstrip().replace('"','\\"')
-        elif isinstance(machine_type, list):
-            self.machine_type = [m.lower().lstrip().replace('"','\\"') for m in machine_type]
+            self.machine_type = standardizeString(machine_type).lower()
         else:
             self.machine_type = None
 
@@ -121,7 +115,7 @@ class Machine:
         if not self.name:
             return ""
         return f'({variable_machine}{self.label}' + \
-               "{" + f'{self.databaseInfoMachine["properties"]["name"]}:"{self.name}"' + "})"
+               "{" + f'{self.databaseInfoMachine["properties"]["name"]}:\'{self.name}\'' + "})"
 
     def cypher_machine_all(self, variable_machine="machine"):
         """
@@ -133,11 +127,11 @@ class Machine:
         if self.name or self.manufacturer or self.location is not None:
             query += "{"
             if self.name:
-                query += f'{self.databaseInfoMachine["properties"]["name"]}:"{self.name}",'
+                query += f'{self.databaseInfoMachine["properties"]["name"]}:\'{self.name}\','
             if self.manufacturer:
-                query += f'{self.databaseInfoMachine["properties"]["manufacturer"]}:"{self.manufacturer}",'
+                query += f'{self.databaseInfoMachine["properties"]["manufacturer"]}:\'{self.manufacturer}\','
             if self.location:
-                query += f'{self.databaseInfoMachine["properties"]["location"]}:"{self.location}",'
+                query += f'{self.databaseInfoMachine["properties"]["location"]}:\'{self.location}\','
             query = query[:-1] + "}"
         return query + ")"
 
@@ -154,9 +148,9 @@ class Machine:
             return ""
         query = f'\nMERGE {self.cypher_machine_name(variable_machine)}'
         if self.manufacturer:
-            query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["manufacturer"]} = "{self.manufacturer}"'
+            query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["manufacturer"]} = \'{self.manufacturer}\''
         if self.location:
-            query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["location"]} = "{self.location}"'
+            query += f'\nSET {variable_machine}.{self.databaseInfoMachine["properties"]["location"]} = \'{self.location}\''
         return query
 
     def cypher_machinetype_type(self, variable_machinetype="machine_type"):
@@ -169,7 +163,7 @@ class Machine:
         if not self.machine_type:
             return ""
         return f'({variable_machinetype}{self.labelType}' + \
-               "{" + f'{self.databaseInfoMachine["properties"]["type"]}:"{self.machine_type}"' + "})"
+               "{" + f'{self.databaseInfoMachine["properties"]["type"]}:\'{self.machine_type}\'' + "})"
 
     def cypher_machinetype_all(self, variable_machinetype="machine_type"):
         """
@@ -179,7 +173,7 @@ class Machine:
         """
         query = f'({variable_machinetype}{self.labelType}'
         if self.machine_type:
-            query += "{" + f'{self.databaseInfoMachine["properties"]["type"]}:"{self.machine_type}"' + "}"
+            query += "{" + f'{self.databaseInfoMachine["properties"]["type"]}:\'{self.machine_type}\'' + "}"
         query += ")"
 
         return query

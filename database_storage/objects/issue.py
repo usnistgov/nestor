@@ -22,7 +22,7 @@ Description:
 """
 
 from datetime import datetime
-from database_storage.helper import isoStringToDate
+from database_storage.helper import isoStringToDate, standardizeString
 
 
 
@@ -122,9 +122,7 @@ class Issue:
 
     def _set_problem(self, problem):
         if isinstance(problem, str):
-            self.problem = problem.replace('\\','\\\\').replace('"', '\\"').lstrip()
-        elif isinstance(problem, list):
-            self.problem = [p.replace('"','\\"').lstrip() for p in problem]
+            self.problem = standardizeString(problem)
         else:
             self.problem = None
 
@@ -133,9 +131,7 @@ class Issue:
 
     def _set_solution(self, solution):
         if isinstance(solution, str) :
-            self.solution = solution.replace('"', '\\"').lstrip()
-        elif isinstance(solution, list):
-            self.solution = [s.replace('"', '\\"').lstrip() for s in solution]
+            self.solution = standardizeString(solution)
         else:
             self.solution=None
 
@@ -144,9 +140,7 @@ class Issue:
 
     def _set_cause(self, cause):
         if isinstance(cause, str):
-            self.cause = cause.replace('"', '\\"').lstrip()
-        elif isinstance(cause, list):
-            self.cause = [c.replace('"','\\"').lstrip() for c in cause]
+            self.cause = standardizeString(cause)
         else:
             self.cause = None
 
@@ -156,9 +150,7 @@ class Issue:
 
     def _set_effects(self, effects):
         if isinstance(effects, str):
-            self.effects = effects.replace('"', '\\"').lstrip()
-        elif isinstance(effects, list):
-            self.effects = [e.replace('"', '\\"').lstrip() for e in effects]
+            self.effects = standardizeString(effects)
         else:
             self.effects = None
 
@@ -167,9 +159,7 @@ class Issue:
 
     def _set_part_in_process(self, part_in_process):
         if isinstance(part_in_process, str):
-            self.part_in_process = part_in_process.lower().replace('"','\\"').lstrip()
-        elif isinstance(part_in_process, list):
-            self.part_in_process = [p.lower().replace('"','\\"').lstrip() for p in part_in_process]
+            self.part_in_process = standardizeString(part_in_process).lower()
         else:
             self.part_in_process = None
 
@@ -179,9 +169,7 @@ class Issue:
     def _set_necessary_part(self, necessary_part):
 
         if isinstance(necessary_part, str):
-            self.necessary_part = necessary_part.lower().replace('"','\\"').lstrip()
-        elif isinstance(necessary_part, list):
-            self.necessary_part = [n.lower().replace('"','\\"').lstrip() for n in necessary_part]
+            self.necessary_part = standardizeString(necessary_part).lower()
         else:
             self.necessary_part = None
 
@@ -193,8 +181,6 @@ class Issue:
             self.machine_down = True
         elif machine_down == "n" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
             self.machine_down = False
-        elif machine_down == "_":
-            self.machine_down = "_"
         else:
             self.machine_down = None
 
@@ -542,161 +528,38 @@ class Issue:
                 or self.date_part_ordered or self.date_part_received is not None:
             query += "{"
             if self.problem:
-                query += f'{self.databaseInfoIssue["properties"]["description_problem"]}:"{self.problem}",'
+                query += f'{self.databaseInfoIssue["properties"]["description_problem"]}:\'{self.problem}\','
             if self.solution:
-                query += f'{self.databaseInfoIssue["properties"]["description_solution"]}:"{self.solution}",'
+                query += f'{self.databaseInfoIssue["properties"]["description_solution"]}:\'{self.solution}\','
             if self.cause:
-                query += f'{self.databaseInfoIssue["properties"]["description_cause"]}:"{self.cause}",'
+                query += f'{self.databaseInfoIssue["properties"]["description_cause"]}:\'{self.cause}\','
             if self.effects:
-                query += f'{self.databaseInfoIssue["properties"]["description_effect"]}:"{self.effects}",'
+                query += f'{self.databaseInfoIssue["properties"]["description_effect"]}:\'{self.effects}\','
             if self.part_in_process:
-                query += f'{self.databaseInfoIssue["properties"]["part_in_process"]}:"{self.part_in_process}",'
+                query += f'{self.databaseInfoIssue["properties"]["part_in_process"]}:\'{self.part_in_process}\','
             if self.necessary_part:
-                query += f'{self.databaseInfoIssue["properties"]["necessary_part"]}:"{self.necessary_part}",'
+                query += f'{self.databaseInfoIssue["properties"]["necessary_part"]}:\'{self.necessary_part}\','
             if self.machine_down:
-                query += f'{self.databaseInfoIssue["properties"]["machine_down"]}:"{self.machine_down}",'
+                query += f'{self.databaseInfoIssue["properties"]["machine_down"]}:\'{self.machine_down}\','
             if self.date_machine_up:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:"{self.date_machine_up}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:\'{self.date_machine_up}\','
             if self.cost:
                 query += f'{self.databaseInfoIssue["properties"]["cost"]}:{self.cost},'
             if self.date_machine_down:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:"{self.date_machine_down }",'
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:\'{self.date_machine_down }\','
             if self.date_workorder_start:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:"{self.date_workorder_start}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:\'{self.date_workorder_start}\','
             if self.date_workorder_completion:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:"{self.date_workorder_completion}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:\'{self.date_workorder_completion}\','
             if self.date_maintenance_technician_arrive:
-                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:"{self.date_maintenance_technician_arrive}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:\'{self.date_maintenance_technician_arrive}\','
             if self.date_problem_found:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:"{self.date_problem_found}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:\'{self.date_problem_found}\','
             if self.date_problem_solve:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:"{self.date_problem_solve}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:\'{self.date_problem_solve}\','
             if self.date_part_ordered:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:"{self.date_part_ordered}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered}\','
             if self.date_part_received:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:"{self.date_part_received}",'
+                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received}\','
             query = query[:-1] + "}"
         return query + ")"
-
-
-    def cypher_issue_whereReturn(self, variable_issue="issue"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this ISSUE
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_issue: default "issue" to match a specific ISSUE
-        :return: a tuple of arrays - where properties, return properties :
-            (['issue.description_of_problem = "bob','issue.description_of_problem = "3"]['issue.part_in_process'])
-        """
-
-        cypherWhere = []
-        cypherReturn = []
-        if self.problem:
-            for p in self.problem:
-                if p == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_problem"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_problem"]} = "{p}"')
-        if self.solution:
-            for s in self.solution:
-                if s == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_solution"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_solution"]} = "{s}"')
-        if self.cause:
-            for c in self.cause:
-                if c == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_cause"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_cause"]} = "{ c }"')
-        if self.effects:
-            for e in self.effects:
-                if e == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_effect"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["description_effect"]} = "{ e }"')
-        if self.machine_down:
-            for d in self.machine_down:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["machine_down"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["machine_down"]} = "{ d }"')
-        if self.part_in_process:
-            for p in self.part_in_process:
-                if p == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["part_in_process"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["part_in_process"]} = "{ p }"')
-        if self.necessary_part:
-            for p in self.necessary_part:
-                if p == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["necessary_part"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["necessary_part"]} = "{ p }"')
-        if self.cost:
-            #TODO be carefull about the "="
-            for c in self.cost:
-                if c == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["cost"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["cost"]} = { c }')
-        if self.date_machine_down:
-            for d in self.date_machine_down:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_machine_down"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_machine_down"]} = "{ d }"')
-        if self.date_workorder_start:
-            for d in self.date_workorder_start:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_workorder_start"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_workorder_start"]} = "{ d }"')
-        if self.date_maintenance_technician_arrive:
-            for d in self.date_maintenance_technician_arrive:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]} = "{ d }"')
-        if self.date_problem_found:
-            for d in self.date_problem_found:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_problem_found"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_problem_found"]} = "{ d }"')
-        if self.date_part_ordered:
-            for d in self.date_part_ordered:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_part_ordered"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_part_ordered"]} = "{ d }"')
-        if self.date_part_received:
-            for d in self.date_part_received:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_part_received"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_part_received"]} = "{ d }"')
-        if self.date_problem_solve:
-            for d in self.date_problem_solve:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_problem_solve"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_problem_solve"]} = "{ d }"')
-        if self.date_machine_up:
-            for d in self.date_machine_up:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_machine_up"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_machine_up"]} = "{ d }"')
-        if self.date_workorder_completion:
-            for d in self.date_workorder_completion:
-                if d == "_":
-                    cypherReturn.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_workorder_completion"]}')
-                else:
-                    cypherWhere.append(f'{variable_issue}.{self.databaseInfoIssue["properties"]["date_workorder_completion"]} = "{ d }"')
-
-
-        return cypherWhere, cypherReturn

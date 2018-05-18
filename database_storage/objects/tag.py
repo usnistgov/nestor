@@ -32,6 +32,9 @@ Description:
     (you can have less but not more)
     However, the hierarchy followed the rules created in this file
 """
+
+from database_storage.helper import standardizeString
+
 class Tag:
     """
      a TAG defines every information that refer to all the node TAG in our database.
@@ -63,9 +66,7 @@ class Tag:
 
     def _set_keyword(self, keyword):
         if isinstance(keyword, str):
-            self.keyword = keyword.lower().lstrip().replace('"','\\"')
-        elif isinstance(keyword,list):
-            self.keyword = [k.lower().lstrip().replace('"','\\"') for k in keyword]
+            self.keyword = standardizeString(keyword).lower()
         else:
             self.keyword = None
 
@@ -74,9 +75,7 @@ class Tag:
 
     def _set_synonyms(self, synonyms):
         if isinstance(synonyms, str):
-            self.synonyms = synonyms.lower().lstrip().replace('"', '\\"')
-        elif isinstance(synonyms, list):
-            self.synonyms = [s.lower().lstrip().replace('"', '\\"') for s in synonyms]
+            self.synonyms = standardizeString(synonyms).lower()
         else:
             self.synonyms = None
 
@@ -123,7 +122,7 @@ class Tag:
         if not self.keyword:
             return ""
         return f'({variable_tag}{self.label}' + \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_tag_all(self, variable_tag="tag"):
         """
@@ -135,9 +134,9 @@ class Tag:
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword is not None:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms is not None:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -155,42 +154,10 @@ class Tag:
         query = f'\nMERGE {self.cypher_tag_keyword(variable_tag)}'
         if self.synonyms:
             for synonym in self.synonyms:
-                query += f'\nFOREACH(x in CASE WHEN "{synonym}" in {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} THEN [] ELSE [1] END |' \
-                         f' SET {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} = coalesce({variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]},[]) + "{synonym}" )'
+                query += f'\nFOREACH(x in CASE WHEN \'{synonym}\' in {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} THEN [] ELSE [1] END |' \
+                         f' SET {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} = coalesce({variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]},[]) + \'{synonym}\' )'
 
         return query
-
-    def cypher_tag_whereReturn(self, variable_tag="tag"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAG
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_tag: default "tag" to match a specific TAG
-        :return: a tuple of arrays - where properties, return properties :
-            (['tag.keyword = "bob','tag.keyword = "3"]['tag.synonyms'])
-        """
-        cypherWhere = []
-        cypherReturn = []
-
-        if self.keyword:
-            for k in self.keyword:
-                if k == "_":
-                    cypherReturn.append(f'{variable_tag}.{self.databaseInfoTag["properties"]["keyword"]}')
-                else:
-                    cypherWhere.append(
-                        f'{variable_tag}.{self.databaseInfoTag["properties"]["keyword"]} = "{k}"')
-
-        if self.synonyms:
-            for s in self.synonyms:
-                if s == "_":
-                    cypherReturn.append(f'{variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]}')
-                else:
-                    cypherWhere.append(f'"{s}" IN {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]}')
-
-        return cypherWhere, cypherReturn
 
 
 class TagOneGram(Tag):
@@ -236,7 +203,7 @@ class TagOneGram(Tag):
         if not self.keyword:
             return ""
         return f'({variable_tagOnGram}{self.label}' + \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_oneGramTag_all(self, variable_tagOnGram="onegram_tag"):
         """
@@ -249,9 +216,9 @@ class TagOneGram(Tag):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -269,24 +236,6 @@ class TagOneGram(Tag):
         query = self.cypher_tag_merge(variable_tagOnGram)
         query += f'\nSET {variable_tagOnGram} {self.databaseInfoTag["label"]["onegram"]}'
         return query
-
-
-
-    def cypher_oneGramTag_whereReturn(self, variable_tagOnGram="onegram_tag"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGONEGRAM
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_tagOnGram: default "onegram_tag" to match a specific TAGONEGRAM
-        :return: a tuple of arrays - where properties, return properties :
-            (['onegram_tag.keyword = "bob','onegram_tag.keyword = "3"]['onegram_tag.synonyms'])
-        """
-        cypherWhere, cypherReturn = self.cypher_tag_whereReturn(variable_tagOnGram)
-
-        return cypherWhere, cypherReturn
 
 class TagItem(TagOneGram):
     """
@@ -357,7 +306,7 @@ class TagItem(TagOneGram):
         if not self.keyword:
             return ""
         return f'({variable_tagItem}{self.label}' + \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_itemTag_all(self, variable_tagItem="tag_item"):
         """
@@ -369,9 +318,9 @@ class TagItem(TagOneGram):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -390,23 +339,6 @@ class TagItem(TagOneGram):
         query = self.cypher_oneGramTag_merge(variable_tagItem)
         query += f'\nSET {variable_tagItem} {self.databaseInfoTag["label"]["item"]}'
         return query
-
-
-    def cypher_itemTag_whereReturn(self, variable_tagItem="tag_item"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGITEM
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_tagItem: default "tag_item" to match a specific TAGITEM
-        :return: a tuple of arrays - where properties, return properties :
-            (['tag_item.keyword = "bob','tag_item.keyword = "3"]['tag_item.synonyms'])
-        """
-        cypherWhere, cypherReturn = self.cypher_oneGramTag_whereReturn(variable_tagItem)
-
-        return cypherWhere, cypherReturn
 
 
 class TagProblem(TagOneGram):
@@ -451,7 +383,7 @@ class TagProblem(TagOneGram):
         if not self.keyword:
             return ""
         return f'({variable_tagProblem}{self.label}' + \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_problemTag_all(self, variable_tagProblem="tag_problem"):
         """
@@ -463,9 +395,9 @@ class TagProblem(TagOneGram):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -484,22 +416,6 @@ class TagProblem(TagOneGram):
         query = self.cypher_oneGramTag_merge(variable_tagProblem)
         query += f'\nSET {variable_tagProblem} {self.databaseInfoTag["label"]["problem"]}'
         return query
-
-    def cypher_problemTag_whereReturn(self, variable_tagProblem="tag_problem"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGPROBLEM
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_tagProblem: default "tag_problem" to match a specific TAGPROBLEM
-        :return: a tuple of arrays - where properties, return properties :
-            (['tag_problem.keyword = "bob','tag_problem.keyword = "3"]['tag_problem.synonyms'])
-        """
-        cypherWhere, cypherReturn = self.cypher_oneGramTag_whereReturn(variable_tagProblem)
-
-        return cypherWhere, cypherReturn
 
 
 class TagSolution(TagOneGram):
@@ -544,7 +460,7 @@ class TagSolution(TagOneGram):
         if not self.keyword:
             return ""
         return f'({variable_tagSolution}{self.label}' + \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_solutionTag_all(self, variable_tagSolution="tag_solution"):
         """
@@ -556,9 +472,9 @@ class TagSolution(TagOneGram):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -578,22 +494,6 @@ class TagSolution(TagOneGram):
         query = self.cypher_oneGramTag_merge(variable_tagSolution)
         query += f'\nSET {variable_tagSolution} {self.databaseInfoTag["label"]["solution"]}'
         return query
-
-    def cypher_solutionTag_whereReturn(self, variable_tagSolution="tag_solution"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGSOLUTION
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_tagSolution: default "tag_solution" to match a specific TAGSOLUTION
-        :return: a tuple of arrays - where properties, return properties :
-            (['tag_solution.keyword = "bob','tag_solution.keyword = "3"]['tag_solution.synonyms'])
-        """
-        cypherWhere, cypherReturn = self.cypher_oneGramTag_whereReturn(variable_tagSolution)
-
-        return cypherWhere, cypherReturn
 
 
 class TagUnknown(TagOneGram):
@@ -638,7 +538,7 @@ class TagUnknown(TagOneGram):
         if not self.keyword:
             return ""
         return f'({variable_tagUnknown}{self.label}'+ \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_unknownTag_all(self, variable_tagUnknown="tag_unknown"):
         """
@@ -650,9 +550,9 @@ class TagUnknown(TagOneGram):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -672,21 +572,6 @@ class TagUnknown(TagOneGram):
         query += f'\nSET {variable_tagUnknown} {self.databaseInfoTag["label"]["unknown"]}'
         return query
 
-    def cypher_unknownTag_whereReturn(self, variable_tagUnknown="tag_unknown"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGUNKNOWN
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_tagUnknown: default "tag_unknown" to match a specific TAGUNKNOWN
-        :return: a tuple of arrays - where properties, return properties :
-            (['tag_unknown.keyword = "bob','tag_unknown.keyword = "3"]['tag_unknown.synonyms'])
-        """
-        cypherWhere, cypherReturn = self.cypher_oneGramTag_whereReturn(variable_tagUnknown)
-
-        return cypherWhere, cypherReturn
 
 class TagNGram(Tag):
     """
@@ -753,7 +638,7 @@ class TagNGram(Tag):
         if not self.keyword:
             return ""
         return f'({variable_tagNGram}{self.label}' + \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_nGramTag_all(self, variable_tagNGram="ngram_tag"):
         """
@@ -765,9 +650,9 @@ class TagNGram(Tag):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -785,25 +670,6 @@ class TagNGram(Tag):
         query = self.cypher_tag_merge(variable_tagNGram)
         query += f'\nSET {variable_tagNGram} {self.databaseInfoTag["label"]["ngram"]}'
         return query
-
-
-    def cypher_nGramTag_whereReturn(self, variable_tagNGram="ngram_tag"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGNGRAM
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_tagNGram: default "tag_unknown" to match a specific TAGNGRAM
-        :return: a tuple of arrays - where properties, return properties :
-            (['ngram_tag.keyword = "bob','ngram_tag.keyword = "3"]['ngram_tag.synonyms'])
-        """
-        cypherWhere, cypherReturn = self.cypher_tag_whereReturn(variable_tagNGram)
-
-        return cypherWhere, cypherReturn
-
-
 
 class TagProblemItem(TagNGram):
     """
@@ -849,7 +715,7 @@ class TagProblemItem(TagNGram):
         if not self.keyword:
             return ""
         return f'({variable_tagProblemItem}{self.label}' + \
-               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
 
     def cypher_problemItemTag_all(self, variable_tagProblemItem="problemitem_tag"):
         """
@@ -861,9 +727,9 @@ class TagProblemItem(TagNGram):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -881,22 +747,6 @@ class TagProblemItem(TagNGram):
         query = self.cypher_nGramTag_merge(variable_tagProblemItem)
         query += f'\nSET {variable_tagProblemItem} {self.databaseInfoTag["label"]["problem_item"]}'
         return query
-
-    def cypher_problemItemTag_whereReturn(self, variable_tagProblemItem="problemitem_tag"):
-        """
-         Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGPROBLEMITEM
-         Used to filter the database based on specifics properties values
-
-         For this case, the properties of this object might be an array
-         If a value in an array is "_" this property will be added to the return statement
-
-         :param variable_tagProblemItem: default "problemitem_tag" to match a specific TAGPROBLEMITEM
-         :return: a tuple of arrays - where properties, return properties :
-             (['problemitem_tag.keyword = "bob','problemitem_tag.keyword = "3"]['problemitem_tag.synonyms'])
-         """
-        cypherWhere, cypherReturn = self.cypher_nGramTag_whereReturn(variable_tagProblemItem)
-
-        return cypherWhere, cypherReturn
 
 
 class TagSolutionItem(TagNGram):
@@ -955,9 +805,9 @@ class TagSolutionItem(TagNGram):
         if self.keyword or self.synonyms is not None:
             query += "{"
             if self.keyword:
-                query += f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}",'
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
             if self.synonyms:
-                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '["' + '","'.join(self.synonyms) + '"],'
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -975,19 +825,3 @@ class TagSolutionItem(TagNGram):
         query = self.cypher_nGramTag_merge(variable_tagSolutionItem)
         query += f'\nSET {variable_tagSolutionItem} {self.databaseInfoTag["label"]["solution_item"]}'
         return query
-
-    def cypher_solutionItemTag_whereReturn(self, variable_tagSolutionItem="solutionitem_tag"):
-        """
-         Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TAGSOLUTIONITEM
-         Used to filter the database based on specifics properties values
-
-         For this case, the properties of this object might be an array
-         If a value in an array is "_" this property will be added to the return statement
-
-         :param variable_tagSolutionItem: default "solutionitem_tag" to match a specific TAGSOLUTIONITEM
-         :return: a tuple of arrays - where properties, return properties :
-             (['solutionitem_tag.keyword = "bob','solutionitem_tag.keyword = "3"]['solutionitem_tag.synonyms'])
-         """
-        cypherWhere, cypherReturn = self.cypher_nGramTag_whereReturn(variable_tagSolutionItem)
-
-        return cypherWhere, cypherReturn

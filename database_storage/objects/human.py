@@ -22,6 +22,8 @@ Description:
     However, the hierarchy followed the rules created in this file
 """
 
+from database_storage.helper import standardizeString
+
 class Human:
     """
     a HUMAN define every information that refer to the node HUMAN in our database.
@@ -48,9 +50,7 @@ class Human:
 
     def _set_name(self, name):
         if isinstance(name, str):
-            self.name = name.lower().lstrip().replace('"','\\"')
-        elif isinstance(name, list):
-            self.name = [n.lower().lstrip().replace('"','\\"') for n in name]
+            self.name = standardizeString(name).lower()
         else:
             self.name = None
 
@@ -72,7 +72,7 @@ class Human:
         if not self.name:
             return ""
         return f'({variable_human}{self.label}' + \
-               "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
+               "{" + f'{self.databaseInfoHuman["properties"]["name"]}:\'{self.name}\'' + "})"
 
     def cypher_human_all(self, variable_human="human"):
         """
@@ -82,7 +82,7 @@ class Human:
         """
         query = f'({variable_human}{self.label}'
         if self.name:
-            query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "}"
+            query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:\'{self.name}\'' + "}"
         query += ")"
 
         return query
@@ -96,34 +96,9 @@ class Human:
          """
         if not self.name:
             return ""
-        query = f'MERGE {self.cypher_human_name(variable_human)}'
+        query = f'\nMERGE {self.cypher_human_name(variable_human)}'
         return query
 
-
-    def cypher_human_whereReturn(self, variable_human="human"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this HUMAN
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_human: default "human" to match a specific HUMAN
-        :return: a tuple of arrays - where properties, return properties :
-            (['human.name = "bob','human.name = "3"]['human.name'])
-        """
-        cypherWhere = []
-        cypherReturn = []
-
-        if self.name:
-            for n in self.name:
-                if n == "_":
-                    cypherReturn.append(f'{variable_human}.{self.databaseInfoHuman["properties"]["name"]}')
-                else:
-                    cypherWhere.append(
-                        f'{variable_human}.{self.databaseInfoHuman["properties"]["name"]} = "{n}"')
-
-        return cypherWhere, cypherReturn
 
 class Operator(Human):
     """
@@ -163,7 +138,7 @@ class Operator(Human):
         if not self.name:
             return ""
         return f'({variable_operator}{self.label}' + \
-               "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
+               "{" + f'{self.databaseInfoHuman["properties"]["name"]}:\'{self.name}\'' + "})"
 
     def cypher_operator_all(self, variable_operator="operator"):
         """
@@ -174,7 +149,7 @@ class Operator(Human):
 
         query = f'({variable_operator}{self.label}'
         if self.name:
-            query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "}"
+            query += "{" + f'{self.databaseInfoHuman["properties"]["name"]}:\'{self.name}\'' + "}"
         query += ")"
 
         return query
@@ -190,23 +165,6 @@ class Operator(Human):
         query += f'\nSET {variable_operator} {self.databaseInfoHuman["label"]["operator"]}'
 
         return query
-
-    def cypher_operator_whereReturn(self, variable_operator="operator"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this OPERATOR
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_operator: default "operator" to match a specific OPERATOR
-        :return: a tuple of arrays - where properties, return properties :
-            (['operator.name = "bob','operator.name = "3"]['operator.name'])
-        """
-
-        cypherWhere, cypherReturn= self.cypher_human_whereReturn(variable_operator)
-
-        return cypherWhere, cypherReturn
 
 
 class Technician(Human):
@@ -240,9 +198,9 @@ class Technician(Human):
 
     def _set_skills(self, skills):
         if isinstance(skills, str):
-            self.skills = skills.lower().lstrip().replace('"','\\"')
+            self.skills = standardizeString(skills).lower()
         elif isinstance(skills, list):
-            self.skills = [s.lower().lstrip().replace('"','\\"') for s in skills]
+            self.skills = [standardizeString(s).lower() for s in skills]
         else:
             self.skills = None
 
@@ -251,9 +209,9 @@ class Technician(Human):
 
     def _set_crafts(self, crafts):
         if isinstance(crafts, str):
-            self.crafts = crafts.lower().lstrip().replace('"','\\"')
+            self.crafts = standardizeString(crafts).lower()
         elif isinstance(crafts, list):
-            self.crafts = [c.lower().lstrip().replace('"','\\"') for c in crafts]
+            self.crafts = [standardizeString(c).lower() for c in crafts]
         else:
             self.crafts = None
 
@@ -279,7 +237,7 @@ class Technician(Human):
         if not self.name:
             return ""
         return f'({variable_technician}{self.label}' + \
-               "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
+               "{" + f'{self.databaseInfoHuman["properties"]["name"]}:\'{self.name}\'' + "})"
 
     def cypher_technician_all(self, variable_technician="technician"):
         """
@@ -291,11 +249,11 @@ class Technician(Human):
         if self.name or self.skills or self.crafts is not None:
             query += "{"
             if self.name is not None:
-                query += f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}",'
+                query += f'{self.databaseInfoHuman["properties"]["name"]}:\'{self.name}\','
             if self.skills is not None:
-                query += f'{self.databaseInfoHuman["properties"]["skills"]}:' + '["' + '","'.join(self.skills) + '"],'
+                query += f'{self.databaseInfoHuman["properties"]["skills"]}:' + '[\'' + '\',\''.join(self.skills) + '\'],'
             if self.crafts is not None:
-                query += f'{self.databaseInfoHuman["properties"]["crafts"]}:' + '["' + '","'.join(self.crafts) + '"],'
+                query += f'{self.databaseInfoHuman["properties"]["crafts"]}:' + '[\'' + '\',\''.join(self.crafts) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
 
@@ -312,41 +270,11 @@ class Technician(Human):
         query = self.cypher_human_merge(variable_technician)
         if self.skills:
             for skill in self.skills:
-                query += f'\nFOREACH(x in CASE WHEN "{skill}" in {variable_technician}.{self.databaseInfoHuman["properties"]["skills"]} THEN [] ELSE [1] END |' \
-                         f'  SET {variable_technician}.{self.databaseInfoHuman["properties"]["skills"]} = coalesce({variable_technician}.{self.databaseInfoHuman["properties"]["skills"]},[]) + "{skill}" )'
+                query += f'\nFOREACH(x in CASE WHEN \'{skill}\' in {variable_technician}.{self.databaseInfoHuman["properties"]["skills"]} THEN [] ELSE [1] END |' \
+                         f'  SET {variable_technician}.{self.databaseInfoHuman["properties"]["skills"]} = coalesce({variable_technician}.{self.databaseInfoHuman["properties"]["skills"]},[]) + \'{skill}\' )'
         if self.crafts:
             for craft in self.crafts:
-                query += f'\nFOREACH(x in CASE WHEN "{craft}" in {variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]} THEN [] ELSE [1] END |' \
-                         f'  SET {variable}.{self.databaseInfoHuman["properties"]["crafts"]} = coalesce({variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]},[]) + "{craft}" )'
+                query += f'\nFOREACH(x in CASE WHEN \'{craft}\' in {variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]} THEN [] ELSE [1] END |' \
+                         f'  SET {variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]} = coalesce({variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]},[]) + \'{craft}\' )'
         query += f'\nSET {variable_technician} {self.databaseInfoHuman["label"]["technician"]}'
         return query
-
-    def cypher_technician_whereReturn(self, variable_technician="technician"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TECHNICIAN
-        Used to filter the database based on specifics properties values
-
-        For this case, the properties of this object might be an array
-        If a value in an array is "_" this property will be added to the return statement
-
-        :param variable_technician: default "technician" to match a specific TECHNICIAN
-        :return: a tuple of arrays - where properties, return properties :
-            (['technician.name = "bob"','"y" in technician.skills']['technician.crafts'])
-        """
-        cypherWhere, cypherReturn= self.cypher_human_whereReturn(variable_technician)
-
-        if self.skills:
-            for s in self.skills:
-                if s == "_":
-                    cypherReturn.append(f'{variable_technician}.{self.databaseInfoHuman["properties"]["skills"]}')
-                else:
-                    cypherWhere.append(f'"{s}" IN {variable_technician}.{self.databaseInfoHuman["properties"]["skills"]}')
-
-        if self.crafts:
-            for c in self.crafts:
-                if c == "_":
-                   cypherReturn.append(f'{variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]}')
-                else:
-                    cypherWhere.append(f'"{c}" IN {variable_technician}.{self.databaseInfoHuman["properties"]["crafts"]}')
-
-        return cypherWhere, cypherReturn

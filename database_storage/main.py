@@ -452,7 +452,7 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
             done, result = database.runQuery(query)
             if not done:
                 print(query)
-                print("ERROR on Maintenance Work Order ", index, "\tOn query", query, "\n\n")
+                #print("ERROR on Maintenance Work Order ", index, "\tOn query", query, "\n\n")
 
     return 1
 

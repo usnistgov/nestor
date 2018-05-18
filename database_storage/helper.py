@@ -114,3 +114,12 @@ def resultToObservationDataframe(result):
         print("The dataframe cannot be created")
     return dataframe_observation
 
+def standardizeString(string):
+    """
+    clean the string for all the string input into the database
+    "\" create problem because Cypher check for the value after as a special char, it has to be change into "\\"
+    "'" create a problem because it is the char to end a sting has to change to "\'"
+    :param string: non clean string
+    :return: a clean string
+    """
+    return string.replace('\\','\\\\').replace("'","\\'").lstrip()
