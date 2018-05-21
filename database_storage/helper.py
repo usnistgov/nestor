@@ -123,3 +123,13 @@ def standardizeString(string):
     :return: a clean string
     """
     return string.replace('\\','\\\\').replace("'","\\'").lstrip()
+
+
+def getListIndexDataframe(dataframe, rownumber, classification):
+    """
+    for a given dataframe , a row number and a classification,
+    Return a Serie of the 1 value
+    """
+    serie = dataframe[classification].iloc[rownumber]
+    return serie[serie > 0].index.values
+

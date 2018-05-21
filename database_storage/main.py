@@ -15,15 +15,15 @@ Description:
     but will respect the graph schema created to solve our problem.
 """
 
-
+from tqdm import tqdm
 
 from database_storage.objects.human import *
 from database_storage.objects.issue import *
 from database_storage.objects.maintenanceworkorder import *
 from database_storage.objects.tag import *
-from tqdm import tqdm
-
 from database_storage.objects.machine import *
+
+from  database_storage.helper import getListIndexDataframe
 
 charsplit = ','
 def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
@@ -78,181 +78,6 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         to the database property and node see example in the file data/mine_data/mine_raw.csv
     :return: 1 when the function has been executed with success - your data are now in your graph database -
     """
-
-    def create_issue(row,propertyToHeader_issue):
-        """
-        Create the Object ISSUE from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_issue: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an ISSUE object or None if something goes wrong
-        """
-
-        issue = None
-
-        try:
-            issue = Issue(problem=row[propertyToHeader_issue['issue']['description_problem']],
-                          databaseInfo=database.schema)
-            try:
-                issue._set_solution(row[propertyToHeader_issue['issue']['description_solution']])
-            except KeyError:
-                pass
-            try:
-                issue._set_cause(row[propertyToHeader_issue['issue']['description_cause']])
-            except KeyError:
-                pass
-            try:
-                issue._set_effects(row[propertyToHeader_issue['issue']['description_effect']])
-            except KeyError:
-                pass
-            try:
-                issue._set_part_in_process(row[propertyToHeader_issue['issue']['part_in_process']])
-            except KeyError:
-                pass
-            try:
-                issue._set_necessary_part(row[propertyToHeader_issue['issue']['necessary_part']])
-            except KeyError:
-                pass
-            try:
-                issue._set_machine_down(row[propertyToHeader_issue['issue']['machine_down']])
-            except KeyError:
-                pass
-            try:
-                issue._set_cost(row[propertyToHeader_issue['issue']['cost']])
-            except KeyError:
-                pass
-            #TODO add a date clenizer for only 1 value
-            try:
-                issue._set_date_machine_down(row[propertyToHeader_issue['issue']['date_machine_down']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_machine_up(row[propertyToHeader_issue['issue']['date_machine_up']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_workorder_completion(row[propertyToHeader_issue['issue']['date_workorder_completion']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_workorder_start(row[propertyToHeader_issue['issue']['date_workorder_start']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_maintenance_technician_arrive(row[propertyToHeader_issue['issue']['date_maintenance_technician_arrive']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_problem_solve(row[propertyToHeader_issue['issue']['date_problem_solve']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_problem_found(row[propertyToHeader_issue['issue']['date_problem_found']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_part_ordered(row[propertyToHeader_issue['issue']['date_part_ordered']])
-            except KeyError:
-                pass
-            try:
-                issue._set_date_part_received(row[propertyToHeader_issue['issue']['date_part_received']])
-            except KeyError:
-                pass
-
-        except KeyError:
-            pass
-        return issue
-
-    def create_technicians(row, propertyToHeader_technician):
-        """
-        Create an array of TECHNICIAN Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_technician: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TECNICIANs empty if something goes wrong or if there are not technician un the csv
-        """
-        charsplit = "/"
-        skills = []
-        try:
-            for skill in row[propertyToHeader_technician['technician']['skills']].split(charsplit):
-                skills.append(skill)
-        except KeyError:
-            pass
-
-        crafts = []
-        try:
-            for craft in row[propertyToHeader_technician['technician']['crafts']].split(charsplit):
-                crafts.append(craft)
-        except KeyError:
-            pass
-
-        technicians = []
-        try:
-            if row[propertyToHeader_technician['technician']['name']]:
-                for name in row[propertyToHeader_technician['technician']['name']].split(charsplit):
-                    technicians.append(Technician(name=name, skills=skills, crafts=crafts, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return technicians
-
-    def create_operators(row,propertyToHeader_operator):
-        """
-        Create an array of OPERATOR Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_operator: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of OPERATORs empty if something goes wrong or if there are not operators un the csv
-        """
-        charsplit = "/"
-        operators = []
-        try:
-            if row[propertyToHeader_operator['operator']['name']]:
-                for name in row[propertyToHeader_operator['operator']['name']].split(charsplit):
-                    operators.append(Operator(name=name, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return operators
-
-    def create_machine(row, propertyToHeader_machine):
-        """
-        Create a MACHINE Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_machine: a dictionaries that link the header of the CSV data to the properties of the object
-        :return:an MACHINE object or None if something goes wrong or if there are not machine un the csv
-        """
-
-        machine = None
-
-        try:
-            if row[propertyToHeader_machine['machine']['name']]:
-                machine = Machine(name=row[propertyToHeader_machine['machine']['name']], databaseInfo=database.schema)
-                #print(row[propertyToHeader_machine['name']])
-
-                try:
-                    machine._set_manufacturer(row[propertyToHeader_machine['machine']['manufacturer']])
-                    #print(row[propertyToHeader_machine['manufacturer']])
-                except KeyError:
-                    pass
-
-                try:
-                    machine._set_machine_type(row[propertyToHeader_machine['machine']['type']])
-                    #print(row[propertyToHeader_machine['type']])
-                except KeyError:
-                    pass
-
-                try:
-                    machine._set_locasion(row[propertyToHeader_machine['machine']['locasion']])
-                    #print(row[propertyToHeader_machine['locasion']])
-                except KeyError:
-                    pass
-
-        except KeyError:
-            pass
-
-        return machine
 
     def create_items(row, propertyToHeader_item):
         """
@@ -401,10 +226,10 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
     for index, row in tqdm(dataframe.iterrows(), total=dataframe.shape[0]):
 
         # creat the objects
-        issue = create_issue(row, propertyToHeader_dict)
-        machine = create_machine(row, propertyToHeader_dict)
-        operators = create_operators(row, propertyToHeader_dict)
-        technicians = create_technicians(row, propertyToHeader_dict)
+        issue = create_issue(row, propertyToHeader_dict, database.schema)
+        machine = create_machine(row, propertyToHeader_dict, database.schema)
+        operators = create_operators(row, propertyToHeader_dict, database.schema)
+        technicians = create_technicians(row, propertyToHeader_dict, database.schema)
         items = create_items(row, propertyToHeader_dict)
         problems = create_problems(row, propertyToHeader_dict)
         solutions = create_solutions(row, propertyToHeader_dict)
@@ -446,14 +271,339 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
 
 
         #run the query into the database
-
-        for query in queries:
-            #print(query)
-            done, result = database.runQuery(query)
-            if not done:
-                print(query)
-                #print("ERROR on Maintenance Work Order ", index, "\tOn query", query, "\n\n")
+        #
+        # for query in queries:
+        #     #print(query)
+        #     done, result = database.runQuery(query)
+        #     if not done:
+        #         print(query)
+        #         #print("ERROR on Maintenance Work Order ", index, "\tOn query", query, "\n\n")
 
     return 1
 
 
+
+def graphDatabase_from_binnaryCSV(database, originalDataframe, binnaryDataframe, binnaryRelationshipDataframe, propertyToHeader_dict):
+
+    def create_items(row, tags, propertyToHeader_item):
+        """
+        Create an array of TAGITEMS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        :param propertyToHeader_item: a dictionaries that link the header of the CSV data to the properties of the object
+        :return: an array of TAGITEMS empty if something goes wrong or if there are not item_tag un the csv
+        """
+
+        if len(tags) > 0:
+            return None
+
+        item = [TagItem(item,) for ]
+
+        # items = []
+        #
+        # try:
+        #     if row[propertyToHeader_item['item']["keyword"]]:
+        #         for item in row[propertyToHeader_item['item']["keyword"]].split(charsplit):
+        #             items.append(TagItem(keyword=item, databaseInfo=database.schema))
+        # except KeyError:
+        #     pass
+        #
+        # return items
+
+    def create_problems(row, binnaryTag, propertyToHeader_problem):
+        """
+        Create an array of TAGPROBLEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        :param propertyToHeader_problem: a dictionaries that link the header of the CSV data to the properties of the object
+        :return: an array of TAGPROBLEM empty if something goes wrong or if there are not problem_tag un the csv
+        """
+        charsplit = ','
+        problems = []
+
+        try:
+            if row[propertyToHeader_problem['problem']["keyword"]]:
+                for problem in row[propertyToHeader_problem['problem']["keyword"]].split(charsplit):
+                    problems.append(TagProblem(keyword=problem, databaseInfo=database.schema))
+        except KeyError:
+            pass
+
+        return problems
+
+    def create_solutions(row, binnaryTag, propertyToHeader_solution):
+        """
+        Create an array of TAGSOLUTION Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        :param propertyToHeader_solution: a dictionaries that link the header of the CSV data to the properties of the object
+        :return: an array of TAGSOLUTION empty if something goes wrong or if there are not solution_tag un the csv
+        """
+        charsplit = ','
+        solutions = []
+
+        try:
+            if row[propertyToHeader_solution['solution']["keyword"]]:
+                for solution in row[propertyToHeader_solution['solution']["keyword"]].split(charsplit):
+                    solutions.append(TagSolution(keyword=solution, databaseInfo=database.schema))
+        except KeyError:
+            pass
+
+        return solutions
+
+    def create_unknowns(row, binnaryTag, propertyToHeader_unknown):
+        """
+        Create an array of TAGUNKNOWNS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        :param propertyToHeader_unknown: a dictionaries that link the header of the CSV data to the properties of the object
+        :return: an array of TAGUNKNOWNS empty if something goes wrong or if there are not unknown_tag un the csv
+        """
+        charsplit = ','
+        unknowns = []
+
+        try:
+            if row[propertyToHeader_unknown['unknown']["keyword"]]:
+                for unknown in row[propertyToHeader_unknown['unknown']["keyword"]].split(charsplit):
+                    unknowns.append(TagUnknown(keyword=unknown, databaseInfo=database.schema))
+        except KeyError:
+            pass
+
+        return unknowns
+
+    def create_problemItems(row, binnaryTag, propertyToHeader_problemItem):
+        """
+        Create an array of TAGPROBLEMITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        :param propertyToHeader_problemItem: a dictionaries that link the header of the CSV data to the properties of the object
+        :return: an array of TAGPROBLEMITEM empty if something goes wrong or if there are not problemitem_tag un the csv
+        """
+        charsplit = ','
+        problemItems = []
+
+        try:
+            if row[propertyToHeader_problemItem['problemitem']["keyword"]]:
+                for problemItem in row[propertyToHeader_problemItem['problemitem']["keyword"]].split(charsplit):
+                    problemItems.append(TagProblemItem(keyword=problemItem, databaseInfo=database.schema))
+        except KeyError:
+            pass
+
+        return problemItems
+
+    def create_solutionItems(row, binnaryTag, propertyToHeader_solutionItem):
+
+        """
+        Create an array of TAGSOLUTIONITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        :param propertyToHeader_solutionItem: a dictionaries that link the header of the CSV data to the properties of the object
+        :return: an array of TAGSOLUTIONITEM empty if something goes wrong or if there are not solutionitem_tag un the csv
+        """
+        charsplit = ','
+        solutionItems = []
+
+        try:
+            if row[propertyToHeader_solutionItem['solutionitem']["keyword"]]:
+                for solutionItem in row[propertyToHeader_solutionItem['solutionitem']["keyword"]].split(charsplit):
+                    solutionItems.append(TagSolutionItem(keyword=solutionItem, databaseInfo=database.schema))
+        except KeyError:
+            pass
+
+        return solutionItems
+
+
+    for index, row in tqdm(originalDataframe.iterrows(), total=originalDataframe.shape[0]):
+        issue = create_issue(row, propertyToHeader_dict, database.schema)
+        machine = create_machine(row, propertyToHeader_dict, database.schema)
+        operators = create_operators(row, propertyToHeader_dict, database.schema)
+        technicians = create_technicians(row, propertyToHeader_dict, database.schema)
+
+
+
+        #send to item the row only with the I
+        items = create_items(row, getListIndexDataframe(binnaryDataframe, index, 'I'),  propertyToHeader_dict)
+        # problems = create_problems(row, getListIndexDataframe(binnaryDataframe, index, 'P'), propertyToHeader_dict)
+        # solutions = create_solutions(row,  getListIndexDataframe(binnaryDataframe, index, 'S'), propertyToHeader_dict)
+        # unknowns = create_unknowns(row,  getListIndexDataframe(binnaryDataframe, index, 'U'), propertyToHeader_dict)
+        # problemItems = create_problemItems(row,  getListIndexDataframe(binnaryRelationshipDataframe, index, 'P I'), propertyToHeader_dict)
+        # solutionItems = create_solutionItems(row,  getListIndexDataframe(binnaryRelationshipDataframe, index, 'S I'), propertyToHeader_dict)
+
+
+
+
+def create_issue(row, propertyToHeader_issue, schema):
+    """
+    Create the Object ISSUE from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+    :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+    :param propertyToHeader_issue: a dictionaries that link the header of the CSV data to the properties of the object
+    :return: an ISSUE object or None if something goes wrong
+    """
+
+    issue = None
+
+    try:
+        issue = Issue(problem=row[propertyToHeader_issue['issue']['description_problem']],
+                      databaseInfo=schema)
+        try:
+            issue._set_solution(row[propertyToHeader_issue['issue']['description_solution']])
+        except KeyError:
+            pass
+        try:
+            issue._set_cause(row[propertyToHeader_issue['issue']['description_cause']])
+        except KeyError:
+            pass
+        try:
+            issue._set_effects(row[propertyToHeader_issue['issue']['description_effect']])
+        except KeyError:
+            pass
+        try:
+            issue._set_part_in_process(row[propertyToHeader_issue['issue']['part_in_process']])
+        except KeyError:
+            pass
+        try:
+            issue._set_necessary_part(row[propertyToHeader_issue['issue']['necessary_part']])
+        except KeyError:
+            pass
+        try:
+            issue._set_machine_down(row[propertyToHeader_issue['issue']['machine_down']])
+        except KeyError:
+            pass
+        try:
+            issue._set_cost(row[propertyToHeader_issue['issue']['cost']])
+        except KeyError:
+            pass
+        # TODO add a date clenizer for only 1 value
+        try:
+            issue._set_date_machine_down(row[propertyToHeader_issue['issue']['date_machine_down']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_machine_up(row[propertyToHeader_issue['issue']['date_machine_up']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_workorder_completion(row[propertyToHeader_issue['issue']['date_workorder_completion']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_workorder_start(row[propertyToHeader_issue['issue']['date_workorder_start']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_maintenance_technician_arrive(
+                row[propertyToHeader_issue['issue']['date_maintenance_technician_arrive']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_problem_solve(row[propertyToHeader_issue['issue']['date_problem_solve']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_problem_found(row[propertyToHeader_issue['issue']['date_problem_found']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_part_ordered(row[propertyToHeader_issue['issue']['date_part_ordered']])
+        except KeyError:
+            pass
+        try:
+            issue._set_date_part_received(row[propertyToHeader_issue['issue']['date_part_received']])
+        except KeyError:
+            pass
+
+    except KeyError:
+        pass
+    return issue
+
+def create_technicians(row, propertyToHeader_technician, schema):
+    """
+    Create an array of TECHNICIAN Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+    :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+    :param propertyToHeader_technician: a dictionaries that link the header of the CSV data to the properties of the object
+    :return: an array of TECNICIANs empty if something goes wrong or if there are not technician un the csv
+    """
+    charsplit = "/"
+    skills = []
+    try:
+        for skill in row[propertyToHeader_technician['technician']['skills']].split(charsplit):
+            skills.append(skill)
+    except KeyError:
+        pass
+
+    crafts = []
+    try:
+        for craft in row[propertyToHeader_technician['technician']['crafts']].split(charsplit):
+            crafts.append(craft)
+    except KeyError:
+        pass
+
+    technicians = []
+    try:
+        if row[propertyToHeader_technician['technician']['name']]:
+            for name in row[propertyToHeader_technician['technician']['name']].split(charsplit):
+                technicians.append(
+                    Technician(name=name, skills=skills, crafts=crafts, databaseInfo=schema))
+    except KeyError:
+        pass
+
+    return technicians
+
+def create_operators(row, propertyToHeader_operator, schema):
+    """
+    Create an array of OPERATOR Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+    :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+    :param propertyToHeader_operator: a dictionaries that link the header of the CSV data to the properties of the object
+    :return: an array of OPERATORs empty if something goes wrong or if there are not operators un the csv
+    """
+    charsplit = "/"
+    operators = []
+    try:
+        if row[propertyToHeader_operator['operator']['name']]:
+            for name in row[propertyToHeader_operator['operator']['name']].split(charsplit):
+                operators.append(Operator(name=name, databaseInfo=schema))
+    except KeyError:
+        pass
+
+    return operators
+
+def create_machine(row, propertyToHeader_machine, schema):
+    """
+    Create a MACHINE Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+
+    :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+    :param propertyToHeader_machine: a dictionaries that link the header of the CSV data to the properties of the object
+    :return:an MACHINE object or None if something goes wrong or if there are not machine un the csv
+    """
+
+    machine = None
+
+    try:
+        if row[propertyToHeader_machine['machine']['name']]:
+            machine = Machine(name=row[propertyToHeader_machine['machine']['name']], databaseInfo=schema)
+            # print(row[propertyToHeader_machine['name']])
+
+            try:
+                machine._set_manufacturer(row[propertyToHeader_machine['machine']['manufacturer']])
+                # print(row[propertyToHeader_machine['manufacturer']])
+            except KeyError:
+                pass
+
+            try:
+                machine._set_machine_type(row[propertyToHeader_machine['machine']['type']])
+                # print(row[propertyToHeader_machine['type']])
+            except KeyError:
+                pass
+
+            try:
+                machine._set_locasion(row[propertyToHeader_machine['machine']['locasion']])
+                # print(row[propertyToHeader_machine['locasion']])
+            except KeyError:
+                pass
+
+    except KeyError:
+        pass
+
+    return machine
