@@ -1,8 +1,8 @@
 # MLPy
-Maintenance Language Processing: Extracting human expertise with python, for maintnenance-based investigatory analysis
+Maintenance Language Processing: Quantifying tacit human knowledge with python, for maintnenance-based investigatory analysis
 
 # Purpose
-There is often a large amount of maintenance data *already* available for use in Smart Manufacturing Systems, but in a currently-unusable form: service tickets and maintenance work orders (MWOs). MLPy is a toolkit for using NLP with efficient user-interaction to perform structured data extraction with minimal annotation time-cost. 
+There is often a large amount of maintenance data *already* available for use in Smart Manufacturing systems, but in a currently-unusable form: service tickets and maintenance work orders (MWOs). MLPy is a toolkit for using Natural Language Processing (NLP) with efficient user-interaction to perform structured data extraction with minimal annotation time-cost. 
 
 
 # Getting Started
