@@ -29,7 +29,7 @@ This package was built as compatible with Anaconda python distribution. See our 
 This toolkit is a part of the Knowledge Extraction and Application for Smart Manufacturing (KEA) project, within the Systems Integration Division at NIST.
 
 ## Points of Contact
-- Michael Brundage (Principal Investigator): @mbrundag0620, michael.brundage@nist.gov
+- Michael Brundage (Principal Investigator): @MichaelPBrundage, michael.brundage@nist.gov
 - Thurston Sexton (Technical Lead): @tbsexton, thurston.sexton@nist.gov
 
 ## Contributors: 
