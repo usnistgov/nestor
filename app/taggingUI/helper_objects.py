@@ -21,18 +21,30 @@ class QTableWidget_token(Qw.QTableWidget):
         self.vocab_limite = vocab_limite
 
     def set_dataframe(self, dataframe):
-        """
-        set the dataframe
-        :param dataframe:
-        :return:
+        """set the dataframe
+
+        Parameters
+        ----------
+        dataframe :
+            return:
+
+        Returns
+        -------
+
         """
         #TODO THURSTON why test_app->mywindow->setDataframe Do we need all the mask and stuff ?
         self.dataframe=dataframe
 
     def printDataframe_tableView(self):
-        """
-        print the dataframe into the table view
+        """print the dataframe into the table view
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         if self.dataframe is not None:
@@ -58,12 +70,23 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         self.spacer=None
 
     def set_checkBoxes_initial(self, token_list, autoMatch_score, dataframe, alias):
-        """
-        create and print the checkboxes
+        """create and print the checkboxes
         check it on condition
-        :param token_list:
-        :param autoMatch_score:
-        :return:
+
+        Parameters
+        ----------
+        token_list :
+            param autoMatch_score:
+        autoMatch_score :
+            
+        dataframe :
+            
+        alias :
+            
+
+        Returns
+        -------
+
         """
         self.clean_checkboxes()
         for token, score in token_list:
@@ -84,11 +107,18 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
 
 
     def set_checkBoxes_rechecked(self, token_list, btn_checked):
-        """
-        check the button that was send in the btn_checked
-        :param token_list:
-        :param btn_checked:
-        :return:
+        """check the button that was send in the btn_checked
+
+        Parameters
+        ----------
+        token_list :
+            param btn_checked:
+        btn_checked :
+            
+
+        Returns
+        -------
+
         """
         self.clean_checkboxes()
         for token, score in token_list:
@@ -102,9 +132,15 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         self.layout.addSpacerItem(self.spacer)
 
     def clean_checkboxes(self):
-        """
-        remove all from the layout
+        """remove all from the layout
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         for btn in self.buttons():
             self.removeButton(btn)
@@ -114,8 +150,15 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
 
     def checkedButtons(self):
         """
-        return the list of all checked buttons
-        :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        type
+            :return:
+
         """
         checkedbtns = []
         for btn in self.buttons():
@@ -132,9 +175,25 @@ class CompositionNGramItem():
 
 
     def printTokenView(self, layout, token, classification, notes, synonyms):
-        """
-        print the view of a given token
+        """print the view of a given token
         :return:
+
+        Parameters
+        ----------
+        layout :
+            
+        token :
+            
+        classification :
+            
+        notes :
+            
+        synonyms :
+            
+
+        Returns
+        -------
+
         """
         #Alias
         text_alias = Qw.QLabel()
@@ -209,11 +268,18 @@ class CompositionNGramItem():
 
 
     def printView(self, dataframe, token_Ngram):
-        """
-        print the information of the
-        :param dataframe:
-        :param token:
-        :return:
+        """print the information of the
+
+        Parameters
+        ----------
+        dataframe :
+            param token:
+        token_Ngram :
+            
+
+        Returns
+        -------
+
         """
         self.clearLayout(self.layout)
 
@@ -232,10 +298,16 @@ class CompositionNGramItem():
         self.layout.addItem(verticalSpacer)
 
     def clearLayout(self,layout):
-        """
-        recursive function that clear the widget and the layout inside a given layout
-        :param layout:
-        :return:
+        """recursive function that clear the widget and the layout inside a given layout
+
+        Parameters
+        ----------
+        layout :
+            return:
+
+        Returns
+        -------
+
         """
         if layout is not None:
             while layout.count():
@@ -250,9 +322,15 @@ class CompositionNGramItem():
 
 
 class MyMplCanvas(FigureCanvas):
-    """
-    the canvas used to print the plot in the right layout of the KPI UI
+    """the canvas used to print the plot in the right layout of the KPI UI
     All the characteristic in common for all the plot should be in this class
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self, layout=None, parent_layout=None, dataframe=None, width=4, height=3, dpi=100):
@@ -272,17 +350,29 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
     def _set_dataframe(self, dataframe):
-        """
-        set the dataframe
-        :param dataframe:
-        :return:
+        """set the dataframe
+
+        Parameters
+        ----------
+        dataframe :
+            return:
+
+        Returns
+        -------
+
         """
         self.dataframe=dataframe
 
     def plot_it(self):
-        """
-        print the plot here we have the original plot
+        """print the plot here we have the original plot
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         self.axes.clear()
         if self.dataframe is not None:

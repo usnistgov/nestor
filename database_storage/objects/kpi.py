@@ -26,13 +26,12 @@ from database_storage.objects.tag import *
 from database_storage.helper import updateDict
 
 class Kpi:
-    """
-        a KPI represent all the informations that refer to create a query to create a kpi:
+    """a KPI represent all the informations that refer to create a query to create a kpi:
         This object contains every object for every kind of node possible into the database.
-
+    
         it does not contains any array, but an object tha can contains a list for every of the object properties
         This might change to be an array and change be a boolean the way we create the return values
-
+    
        This object is used every time we create a kpi
        It is instantiate using:
            - database: from the DATABASE Object from database.py file
@@ -40,12 +39,19 @@ class Kpi:
                 it is used to represent the object we kpi will have
                 We store it into a dictionary so that it can easily be saved and shared
                 It looks like the dictionary fulldict that is the base of it and set up all the possible values
-
+    
            It contains getter and setter for every properties, it is highly recommend to use the setter
             because it represent the data as a standard way - the way it is store in the database
            It contains a string representation
            It contains a boolean representation
-           """
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
 
     def __init__(self, database, kpiDict):
         self.database=database
@@ -274,20 +280,38 @@ class Kpi:
     def tree_itemsHierarchie(self, child=False, parent=False):
         """
 
-        :param child: boolean default False, if True it will return the children hierarchy of all the given TAG_ITEM
-        :param parent: boolean default False, if True it will return the parent hierarchy of all the given TAG_ITEM
-        :return: an array of tuple of Graph from networkx library
+        Parameters
+        ----------
+        child :
+            boolean default False, if True it will return the children hierarchy of all the given TAG_ITEM
+        parent :
+            boolean default False, if True it will return the parent hierarchy of all the given TAG_ITEM
+
+        Returns
+        -------
+        type
+            an array of tuple of Graph from networkx library
             [(childGraphItem1, parentGraphItem1), (childGraphItem2, parentGraphItem2), ...]
+
         """
 
         def children_hierarchy(currentTag, graph):
-            """
-            Recursive function
+            """Recursive function
             Create the networkx graph the represent the children hierarchy of the given TAGITEM
             Only works for the item tag right now
-            :param currentTag: the TAGITEM form the graph will be created
-            :param graph: the graph with all the relationship and the node
-            :return: the graph with a new Node
+
+            Parameters
+            ----------
+            currentTag :
+                the TAGITEM form the graph will be created
+            graph :
+                the graph with all the relationship and the node
+
+            Returns
+            -------
+            type
+                the graph with a new Node
+
             """
 
             currentKeyword = currentTag._get_keyword()
@@ -310,13 +334,22 @@ class Kpi:
 
 
         def parent_hierarchy(currentTag, graph):
-            """
-            Recursive function
+            """Recursive function
             Create the networkx graph the represent the parent hierarchy of the given TAGITEM
             Only works for the item tag right now
-            :param currentTag: the TAGITEM form the graph will be created
-            :param graph: the graph with all the relationship and the node
-            :return: the graph with a new Node
+
+            Parameters
+            ----------
+            currentTag :
+                the TAGITEM form the graph will be created
+            graph :
+                the graph with all the relationship and the node
+
+            Returns
+            -------
+            type
+                the graph with a new Node
+
             """
 
             currentKeyword = currentTag._get_keyword()
@@ -364,27 +397,49 @@ class Kpi:
                               variable_tagProblem="tag_problem", variable_tagSolution="tag_solution",
                               variable_tagUnknown="tag_unknown", variable_tagNGram="ngram_tag",
                               variable_tagProblemItem="problemitem_tag", variable_tagSolutionItem="solutionitem_tag"):
-        """
-        Create a Cypher Query used to simply filter the database and return that query
+        """Create a Cypher Query used to simply filter the database and return that query
 
-        :param variable_issue: default "issue" to refer to a special node
-        :param variable_machine: default "machine" to refer to a special node
-        :param variable_type: default "machine_type" to refer to a special node
-        :param variable_human: default "human" to refer to a special node
-        :param variable_operator: default "operator" to refer to a special node
-        :param variable_technician: default "technician" to refer to a special node
-        :param variable_tag: default "tag" to refer to a special node
-        :param variable_tagOnGram: default "onegram_tag" to refer to a special node
-        :param variable_tagItem: default "tag_item" to refer to a special node
-        :param variable_tagItemAsProblem: default "tag_itemAsProblem" to refer to a special node
-        :param variable_tagItemAsSolution: default "tag_itemAsSolution" to refer to a special node
-        :param variable_tagProblem: default "tag_problem" to refer to a special node
-        :param variable_tagSolution: default "tag_solution" to refer to a special node
-        :param variable_tagUnknown: default "tag_unknown" to refer to a special node
-        :param variable_tagNGram: default "ngram_tag" to refer to a special node
-        :param variable_tagProblemItem: default "problemitem_tag" to refer to a special node
-        :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a special node
-        :return: a string - Cypher Query
+        Parameters
+        ----------
+        variable_issue :
+            default "issue" to refer to a special node
+        variable_machine :
+            default "machine" to refer to a special node
+        variable_type :
+            default "machine_type" to refer to a special node
+        variable_human :
+            default "human" to refer to a special node
+        variable_operator :
+            default "operator" to refer to a special node
+        variable_technician :
+            default "technician" to refer to a special node
+        variable_tag :
+            default "tag" to refer to a special node
+        variable_tagOnGram :
+            default "onegram_tag" to refer to a special node
+        variable_tagItem :
+            default "tag_item" to refer to a special node
+        variable_tagItemAsProblem :
+            default "tag_itemAsProblem" to refer to a special node
+        variable_tagItemAsSolution :
+            default "tag_itemAsSolution" to refer to a special node
+        variable_tagProblem :
+            default "tag_problem" to refer to a special node
+        variable_tagSolution :
+            default "tag_solution" to refer to a special node
+        variable_tagUnknown :
+            default "tag_unknown" to refer to a special node
+        variable_tagNGram :
+            default "ngram_tag" to refer to a special node
+        variable_tagProblemItem :
+            default "problemitem_tag" to refer to a special node
+        variable_tagSolutionItem :
+            default "solutionitem_tag" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query
             MATCH (node:LABEL)
             MATCH ...
             WHERE node.property = "X" AND node.property = "Y"

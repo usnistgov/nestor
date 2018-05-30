@@ -20,15 +20,20 @@ from neo4j.v1 import GraphDatabase
 
 
 class DatabaseNeo4J(object):
-    """
-    The class database this object is specially created for Neo4J database
+    """The class database this object is specially created for Neo4J database
     it is instantiate using:
         - uri: the server url
         - user: the user of the database
         - password: the password of the use
         - schema : a dictionary the desrcibe the schame of the database (node label, edges label, properies name) -see the YAML file database_storage/database/DatabaseSchema.yaml-
-
+    
     It also contains the methods to transform the result from self.runQuery() into dataframe
+
+    Parameters
+    ----------
+
+    Returns
+    -------
 
     """
 
@@ -37,20 +42,33 @@ class DatabaseNeo4J(object):
         self._driver = GraphDatabase.driver(uri, auth=(user, password))
 
     def close(self):
-        """
-        Close the curent database
+        """Close the curent database
         :return: 1 if it works
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         self._driver.close()
         return 1
 
     def runQuery(self, query):
-        """
-        Execute the cypher query into the given database into a transaction that respect the ACID standard
-        :param query: a cypher query
-        :return:
-        - (1, ResultStatement) if it has been executed with succes
-        - (0, None) if it cannot run -The problem often is on the query structure
+        """Execute the cypher query into the given database into a transaction that respect the ACID standard
+
+        Parameters
+        ----------
+        query :
+            a cypher query
+
+        Returns
+        -------
+        type
+            1, ResultStatement) if it has been executed with succes
+            - (0, None) if it cannot run -The problem often is on the query structure
+
         """
         try:
             result = None
@@ -61,18 +79,30 @@ class DatabaseNeo4J(object):
             return 0, None
 
     def deleteData(self):
-        """
-        Delete all the data from the database
+        """Delete all the data from the database
         :return: 1 if it works
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         with self._driver.session() as session:
             session.write_transaction(self._execute_code, "MATCH(n) OPTIONAL MATCH(n) - [r] - () DELETE n, r")
         return 1
 
     def createIndexes(self):
-        """
-        Create the indexs on the database for the properties often asked
+        """Create the indexs on the database for the properties often asked
         :return: 1 if it works
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         self.runQuery(f'CREATE INDEX ON {self.schema["human"]["label"]["human"]}({self.schema["human"]["properties"]["name"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["machine"]["label"]["machine"]}({self.schema["machine"]["properties"]["name"]})')
@@ -80,9 +110,15 @@ class DatabaseNeo4J(object):
         return 1
 
     def dropIndexes(self):
-        """
-        Delete all indexes from the database
+        """Delete all indexes from the database
         :return: 1 if it works
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         with self._driver.session() as session:
             indexes = session.write_transaction(self._execute_code, "CALL db.indexes")
@@ -93,11 +129,20 @@ class DatabaseNeo4J(object):
 
     @staticmethod
     def _execute_code(tx, query):
-        """
-        Execute a cypher query into a transaction
-        :param tx: the Transaction object from the Neo4j Driver
-        :param query: a Cypher query
-        :return: the result as ResultStatement from Neo4j Driver object
+        """Execute a cypher query into a transaction
+
+        Parameters
+        ----------
+        tx :
+            the Transaction object from the Neo4j Driver
+        query :
+            a Cypher query
+
+        Returns
+        -------
+        type
+            the result as ResultStatement from Neo4j Driver object
+
         """
         result = tx.run(query)
         return result

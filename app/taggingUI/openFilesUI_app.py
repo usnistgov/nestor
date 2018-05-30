@@ -45,19 +45,31 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
             str(100 - self.horizontalSlider_openFiles_similarityMatrixThreshold.value()) + '%')
 
     def onClick_removePath(self, lineEdit):
-        """
-        when click on a X button remove the file path
-        :param lineEdit:
-        :return:
+        """when click on a X button remove the file path
+
+        Parameters
+        ----------
+        lineEdit :
+            return:
+
+        Returns
+        -------
+
         """
         lineEdit.setText("")
 
     def onClick_openFile(self, lineEdit):
-        """
-        Action when you click on the open files
+        """Action when you click on the open files
         it need an argument so use lambda in the connect function
-        :param lineEdit:
-        :return:
+
+        Parameters
+        ----------
+        lineEdit :
+            return:
+
+        Returns
+        -------
+
         """
         options = Qw.QFileDialog.Options()
         fileName, _ = Qw.QFileDialog.getOpenFileName(self, lineEdit.objectName(), "",
@@ -66,10 +78,16 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
             lineEdit.setText(fileName)
 
     def onClick_Reset(self):
-        """
-        Action when click on reset button
+        """Action when click on reset button
         remove all text in LineEdit
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         self.onClick_removePath(self.lineEdit_openFiles_OriginalCSV)
         self.onClick_removePath(self.lineEdit_openFiles_1GramCSV)
@@ -77,10 +95,16 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
 
 
     def set_config(self, config):
-        """
-        add to the window the values from the config dict
-        :param config:
-        :return:
+        """add to the window the values from the config dict
+
+        Parameters
+        ----------
+        config :
+            return:
+
+        Returns
+        -------
+
         """
 
         self.lineEdit_openFiles_OriginalCSV.setText(config['file']['filePath_OriginalCSV']['path'])
@@ -92,11 +116,19 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         # self.lineEdit_openFiles_SimilarityAlreadyChecked.setText(str(config['value']['similarityMatrix_alreadyChecked']))
 
     def get_config(self, config):
-        """
-        replace the given config dict with a new one based on the window values
-
+        """replace the given config dict with a new one based on the window values
+        
         it is call when we save the view
         :return:
+
+        Parameters
+        ----------
+        config :
+            
+
+        Returns
+        -------
+
         """
         # if we are on a Windows machine
         if os.name == 'nt':
@@ -140,10 +172,18 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
             return False, None
 
     def keyPressEvent(self, event):
-        """
-        listenr on the keyboard
-        :param e:
-        :return:
+        """listenr on the keyboard
+
+        Parameters
+        ----------
+        e :
+            return:
+        event :
+            
+
+        Returns
+        -------
+
         """
 
         if event.key() == Qt.Key_Return:

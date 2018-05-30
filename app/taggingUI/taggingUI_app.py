@@ -118,9 +118,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
     def onClick_saveTrack(self):
-        """
-        save the current completness of the token in a dataframe
+        """save the current completness of the token in a dataframe
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         print("progress saving; calculating the extracted tags and statistics...")
         # do 1-grams
@@ -158,9 +164,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # return tag_readable, tag_df
 
     def onClick_saveNewCsv(self):
-        """
-        generate a new csv with the original csv and the generated token for the document
+        """generate a new csv with the original csv and the generated token for the document
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         # tag_readable, tag_df = self.onClick_saveTrack()
         #TODO add this stuff to the original csv data
@@ -173,9 +185,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
     def onClick_saveBinnaryCsv(self):
-        """
-        generate a new csv with the document and the tag occurences (0 if not 1 if )
+        """generate a new csv with the document and the tag occurences (0 if not 1 if )
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         # tag_readable, tag_df = self.onClick_saveTrack()
 
@@ -191,9 +209,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
     def onSelectedItem_table1Gram(self):
-        """
-        action when we select an item from the 1Gram table view
+        """action when we select an item from the 1Gram table view
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
         token, classification, alias, notes = (str(i.text()) for i in items)
@@ -205,9 +229,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #self.buttonGroup_1Gram_similarityPattern.autoChecked(self.dataframe_1Gram, alias)
 
     def onSelectedItem_tableNGram(self):
-        """
-        action when we select an item from the NGram table view
+        """action when we select an item from the NGram table view
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
         tokens, classification, alias, notes = (str(i.text()) for i in items)
@@ -222,16 +252,24 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self._set_editorValue_NGram(alias, tokens, notes, classification)
 
     def onClick_saveButton(self, dataframe, path):
-        """
-        save the dataframe to the CSV file
+        """save the dataframe to the CSV file
         :return:
+
+        Parameters
+        ----------
+        dataframe :
+            
+        path :
+            
+
+        Returns
+        -------
+
         """
         dataframe.to_csv(path)
 
     def onClick_updateButton_1Gram(self):
-        """
-        Triggers with update button. Saves user annotation to the dataframe
-        """
+        """Triggers with update button. Saves user annotation to the dataframe"""
         try:
             items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
@@ -261,9 +299,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
     def onClick_updateButton_NGram(self):
-        """
-        Triggers with update button. Saves user annotation to the dataframe
-        """
+        """Triggers with update button. Saves user annotation to the dataframe"""
         try :
             items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
@@ -286,9 +322,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         pass
 
     def onSliderMoved_similarityPattern(self):
-        """
-        when the slider change, print the good groupboxes
+        """when the slider change, print the good groupboxes
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         btn_checked = []
         for btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
@@ -303,14 +345,24 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
     def _set_dataframeItemValue(self, dataframe, token, alias, classification, notes):
-        """
-        update the value of the dataframe
-        :param dataframe:
-        :param token:
-        :param alias:
-        :param classification:
-        :param notes:
-        :return:
+        """update the value of the dataframe
+
+        Parameters
+        ----------
+        dataframe :
+            param token:
+        alias :
+            param classification:
+        notes :
+            return:
+        token :
+            
+        classification :
+            
+
+        Returns
+        -------
+
         """
         dataframe.loc[token,"alias"] = alias
         dataframe.loc[token,"notes"] = notes
@@ -318,11 +370,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         return dataframe
 
     def _set_dataframes(self, dataframe_1Gram = None, dataframe_NGram = None, dataframe_Original=None):
-        """
-        set the dataframe for the window
-        :param dataframe_1Gram:
-        :param dataframe_NGram:
-        :return:
+        """set the dataframe for the window
+
+        Parameters
+        ----------
+        dataframe_1Gram :
+            param dataframe_NGram: (Default value = None)
+        dataframe_NGram :
+             (Default value = None)
+        dataframe_Original :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
         if dataframe_Original is not None:
             self.dataframe_Original= dataframe_Original
@@ -341,9 +402,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
 
     def _set_tokenExtractor(self, tokenExtractor_1Gram = None, tokenExtractor_nGram=None):
-        """
-        set both token extractore
+        """set both token extractore
         Needed for the report tab
+
+        Parameters
+        ----------
+        tokenExtractor_1Gram :
+             (Default value = None)
+        tokenExtractor_nGram :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
         if tokenExtractor_1Gram is not None:
             self.tokenExtractor_1Gram = tokenExtractor_1Gram
@@ -351,12 +422,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.tokenExtractor_nGram = tokenExtractor_nGram
 
     def _set_cleanRawText(self, clean_rawText=None, clean_rawText_1Gram=None):
-        """
-        set the clean raw text
+        """set the clean raw text
         Needed for the report tab
-        :param clean_rawText:
-        :param clean_rawText_1Gram:
-        :return:
+
+        Parameters
+        ----------
+        clean_rawText :
+            param clean_rawText_1Gram: (Default value = None)
+        clean_rawText_1Gram :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
         if clean_rawText is not None:
             self.clean_rawText= clean_rawText
@@ -364,8 +442,18 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.clean_rawText_1Gram=clean_rawText_1Gram
 
     def update_progress_bar(self, progressBar, dataframe):
-        """
-        set the value of the progress bar based on the dataframe score
+        """set the value of the progress bar based on the dataframe score
+
+        Parameters
+        ----------
+        progressBar :
+            
+        dataframe :
+            
+
+        Returns
+        -------
+
         """
         scores = dataframe['score']
         matched = scores[dataframe['NE'] != '']
@@ -375,14 +463,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         progressBar.setValue(100*completed_pct)
 
     def _set_editorValue_1Gram(self, alias, token, notes, classification):
-        """
-        print all the information from the token to the right layout 1Gram
+        """print all the information from the token to the right layout 1Gram
         (alias, button, notes)
-        :param alias:
-        :param token:
-        :param notes:
-        :param classification:
-        :return:
+
+        Parameters
+        ----------
+        alias :
+            param token:
+        notes :
+            param classification:
+        token :
+            
+        classification :
+            
+
+        Returns
+        -------
+
         """
 
         #alias
@@ -399,9 +496,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         btn.toggle()  # toggle that button
 
     def _set_editorValue_NGram(self, alias, token, notes, classification):
-        """
-        print all the information from the token to the right layout NGram
+        """print all the information from the token to the right layout NGram
         (alias, button, notes)
+
+        Parameters
+        ----------
+        alias :
+            
+        token :
+            
+        notes :
+            
+        classification :
+            
+
+        Returns
+        -------
+
         """
         # alias
         if alias is '':
@@ -418,10 +529,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
     def _get_similarityMatches(self, token):
-        """
-        get the list of token similar to the given token
-        :param token:
-        :return:
+        """get the list of token similar to the given token
+
+        Parameters
+        ----------
+        token :
+            return:
+
+        Returns
+        -------
+
         """
 
         # TODO THURSTON which one should we keep
@@ -436,10 +553,18 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         return matches
 
     def keyPressEvent(self, event):
-        """
-        listenr on the keyboard
-        :param e:
-        :return:
+        """listenr on the keyboard
+
+        Parameters
+        ----------
+        e :
+            return:
+        event :
+            
+
+        Returns
+        -------
+
         """
 
         if event.key() == Qt.Key_Return:
@@ -450,10 +575,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
     def _set_config(self, config):
-        """
-        add to the window the values from the config dict
-        :param config
-        :return:
+        """add to the window the values from the config dict
+
+        Parameters
+        ----------
+        config :
+            return:
+
+        Returns
+        -------
+
         """
         self.config=config
         self.tableWidget_1gram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
@@ -465,20 +596,32 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
     def _get_config(self, config):
-        """
-        replace the given config dict with a new one based on the window values
-
+        """replace the given config dict with a new one based on the window values
+        
         it is call when we save the view
-        :param config:
-        :return:
+
+        Parameters
+        ----------
+        config :
+            return:
+
+        Returns
+        -------
+
         """
         pass
 
     def closeEvent(self, event):
-        """
-        trigger when we close the window
-        :param event:
-        :return:
+        """trigger when we close the window
+
+        Parameters
+        ----------
+        event :
+            return:
+
+        Returns
+        -------
+
         """
         self.closeFunction(event)
 
@@ -490,9 +633,7 @@ Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_
 
 
 class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
-    """
-    Class to instantiate window showing NIST license. FUTURE: any other versioning information.
-    """
+    """Class to instantiate window showing NIST license. FUTURE: any other versioning information."""
     def __init__(self, iconPath=None, closeFunction=None):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_tosDialog.__init__(self)

@@ -18,13 +18,12 @@ import collections
 
 
 class MaintenanceWorkOrder():
-    """
-    a MAINTENENCEWORKORDER represent all the informations that refer to an event in our context:
+    """a MAINTENENCEWORKORDER represent all the informations that refer to an event in our context:
     When a machine as an issue, all the information related to that are merge inbto tha object
     Several function are used to create the needed Cypher query that can be executed into the database.
-
-   This object should be use when extracting the CSV for every row we create a MAINTENENCEWORKORDER object
-   It is instantiate using:
+    
+       This object should be use when extracting the CSV for every row we create a MAINTENENCEWORKORDER object
+       It is instantiate using:
        - issue: an ISSUE from the issue object
        - machine : a MACHINE from the machine.py file
        - operators: a OPERATOR or array of OPERATOR from the human.py file
@@ -36,12 +35,19 @@ class MaintenanceWorkOrder():
        - tag_problemItems: an array of TAGPROBLEMITEM from the tag.py file
        - tag_solutionsItems: an array of TAGSOLUTIONITEM from the tag.py file
        - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
-
+    
        It contains getter and setter for every properties, it is highly recommend to use the setter
         because it represent the data as a standard way - the way it is store in the database
        It contains a string representation
        It contains a boolean representation
-       """
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
 
     def __init__(self, issue=None, machine=None, operators=None, technicians=None, tag_items=None, tag_problems=None,
                  tag_solutions=None, tag_unknowns=None, tag_problemItems=None, tag_solutionsItems=None,  databaseInfo=None):
@@ -189,10 +195,9 @@ class MaintenanceWorkOrder():
                                                 var_operators="operators", var_technicians="technicians", var_tag_items="tag_items",
                                                 var_tag_problems="tag_problems", var_tag_solutions="tag_solutions", var_tag_unknowns="tag_unknowns",
                                                 var_tag_problemItems="tag_problemItems", var_tag_solutionItems="tag_solutionItems"):
-        """
-        Create a Cypher Query to create all the node from the objects as well as the relationship between these object
+        """Create a Cypher Query to create all the node from the objects as well as the relationship between these object
         The relationships created by this function are the follow:
-
+        
         ISSUE -----> OPERATOR
         ISSUE -----> TECHNICIAN
         ISSUE -----> MACHINE
@@ -203,53 +208,69 @@ class MaintenanceWorkOrder():
         ISSUE -----> TAGUNKNOWN
         ISSUE -----> TAGPROBLEMITEM
         ISSUE -----> TAGPROBLEMSOLUTION
-
+        
         The node ISSUE are created for every object
         The other nodes are merge only created if it didn't exists
         OPERATOR, TECHNICIAN, MACHINE, MACHINE_TYPE, TAGITEM, TAGPROBLEM, TAGSOLUTION, TAGUNKNOWN, TAGPROBLEMITEM, TAGPROBLEMSOLUTION
 
+        Parameters
+        ----------
+        var_issue :
+            default "issue" to refer to a special node
+        var_machine :
+            default "machine" to refer to a special node
+        var_machine_type :
+            default "machine_type" to refer to a special node
+        var_operators :
+            default "operators" to refer to a special node
+        var_technicians :
+            default "technicians" to refer to a special node
+        var_tag_items :
+            default "tag_items" to refer to a special node
+        var_tag_problems :
+            default "tag_problems" to refer to a special node
+        var_tag_solutions :
+            default "tag_solutions" to refer to a special node
+        var_tag_unknowns :
+            default "tag_unknowns" to refer to a special node
+        var_tag_problemItems :
+            default "tag_problemItems" to refer to a special node
+        var_tag_solutionItems :
+            default "tag_solutionItems" to refer to a special node
 
-        :param var_issue: default "issue" to refer to a special node
-        :param var_machine: default "machine" to refer to a special node
-        :param var_machine_type: default "machine_type" to refer to a special node
-        :param var_operators: default "operators" to refer to a special node
-        :param var_technicians: default "technicians" to refer to a special node
-        :param var_tag_items: default "tag_items" to refer to a special node
-        :param var_tag_problems: default "tag_problems" to refer to a special node
-        :param var_tag_solutions: default "tag_solutions" to refer to a special node
-        :param var_tag_unknowns: default "tag_unknowns" to refer to a special node
-        :param var_tag_problemItems: default "tag_problemItems" to refer to a special node
-        :param var_tag_solutionItems: default "tag_solutionItems" to refer to a special node
-        :return: a string - Cypher Query :
-
-        CREATE (issue:ISSUE {...})
-
-        MERGE (operator:HUMAN:OPERATOR {...})
-        MERGE (issue)-->(operator)
-
-        MERGE (technicians:HUMAN:TECHNICIAN {...})
-        MERGE (issue)-->(technicians)
-
-        MERGE (machine:MACHINE {...})
-        MERGE (issue)-->(machine)
-
-        MERGE (machine_type:MACHINE_TYPE {...})
-        MERGE (machine)-->(machine_type)
-
-        MERGE (tag_items:TAG:ONE_GRAM:ITEM {...})
-        MERGE (issue)-->(tag_items)
-
-        MERGE (tag_problems:TAG:ONE_GRAM:PROBLEM {...})
-        MERGE (issue)-->(tag_problems)
-
-        MERGE (tag_unknowns:TAG:ONE_GRAM:UNKNOWN {...})
-        MERGE (issue)-->(tag_unknowns)
-
-        MERGE (tag_problemItems:TAG:N_GRAM:PROBLEM_ITEM {...})
-        MERGE (issue)-->(tag_problemItems)
-
-        MERGE (tag_solutionItems:TAG:N_GRAM:SOLUTION_ITEM {...})
-        MERGE (issue)-->(tag_solutionItems)
+        Returns
+        -------
+        type
+            a string - Cypher Query :
+            
+            CREATE (issue:ISSUE {...})
+            
+            MERGE (operator:HUMAN:OPERATOR {...})
+            MERGE (issue)-->(operator)
+            
+            MERGE (technicians:HUMAN:TECHNICIAN {...})
+            MERGE (issue)-->(technicians)
+            
+            MERGE (machine:MACHINE {...})
+            MERGE (issue)-->(machine)
+            
+            MERGE (machine_type:MACHINE_TYPE {...})
+            MERGE (machine)-->(machine_type)
+            
+            MERGE (tag_items:TAG:ONE_GRAM:ITEM {...})
+            MERGE (issue)-->(tag_items)
+            
+            MERGE (tag_problems:TAG:ONE_GRAM:PROBLEM {...})
+            MERGE (issue)-->(tag_problems)
+            
+            MERGE (tag_unknowns:TAG:ONE_GRAM:UNKNOWN {...})
+            MERGE (issue)-->(tag_unknowns)
+            
+            MERGE (tag_problemItems:TAG:N_GRAM:PROBLEM_ITEM {...})
+            MERGE (issue)-->(tag_problemItems)
+            
+            MERGE (tag_solutionItems:TAG:N_GRAM:SOLUTION_ITEM {...})
+            MERGE (issue)-->(tag_solutionItems)
 
         """
 
@@ -321,19 +342,26 @@ class MaintenanceWorkOrder():
         return query
 
     def cypher_mwo_createNgram1GramRelationaship(self, var_tag_Ngramm="tag_Ngramm", var_tag_OneGram="tag_OneGram"):
-        """
-        Create a Cypher Query to link the One_Gram with the N_Gram for the current MAINTENANCEWORKORDER
+        """Create a Cypher Query to link the One_Gram with the N_Gram for the current MAINTENANCEWORKORDER
 
-        :param var_tag_Ngramm: default "tag_Ngramm" to refer to a special node
-        :param var_tag_OneGram: default "tag_OneGram" to refer to a special node
-        :return: a string - Cypher Query :
+        Parameters
+        ----------
+        var_tag_Ngramm :
+            default "tag_Ngramm" to refer to a special node
+        var_tag_OneGram :
+            default "tag_OneGram" to refer to a special node
 
-        MATCH (tag_Ngramm:TAG:N_GRAM {...})
-        MATCH (tag_OneGram1:TAG:ONE_GRAM {...})
-        MATCH (tag_OneGram2:TAG:ONE_GRAM {...})
-
-        MERGE (tag_Ngramm) --> (tag_OneGram1)
-        MERGE (tag_Ngramm) --> (tag_OneGram2)
+        Returns
+        -------
+        type
+            a string - Cypher Query :
+            
+            MATCH (tag_Ngramm:TAG:N_GRAM {...})
+            MATCH (tag_OneGram1:TAG:ONE_GRAM {...})
+            MATCH (tag_OneGram2:TAG:ONE_GRAM {...})
+            
+            MERGE (tag_Ngramm) --> (tag_OneGram1)
+            MERGE (tag_Ngramm) --> (tag_OneGram2)
 
         """
         queries = []
@@ -369,17 +397,24 @@ class MaintenanceWorkOrder():
 
 
     def cypher_mwo_createItemItemRelationaship(self, var_tag_ItemA="tag_ItemA", var_tag_ItemB="tag_ItemB"):
-        """
-        Create the relationship between ITEM and ITEM based on the properties CHILD of each ITEM
+        """Create the relationship between ITEM and ITEM based on the properties CHILD of each ITEM
 
-        :param var_tag_ItemA: default "tag_ItemA" to refer to a special node
-        :param var_tag_ItemB: default "tag_ItemB" to refer to a special node
-        :return: a string - Cypher Query :
+        Parameters
+        ----------
+        var_tag_ItemA :
+            default "tag_ItemA" to refer to a special node
+        var_tag_ItemB :
+            default "tag_ItemB" to refer to a special node
 
-        MATCH (tag_ItemA:TAG:ONE_GRAM:ITEM {...})
-        MERGE (tag_ItemB:TAG:ONE_GRAM:ITEM {...})
-
-        MERGE (tag_ItemB) --> (tag_ItemA)
+        Returns
+        -------
+        type
+            a string - Cypher Query :
+            
+            MATCH (tag_ItemA:TAG:ONE_GRAM:ITEM {...})
+            MERGE (tag_ItemB:TAG:ONE_GRAM:ITEM {...})
+            
+            MERGE (tag_ItemB) --> (tag_ItemA)
 
         """
         queries = []
@@ -405,18 +440,25 @@ class MaintenanceWorkOrder():
 
 
     def cypher_mwo_updateIssueItemRelationaship(self, var_Issue="issue", var_tag_Item="tag_Item"):
-        """
-        Create the relationship between ISSUE and ITEM depend on if the ITEM creates a problem or if it solve a solution
+        """Create the relationship between ISSUE and ITEM depend on if the ITEM creates a problem or if it solve a solution
         This depend on the properties COMPOSED_OF of the object TAGPROBLEMITEM and TAGSOLUTIONITEM
 
-        :param var_Issue: default "issue" to refer to a special node
-        :param var_tag_Item: default "tag_Item" to refer to a special node
-        :return: a string - Cypher Query :
+        Parameters
+        ----------
+        var_Issue :
+            default "issue" to refer to a special node
+        var_tag_Item :
+            default "tag_Item" to refer to a special node
 
-        MATCH (tag_Item:TAG:ONE_GRAM:ITEM {...})
-        MATCH (issue:ISSUE {...})
-
-        CREATE (issue) --> (tag_Item)
+        Returns
+        -------
+        type
+            a string - Cypher Query :
+            
+            MATCH (tag_Item:TAG:ONE_GRAM:ITEM {...})
+            MATCH (issue:ISSUE {...})
+            
+            CREATE (issue) --> (tag_Item)
 
         """
 

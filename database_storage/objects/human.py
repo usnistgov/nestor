@@ -23,19 +23,25 @@ Description:
 """
 
 class Human:
-    """
-    a HUMAN define every information that refer to the node HUMAN in our database.
+    """a HUMAN define every information that refer to the node HUMAN in our database.
     It setup the properties and query to match with every HUMAN in the database
     An HUMAN is define only with a property NAME in the database
-
+    
     It is instantiate using:
         - name: a String or array of string
         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
-
+    
     It contains getter and setter for every properties, it is highly recommend to use the setter
      because it represent the data as a standard way - the way it is store in the database
     It contains a string representation
     It contains a boolean representation
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
     def __init__(self, name=None,  databaseInfo=None):
         self.databaseInfoHuman = databaseInfo['human']
@@ -61,19 +67,35 @@ class Human:
                f"Name: {self.name}"
 
     def cypher_human_label(self, variable_human="human"):
-        """
-        Create a Cypher query with the given variable and all label for the node HUMAN
-        :param variable_human: default "human" to refer to a special node
-        :return: a string - Cypher Query : human:HUMAN
+        """Create a Cypher query with the given variable and all label for the node HUMAN
+
+        Parameters
+        ----------
+        variable_human :
+            default "human" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : human:HUMAN
+
         """
         return f'{variable_human}{self.databaseInfoHuman["label"]["human"]}'
 
     def cypher_human_name(self, variable_human="human"):
-        """
-        Create a Cypher query to return the specific node HUMAN define by the property NAME
-        :param variable_human: default "human" to refer to a special node
-        :return: a string - Cypher Query : (human:HUMAN{name:"x"})
+        """Create a Cypher query to return the specific node HUMAN define by the property NAME
+
+        Parameters
+        ----------
+        variable_human :
+            default "human" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (human:HUMAN{name:"x"})
             OR empty string if the HUMAN has no NAME
+
         """
         if not self.name:
             return ""
@@ -81,10 +103,18 @@ class Human:
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_human_all(self, variable_human="human"):
-        """
-        Create a Cypher query to return the specific node HUMAN define by all the possible properties (NAME)
-        :param variable_human: default "human" to refer to a specific HUMAN
-        :return: a string - Cypher Query : (operator:HUMAN{name:"x"})
+        """Create a Cypher query to return the specific node HUMAN define by all the possible properties (NAME)
+
+        Parameters
+        ----------
+        variable_human :
+            default "human" to refer to a specific HUMAN
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (operator:HUMAN{name:"x"})
+
         """
         query = f'({self.cypher_human_label(variable_human)}'
         if self.name:
@@ -94,12 +124,20 @@ class Human:
         return query
 
     def cypher_human_merge(self, variable_human="human"):
-        """
-         Create a Cypher query to merge the node HUMAN using his property NAME
+        """Create a Cypher query to merge the node HUMAN using his property NAME
          and Set the missing properties (none in this case)
-         :param variable_human: default "human" to refer to a specific HUMAN
-         :return: a string - Cypher Query : MERGE (technician:HUMAN{name:"x"})
-         """
+
+        Parameters
+        ----------
+        variable_human :
+            default "human" to refer to a specific HUMAN
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : MERGE (technician:HUMAN{name:"x"})
+
+        """
         if not self.name:
             return ""
         query = f'MERGE {self.cypher_human_name(variable_human)}'
@@ -107,16 +145,23 @@ class Human:
 
 
     def cypher_human_whereReturn(self, variable_human="human"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this HUMAN
+        """Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this HUMAN
         Used to filter the database based on specifics properties values
-
+        
         For this case, the properties of this object might be an array
         If a value in an array is "_" this property will be added to the return statement
 
-        :param variable_human: default "human" to match a specific HUMAN
-        :return: a tuple of arrays - where properties, return properties :
+        Parameters
+        ----------
+        variable_human :
+            default "human" to match a specific HUMAN
+
+        Returns
+        -------
+        type
+            a tuple of arrays - where properties, return properties :
             (['human.name = "bob','human.name = "3"]['human.name'])
+
         """
         cypherWhere = []
         cypherReturn = []
@@ -132,20 +177,26 @@ class Human:
         return cypherWhere, cypherReturn
 
 class Operator(Human):
-    """
-    An OPERATOR inherit from HUMAN
+    """An OPERATOR inherit from HUMAN
     It define every information that refer to the node OPERATOR in our database.
     It setup the properties and query to match with every HUMAN OPERATOR in the database
     There are no additional properties than the HUMAN one but functions are different
-
+    
     It is instantiate using:
         - name: a String or list of string that represent the property NAME of the OPERATOR
         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
-
+    
     It contains getter and setter for every properties, it is highly recommend to use the setter
      because it represent the data as a standard way - the way it is store in the database
     It contains a string representation
     It contains a boolean representation
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self, name=None, databaseInfo=None):
@@ -159,19 +210,35 @@ class Operator(Human):
                f"Name: {self.name}"
 
     def cypher_operator_label(self, variable_operator="operator"):
-        """
-        Create a Cypher query with the given variable and all label for the node OPERATOR
-        :param variable_operator: default "operator" to refer to a special node
-        :return: a string - Cypher Query : operator:HUMAN:OPERATOR
+        """Create a Cypher query with the given variable and all label for the node OPERATOR
+
+        Parameters
+        ----------
+        variable_operator :
+            default "operator" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : operator:HUMAN:OPERATOR
+
         """
         return f'{self.cypher_human_label(variable_operator)}{self.databaseInfoHuman["label"]["operator"]}'
 
     def cypher_operator_name(self, variable_operator="operator"):
-        """
-        Create a Cypher query to return the specific node OPERATOR define by the property NAME
-        :param variable_operator: default "operator" to refer to a special node
-        :return: a string - Cypher Query : (operator:HUMAN:OPERATOR{name:"x"})
+        """Create a Cypher query to return the specific node OPERATOR define by the property NAME
+
+        Parameters
+        ----------
+        variable_operator :
+            default "operator" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (operator:HUMAN:OPERATOR{name:"x"})
             OR empty string if the OPERATOR has no NAME
+
         """
         if not self.name:
             return ""
@@ -179,10 +246,18 @@ class Operator(Human):
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_operator_all(self, variable_operator="operator"):
-        """
-        Create a Cypher query to return the specific node OPERATOR define by all the possible properties (NAME)
-        :param variable_operator: default "operator" to refer to a specific OPERATOR
-        :return: a string - Cypher Query : (operator:HUMAN:OPERATOR{name:"x"})
+        """Create a Cypher query to return the specific node OPERATOR define by all the possible properties (NAME)
+
+        Parameters
+        ----------
+        variable_operator :
+            default "operator" to refer to a specific OPERATOR
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (operator:HUMAN:OPERATOR{name:"x"})
+
         """
 
         query = f'({self.cypher_operator_label(variable_operator)}'
@@ -193,11 +268,19 @@ class Operator(Human):
         return query
 
     def cypher_operator_merge(self, variable_operator="operator"):
-        """
-        Create a Cypher query to merge the node OPERATOR using his property NAME
+        """Create a Cypher query to merge the node OPERATOR using his property NAME
         and Set the missing properties (none in this case)
-        :param variable_operator: default "operator" to refer to a specific OPERATOR
-        :return: a string - Cypher Query : MERGE (operator:HUMAN:OPERATOR{name:"x"})
+
+        Parameters
+        ----------
+        variable_operator :
+            default "operator" to refer to a specific OPERATOR
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : MERGE (operator:HUMAN:OPERATOR{name:"x"})
+
         """
         query = self.cypher_human_merge(variable_operator)
         query += f'\nSET {variable_operator} {self.databaseInfoHuman["label"]["operator"]}'
@@ -205,16 +288,23 @@ class Operator(Human):
         return query
 
     def cypher_operator_whereReturn(self, variable_operator="operator"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this OPERATOR
+        """Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this OPERATOR
         Used to filter the database based on specifics properties values
-
+        
         For this case, the properties of this object might be an array
         If a value in an array is "_" this property will be added to the return statement
 
-        :param variable_operator: default "operator" to match a specific OPERATOR
-        :return: a tuple of arrays - where properties, return properties :
+        Parameters
+        ----------
+        variable_operator :
+            default "operator" to match a specific OPERATOR
+
+        Returns
+        -------
+        type
+            a tuple of arrays - where properties, return properties :
             (['operator.name = "bob','operator.name = "3"]['operator.name'])
+
         """
 
         cypherWhere, cypherReturn= self.cypher_human_whereReturn(variable_operator)
@@ -223,22 +313,28 @@ class Operator(Human):
 
 
 class Technician(Human):
-    """
-    An TECHNICIAN inherit from HUMAN
+    """An TECHNICIAN inherit from HUMAN
     It define every information that refer to the node TECHNICIAN in our database.
     It setup the properties and query to match with every HUMAN TECHNICIAN in the database
     The additional properties are SKILLS (array in the database) and CRAFTS (array in the database)
-
+    
     It is instantiate using:
         - name: a String or array of string
         - skills : array of string
         - crafts : array of string
         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
-
+    
     It contains getter and setter for every properties, it is highly recommend to use the setter
      because it represent the data as a standard way - the way it is store in the database
     It contains a string representation
     It contains a boolean representation
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self, name=None, skills=None, crafts=None, databaseInfo=None):
@@ -283,30 +379,54 @@ class Technician(Human):
                f"Crafts: {self.crafts}"
 
     def cypher_technician_label(self, variable_technician="technician"):
-        """
-        Create a Cypher query with the given variable and all label for the node TECHNICIAN
-        :param variable_technician: default "technician" to refer to a special node
-        :return: a string - Cypher Query : technician:HUMAN:TECHNICIAN
+        """Create a Cypher query with the given variable and all label for the node TECHNICIAN
+
+        Parameters
+        ----------
+        variable_technician :
+            default "technician" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : technician:HUMAN:TECHNICIAN
+
         """
         return f'{self.cypher_human_label(variable_technician)}{self.databaseInfoHuman["label"]["technician"]}'
 
     def cypher_technician_name(self, variable_technician="technician"):
+        """Create a Cypher query to return the specific node TECHNICIAN define by the property NAME
+
+        Parameters
+        ----------
+        variable_technician :
+            default "technician" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (operator:HUMAN:TECHNICIAN{name:"x"})
+            OR empty string if the TECHNICIAN has no NAME
+
         """
-         Create a Cypher query to return the specific node TECHNICIAN define by the property NAME
-         :param variable_technician: default "technician" to refer to a special node
-         :return: a string - Cypher Query : (operator:HUMAN:TECHNICIAN{name:"x"})
-             OR empty string if the TECHNICIAN has no NAME
-         """
         if not self.name:
             return ""
         return f'({self.cypher_technician_whereReturn(variable_technician)}' + \
                "{" + f'{self.databaseInfoHuman["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_technician_all(self, variable_technician="technician"):
-        """
-        Create a Cypher query to return the specific node TECHNICIAN define by all the possible properties (NAME, SKILLS, CRAFTS)
-        :param variable_technician: default "technician" to refer to a specific TECHNICIAN
-        :return: a string - Cypher Query : (operator:HUMAN:TECHNICIAN{name:"x", skills:["x","y"], crafts:["x"]})
+        """Create a Cypher query to return the specific node TECHNICIAN define by all the possible properties (NAME, SKILLS, CRAFTS)
+
+        Parameters
+        ----------
+        variable_technician :
+            default "technician" to refer to a specific TECHNICIAN
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (operator:HUMAN:TECHNICIAN{name:"x", skills:["x","y"], crafts:["x"]})
+
         """
         query = f'({self.cypher_technician_whereReturn(variable_technician)}'
         if self.name or self.skills or self.crafts is not None:
@@ -321,15 +441,23 @@ class Technician(Human):
         return query + ")"
 
     def cypher_technician_merge(self, variable_technician="technician"):
-        """
-         Create a Cypher query to merge the node TECHNICIAN using his property NAME
+        """Create a Cypher query to merge the node TECHNICIAN using his property NAME
          and Set the missing properties (SKILLS, CRAFTS)
-         :param variable_technician: default "technician" to refer to a specific TECHNICIAN
-         :return: a string - Cypher Query : MERGE (technician:HUMAN:TECHNICIAN{name:"x"})
-                                            SET technician.skills = ["x","y"]
-                                            SET technician.crafts = ["x"]
-                in the database, SKILLS and CRAFTS are array, so we add values to the array if not already in
-         """
+
+        Parameters
+        ----------
+        variable_technician :
+            default "technician" to refer to a specific TECHNICIAN
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : MERGE (technician:HUMAN:TECHNICIAN{name:"x"})
+            SET technician.skills = ["x","y"]
+            SET technician.crafts = ["x"]
+            in the database, SKILLS and CRAFTS are array, so we add values to the array if not already in
+
+        """
         query = self.cypher_human_merge(variable_technician)
         if self.skills:
             for skill in self.skills:
@@ -343,16 +471,23 @@ class Technician(Human):
         return query
 
     def cypher_technician_whereReturn(self, variable_technician="technician"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TECHNICIAN
+        """Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this TECHNICIAN
         Used to filter the database based on specifics properties values
-
+        
         For this case, the properties of this object might be an array
         If a value in an array is "_" this property will be added to the return statement
 
-        :param variable_technician: default "technician" to match a specific TECHNICIAN
-        :return: a tuple of arrays - where properties, return properties :
+        Parameters
+        ----------
+        variable_technician :
+            default "technician" to match a specific TECHNICIAN
+
+        Returns
+        -------
+        type
+            a tuple of arrays - where properties, return properties :
             (['technician.name = "bob"','"y" in technician.skills']['technician.crafts'])
+
         """
         cypherWhere, cypherReturn= self.cypher_human_whereReturn(variable_technician)
 

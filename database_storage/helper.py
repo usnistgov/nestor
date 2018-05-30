@@ -37,9 +37,17 @@ import collections
 #         return dict
 
 def openYAMLFile(yaml_path):
-    """
-    open a Yaml file based on the given path
+    """open a Yaml file based on the given path
     :return: a dictionary
+
+    Parameters
+    ----------
+    yaml_path :
+        
+
+    Returns
+    -------
+
     """
     with open(yaml_path, 'r') as yamlfile:
         config = yaml.load(yamlfile)
@@ -48,11 +56,18 @@ def openYAMLFile(yaml_path):
 
 
 def isoStringToDate(date):
-    """
-    convert a ISO8601 String date format to a DateTime format
+    """convert a ISO8601 String date format to a DateTime format
 
-    :param date: a ISO date in String format
-    :return: a DateTime date
+    Parameters
+    ----------
+    date :
+        a ISO date in String format
+
+    Returns
+    -------
+    type
+        a DateTime date
+
     """
     try:
         return datetime(year=int(date[:4]), month=int(date[5:7]), day=int(date[8:10]), hour=int(date[11:13]), minute=int(date[14:16]))
@@ -73,12 +88,20 @@ def isoStringToDate(date):
 
 
 def timeBetweenIsoStringDates(date1, date2):
-    """
-    return the time spen between date1 and date2
+    """return the time spen between date1 and date2
 
-    :param date1: ISO string format of the early date
-    :param date2: ISO string format of the last date
-    :return: timedelta of the difference
+    Parameters
+    ----------
+    date1 :
+        ISO string format of the early date
+    date2 :
+        ISO string format of the last date
+
+    Returns
+    -------
+    type
+        timedelta of the difference
+
     """
     if date1 is None or date1 is "" or date2 is None or date2 is "":
         return None
@@ -87,11 +110,18 @@ def timeBetweenIsoStringDates(date1, date2):
     return isoStringToDate(date2) - isoStringToDate(date1)
 
 def updateDict(d, u):
-    """
-    recursivly merge 2 dictionary
-    :param d:
-    :param u:
-    :return:
+    """recursivly merge 2 dictionary
+
+    Parameters
+    ----------
+    d :
+        param u:
+    u :
+        
+
+    Returns
+    -------
+
     """
     for k, v in u.items():
         if isinstance(v, collections.Mapping):
@@ -102,9 +132,17 @@ def updateDict(d, u):
 
 
 def resultToObservationDataframe(result):
-    """
-    transforn a result into a observation dataframe
+    """transforn a result into a observation dataframe
     :return: the observation dataframe
+
+    Parameters
+    ----------
+    result :
+        
+
+    Returns
+    -------
+
     """
     dataframe_observation= None
     if result:

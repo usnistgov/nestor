@@ -27,10 +27,9 @@ from database_storage.helper import isoStringToDate
 
 
 class Issue:
-    """
-    An ISSUE define every information that refer to the node ISSUE in our database.
+    """An ISSUE define every information that refer to the node ISSUE in our database.
     It setup the properties and query to match with every ISSUE in the database
-
+    
     It is instantiate using:
         - problemn: a String or array of string
         - solution: a String or array of string
@@ -39,7 +38,7 @@ class Issue:
         - part_in_process: a String or array of string
         - necessary_part: a String or array of string
         - machine_down: a boolean or array of boolean
-
+    
         - date_machine_up: a DateTime or array of DateTime
         - date_machine_down: a DateTime or array of DateTime
         - date_workorder_start: a DateTime or array of DateTime
@@ -49,13 +48,13 @@ class Issue:
         - date_problem_solved: a DateTime or array of DateTime
         - date_part_ordered: a DateTime or array of DateTime
         - date_part_received:  a DateTime or array of DateTime
-
+    
         Date needs to be a DateTime type OR a string that respect the ISO format and contains at least
         YYYY-MM-DD up to YYYY-MM-DDTHH:MM seconds and aboce as well as Time Zone Definer are not taking in acount
         See hleper.py - isoStringToDate() function
-
+    
         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
-
+    
     it also contains some time properties calculated based on the date:
         - time_to_repair : date_machine_down --> date_machine_up
         - time_work_order_completion : date_workorder_start --> date_workorder_completion
@@ -69,14 +68,21 @@ class Issue:
         - time_lead_for_part : date_part_ordered --> date_part_received
         - time_to_fix : date_part_received --> date_problem_solve
         - time_to_turn_on : date_problem_solve --> date_machine_up
-
+    
     The time information are not store in the database because we can calculate them very fast,
     but it is totaly possible to store it to recude the computation time but increase the size of the database
-
+    
     It contains getter and setter for every properties, it is highly recommend to use the setter
      because it represent the data as a standard way - the way it is store in the database
     It contains a string representation
     It contains a boolean representation
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
     def __init__(self, problem=None, solution=None, cause=None, effects=None,
@@ -426,9 +432,7 @@ class Issue:
 
 
     def create_all_time(self):
-        """
-        Set all the time based on all the date in the object
-        """
+        """Set all the time based on all the date in the object"""
         self._set_time_to_repair()
         self._set_time_work_order_completion()
         self._set_time_to_dispatch()
@@ -485,26 +489,41 @@ class Issue:
 
 
     def cypher_issue_label(self, variable_issue="issue"):
-        """
-        Create a Cypher query with the given variable and all label for the node ISSUE
-        :param variable_issue: default "issue" to refer to a special node
-        :return: a string - Cypher Query : issue:ISSUE
+        """Create a Cypher query with the given variable and all label for the node ISSUE
+
+        Parameters
+        ----------
+        variable_issue :
+            default "issue" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : issue:ISSUE
+
         """
         return f'{variable_issue}{self.databaseInfoIssue["label"]["issue"]}'
 
     def cypher_issue_all(self, variable_issue="issue"):
-        """
-        Create a Cypher query to return the specific node ISSUE define by all the possible properties
+        """Create a Cypher query to return the specific node ISSUE define by all the possible properties
         (DESCRIPTION_OF_PROBLEM, DESCRIPTION_OF_SOLUTION, DESCRIPTION_OF_CAUSE, DESCRIPTION_OF_EFFECTS,
         MACHINE_DOWN, NECESSARY_PART, PART_IN_PROCESS, DATE_MACHINE_DOWN, DATE_MAINTENANCEWORKOREDER_START,
         DATE_MAINTENANCE_TECHNICIAN_ARRIVE, DATE_PROBLEM_FOUND, DATE_PROBLEM_SOLVE, DATE_PART_RECEIVED,
         DATE_PART_ORDERED, DATE_MACHINE_UP,, DATE_MAINTENANCEWORKORDER_COMPLETION)
-
+        
         The time information are not store in the database because we can calculate them very fast,
         but it is totaly possible to store it to recude the computation time but increase the size of the database
 
-        :param variable_issue: default "issue" to refer to a specific ISSUE
-        :return: a string - Cypher Query : (issue:ISSUE{description_of_problem:"x", description_of_solution:"x", ...})
+        Parameters
+        ----------
+        variable_issue :
+            default "issue" to refer to a specific ISSUE
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (issue:ISSUE{description_of_problem:"x", description_of_solution:"x", ...})
+
         """
 
         query = f'({self.cypher_issue_label(variable_issue)}'
@@ -551,16 +570,23 @@ class Issue:
 
 
     def cypher_issue_whereReturn(self, variable_issue="issue"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this ISSUE
+        """Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this ISSUE
         Used to filter the database based on specifics properties values
-
+        
         For this case, the properties of this object might be an array
         If a value in an array is "_" this property will be added to the return statement
 
-        :param variable_issue: default "issue" to match a specific ISSUE
-        :return: a tuple of arrays - where properties, return properties :
+        Parameters
+        ----------
+        variable_issue :
+            default "issue" to match a specific ISSUE
+
+        Returns
+        -------
+        type
+            a tuple of arrays - where properties, return properties :
             (['issue.description_of_problem = "bob','issue.description_of_problem = "3"]['issue.part_in_process'])
+
         """
 
         cypherWhere = []

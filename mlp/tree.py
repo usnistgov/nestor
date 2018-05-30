@@ -87,6 +87,9 @@ def tag_df_network(tag_df):
 def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
                      dynamic=False, dotfile=None, verbose=False):
     """
+
+    Parameters
+    ----------
     dist_mat: dataframe containing similarity matrix, indexed and named by tags
     cent_prog: algorithm to use in calculating node centrality
         pr: PageRank
@@ -97,6 +100,8 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
     dynamic: re-calculate centrality after adding every tag
     write_dot: fname or None, where to save a .dot, if any.
     verbose: print some stuff
+
+
     """
     #     tau = 5e-4
     cent_dict = {

@@ -30,10 +30,18 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
 
     def set_checkBoxesValues(self, headers):
-        """
-        create the list of checkbox based on the header attribute
+        """create the list of checkbox based on the header attribute
         the header is created using the method set_CSVHeader
         :return:
+
+        Parameters
+        ----------
+        headers :
+            
+
+        Returns
+        -------
+
         """
         self.headers = headers
 
@@ -64,10 +72,16 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             self.buttonGroup_CSVHeaders.addButton(checkBox)
 
     def onClick_check(self, check):
-        """
-        called when we want to set the checkbox to check:True of uncheck:False
-        :param check: True: check/ False:uncheck
-        :return:
+        """called when we want to set the checkbox to check:True of uncheck:False
+
+        Parameters
+        ----------
+        check :
+            True: check/ False:uncheck
+
+        Returns
+        -------
+
         """
         for button in self.buttonGroup_CSVHeaders.buttons():
             button.setChecked(check)
@@ -75,8 +89,15 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
     def get_checkedButton(self):
         """
-        return a list of the text in the button checked
-        :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        type
+            :return:
+
         """
         checked = []
         for button in self.buttonGroup_CSVHeaders.buttons():
@@ -85,10 +106,16 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         return checked
 
     def set_config(self, config):
-        """
-        add to the window the values from the config dict
-        :param config
-        :return:
+        """add to the window the values from the config dict
+
+        Parameters
+        ----------
+        config :
+            return:
+
+        Returns
+        -------
+
         """
         if config['file']['filePath_OriginalCSV']['headers'] is not None:
             for button in self.buttonGroup_CSVHeaders.buttons():
@@ -97,12 +124,18 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
 
     def get_config(self, config):
-        """
-        replace the given config dict with a new one based on the window values
-
+        """replace the given config dict with a new one based on the window values
+        
         it is call when we save the view
-        :param config:
-        :return:
+
+        Parameters
+        ----------
+        config :
+            return:
+
+        Returns
+        -------
+
         """
         checked = []
         for button in self.buttonGroup_CSVHeaders.buttons():
@@ -117,10 +150,18 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             return False, None
 
     def keyPressEvent(self, event):
-        """
-        listenr on the keyboard
-        :param e:
-        :return:
+        """listenr on the keyboard
+
+        Parameters
+        ----------
+        e :
+            return:
+        event :
+            
+
+        Returns
+        -------
+
         """
 
         if event.key() == Qt.Key_Return:

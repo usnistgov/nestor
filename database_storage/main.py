@@ -27,8 +27,7 @@ from database_storage.objects.machine import *
 
 charsplit = ','
 def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
-    """
-    This function is used to import a certain kind of CSV data into the graph database
+    """This function is used to import a certain kind of CSV data into the graph database
     The data should follow this structure but doesn't have to contains all the headers.
     The header's name are define by the input -propertyToHeader_dict- :
         * Maintenance Work order specific information:
@@ -62,29 +61,45 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         Tag Item, Tag Solution, Tag Problem, Tag Unknown, Tag ProblemItem, Tag SolutionItem Infornations:
             - keyword
             - synonyms
-
+    
     In our case, the Tag informations are extracted using the KeyWordExtractor module we created for this purpose
     Or the tagging App (UI created in front end to extract the tag)
-
+    
     To see an example of this CSV, you can see the OpenSource Public Mining Data <Refer to Melinda's project>
 
-
-
-    :param database: Database object from the module database_storage.database.database
-    :param dataframe: Dataframe object from the Pandas Library - represent the of the CSV file -
+    Parameters
+    ----------
+    database :
+        Database object from the module database_storage.database.database
+    dataframe :
+        Dataframe object from the Pandas Library - represent the of the CSV file -
         See example of the CSV in data/mine_data/csvHeader.yaml
-    :param propertyToHeader_dict: dictionary which match the header of the Dataframe (and so tha csv file)
+    propertyToHeader_dict :
+        dictionary which match the header of the Dataframe (and so tha csv file)
         to the database property and node see example in the file data/mine_data/mine_raw.csv
-    :return: 1 when the function has been executed with success - your data are now in your graph database -
+
+    Returns
+    -------
+    type
+        1 when the function has been executed with success - your data are now in your graph database -
+
     """
 
     def create_issue(row,propertyToHeader_issue):
-        """
-        Create the Object ISSUE from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create the Object ISSUE from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_issue: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an ISSUE object or None if something goes wrong
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_issue :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an ISSUE object or None if something goes wrong
+
         """
 
         issue = None
@@ -156,12 +171,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return issue
 
     def create_technicians(row, propertyToHeader_technician):
-        """
-        Create an array of TECHNICIAN Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of TECHNICIAN Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_technician: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TECNICIANs empty if something goes wrong or if there are not technician un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_technician :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of TECNICIANs empty if something goes wrong or if there are not technician un the csv
+
         """
         charsplit = "/"
         skills = []
@@ -189,12 +212,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return technicians
 
     def create_operators(row,propertyToHeader_operator):
-        """
-        Create an array of OPERATOR Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of OPERATOR Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_operator: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of OPERATORs empty if something goes wrong or if there are not operators un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_operator :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of OPERATORs empty if something goes wrong or if there are not operators un the csv
+
         """
         charsplit = "/"
         operators = []
@@ -208,12 +239,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return operators
 
     def create_machine(row, propertyToHeader_machine):
-        """
-        Create a MACHINE Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create a MACHINE Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_machine: a dictionaries that link the header of the CSV data to the properties of the object
-        :return:an MACHINE object or None if something goes wrong or if there are not machine un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_machine :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an MACHINE object or None if something goes wrong or if there are not machine un the csv
+
         """
 
         machine = None
@@ -247,12 +286,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return machine
 
     def create_items(row, propertyToHeader_item):
-        """
-        Create an array of TAGITEMS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of TAGITEMS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_item: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGITEMS empty if something goes wrong or if there are not item_tag un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_item :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of TAGITEMS empty if something goes wrong or if there are not item_tag un the csv
+
         """
         charsplit = ','
         items = []
@@ -267,12 +314,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return items
 
     def create_problems(row, propertyToHeader_problem):
-        """
-        Create an array of TAGPROBLEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of TAGPROBLEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_problem: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGPROBLEM empty if something goes wrong or if there are not problem_tag un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_problem :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of TAGPROBLEM empty if something goes wrong or if there are not problem_tag un the csv
+
         """
         charsplit = ','
         problems = []
@@ -287,12 +342,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return problems
 
     def create_solutions(row, propertyToHeader_solution):
-        """
-        Create an array of TAGSOLUTION Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of TAGSOLUTION Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_solution: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGSOLUTION empty if something goes wrong or if there are not solution_tag un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_solution :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of TAGSOLUTION empty if something goes wrong or if there are not solution_tag un the csv
+
         """
         charsplit = ','
         solutions = []
@@ -307,12 +370,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return solutions
 
     def create_unknowns(row, propertyToHeader_unknown):
-        """
-        Create an array of TAGUNKNOWNS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of TAGUNKNOWNS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_unknown: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGUNKNOWNS empty if something goes wrong or if there are not unknown_tag un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_unknown :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of TAGUNKNOWNS empty if something goes wrong or if there are not unknown_tag un the csv
+
         """
         charsplit = ','
         unknowns = []
@@ -327,12 +398,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return unknowns
 
     def create_problemItems(row, propertyToHeader_problemItem):
-        """
-        Create an array of TAGPROBLEMITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of TAGPROBLEMITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_problemItem: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGPROBLEMITEM empty if something goes wrong or if there are not problemitem_tag un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_problemItem :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of TAGPROBLEMITEM empty if something goes wrong or if there are not problemitem_tag un the csv
+
         """
         charsplit = ','
         problemItems = []
@@ -347,12 +426,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         return problemItems
 
     def create_solutionItems(row, propertyToHeader_solutionItem):
-        """
-        Create an array of TAGSOLUTIONITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+        """Create an array of TAGSOLUTIONITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_solutionItem: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGSOLUTIONITEM empty if something goes wrong or if there are not solutionitem_tag un the csv
+        Parameters
+        ----------
+        row :
+            a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
+        propertyToHeader_solutionItem :
+            a dictionaries that link the header of the CSV data to the properties of the object
+
+        Returns
+        -------
+        type
+            an array of TAGSOLUTIONITEM empty if something goes wrong or if there are not solutionitem_tag un the csv
+
         """
         charsplit = ','
         solutionItems = []
@@ -368,13 +455,19 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
 
 
     def TODO_inagine_linkedItem(items):
-        """
-        This function is actually used to create a child for the item and so make the ITEM --> ITEM relationship
+        """This function is actually used to create a child for the item and so make the ITEM --> ITEM relationship
         It is temporaly and only use to tray some queries
-
+        
         It should be implemented from the user as an item hierarchy
-        :param items:
-        :return:
+
+        Parameters
+        ----------
+        items :
+            return:
+
+        Returns
+        -------
+
         """
         charsplit="_"
         newItems = []

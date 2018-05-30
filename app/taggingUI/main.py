@@ -63,10 +63,18 @@ class Main:
         self.window_OpenFiles.show()
 
     def onClick_windowTaggingTool_selectTab(self, index):
-        """
-        when changing the tab in the taggingUI window (from the 1gram to the Ngram)
+        """when changing the tab in the taggingUI window (from the 1gram to the Ngram)
         Update the Ngram Dataframe and print it back
         :return:
+
+        Parameters
+        ----------
+        index :
+            
+
+        Returns
+        -------
+
         """
         # if Ngramm
         if index == 1:
@@ -80,10 +88,16 @@ class Main:
 
 
     def openWindow_to_selectWindow(self):
-        """
-           When click on the save button in the OpenFiles Window
+        """When click on the save button in the OpenFiles Window
            Open the selectCSVHeader Window
            :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         # done is True when self.window_OpenFiles.get_AllFilesPath() was executed with success
@@ -120,10 +134,16 @@ class Main:
             self.window_selectCSVHeader.show()
 
     def selectWindow_to_taggingWindow(self):
-        """
-        When click on the save button in the selectCSVHeader Window
+        """When click on the save button in the selectCSVHeader Window
         Open the taggingTool Window
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         done, self.config_new = self.window_selectCSVHeader.get_config(self.config_new)
 
@@ -158,11 +178,18 @@ class Main:
             self.window_taggingTool.show()
 
     def update_ngram_from_1gram(self, filename=None, init=None):
-        """
-        update the Bgram dataframe from the new 1gram input
-        :param filename:
-        :param init:
-        :return:
+        """update the Bgram dataframe from the new 1gram input
+
+        Parameters
+        ----------
+        filename :
+            param init: (Default value = None)
+        init :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
 
         self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
@@ -184,9 +211,19 @@ class Main:
 
 
     def openYAMLConfig_File(self, yaml_path, dict=None):
-        """
-        open a Yaml file based on the given path
+        """open a Yaml file based on the given path
         :return: a dictionary
+
+        Parameters
+        ----------
+        yaml_path :
+            
+        dict :
+             (Default value = None)
+
+        Returns
+        -------
+
         """
         try:
             with open(yaml_path, 'r') as yamlfile:
@@ -201,9 +238,19 @@ class Main:
 
 
     def saveYAMLConfig_File(self, yaml_path, dict):
-        """
-        save a Yaml file based on the given path
+        """save a Yaml file based on the given path
         :return: a dictionary
+
+        Parameters
+        ----------
+        yaml_path :
+            
+        dict :
+            
+
+        Returns
+        -------
+
         """
         with open(yaml_path, 'w') as yamlfile:
             yaml.dump(dict, yamlfile)
@@ -211,9 +258,17 @@ class Main:
 
 
     def close_taggingUIWindow(self, event):
-        """
-        Trigger when closing the window tagginUI
+        """Trigger when closing the window tagginUI
         :return:
+
+        Parameters
+        ----------
+        event :
+            
+
+        Returns
+        -------
+
         """
         choice = Qw.QMessageBox.question(self.window_taggingTool, 'Shut it Down',
                                   'Do you want to save your changes before closing?',
@@ -234,9 +289,17 @@ class Main:
 
 
     def close_otherWindow(self, window):
-        """
-        trigger when closing the other window
+        """trigger when closing the other window
         :return:
+
+        Parameters
+        ----------
+        window :
+            
+
+        Returns
+        -------
+
         """
         self.config_new = window._get_config(self.config_new)
         self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)

@@ -20,23 +20,29 @@ Description:
 """
 
 class Machine:
-    """
-    A MACHINE define every information that refer to the node MACHINE and MACHINE_TYPE in our database.
+    """A MACHINE define every information that refer to the node MACHINE and MACHINE_TYPE in our database.
     It setup the properties and query to match with every MACHINE and MACHINE_TYPE in the database
     The MACHINE is define using the property NAME, MANUFACTURER, LOCATION
     The MACHINE_TYPE is define using a property TYPE
-
+    
     It is instantiate using:
         - name: a String or array of string
         - manufacturer : a String or array of string
         - locasion: a String or array of string
         - machine_type: a String or array of string
         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
-
+    
     It contains getter and setter for every properties, it is highly recommend to use the setter
      because it represent the data as a standard way - the way it is store in the database
     It contains a string representation
     It contains a boolean representation
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
 
 
@@ -108,30 +114,54 @@ class Machine:
                f"Type: {self.machine_type}"
 
     def cypher_machine_label(self, variable_machine="machine"):
-        """
-        Create a Cypher query with the given variable and all label for the node MACHINE
-        :param variable_machine: default "machine" to refer to a special node
-        :return: a string - Cypher Query : machine:MACHINE
+        """Create a Cypher query with the given variable and all label for the node MACHINE
+
+        Parameters
+        ----------
+        variable_machine :
+            default "machine" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : machine:MACHINE
+
         """
         return f'{variable_machine}{self.databaseInfoMachine["label"]["machine"]}'
 
     def cypher_machine_name(self, variable_machine="machine"):
+        """Create a Cypher query to return the specific node MACHINE define by the property NAME
+
+        Parameters
+        ----------
+        variable_machine :
+            default "machine" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (machine:MACHINE{name:"x"})
+            OR empty string if the MACHINE has no NAME
+
         """
-         Create a Cypher query to return the specific node MACHINE define by the property NAME
-         :param variable_machine: default "machine" to refer to a special node
-         :return: a string - Cypher Query : (machine:MACHINE{name:"x"})
-             OR empty string if the MACHINE has no NAME
-         """
         if not self.name:
             return ""
         return f'({self.cypher_machine_label(variable_machine)}' + \
                "{" + f'{self.databaseInfoMachine["properties"]["name"]}:"{self.name}"' + "})"
 
     def cypher_machine_all(self, variable_machine="machine"):
-        """
-        Create a Cypher query to return the specific node MACHINE define by all the possible properties (NAME, MANUFACTURER, LOCATION)
-        :param variable_machine: default "machine" to refer to a specific MACHINE
-        :return: a string - Cypher Query : (machine:MACHINE{name:"x", manufacturer:"x", location:"x"})
+        """Create a Cypher query to return the specific node MACHINE define by all the possible properties (NAME, MANUFACTURER, LOCATION)
+
+        Parameters
+        ----------
+        variable_machine :
+            default "machine" to refer to a specific MACHINE
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (machine:MACHINE{name:"x", manufacturer:"x", location:"x"})
+
         """
         query = f'({self.cypher_machine_label(variable_machine)}'
         if self.name or self.manufacturer or self.location is not None:
@@ -146,14 +176,22 @@ class Machine:
         return query + ")"
 
     def cypher_machine_merge(self, variable_machine="machine"):
-        """
-         Create a Cypher query to merge the node MACHINE using his property NAME
+        """Create a Cypher query to merge the node MACHINE using his property NAME
          and Set the missing properties (MANUFACTURER, LOCATION)
-         :param variable_machine: default "machine" to refer to a specific MACHINE
-         :return: a string - Cypher Query : MERGE (machine:MACHINE{name:"x"})
-                                            SET machine.manufacturer = "x"
-                                            SET machine.location = "x"
-         """
+
+        Parameters
+        ----------
+        variable_machine :
+            default "machine" to refer to a specific MACHINE
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : MERGE (machine:MACHINE{name:"x"})
+            SET machine.manufacturer = "x"
+            SET machine.location = "x"
+
+        """
         if not self.name:
             return ""
         query = f'\nMERGE {self.cypher_machine_name(variable_machine)}'
@@ -164,16 +202,23 @@ class Machine:
         return query
 
     def cypher_machine_whereReturn(self, variable_machine="machine"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE
+        """Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE
         Used to filter the database based on specifics properties values
-
+        
         For this case, the properties of this object might be an array
         If a value in an array is "_" this property will be added to the return statement
 
-        :param variable_machine: default "machine" to match a specific MACHINE
-        :return: a tuple of arrays - where properties, return properties :
+        Parameters
+        ----------
+        variable_machine :
+            default "machine" to match a specific MACHINE
+
+        Returns
+        -------
+        type
+            a tuple of arrays - where properties, return properties :
             (['machine.name = "bob','machine.manufacturer = "3", 'machine.location = "y"']['machine.location'])
+
         """
         cypherWhere = []
         cypherReturn = []
@@ -201,31 +246,55 @@ class Machine:
 
 
     def cypher_machinetype_label(self, variable_machinetype="machine_type"):
-        """
-        Create a Cypher query with the given variable and all label for the node MACHINE_TYPE
-        :param variable_machinetype: default "machine_type" to refer to the node
-        :return: a string - Cypher Query : machine_type:MACHINE_TYPE
+        """Create a Cypher query with the given variable and all label for the node MACHINE_TYPE
+
+        Parameters
+        ----------
+        variable_machinetype :
+            default "machine_type" to refer to the node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : machine_type:MACHINE_TYPE
+
         """
         return f'{variable_machinetype}{self.databaseInfoMachine["label"]["type"]}'
 
 
     def cypher_machinetype_type(self, variable_machinetype="machine_type"):
+        """Create a Cypher query to return the specific node MACHINE_TYPE define by the property TYPE
+
+        Parameters
+        ----------
+        variable_machinetype :
+            default "machine_type" to refer to a special node
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (machine_type:MACHINE_TYPE{type:"x"})
+            OR empty string if the MACHINE_TYPE has no TYPE
+
         """
-         Create a Cypher query to return the specific node MACHINE_TYPE define by the property TYPE
-         :param variable_machinetype: default "machine_type" to refer to a special node
-         :return: a string - Cypher Query : (machine_type:MACHINE_TYPE{type:"x"})
-             OR empty string if the MACHINE_TYPE has no TYPE
-         """
         if not self.machine_type:
             return ""
         return f'( {self.cypher_machinetype_label(variable_machinetype)}' + \
                "{" + f'{self.databaseInfoMachine["properties"]["type"]}:"{self.machine_type}"' + "})"
 
     def cypher_machinetype_all(self, variable_machinetype="machine_type"):
-        """
-        Create a Cypher query to return the specific node MACHINE_TYPE define by all the possible properties (TYPE)
-        :param variable_machinetype: default "machine_type" to refer to a specific MACHINE_TYPE
-        :return: a string - Cypher Query : (machine_type:MACHINE_TYPE{type:"x"})
+        """Create a Cypher query to return the specific node MACHINE_TYPE define by all the possible properties (TYPE)
+
+        Parameters
+        ----------
+        variable_machinetype :
+            default "machine_type" to refer to a specific MACHINE_TYPE
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : (machine_type:MACHINE_TYPE{type:"x"})
+
         """
         query = f'( {self.cypher_machinetype_label(variable_machinetype)}'
         if self.machine_type:
@@ -236,12 +305,20 @@ class Machine:
 
 
     def cypher_machinetype_merge(self, variable_machinetype="machine_type"):
-        """
-         Create a Cypher query to merge the node MACHINE_TYPE using his property TYPE
+        """Create a Cypher query to merge the node MACHINE_TYPE using his property TYPE
          and Set the missing properties (none in that case)
-         :param variable_machinetype: default "machine_type" to refer to a specific MACHINE_TYPE
-         :return: a string - Cypher Query : MERGE (machine_type:MACHINE_TYPE{type:"x"})
-         """
+
+        Parameters
+        ----------
+        variable_machinetype :
+            default "machine_type" to refer to a specific MACHINE_TYPE
+
+        Returns
+        -------
+        type
+            a string - Cypher Query : MERGE (machine_type:MACHINE_TYPE{type:"x"})
+
+        """
         if not self.name:
             return ""
         query = f'\nMERGE {self.cypher_machinetype_type(variable_machinetype)}'
@@ -249,16 +326,23 @@ class Machine:
 
 
     def cypher_machinetype_whereReturn(self, variable_machinetype="machine_type"):
-        """
-        Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE_TYPE
+        """Create 2 arrays used for the WHERE clause and the RETURN clause of the Cypher Query from this MACHINE_TYPE
         Used to filter the database based on specifics properties values
-
+        
         For this case, the properties of this object might be an array
         If a value in an array is "_" this property will be added to the return statement
 
-        :param variable_machinetype: default "machine_type" to match a specific MACHINE_TYPE
-        :return: a tuple of arrays - where properties, return properties :
+        Parameters
+        ----------
+        variable_machinetype :
+            default "machine_type" to match a specific MACHINE_TYPE
+
+        Returns
+        -------
+        type
+            a tuple of arrays - where properties, return properties :
             (['machine_type.type = "bob','machine_type.type = "3"]['machine_type.type'])
+
         """
         cypherWhere = []
         cypherReturn = []

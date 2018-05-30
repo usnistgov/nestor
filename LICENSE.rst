@@ -1,6 +1,5 @@
-------------
 Terms of Use
-------------
+============
 
 This software was developed at the `National Institute of Standards
 and Technology`_ by employees of the Federal Government in the course

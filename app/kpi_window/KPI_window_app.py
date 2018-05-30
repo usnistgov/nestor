@@ -16,15 +16,21 @@ from database.KPI import Plot
 
 
 class LayoutLeftKpiSelection:
-    """
-    an object that take care of the left part of the UI: the selection of the information
+    """an object that take care of the left part of the UI: the selection of the information
     The goal is to get all the properties from the given database,
     Print it
     allow the user to select the variable he wants to return
     filter on the data he wants
-
+    
     when clicking on the Search button, it will send to the mainWindow : MyWindow
     the needed query to creat a pandas dataframe with the information
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
     def __init__(self, layout, parent_layout, label_properties):
         """
@@ -70,18 +76,30 @@ class LayoutLeftKpiSelection:
         self.layout.addWidget(self.Left_PButton_search, self.rowX, 1, 2, 1)
 
     def clean_Layout(self):
-        """
-        clean the form layout by removing all the Widget in it
+        """clean the form layout by removing all the Widget in it
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         for i in reversed(range(self.layout.count())):
             if self.layout.itemAt(i).widget() is not None:
                 self.layout.itemAt(i).widget().deleteLater()
 
     def print_form_property(self):
-        """
-        it print the view for the properties information based on the self.label_properties
+        """it print the view for the properties information based on the self.label_properties
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         self.rowX += 1
 
@@ -122,9 +140,15 @@ class LayoutLeftKpiSelection:
 
 
     def create_objects(self):
-        """
-            Create all the objects based on the lcheckbox and the texedit
+        """Create all the objects based on the lcheckbox and the texedit
             it return a lists of non None objects
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         objects = set()
 
@@ -355,13 +379,19 @@ class LayoutLeftKpiSelection:
 
 
 class LayoutCenterPlotSelection:
-    """
-    Class that contains all the information to take care about the center layout :
+    """Class that contains all the information to take care about the center layout :
     it is used to select the given plot you want to print
     add the information of this plot based on the need and the pandas dataframe created by the class LayoutKpiSelection
     It return the information to the MainWindow about the plot selection
-
+    
     The plot information is send as a dictionary by the MainWindow: MyWindow
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
     def __init__(self, layout, parent_layout, dict_plot):
 
@@ -381,10 +411,16 @@ class LayoutCenterPlotSelection:
 
 
     def _set_possible_xy_values(self, array_xy_values):
-        """
-        this function set the content of every combobox from a given array
-        :param array_xy_values: the array of value to be added
-        :return:
+        """this function set the content of every combobox from a given array
+
+        Parameters
+        ----------
+        array_xy_values :
+            the array of value to be added
+
+        Returns
+        -------
+
         """
         self.array_xy_values = array_xy_values
 
@@ -395,10 +431,16 @@ class LayoutCenterPlotSelection:
 
 
     def print_plot_settings(self):
-        """
-        this function create and print the Widget in the form
+        """this function create and print the Widget in the form
         It changes based on the plot selected
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         self.clean_formLayout()
@@ -422,18 +464,30 @@ class LayoutCenterPlotSelection:
 
 
     def clean_formLayout(self):
-        """
-        clean the form layout by removing all the Widget in it
+        """clean the form layout by removing all the Widget in it
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         for i in reversed(range(self.Center_formLayout_infoPlot.count())):
             if self.Center_formLayout_infoPlot.itemAt(i).widget() is not None:
                 self.Center_formLayout_infoPlot.itemAt(i).widget().deleteLater()
 
     def initial_view(self):
-        """
-        create the initial view for the Center layout
+        """create the initial view for the Center layout
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
 
         #print the comboBox
@@ -462,13 +516,18 @@ class LayoutCenterPlotSelection:
 
 
 class LayoutRightPlotPrint:
-    """
-    Contains all the information to take care of the right layout :
+    """Contains all the information to take care of the right layout :
     it is used to print the given plot but also it contains the save information
-
+    
     It gather the plot information send by the centerlayout
     and the pandas dataframe create based on the leftlayout
     to print a nice matplotlib plot
+
+    Parameters
+    ----------
+
+    Returns
+    -------
 
     """
     def __init__(self, layout, parent_layout):
@@ -490,9 +549,15 @@ class LayoutRightPlotPrint:
         self.properties = properties
 
     def initial_view(self):
-        """
-        the initial view of the tool
+        """the initial view of the tool
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         self.Right_VBoxLayout_PlotView = Qw.QVBoxLayout(self.parent_layout)
         self.Right_VBoxLayout_PlotView.setObjectName("Right_graphicsView_Plot")
@@ -515,9 +580,15 @@ class LayoutRightPlotPrint:
 
 
     def print_plot(self):
-        """
-        print the plot on the layout
+        """print the plot on the layout
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         self.clean_plotLayout()
 
@@ -547,22 +618,34 @@ class LayoutRightPlotPrint:
 
 
     def clean_plotLayout(self):
-        """
-        clean the plot layout
+        """clean the plot layout
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         for i in reversed(range(self.Right_VBoxLayout_PlotView.count())):
             if self.Right_VBoxLayout_PlotView.itemAt(i).widget() is not None:
                 self.Right_VBoxLayout_PlotView.itemAt(i).widget().deleteLater()
 
 class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
-    """
-    the main class it make the interaction between all the different view and the database: it is kind of a controller
+    """the main class it make the interaction between all the different view and the database: it is kind of a controller
     it ask the database to give a dict that contains the node and propeties from the given database
     it give this information to the class LayoutKpiSelection to allow the user to select the needed data
         this return a query used to ask the database to create the pandas dataframe
     it give the information to the class LayoutPlotSelection to allow the user to select the needed plot information
     It used the pandas and the plot information to create a plot and send it to the class LayoutPlotView to print it
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
     """
     def __init__(self, database=None):
         Qw.QMainWindow.__init__(self)
@@ -595,14 +678,21 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 
 
     def onClick_leftLayout_searchButton(self):
-        """
-        when you click on the search buttom from the left layout
+        """when you click on the search buttom from the left layout
         it gather all information selected
         create an object to represent it when needed
         and it return the query in cypher language
         and the array of the possible selection
         :return: query, array of seletion
-        # """
+        #
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
 
         objects = self.Left_View_labelProperties.create_objects()
         # for obj in objects:
@@ -621,10 +711,16 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 
 
     def onClick_centerLayout_printPlotButton(self):
-        """
-        when you click on rhe center button
+        """when you click on rhe center button
         it gather the needed information for the plot in a dictionary
         :return: dictionary
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         form_layout = self.Center_view_plotSelection.Center_formLayout_infoPlot
         plot_text = self.Center_view_plotSelection.Center_comboBox_select_plot.currentText()
@@ -647,10 +743,16 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
         self.Right_view_plorPrint.print_plot()
 
     def onClick_saveJson(self):
-        """
-        when you want to save the information to create your plot
+        """when you want to save the information to create your plot
         it gather the query, the dictionary created from the center layout and save it in an json file
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         if self.query and self.array_selection and self.dict_needed_plot is not None:
             name, okPressed = Qw.QInputDialog.getText(self, "Get Name", "plot name", Qw.QLineEdit.Normal, "")
@@ -677,9 +779,15 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 
 
     def onClick_savePlot(self):
-        """
-        save the plot as a png images in you folder
+        """save the plot as a png images in you folder
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         if self.Right_view_plorPrint.plot is not None:
             name, okPressed = Qw.QInputDialog.getText(self, "Get Name", "plot name", Qw.QLineEdit.Normal, "")
@@ -690,9 +798,15 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 
 
     def onClick_openJson(self):
-        """
-        to add the information back to the user from the information previously saved
+        """to add the information back to the user from the information previously saved
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         if self.file_jsonPlot_save:
             self.Left_View_labelProperties.clean_Layout()
@@ -729,9 +843,15 @@ class MyWindow(Qw.QMainWindow, Ui_KPIWindow):
 
 
     def close_application(self):
-        """
-        close the application
+        """close the application
         :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
         """
         # this running means somewhere, an option to leave has been clicked
         choice = Qw.QMessageBox.question(self, 'Shut it Down',
