@@ -125,11 +125,17 @@ def standardizeString(string):
     return string.replace('\\','\\\\').replace("'","\\'").lstrip()
 
 
-def getListIndexDataframe(dataframe, rownumber, classification):
+def getListCollumnDataframe(dataframe, rownumber, classification):
     """
     for a given dataframe , a row number and a classification,
     Return a Serie of the 1 value
     """
     serie = dataframe[classification].iloc[rownumber]
     return serie[serie > 0].index.values
+
+
+def getListIndexDataframe(dataframe, keyword, classification):
+    serie = dataframe[classification][keyword]
+
+    return serie[serie > 0].axes[0].tolist()
 

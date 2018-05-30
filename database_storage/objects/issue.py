@@ -89,7 +89,8 @@ class Issue:
                  date_maintenance_technician_arrive=None,
                  date_problem_found=None, date_problem_solved=None,
                  date_part_ordered=None, date_part_received=None,
-                 databaseInfo=None):
+                 databaseInfo=None,
+                 id=None):
         self.databaseInfoIssue = databaseInfo['issue']
         self.label = self.databaseInfoIssue['label']['issue']
 
@@ -116,6 +117,14 @@ class Issue:
 
         self._set_date_part_ordered(date_part_ordered)
         self._set_date_part_received(date_part_received)
+
+        self._set_id(id)
+
+    def _get_id(self):
+        return self.id
+
+    def _set_id(self, id):
+        self.id = id
 
     def _get_problem(self):
         return self.problem
@@ -561,5 +570,7 @@ class Issue:
                 query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered}\','
             if self.date_part_received:
                 query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received}\','
+            if self.id:
+                query += f'{self.databaseInfoIssue["properties"]["id"]}:{self.id},'
             query = query[:-1] + "}"
         return query + ")"

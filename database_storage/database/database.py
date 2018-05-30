@@ -14,7 +14,6 @@ Description:
    but will respect the graph schema created to solve our problem
    It use the neo4j driver for python
 """
-import pandas as pd
 from tqdm import tqdm
 from neo4j.v1 import GraphDatabase
 
@@ -60,6 +59,20 @@ class DatabaseNeo4J(object):
         except:
             return 0, None
 
+    def runQueries(self, queries):
+        """
+        execute all the query from an array of queries
+        :param queries:
+        :return: 1
+        """
+
+        for query in tqdm(queries):
+            done, result = self.runQuery(query)
+
+            if not done:
+                print("ERROR on Maintenance Work Order \tOn query\n", query, "\n\n")
+        return 1
+
     def deleteData(self):
         """
         Delete all the data from the database
@@ -98,6 +111,27 @@ class DatabaseNeo4J(object):
                 session.write_transaction(self._execute_code, "DROP %s" % (index[0]))
         return 1
 
+
+    def createConstraints(self):
+        """
+        Create the constriants on the database
+        :return: 1 if it works
+        """
+        print(f'CREATE CONSTRAINT ON (issue{self.schema["issue"]["label"]["issue"]}) ASSERT issue.{self.schema["issue"]["properties"]["id"]} IS UNIQUE')
+
+        self.runQuery(f'CREATE CONSTRAINT ON (issue{self.schema["issue"]["label"]["issue"]}) ASSERT issue.{self.schema["issue"]["properties"]["id"]} IS UNIQUE')
+        return 1
+
+    def dropConstraints(self):
+        """
+        Delete all constraints from the database
+        :return: 1 if it works
+        """
+        with self._driver.session() as session:
+            indexes = session.write_transaction(self._execute_code, "CALL db.constraints")
+            for index in indexes:
+                session.write_transaction(self._execute_code, "DROP %s" % (index[0]))
+        return 1
 
     @staticmethod
     def _execute_code(tx, query):
