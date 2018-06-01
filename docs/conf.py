@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'mlpy'
+project = 'nestor'
 copyright = '2018, Thurston Sexton, Michael Brundage, Sascha Moccozet'
 author = 'Thurston Sexton, Michael Brundage, Sascha Moccozet'
 
@@ -114,7 +114,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'mlpydoc'
+htmlhelp_basename = 'nestordoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -141,7 +141,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'mlpy.tex', 'mlpy Documentation',
+    (master_doc, 'nestor.tex', 'nestor Documentation',
      'Thurston Sexton, Michael Brundage, Sascha Moccozet', 'manual'),
 ]
 
@@ -151,7 +151,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'mlpy', 'mlpy Documentation',
+    (master_doc, 'nestor', 'nestor Documentation',
      [author], 1)
 ]
 
@@ -162,8 +162,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'mlpy', 'mlpy Documentation',
-     author, 'mlpy', 'One line description of project.',
+    (master_doc, 'nestor', 'nestor Documentation',
+     author, 'nestor', 'One line description of project.',
      'Miscellaneous'),
 ]
 
