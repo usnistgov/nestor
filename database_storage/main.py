@@ -369,11 +369,87 @@ def graphDatabase_from_binnaryCSV(database, originalDataframe, binnaryDataframe,
 
         return queries
 
-    def cypherCreateLink_1GramNgram():
-        query = f'\nMATCH (ngram{database.schema["tag"]["label"]["ngram"]})' \
-                f'\nWITH split(ngram.{database.schema["tag"]["propoerties"]["keyword"]}[0] AS match)' \
-                f'\nMATCH (item{database.schema["tag"]["label"]["item"]} {{{database.schema["tag"]["propoerties"]["keyword"]}:match}})' \
-                f'\nMERGE (item)-[relationship]->(ngram)'
+    def cypherCreateLink_1GramNgram(database):
+
+        queries = []
+
+        problemItem = TagProblemItem(databaseInfo=database.schema)
+        solutionItem = TagSolutionItem(databaseInfo=database.schema)
+        item = TagItem(databaseInfo=database.schema)
+        problem = TagProblem(databaseInfo=database.schema)
+        solution = TagSolution(databaseInfo=database.schema)
+        unknown = TagUnknown(databaseInfo=database.schema)
+
+        query = f'\nMATCH (problemitem{problemItem.label})' \
+                f'\nWITH problemitem, split(problemitem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+                f'\nUNWIND halfTags AS halfTag' \
+                f'\nMATCH (problem{problem.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+                f'\nMERGE (problemitem)-[{database.schema["edges"]["problemitem-problem"]}]->(problem)'
+        queries.append(query)
+
+        query = f'\nMATCH (problemitem{problemItem.label})' \
+                f'\nWITH problemitem, split(problemitem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+                f'\nUNWIND halfTags AS halfTag' \
+                f'\nMATCH (item{item.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+                f'\nMERGE (problemitem)-[{database.schema["edges"]["problemitem-item"]}]->(item)'
+        queries.append(query)
+
+        query = f'\nMATCH (problemitem{problemItem.label})' \
+                f'\nWITH problemitem, split(problemitem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+                f'\nUNWIND halfTags AS halfTag' \
+                f'\nMATCH (unknown{unknown.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+                f'\nMERGE (problemitem)-[{database.schema["edges"]["problemitem-unknown"]}]->(unknown)'
+        queries.append(query)
+
+
+        query = f'\nMATCH (solutionItem{solutionItem.label})' \
+                f'\nWITH solutionItem, split(solutionItem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+                f'\nUNWIND halfTags AS halfTag' \
+                f'\nMATCH (solution{solution.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+                f'\nMERGE (solutionItem)-[{database.schema["edges"]["solutionitem-solution"]}]->(solution)'
+        queries.append(query)
+
+        query = f'\nMATCH (solutionItem{solutionItem.label})' \
+                f'\nWITH solutionItem, split(solutionItem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+                f'\nUNWIND halfTags AS halfTag' \
+                f'\nMATCH (item{item.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+                f'\nMERGE (solutionItem)-[{database.schema["edges"]["solutionitem-item"]}]->(item)'
+        queries.append(query)
+
+        query = f'\nMATCH (solutionItem{problemItem.label})' \
+                f'\nWITH solutionItem, split(solutionItem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+                f'\nUNWIND halfTags AS halfTag' \
+                f'\nMATCH (unkknown{unknown.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+                f'\nMERGE (solutionItem)-[{database.schema["edges"]["solutionitem-unknown"]}]->(unknown)'
+        queries.append(query)
+
+        return queries
+
+
+    def cypherCreateNewLink_issueItem(database):
+
+        queries= []
+
+        issue= Issue(databaseInfo=database.schema)
+        problemItem = TagProblemItem(databaseInfo=database.schema)
+        solutionItem = TagSolutionItem(databaseInfo=database.schema)
+        item = TagItem(databaseInfo=database.schema)
+
+        query = f'\nMATCH (issue{issue.label})-[{database.schema["edges"]["issue-problemitem"]}]->(problemitem{problemItem.label})' \
+                f'\nMATCH (issue)-[{database.schema["edges"]["issue-item"]}]->(item{item.label})' \
+                f'\nWHERE (problemitem)-[{database.schema["edges"]["problemitem-item"]}]->(item)' \
+                f'\nMERGE (issue)-[{database.schema["edges"]["issue-itemasproblem"]}]->(item)'
+        queries.append(query)
+
+        query = f'\nMATCH (issue{issue.label})-[{database.schema["edges"]["issue-solutionitem"]}]->(solutionitem{solutionItem.label})' \
+                f'\nMATCH (issue)-[{database.schema["edges"]["issue-item"]}]->(item{item.label})' \
+                f'\nWHERE (solutionitem)-[{database.schema["edges"]["solutionitem-item"]}]->(item)' \
+                f'\nMERGE (issue)-[{database.schema["edges"]["issue-itemassolution"]}]->(item)'
+        queries.append(query)
+
+        return queries
+
+
     #
     # def create_items(tags):
     #     """
@@ -459,16 +535,15 @@ def graphDatabase_from_binnaryCSV(database, originalDataframe, binnaryDataframe,
     print("-- Queries from the HISTORICAL dataset created !!")
     queries += cypherCreate_tags(binnaryDataframe)
     print("-- Queries from the 1GRAM TAGGED dataset created !!")
-    print(binnaryRelationshipDataframe)
     queries += cypherCreate_tags(binnaryRelationshipDataframe)
     print("-- Queries from the NGRAM TAGGED dataset created !!")
 
 
-    # queries += cypherCreateLink_1GramNgram(binnaryDataframe, binnaryRelationshipDataframe)
-    # print("-- Queries to linked 1GRAM TAG and NGRAM TAG created!!")
+    queries += cypherCreateLink_1GramNgram(database)
+    print("-- Queries to linked 1GRAM TAG and NGRAM TAG created!!")
 
-    # queries += cypherCreate_tags(binnaryRelationshipDataframe)
-    # print("-- Queries to update ITEM TAG and ISSUE relationship created!!")
+    queries += cypherCreateNewLink_issueItem(database)
+    print("-- Queries to update ITEM TAG to ISSUE relationship created!!")
 
 
 
