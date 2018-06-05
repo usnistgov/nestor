@@ -423,6 +423,8 @@ def graphDatabase_from_binnaryCSV(database, originalDataframe, binnaryDataframe,
                 f'\nMERGE (solutionItem)-[{database.schema["edges"]["solutionitem-unknown"]}]->(unknown)'
         queries.append(query)
 
+        print(query)
+
         return queries
 
 

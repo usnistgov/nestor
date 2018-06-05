@@ -20,7 +20,6 @@ issue:
     date_problem_solve: date_problem_solve
     date_machine_up: date_machine_up
     date_workorder_completion : date_maintenanceworkorder_completion
-
     id : id
 
 human:
@@ -78,7 +77,4 @@ edges:
   solutionitem-solution: ':COMPOSED_OF'
   solutionitem-item: ':COMPOSED_OF'
   solutionitem-unknown: ':COMPOSED_OF'
-  solutionitem-onegram: ':COMPOSED_OF'
-  problemitem-onegram: ':COMPOSED_OF'
-  ngram-onegram: ':COMPOSED_OF'
 
