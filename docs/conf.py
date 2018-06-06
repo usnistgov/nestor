@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'nestor'
-copyright = '2018, Thurston Sexton, Michael Brundage, Sascha Moccozet'
-author = 'Thurston Sexton, Michael Brundage, Sascha Moccozet'
+# copyright = '2018, Thurston Sexton, Michael Brundage, Sascha Moccozet'
+author = "KEA Development Team"
 
 # The short X.Y version
 version = ''
@@ -40,6 +40,7 @@ release = '0.2.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'nbsphinx',
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -47,18 +48,32 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
 ]
+exclude_patterns = []
 
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
 napoleon_numpy_docstring = True
 
+# Don't auto-generate summary for class members.
+numpydoc_show_class_members = False
+
+# Show the documentation of __init__ and the class docstring
+autoclass_content = 'both'
+
+# Do not show the return type as seperate section
+napoleon_use_rtype = False
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# The suffix(es) of source filenames.
+## The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
+
+# source_parsers = {
+#     '.md': 'recommonmark.parser.CommonMarkParser',
+# }
 # source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
@@ -75,7 +90,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+
+nbsphinx_execute = 'never'
+nbsphinx_allow_errors = True
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'

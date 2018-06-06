@@ -17,7 +17,7 @@ Contents:
 
    readme
    step_by_step
-
+   examples
 
 Indices and tables
 ==================
