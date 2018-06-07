@@ -117,8 +117,6 @@ class DatabaseNeo4J(object):
         Create the constriants on the database
         :return: 1 if it works
         """
-        print(f'CREATE CONSTRAINT ON (issue{self.schema["issue"]["label"]["issue"]}) ASSERT issue.{self.schema["issue"]["properties"]["id"]} IS UNIQUE')
-
         self.runQuery(f'CREATE CONSTRAINT ON (issue{self.schema["issue"]["label"]["issue"]}) ASSERT issue.{self.schema["issue"]["properties"]["id"]} IS UNIQUE')
         return 1
 

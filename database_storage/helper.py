@@ -56,17 +56,17 @@ def isoStringToDate(date):
     """
     try:
         return datetime(year=int(date[:4]), month=int(date[5:7]), day=int(date[8:10]), hour=int(date[11:13]), minute=int(date[14:16]))
-    except AttributeError and ValueError:
+    except (AttributeError, ValueError):
         pass
 
     try:
         return datetime(year=int(date[:4]), month=int(date[5:7]), day=int(date[8:10]), hour=int(date[11:13]))
-    except AttributeError and ValueError:
+    except (AttributeError, ValueError):
         pass
 
     try:
         return datetime(year=int(date[:4]), month=int(date[5:7]), day=int(date[8:10]))
-    except AttributeError and ValueError:
+    except (AttributeError, ValueError):
         pass
 
     return None
@@ -113,6 +113,7 @@ def resultToObservationDataframe(result):
     else:
         print("The dataframe cannot be created")
     return dataframe_observation
+
 
 def standardizeString(string):
     """
