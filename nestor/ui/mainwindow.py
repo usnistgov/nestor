@@ -1,7 +1,15 @@
-from app.taggingUI import *
+import yaml
+import pandas as pd
+import chardet
+from .. import keyword as kex
+
+from .helper_objects import *
+from .openFilesUI_app import *
+from .selectCSVHeadersUI_app import *
+from .taggingUI_app import *
 
 
-class Main:
+class MainWindow:
     def __init__(self):
         self.icnoPtah=None
         self.yamlPath_config = "config.yaml"
@@ -312,8 +320,8 @@ class Main:
             app.exec_()
 
 
-if __name__ == "__main__":
-    app = Qw.QApplication(sys.argv)
-    main = Main()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     app = Qw.QApplication(sys.argv)
+#     main = MainWindow()
+#     sys.exit(app.exec_())
 

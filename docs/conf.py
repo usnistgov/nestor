@@ -16,6 +16,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../nestor'))
 
 
 # -- Project information -----------------------------------------------------
@@ -25,7 +26,7 @@ project = 'nestor'
 author = "KEA Development Team"
 
 # The short X.Y version
-version = ''
+version = '0.2.0'
 # The full version, including alpha/beta/rc tags
 release = '0.2.0'
 
@@ -49,7 +50,6 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinxcontrib.bibtex',
 ]
-exclude_patterns = []
 
 napoleon_google_docstring = False
 napoleon_use_param = False
@@ -75,7 +75,7 @@ templates_path = ['_templates']
 # source_parsers = {
 #     '.md': 'recommonmark.parser.CommonMarkParser',
 # }
-# source_suffix = ['.rst', '.md']
+source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
 # The master toctree document.
@@ -133,7 +133,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'mlpydoc'
+htmlhelp_basename = 'nestordoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -160,7 +160,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'mlpy.tex', 'mlpy Documentation',
+    (master_doc, 'nestor.tex', 'nestor Documentation',
      'Thurston Sexton, Michael Brundage, Sascha Moccozet', 'manual'),
 ]
 
@@ -170,7 +170,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'mlpy', 'mlpy Documentation',
+    (master_doc, 'nestor', 'nestor Documentation',
      [author], 1)
 ]
 
@@ -181,8 +181,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'mlpy', 'mlpy Documentation',
-     author, 'mlpy', 'One line description of project.',
+    (master_doc, 'nestor', 'nestor Documentation',
+     author, 'nestor', 'One line description of project.',
      'Miscellaneous'),
 ]
 

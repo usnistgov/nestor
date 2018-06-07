@@ -39,8 +39,8 @@ Start the Application
 
 #. The application window will open as seen below: |image|
 
-Using the Application - 1 Gram Token tab
-----------------------------------------
+1 Gram Token tab
+----------------
 
 This subsection will describe the features of the application and goes
 into detail on the “1 Gram Token” tab.
@@ -104,8 +104,8 @@ into detail on the “1 Gram Token” tab.
 
 .. _sec:Ngram:
 
-Using the Application - N Gram Token tab
-----------------------------------------
+N Gram Token tab
+----------------
 
 This subsection will describe the features of the application and goes
 into detail on the “N Gram Token” tab.
@@ -173,7 +173,7 @@ into detail on the “N Gram Token” tab.
       when a “solution” 1 gram is paired with a “problem” ‘ gram. The
       user can decide if any other 2 grams are not useful.
 
-Using the Application - Report tab
+Report tab
 ----------------------------------
 
 Once the user is done tagging their desired amount of tokens, they can

@@ -1,7 +1,14 @@
-from app.taggingUI import *
+from pathlib import Path
+import os
+import sys
+
+from PyQt5 import uic, QtGui
+from PyQt5.QtCore import Qt
+import PyQt5.QtWidgets as Qw
+
 
 fname = 'openFilesUI.ui'
-qtDesignerFile_openFiles = Path('./app/taggingUI')/fname
+qtDesignerFile_openFiles = Path('nestor/ui')/fname
 Ui_MainWindow_openFiles, QtBaseClass_openFiles = uic.loadUiType(str(qtDesignerFile_openFiles))
 
 
@@ -15,7 +22,7 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         self.closeFunction = closeFunction
         self.nextWindowFunction = nextWindow
         if iconPath:
-            self.setWindowIcon(QIcon(iconPath))
+            self.setWindowIcon(QtGui.QIcon(iconPath))
 
         self.lineEdit_openFiles_numberTokenShow.setInputMask('99999')
         self.lineEdit_openFiles_SimilarityAlreadyChecked.setInputMask('99')

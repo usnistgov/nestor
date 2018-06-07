@@ -17,13 +17,13 @@ THE IDEA OF THIS KPI OBJECT IS STILL IN PROCESS, LOTS OF THE IDEA MIGHT CHANGE I
 
 
 import networkx as nx
-
-
-from database_storage.objects.issue import *
-from database_storage.objects.machine import *
-from database_storage.objects.human import *
-from database_storage.objects.tag import *
 from database_storage.helper import updateDict
+from database_storage.objects.human import *
+from database_storage.objects.machine import *
+from database_storage.objects.tag import *
+
+from nestor.database_storage.objects.issue import *
+
 
 class Kpi:
     """a KPI represent all the informations that refer to create a query to create a kpi:

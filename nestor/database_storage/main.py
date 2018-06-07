@@ -18,12 +18,12 @@ Description:
 
 
 from database_storage.objects.human import *
-from database_storage.objects.issue import *
+from database_storage.objects.machine import *
 from database_storage.objects.maintenanceworkorder import *
 from database_storage.objects.tag import *
 from tqdm import tqdm
 
-from database_storage.objects.machine import *
+from nestor.database_storage.objects.issue import *
 
 charsplit = ','
 def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):

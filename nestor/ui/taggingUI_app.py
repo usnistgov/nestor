@@ -1,7 +1,18 @@
-from app.taggingUI import *
+import nestor.ui.helper_objects as myObjects
+from .. import keyword as kex
+
+from pathlib import Path
+import pandas as pd
+import fuzzywuzzy.process as zz
+
+from PyQt5.QtCore import Qt
+from PyQt5 import QtGui, uic
+import PyQt5.QtWidgets as Qw
+
+
 
 fname = 'taggingUI.ui'
-qtDesignerFile_taggingTool = Path('./app/taggingUI')/fname
+qtDesignerFile_taggingTool = Path('nestor/ui')/fname
 Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(str(qtDesignerFile_taggingTool))
 
 
@@ -17,7 +28,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #self.actionExit.triggered.connect(self.close_application)
 
         if iconPath:
-            self.setWindowIcon(QIcon(iconPath))
+            self.setWindowIcon(QtGui.QIcon(iconPath))
 
         self.similarityThreshold_alreadyChecked = 100
 
@@ -628,7 +639,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 # Now the ToS dialog .ui file
 fname2 = 'termsOfUse.ui'
-qtDesignerFile_tosDialog = Path('./app/taggingUI')/fname2
+qtDesignerFile_tosDialog = Path('nestor/ui')/fname2
 Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_tosDialog)
 
 
@@ -641,7 +652,7 @@ class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
         self.closeFunction = closeFunction
 
         if iconPath:
-            self.setWindowIcon(QIcon(iconPath))
+            self.setWindowIcon(QtGui.QIcon(iconPath))
 
 
 

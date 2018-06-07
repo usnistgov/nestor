@@ -1,8 +1,5 @@
-import sys
-from PyQt5.QtCore import QCoreApplication, Qt, QSize
-from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
 import PyQt5.QtWidgets as Qw
-# from sympy.core.tests.test_arit import same_and_same_prec
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure

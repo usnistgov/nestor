@@ -11,22 +11,22 @@ adapted from:
 from __future__ import unicode_literals
 
 import calendar
-import datetime
+from distutils.version import StrictVersion
 
-from matplotlib.colors import ColorConverter, ListedColormap
+import holoviews as hv
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
-from distutils.version import StrictVersion
-import mlp.tree
-import networkx as nx
-import holoviews as hv
+from matplotlib.colors import ColorConverter
+
+import nestor.mlp.tree
 
 
 def hv_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, padding=None):
     if name is None:
         name = 'Tag Net'
-    G, node_info, edge_info = mlp.tree.tag_df_network(tag_df)
+    G, node_info, edge_info = nestor.mlp.tree.tag_df_network(tag_df)
     pos = pd.DataFrame(layout(G, **layout_kws)).T
     # node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,

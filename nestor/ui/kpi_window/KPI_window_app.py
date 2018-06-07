@@ -7,7 +7,7 @@ from PyQt5.QtCore import QSize
 
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
-from app.kpi_window.KPI_window_skeleton import Ui_KPIWindow
+from nestor.ui import Ui_KPIWindow
 from database.Objects.Tag import *
 from database.Objects.Machine import *
 from database.Objects.MaintenanceWorkOrder import MaintenanceWorkOrder

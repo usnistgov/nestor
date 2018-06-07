@@ -1,7 +1,15 @@
-from app.taggingUI import *
+
+import sys
+from pathlib import Path
+from PyQt5.QtCore import QCoreApplication, Qt, QSize
+from PyQt5 import QtGui, uic
+import PyQt5.QtWidgets as Qw
+# from sympy.core.tests.test_arit import same_and_same_prec
+
+
 
 fname = 'selectCSVHeadersUI.ui'
-qtDesignerFile_selectCSVHeaders = Path('./app/taggingUI')/fname
+qtDesignerFile_selectCSVHeaders = Path('nestor/ui')/fname
 Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(str(qtDesignerFile_selectCSVHeaders))
 
 
@@ -16,7 +24,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         self.nextWindowFunction = nextWindow
 
         if iconPath:
-            self.setWindowIcon(QIcon(iconPath))
+            self.setWindowIcon(QtGui.QIcon(iconPath))
 
         self.buttonGroup_CSVHeaders = Qw.QButtonGroup()
         self.buttonGroup_CSVHeaders.setExclusive(False)
