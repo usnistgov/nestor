@@ -1,12 +1,21 @@
-Nestor
-====
+About Nestor
+============
 
 Quantifying tacit human knowledge with
 python, for maintnenance-based investigatory analysis
 
 Purpose
 =======
-This is a tool for structuring and analyzing work-order data through tags.
+
+This application was designed to help manufacturers “tag” their maintenance work-order data
+according to the methods described in
+:cite:`sexton2017hybrid,sharp2017toward`. The goal of this
+application is to give understanding to data sets that previously were
+too unstructured or filled with jargon to analyze. The current build is
+in very early alpha, so please be patient in using this application. If
+you have any questions, please do not hesitate to contact:
+-  Thurston Sexton ``thurston.sexton@nist.gov``, or
+-  Michael Brundage ``michael.brundage@nist.gov``
 
 Why?
 ----
@@ -87,3 +96,4 @@ Island of NZ. Known for their intelligence and ability to solve puzzles
 through the use of tools, they will often work together to reach their
 goals, which is especially important in their harsh, mountainous
 habitat.
+

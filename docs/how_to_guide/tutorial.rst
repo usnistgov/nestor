@@ -1,106 +1,7 @@
-.. raw:: latex
 
-   \maketitle
 
-About
-=====
 
-Introduction
-------------
 
-This application was designed to help manufacturers “tag” their data
-according to the methods described in
-:raw-latex:`\cite{sexton2017hybrid, sharptoward}`. The goal of this
-application is to give understanding to data sets that previously were
-too unstructured or filled with jargon to analyze. The current build is
-in very early alpha, so please be patient in using this application. If
-you have any questions, please do not hesitate to contact Thurston
-Sexton (``thurston.sexton@nist.gov``) or Michael Brundage
-(``michael.brundage@nist.gov``). Future changes will be made through our
-public Github page, which will be available in the near future.
-
-Terms of Use
-------------
-
-This software was developed at the `National Institute of Standards and
-Technology <http://www.nist.gov/>`__ by employees of the Federal
-Government in the course of their official duties. Pursuant to `title 17
-section
-105 <http://uscode.house.gov/uscode-cgi/fastweb.exe?getdoc+uscview+t17t20+9+0++>`__
-of the United States Code this software is not subject to copyright
-protection and is in the public domain. ``ml-py`` is an experimental
-system. NIST assumes no responsibility whatsoever for its use by other
-parties, and makes no guarantees, expressed or implied, about its
-quality, reliability, or any other characteristic. We would appreciate
-acknowledgement if the software is used. This software can be
-redistributed and/or modified freely provided that any derivative works
-bear some notice that they are derived from it, and any modified
-versions bear some notice that they have been modified.
-
-Disclaimer
-----------
-
-The use of any products described in this toolkit does not imply
-recommendation or endorsement by the National Institute of Standards and
-Technology, nor does it imply that products are necessarily the best
-available for the purpose.
-
-.. raw:: latex
-
-   \tableofcontents
-
-Downloading and Installing Anaconda
-===================================
-
-This section will walk through the steps for downloading Anaconda. The
-steps and pictures are for a Windows machine, but will be similar for
-other operating systems.
-
-Downloading Anaconda
---------------------
-
-#. Visit the `Anaconda website <https://www.anaconda.com/download/>`__
-   and click on the “Download For: Windows, Mac, Linux" Button |image|
-
-#. Click on the appropriate OS and select Python 3.6 version or higher
-    [1]_ |image|
-
-Installing Anaconda
--------------------
-
-#. Follow the step-by-step installation from Anaconda until you get to
-   the screen below: |image|
-
-#. Enable “Add Anaconda to my PATH environment variable". This registers
-   as a valid command in any terminal/shell environment. (optional)
-   |image|
-
-#. Enable “Register Anaconda as my default Python 3.6" (recommended)
-   |image|
-
-#. Finish Installation
-
-Installing the Application and Importing the Environment
-========================================================
-
-This section will walk through the steps for installing the tagging tool
-application and importing the correct environment to Anaconda.
-
-#. Unzip the application .zip file (please note the location of the
-   file)
-
-#. Open Anaconda |image|
-
-#. Click on the Environments tab |image|
-
-#. Click on the Import button |image|
-
-#. Click on the Browse button |image|
-
-#. Navigate to the folder that has the application stored and locate the
-   **nist-tagging-tool.yml** and select open. |image|
-
-#. Wait for the environment to load (note this can take some time).
 
 Using the Tagging Tool
 ======================
@@ -310,23 +211,11 @@ begin using the report tab.
       contain the tag in the header and a “1” is placed when the tag in
       the header is contained in the work order.
 
-.. raw:: latex
 
-   \bibliographystyle{IEEEtran}
 
-.. [1]
-   This install guide will illustrate the install process for Windows.
 
-.. |image| image:: images/Graphic2.png
-.. |image| image:: images/Graphic4_v2.png
-.. |image| image:: images/Graphic15_v2.png
-.. |image| image:: images/Graphic16_v2.png
-.. |image| image:: images/Graphic17_v2.png
-.. |image| image:: images/Graphic19.png
-.. |image| image:: images/Graphic20_v2.png
-.. |image| image:: images/Graphic22_v2.png
-.. |image| image:: images/Graphic24_v2.png
-.. |image| image:: images/Graphic26_v2.png
+
+
 .. |image| image:: images/Graphic29_v2.png
 .. |image| image:: images/Graphic30_v2.png
 .. |image| image:: images/Graphic31_v2.png

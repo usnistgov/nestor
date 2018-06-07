@@ -1,5 +1,5 @@
 Terms of Use
-============
+------------
 
 This software was developed at the `National Institute of Standards
 and Technology`_ by employees of the Federal Government in the course
@@ -16,6 +16,14 @@ provided that any derivative works bear some notice that they are
 derived from it, and any modified versions bear some notice that
 they have been modified.
 
+
+Disclaimer
+----------
+
+The use of any products described in this toolkit does not imply
+recommendation or endorsement by the National Institute of Standards and
+Technology, nor does it imply that products are necessarily the best
+available for the purpose.
 
 .. _National Institute of Standards and Technology: http://www.nist.gov/
 .. _NIST:                 http://www.nist.gov/

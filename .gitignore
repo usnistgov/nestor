@@ -7,6 +7,11 @@ segments_6
 
 # data folder
 data/**
+_build
+_static
+_templates
+_pdf
+.doctrees
 
 #   special file type
 **.pyc

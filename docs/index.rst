@@ -3,24 +3,34 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to nestor's documentation!
-================================
 
-
-*********
-Contents:
-*********
+.. include:: ../README.rst
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :hidden:
+   :caption: Getting Started
 
-   readme
-   step_by_step
-   examples
+   self
+   how_to_guide/anaconda_tut.rst
+   how_to_guide/tutorial.rst
 
-Indices and tables
-==================
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Examples
+
+   examples.rst
+
+
+
+
+
+API Index and Documentation
+===========================
 
 * :ref:`genindex`
 * :ref:`modindex`

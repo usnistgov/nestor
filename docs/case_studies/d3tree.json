@@ -1,1 +1,0 @@
-{"id": "right_hand", "children": [{"id": "pump", "children": [{"id": "lube"}, {"id": "pto"}, {"id": "servo"}, {"id": "box"}]}, {"id": "track", "children": [{"id": "roller", "children": [{"id": "no"}]}, {"id": "idler"}]}, {"id": "seal"}]}
