@@ -12,32 +12,53 @@ application.
 Start the Application
 ---------------------
 
-#. Click on the nist-tagging-tool environment button |image|
+1. Click on the nist-tagging-tool environment button
 
-#. Click on the "run" button |image|
+|image1|
 
-#. Select "Open Terminal" |image|
+2. Click on the "run" button
 
-#. A new terminal will open that will look like the below: |image|
+|image2|
 
-#. Within the terminal, navigate to the top level folder of the
+3. Select "Open Terminal"
+
+|image3|
+
+4. A new terminal will open that will look like the below:
+
+|image4|
+
+5. Within the terminal, navigate to the top level folder of the
    application. Here, the folder is located at
 
-#. Type the command \|python -m app.taggingUI.main\| |image|
+6. Type the command \|python -m app.taggingUI.main\|
 
-#. The application should open as seen below: |image|
+|image5|
 
-#. Open your .csv file with your MWOs. Included in the application, is a
+7. The application should open as seen below:
+
+|image6|
+
+8. Open your .csv file with your MWOs. Included in the application, is a
    publicly available dataset. We will use this file (mine_raw.csv) as
-   the example. |image| |image|
+   the example.
 
-#. If you are using the application for the first time, hit “Next”
-   |image|
+|image7|
 
-#. Select the column(s) that you would like to “tag.” In this example,
-   the column is “OriginalShorttext.” Hit “Next”. |image|
+|image8|
 
-#. The application window will open as seen below: |image|
+9. If you are using the application for the first time, hit “Next”
+
+|image9|
+
+10. Select the column(s) that you would like to “tag.” In this example,
+   the column is “OriginalShorttext.” Hit “Next”.
+
+|image10|
+
+11. The application window will open as seen below:
+
+|image11|
 
 1 Gram Token tab
 ----------------
@@ -45,7 +66,9 @@ Start the Application
 This subsection will describe the features of the application and goes
 into detail on the “1 Gram Token” tab.
 
--  This window contains the following information: |image|
+|image12|
+
+-  This window contains the following information:
 
    -  “tokens”: The token as seen in the corpus and ranked by TF-IDF
       weighting.
@@ -61,7 +84,9 @@ into detail on the “1 Gram Token” tab.
       mapped to an alias.
 
 -  Next, select a token to “tag.” In this example, we use “replace.”
-   |image|
+
+
+|image13|
 
 -  The “similar pattern” field will display words similar to the token
    using an “edit-distance"-based metric, via
@@ -69,12 +94,16 @@ into detail on the “1 Gram Token” tab.
    that is selected here will be given the same alias and classification
    as the original token. So in this example, if “replaced” is selected,
    it will be given the same alias, notes, and classification as
-   “replace” |image|
+   “replace”
+
+|image14|
 
 -  The “alias” field will allow a user to enter any alias they would
    like for a token. The field will auto suggest the “token” as-is as
    the initial alias, but the user has the ability to change it to any
-   alias they desire. |image|
+   alias they desire.
+
+|image15|
 
 -  This field is where the user can classify the “token.” The
    classifications provided are:
@@ -97,10 +126,13 @@ into detail on the “1 Gram Token” tab.
    -  “Stop-word”: A word that does not matter for analysis. For
       example, “see” or “according” are stop-words.
 
-   |image|
+|image16|
 
 -  The “Notes” field allows users to enter notes about the
-   token/classifications. |image|
+   token/classifications.
+
+|image17|
+
 
 .. _sec:Ngram:
 
@@ -115,10 +147,13 @@ into detail on the “N Gram Token” tab.
    a common 2 gram in some data sets). The 2 grams can also provide more
    context for the “Uknown” classifications from the above section. For
    example, “oil” is unknown until the user is provided more context.
-   |image|
+
+|image18|
 
 -  When a user selects the N Gram Token tab, the window below is
-   presented: |image|
+   presented:
+
+|image19|
 
 -  The user is presented with the Composition of the 2 gram, which are
    composed of two 1 gram tokens. Each 1 gram is presented, with the
@@ -126,12 +161,16 @@ into detail on the “N Gram Token” tab.
    linked with the Similar Pattern subwindow in the above section). In
    this example, “oil” is an “unknown (U)” classification and has no
    other synonyms at this point; “leak” is a “problem (P)” and has no
-   other synonyms at this point. |image|
+   other synonyms at this point.
+
+|image20|
 
 -  There are a number of classifications that a user can select for a 2
    grams. The user will have to classify any 2 grams that contain an “U”
    classification. Please note that some 2 grams will be pre-classified
-   based on a ruleset as seen below: |image|
+   based on a ruleset as seen below:
+
+|image21|
 
    -  Problem Item: This is a problem-item (or item-problem) pair. For
       example, “hydraulic” is an item and “leak” is a problem so
@@ -151,7 +190,9 @@ into detail on the “N Gram Token” tab.
       pre-populate some items based on 1 grams that are both items.
       Please note that 2 gram items, since they are really being treated
       as 1-grams, must have an underscore (_) in their alias, between
-      the 2 individual items as seen below: |image|
+      the 2 individual items as seen below:
+
+|image22|
 
    -  Problem: This is a problem that is a 2 gram. This will be left up
       to the user to classify as these will not be pre-populated using 1
@@ -180,25 +221,35 @@ Once the user is done tagging their desired amount of tokens, they can
 begin using the report tab.
 
 -  Please make sure to hit the “update tag extraction” button before
-   proceeding. This may take some time to compute. |image|
+   proceeding. This may take some time to compute.
+
+|image23|
 
 -  The bottom graph will update. It explains the amount of tagging that
    has been completed. The distribution of documents (shown as a
    histogram) is calculated over the precision for each document (i.e.
    of the tokens found in a document, what fraction have a valid
-   classification defined). |image|
+   classification defined).
 
--  Summary statistics are also shown. |image|
+|image24|
+
+-  Summary statistics are also shown.
+
+|image25|
 
 -  The “create new CSV” button will create an .csv with the original
    dataset and 7 new columns (“I”,“P”,”PI”, “S”,“SI”,“U”, and “X”) ,
    which contain the new tags from each category. Please note that “X”
-   contains any stop words. |image|
+   contains any stop words.
+
+|image26|
 
 -  The “create a binary CSV” button will create 2 new .csv files. Each
    file will contain the work order number (starting with 0), and is
    ordered identically to the .csv file that was originally loaded. Two
-   new files are created: binary_tags and binary_relations. |image|
+   new files are created: binary_tags and binary_relations.
+
+|image27|
 
    -  binary_tags: The left most column contains the work order number,
       while the headers contain all 1 gram tags. A “0” is placed when
@@ -216,31 +267,31 @@ begin using the report tab.
 
 
 
-.. |image| image:: images/Graphic29_v2.png
-.. |image| image:: images/Graphic30_v2.png
-.. |image| image:: images/Graphic31_v2.png
-.. |image| image:: images/Graphic32_v2.png
-.. |image| image:: images/Graphic33_v2.png
-.. |image| image:: images/Graphic34_v2.png
-.. |image| image:: images/Graphic35_v2.png
-.. |image| image:: images/Graphics36_v2.png
-.. |image| image:: images/Graphics37_v2.png
-.. |image| image:: images/Graphics38_v2.png
-.. |image| image:: images/Graphics40_v2.png
-.. |image| image:: images/Graphics41_v2.png
-.. |image| image:: images/Graphics42_v2.png
-.. |image| image:: images/Graphics43_v2.png
-.. |image| image:: images/Graphics44_v2.png
-.. |image| image:: images/Graphics45_v2.png
-.. |image| image:: images/Graphics46_v2.png
-.. |image| image:: images/Graphics47_v2.png
-.. |image| image:: images/Graphics48_v2.png
-.. |image| image:: images/Graphics49_v2.png
-.. |image| image:: images/Graphics50_v2.png
-.. |image| image:: images/Graphics51_v2.png
-.. |image| image:: images/Graphics52_v2.png
-.. |image| image:: images/Graphics53_v2.png
-.. |image| image:: images/Graphics54_v2.png
-.. |image| image:: images/Graphics55_v2.png
-.. |image| image:: images/Graphics56_v2.png
+.. |image1| image:: images/Graphic29_v2.png
+.. |image2| image:: images/Graphic30_v2.png
+.. |image3| image:: images/Graphic31_v2.png
+.. |image4| image:: images/Graphic32_v2.png
+.. |image5| image:: images/Graphic33_v2.png
+.. |image6| image:: images/Graphic34_v2.png
+.. |image7| image:: images/Graphic35_v2.png
+.. |image8| image:: images/Graphics36_v2.png
+.. |image9| image:: images/Graphics37_v2.png
+.. |image10| image:: images/Graphics38_v2.png
+.. |image11| image:: images/Graphics40_v2.png
+.. |image12| image:: images/Graphics41_v2.png
+.. |image13| image:: images/Graphics42_v2.png
+.. |image14| image:: images/Graphics43_v2.png
+.. |image15| image:: images/Graphics44_v2.png
+.. |image16| image:: images/Graphics45_v2.png
+.. |image17| image:: images/Graphics46_v2.png
+.. |image18| image:: images/Graphics47_v2.png
+.. |image19| image:: images/Graphics48_v2.png
+.. |image20| image:: images/Graphics49_v2.png
+.. |image21| image:: images/Graphics50_v2.png
+.. |image22| image:: images/Graphics51_v2.png
+.. |image23| image:: images/Graphics52_v2.png
+.. |image24| image:: images/Graphics53_v2.png
+.. |image25| image:: images/Graphics54_v2.png
+.. |image26| image:: images/Graphics55_v2.png
+.. |image27| image:: images/Graphics56_v2.png
 

@@ -4,22 +4,35 @@
    contain the root `toctree` directive.
 
 
-.. include:: ../README.rst
+.. only:: latex
+
+    Introduction
+    ============
+
+
+.. include:: readme.rst
+
+.. only:: latex
+Getting Started
+===============
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    :caption: Getting Started
 
    self
-   how_to_guide/anaconda_tut.rst
-   how_to_guide/tutorial.rst
+   getting_started.rst
 
+
+.. only:: latex
+Examples
+========
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    :caption: Examples
 
@@ -27,11 +40,9 @@
 
 
 
-
-
+.. only:: html
 API Index and Documentation
 ===========================
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

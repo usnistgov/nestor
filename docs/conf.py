@@ -76,7 +76,7 @@ templates_path = ['_templates']
 #     '.md': 'recommonmark.parser.CommonMarkParser',
 # }
 source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+# source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
@@ -145,7 +145,7 @@ latex_elements = {
 
     # The font size ('10pt', '11pt' or '12pt').
     #
-    # 'pointsize': '10pt',
+    'pointsize': '10pt',
 
     # Additional stuff for the LaTeX preamble.
     #
@@ -160,8 +160,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'nestor.tex', 'nestor Documentation',
-     'Thurston Sexton, Michael Brundage, Sascha Moccozet', 'manual'),
+    (master_doc, 'nestor.tex', 'Nestor Documentation',
+     author, 'manual'),
 ]
 
 
