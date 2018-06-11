@@ -296,7 +296,7 @@ def _get_readable_tag_df(tag_df):
     return temp_df
 
 
-def _get_tag_completeness(tag_df):
+def get_tag_completeness(tag_df):
     """get tagging statistic/array, as the completeness ratio for each MWO"""
     tag_pct = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))  #TODO: if they tag everything?
     all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
