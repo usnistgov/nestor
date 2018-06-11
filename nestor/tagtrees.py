@@ -1,4 +1,4 @@
-"""__author__ = "Thurston Sexton, nx2gt adapted from Benjamin Bengfort" """
+"""__author__ = "Thurston Sexton" """
 
 import networkx as nx
 

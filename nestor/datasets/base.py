@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 
 
@@ -18,15 +19,23 @@ def load_excavators(cleaned=False):
     Returns
     -------
     pandas.DataFrame
-        columns :
-            BscStartDate : initialization of MWO
-            Asset : which excavator this MWO concerns (A, B, C, D, E)
-            OriginalShorttext : natural language description of the MWO
-            PMType : repair (PM01) or replacement (PM02)
-            Cost : MWO expense (AUD)
+        BscStartDate :
+            initialization of MWO
+        Asset :
+            which excavator this MWO concerns (A, B, C, D, E)
+        OriginalShorttext :
+            natural language description of the MWO
+        PMType :
+            repair (PM01) or replacement (PM02)
+        Cost :
+            MWO expense (AUD)
     """
+    module_path = Path(__file__).parent
     if cleaned:
-        df = pd.read_csv('excavators-cleaned.csv')
+        csv_filename = module_path/'excavators-cleaned.csv'
     else:
-        df = pd.read_csv('excavators.csv')
+        csv_filename = module_path / 'excavators.csv'
+
+    df = pd.read_csv(csv_filename)
+    df['BscStartDate'] = pd.to_datetime(df.BscStartDate)
     return df

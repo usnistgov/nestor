@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 import configparser
 
 # Utility function to read the README file.
@@ -15,7 +15,7 @@ def read(fname):
 
 def run_setup(packages, install_requires, extras_require):
     # populate the version_info dictionary with values stored in the version file
-
+    print(packages)
     setup(
         name = "nestor",
         version = "0.2.1",
@@ -47,9 +47,10 @@ try:
 except IOError:
     print("Could not open config file.")
 
-packages = ['nestor',
-            'nestor.database_storage',
-            'nestor.datasets']
+# packages = ['nestor',
+#             'nestor/database_storage',
+#             'nestor/datasets']
+packages = find_packages()
 install_requires = ['numpy>=1.14.2',
                     'pandas>=0.22.0',
                     'scikit-learn',

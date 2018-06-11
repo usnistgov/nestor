@@ -26,9 +26,9 @@ project = 'nestor'
 author = "KEA Development Team"
 
 # The short X.Y version
-version = '0.2.0'
+version = '0.2.1'
 # The full version, including alpha/beta/rc tags
-release = '0.2.0'
+release = '0.2.1-alpha'
 
 
 # -- General configuration ---------------------------------------------------
@@ -51,6 +51,8 @@ extensions = [
     'sphinxcontrib.bibtex',
 ]
 
+add_module_names = False
+
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
@@ -61,6 +63,7 @@ numpydoc_show_class_members = False
 
 # Show the documentation of __init__ and the class docstring
 autoclass_content = 'both'
+# autoclass_content = 'init'
 
 # Do not show the return type as seperate section
 napoleon_use_rtype = False

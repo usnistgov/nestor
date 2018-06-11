@@ -31,6 +31,14 @@ from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
 from itertools import product
 
+# __all__ = ['NLPSelect',
+#            'TokenExtractor',
+#            'generate_vocabulary_df',
+#            'get_tag_completeness',
+#            'tag_extractor',
+#            'token_to_alias',
+#            'ngram_automatch']
+
 
 class Transformer(TransformerMixin):
     """
@@ -100,60 +108,60 @@ class NLPSelect(Transformer):
 
 
 class TokenExtractor(TransformerMixin):
-    """
-    A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
-    total tf-idf score, and getting a list of vocabulary.
 
-    Parameters
-    ----------
-    tfidf_kwargs: arguments to pass to sklearn's TfidfVectorizer
-    Valid options modified here (see sklearn docs for more options) are:
-
-        input : string {'filename', 'file', 'content'}, default='content'
-            If 'filename', the sequence passed as an argument to fit is
-            expected to be a list of filenames that need reading to fetch
-            the raw content to analyze.
-
-            If 'file', the sequence items must have a 'read' method (file-like
-            object) that is called to fetch the bytes in memory.
-
-            Otherwise the input is expected to be the sequence strings or
-            bytes items are expected to be analyzed directly.
-
-        ngram_range : tuple (min_n, max_n), default=(1,1)
-            The lower and upper boundary of the range of n-values for different
-            n-grams to be extracted. All values of n such that min_n <= n <= max_n
-            will be used.
-
-        stop_words : string {'english'} (default), list, or None
-            If a string, it is passed to _check_stop_list and the appropriate stop
-            list is returned. 'english' is currently the only supported string
-            value.
-
-            If a list, that list is assumed to contain stop words, all of which
-            will be removed from the resulting tokens.
-            Only applies if ``analyzer == 'word'``.
-
-            If None, no stop words will be used. max_df can be set to a value
-            in the range [0.7, 1.0) to automatically detect and filter stop
-            words based on intra corpus document frequency of terms.
-
-        max_features : int or None, default=5000
-            If not None, build a vocabulary that only consider the top
-            max_features ordered by term frequency across the corpus.
-
-            This parameter is ignored if vocabulary is not None.
-
-        smooth_idf : boolean, default=False
-            Smooth idf weights by adding one to document frequencies, as if an
-            extra document was seen containing every term in the collection
-            exactly once. Prevents zero divisions.
-
-        sublinear_tf : boolean, default=True
-            Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
-    """
     def __init__(self, **tfidf_kwargs):
+        """
+            A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
+            total tf-idf score, and getting a list of vocabulary.
 
+            Parameters
+            ----------
+            tfidf_kwargs: arguments to pass to sklearn's TfidfVectorizer
+            Valid options modified here (see sklearn docs for more options) are:
+
+                input : string {'filename', 'file', 'content'}, default='content'
+                    If 'filename', the sequence passed as an argument to fit is
+                    expected to be a list of filenames that need reading to fetch
+                    the raw content to analyze.
+
+                    If 'file', the sequence items must have a 'read' method (file-like
+                    object) that is called to fetch the bytes in memory.
+
+                    Otherwise the input is expected to be the sequence strings or
+                    bytes items are expected to be analyzed directly.
+
+                ngram_range : tuple (min_n, max_n), default=(1,1)
+                    The lower and upper boundary of the range of n-values for different
+                    n-grams to be extracted. All values of n such that min_n <= n <= max_n
+                    will be used.
+
+                stop_words : string {'english'} (default), list, or None
+                    If a string, it is passed to _check_stop_list and the appropriate stop
+                    list is returned. 'english' is currently the only supported string
+                    value.
+
+                    If a list, that list is assumed to contain stop words, all of which
+                    will be removed from the resulting tokens.
+                    Only applies if ``analyzer == 'word'``.
+
+                    If None, no stop words will be used. max_df can be set to a value
+                    in the range [0.7, 1.0) to automatically detect and filter stop
+                    words based on intra corpus document frequency of terms.
+
+                max_features : int or None, default=5000
+                    If not None, build a vocabulary that only consider the top
+                    max_features ordered by term frequency across the corpus.
+
+                    This parameter is ignored if vocabulary is not None.
+
+                smooth_idf : boolean, default=False
+                    Smooth idf weights by adding one to document frequencies, as if an
+                    extra document was seen containing every term in the collection
+                    exactly once. Prevents zero divisions.
+
+                sublinear_tf : boolean, default=True
+                    Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
+            """
         self.default_kws = dict({'input': 'content',
                                  'ngram_range': (1, 1),
                                  'stop_words': 'english',
@@ -194,6 +202,14 @@ class TokenExtractor(TransformerMixin):
 
     @property
     def ranks_(self):
+        """
+        Retrieve the rank of each token, for sorting. Uses summed scoring over the
+        TF-IDF for each token, so that: :math:`S_t = \\Sum_{\\text{MWO}}\\text{TF-IDF}_t`
+
+        Returns
+        -------
+        ranks : numpy.array
+        """
         ranks = self._tf_tot.argsort()[::-1]
         if len(ranks) > self.default_kws['max_features']:
             ranks = ranks[:self.default_kws['max_features']]
@@ -201,11 +217,26 @@ class TokenExtractor(TransformerMixin):
 
     @property
     def vocab_(self):
+        """
+        ordered list of tokens, rank-ordered by summed-tf-idf
+        (see :func:`~nestor.keyword.TokenExtractor.ranks_`)
+
+        Returns
+        -------
+        extracted_toks : numpy.array
+        """
         extracted_toks = np.array(self._model.get_feature_names())[self.ranks_]
         return extracted_toks
 
     @property
     def scores_(self):
+        """
+        Returns actual scores of tokens, for progress-tracking (unit-normalized)
+
+        Returns
+        -------
+        numpy.array
+        """
         scores = self._tf_tot[self.ranks_]
         return scores/scores.sum()
 
@@ -222,17 +253,17 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
 
     Parameters
     ----------
-    transformer: object TokenExtractor
+    transformer : object TokenExtractor
         the (TRAINED) token extractor used to generate the ranked list of vocab.
-    filename: str, optional
+    filename : str, optional
         the file location to read/write a csv containing a formatted vocabulary list
-    init: str or pandas.Dataframe, optional
+    init : str or pandas.Dataframe, optional
         file location of csv or dataframe of existing vocab list to read and update
         token classification values from
 
     Returns
     -------
-    vocab: pandas.Dataframe
+    vocab : pandas.Dataframe
         the correctly formatted vocabulary list for token:NE, alias matching
     """
 
@@ -297,7 +328,17 @@ def _get_readable_tag_df(tag_df):
 
 
 def get_tag_completeness(tag_df):
-    """get tagging statistic/array, as the completeness ratio for each MWO"""
+    """
+
+    Parameters
+    ----------
+    tag_df : pandas.DataFrame
+        heirarchical-column df containing
+
+    Returns
+    -------
+
+    """
     tag_pct = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))  #TODO: if they tag everything?
     all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
 

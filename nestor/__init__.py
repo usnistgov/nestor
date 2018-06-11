@@ -36,13 +36,12 @@ available for the purpose.
 .. _National Institute of Standards and Technology: http://www.nist.gov/
 .. _NIST:                 http://www.nist.gov/
 .. _title 17 section 105: http://uscode.house.gov/uscode-cgi/fastweb.exe?getdoc+uscview+t17t20+9+0++
-
-
 """
+
 __version__ = "0.2.1"
 
-__all__ = ['keyword',
-           'tagplots',
-           'tagtrees',
-           'datasets']
+# __all__ = ['keyword',
+#            'tagplots',
+#            'tagtrees',
+#            'datasets']
 
