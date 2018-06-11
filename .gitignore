@@ -12,6 +12,7 @@ _static
 _templates
 _pdf
 .doctrees
+dist
 
 #   special file type
 **.pyc

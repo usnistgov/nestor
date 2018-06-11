@@ -13,7 +13,7 @@ CONFIG_FILE = 'setup.cfg'
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-def run_setup(packages):
+def run_setup(packages, install_requires, extras_require):
     # populate the version_info dictionary with values stored in the version file
 
     setup(
@@ -23,15 +23,19 @@ def run_setup(packages):
         author_email = "thurston.sexton@nist.gov",
         description = ("Quantifying tacit human knowledge with python,\
                         for maintnenance-based investigatory analysis"),
-        keywords = "example documentation tutorial",
-        url = "http://packages.python.org/an_example_pypi_project",
+        keywords = "nlp smart manufacturing maintenance tag app",
+        url = "https://github.com/usnistgov/nestor",
         packages=packages,
-        long_description=read('README'),
+        long_description=read('README.rst'),
         classifiers=[
             "Development Status :: 2 - Pre-Alpha",
             'Intended Audience :: Science/Research/Industry',
             'Programming Language :: Python :: 3',
         ],
+        install_requires=install_requires,
+        extras_require=extras_require,
+        include_package_data=True,
+        zip_safe=False
     )
 
 
@@ -44,8 +48,22 @@ try:
 except IOError:
     print("Could not open config file.")
 
-packages = ['nestor']
+packages = ['nestor',
+            'nestor.database_storage']
+install_requires = ['numpy>=1.14.2',
+                    'pandas>=0.22.0',
+                    'scikit-learn',
+                    'tqdm>=4.23.0'
+                    ]
+extras_require = {'gui': ['pyqt5', 'pyyaml', 'chardet', 'seaborn>=0.8.1', 'matplotlib>=2.2.2',
+                          'fuzzywuzzy', 'python-levenshtein'],
+                  'tree': ['networkx==1.11', 'pygraphviz', 'pydot'],
+                  'plot': ['geopandas', 'bokeh', 'holoviews', 'geoviews']}
+
+extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
+
+
 if config.getboolean('GUI', 'use'):
     packages.append('nestor.ui')
 
-run_setup(packages)
+run_setup(packages, install_requires, extras_require)
