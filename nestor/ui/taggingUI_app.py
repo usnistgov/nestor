@@ -3,6 +3,7 @@ from .. import keyword as kex
 
 from pathlib import Path
 import pandas as pd
+import numpy as np
 import fuzzywuzzy.process as zz
 
 from PyQt5.QtCore import Qt
@@ -162,14 +163,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # tag_readable.head(10)
 
         # do statistics
-        tag_pct, tag_comp, tag_empt = kex._get_tag_completeness(self.tag_df)
+        tag_pct, tag_comp, tag_empt = kex.get_tag_completeness(self.tag_df)
 
         self.label_report_tagCompleteness.setText(f'Tag PPV: {tag_pct.mean():.2%} +/- {tag_pct.std():.2%}')
         self.label_report_completeDocs.setText(f'Complete Docs: {tag_comp} of {len(self.tag_df)}, or {tag_comp/len(tag_df):.2%}')
         self.label_report_emptyDocs.setText(f'Empty Docs: {tag_empt} of {len(self.tag_df)}, or {tag_empt/len(self.tag_df):.2%}')
 
         self.completenessPlot._set_dataframe(tag_pct)
-        self.completenessPlot.plot_it()
+        nbins = int(np.percentile(tag_df.sum(axis=1), 90))
+        print(f'Docs have at most {nbins} tokens (90th percentile)')
+        self.completenessPlot.plot_it(nbins)
 
         self.dataframe_completeness = tag_pct
         # return tag_readable, tag_df
