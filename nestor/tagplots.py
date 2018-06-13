@@ -20,25 +20,15 @@ import numpy as np
 import pandas as pd
 from matplotlib.colors import ColorConverter
 
-import nestor.mlp.tree
+import nestor.tagtrees
 
 
 def hv_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, padding=None):
     if name is None:
         name = 'Tag Net'
-    G, node_info, edge_info = nestor.mlp.tree.tag_df_network(tag_df)
+    G, node_info, edge_info = nestor.tagtrees.tag_df_network(tag_df)
     pos = pd.DataFrame(layout(G, **layout_kws)).T
-    # node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
-    # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
-    #                        ],
-    #                       axis=1).reset_index()
-    # print(pos[0].values,
-    #                   pos[1].values,
-    #                   pos.index.tolist(),
-    #                   *node_info.values.T.tolist())
 
-    # overlay = hv.Overlay(group=name)
-    # overlay = []
     opts = {
         'P':'crimson',
         'S':'#7ABC32',

@@ -31,13 +31,13 @@ from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
 from itertools import product
 
-# __all__ = ['NLPSelect',
-#            'TokenExtractor',
-#            'generate_vocabulary_df',
-#            'get_tag_completeness',
-#            'tag_extractor',
-#            'token_to_alias',
-#            'ngram_automatch']
+__all__ = ['NLPSelect',
+           'TokenExtractor',
+           'generate_vocabulary_df',
+           'get_tag_completeness',
+           'tag_extractor',
+           'token_to_alias',
+           'ngram_automatch']
 
 
 class Transformer(TransformerMixin):
