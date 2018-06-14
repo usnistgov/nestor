@@ -20,60 +20,49 @@ import numpy as np
 import pandas as pd
 from matplotlib.colors import ColorConverter
 
-import nestor.tagtrees
 
-
-def hv_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, padding=None):
+def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, padding=None):
+    try:
+        import nestor.tagtrees
+    except ImportError:
+        print('The tag-relation network requires the use of our trees module! Import failed!')
+        raise
     if name is None:
         name = 'Tag Net'
+
     G, node_info, edge_info = nestor.tagtrees.tag_df_network(tag_df)
-    pos = pd.DataFrame(layout(G, **layout_kws)).T
-
+    pos = pd.DataFrame(layout(G)).T.rename(columns={0: 'x', 1: 'y'})
+    node_info = node_info.join(pos).reset_index().rename(columns={'index': 'tag'})
+    nodes = hv.Nodes(node_info,
+                     kdims=['x', 'y', 'tag'],
+                     vdims=['size', 'NE', 'count'])
     opts = {
-        'P':'crimson',
-        'S':'#7ABC32',
-        'I':'#4F81BD',
-        'U':'#ffc000',
-        'NA':'gray',
-        'X':'black'
+        'P': 'crimson',
+        'S': '#7ABC32',
+        'I': '#4F81BD',
+        'U': '#ffc000',
+        'NA': 'gray',
+        'X': 'black'
     }
-
-    nodes = hv.Nodes((pos[0].values,
-                      pos[1].values,
-                      pos.index.tolist(),
-                      *node_info.values.T.tolist()),
-                     vdims=node_info.columns.tolist())
+    nodes = nodes.sort('NE').options(color_index='NE', cmap=opts, size='size')
+    text = hv.Labels(node_info, ['x', 'y'], 'tag', group=name).options(text_font_size='8pt',
+                                                                       xoffset=0.015, yoffset=-0.015,
+                                                                       text_align='left')
 
     graph = hv.Graph(((edge_info.source.values, edge_info.target.values, edge_info.weight.values),
                       nodes), group=name, vdims='weight')
-    # text = hv.Text(pos[0].values,
-    #                pos[1].values,
-    #                pos.index.tolist())
-    # overlay['edges'] = graph.edgepaths
-    overlay = [graph.edgepaths]
-    for clf in node_info.NE.unique():
-        # print(opts[clf])
-        mask = node_info.NE == clf
-        # print(pos.loc[mask, 0])
-        overlay += [hv.Nodes((pos.loc[mask, 0].values,
-                      pos.loc[mask, 1].values,
-                      pos[mask].index.tolist(),
-                      *node_info[mask].values.T.tolist()),
-                     vdims=node_info.columns.tolist(),
-                     group=name, label=clf).opts(style=dict(color=opts[clf]))]
-        # print(clf)
-    # return graph
-    # overlay['total'] = graph.opts(plot=dict(node_size=0))#hv.EdgePaths(edge_info, vdims='weight', group=name)#graph.edgepaths
-#     print([list(i) for i in pos.iterrows()])
-    text = [hv.Text(x, y, name, fontsize=8) for name, (x, y) in pos.iterrows()]
-    overlay += text
-    ov = hv.Overlay(overlay, group=name)
-    if padding is not None:
-        ov = ov.redim.range(**padding)
-    return ov
+    graph = graph.options(color_index='NE', cmap=opts,
+                          edge_color_index='weight', edge_cmap='Magma_r',
+                          node_size='size')
+
+    if padding is None:
+        padding = dict(x=(-0.05, 1.05), y=(-0.05, 1.05))
+
+    return (graph*text).redim.range(**padding)
 
 
 _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')
+
 
 def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
              fillcolor='whitesmoke', linewidth=1, linecolor=None,
