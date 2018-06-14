@@ -57,9 +57,11 @@ class Tag:
         self.databaseInfoTag = databaseInfo['tag']
         self.label = self.databaseInfoTag['label']['tag']
 
+
         self._set_keyword(keyword)
         self._set_synonyms(synonyms)
         self._set_similarTo(similarTo, databaseInfo)
+
 
     def _get_keyword(self):
         return self.keyword
@@ -75,7 +77,9 @@ class Tag:
 
     def _set_synonyms(self, synonyms):
         if isinstance(synonyms, str):
-            self.synonyms = standardizeString(synonyms).lower()
+            self.synonyms = [standardizeString(synonyms).lower()]
+        elif isinstance(synonyms, list):
+            self.synonyms = [standardizeString(s).lower() for s in synonyms]
         else:
             self.synonyms = None
 
@@ -825,3 +829,4 @@ class TagSolutionItem(TagNGram):
         query = self.cypher_nGramTag_merge(variable_tagSolutionItem)
         query += f'\nSET {variable_tagSolutionItem} {self.databaseInfoTag["label"]["solution_item"]}'
         return query
+

@@ -56,6 +56,7 @@ tag:
   properties:
     keyword: keyword
     synonyms: synonyms
+    approved: approved
 
 edges:
   issue-itemasproblem: ':PROBLEM'

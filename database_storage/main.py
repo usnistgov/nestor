@@ -26,7 +26,7 @@ from database_storage.objects.machine import *
 from  database_storage.helper import getListIndexDataframe
 
 
-def CypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, propertyToHeader_dict):
+def cypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, propertyToHeader_dict):
 
     def create_issue(row, propertyToHeader_issue, schema):
         """
@@ -229,14 +229,14 @@ def CypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, pro
     return queries
 
 
-def CypherCreate_tag(database, dataframe):
+def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None):
     """
     create the query for all the tages, and link it to the given issue
     :param binnaryDataframe:
     :return:
     """
 
-    def toSpecialtag(keyword, classification):
+    def toSpecialtag(keyword, synonyms, classification):
         """
         Create a tag object from the type based on the classification
         :param keyword: the name of the tag
@@ -245,43 +245,59 @@ def CypherCreate_tag(database, dataframe):
         """
 
         if classification == "I":
-            return TagItem(keyword=keyword, databaseInfo=database.schema), database.schema["edges"]["issue-item"]
+            return TagItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_itemTag_all("tag"), \
+                   database.schema["edges"]["issue-item"]
         if classification == "S":
-            return TagSolution(keyword=keyword, databaseInfo=database.schema), database.schema["edges"][
+            return TagSolution(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_solutionTag_all("tag"),\
+                   database.schema["edges"][
                 "issue-solution"]
         if classification == "P":
-            return TagProblem(keyword=keyword, databaseInfo=database.schema), database.schema["edges"][
+            return TagProblem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_problemTag_all("tag"),\
+                   database.schema["edges"][
                 "issue-problem"]
         if classification == "U":
-            return TagUnknown(keyword=keyword, databaseInfo=database.schema), database.schema["edges"][
+            return TagUnknown(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_unknownTag_all("tag"), \
+                   database.schema["edges"][
                 "issue-unknown"]
         if classification == "S I":
-            return TagSolutionItem(keyword=keyword, databaseInfo=database.schema), database.schema["edges"][
+            return TagSolutionItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_solutionItemTag_all("tag"), \
+                   database.schema["edges"][
                 "issue-solutionitem"]
         if classification == "P I":
-            return TagProblemItem(keyword=keyword, databaseInfo=database.schema), database.schema["edges"][
+            return TagProblemItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_problemItemTag_all("tag"), \
+                   database.schema["edges"][
                 "issue-problemitem"]
         return None, None
 
     queries = []
     issue = Issue(databaseInfo=database.schema)
+
     df = dataframe.drop('NA', axis=1, level=0).drop('X', axis=1, level=0)
     for classification, keyword in tqdm(df, total=df.shape[1]):
-        tag, linkType = toSpecialtag(keyword, classification)
-        if tag:
+
+        if vocab1g is not None:
+            vocabs = vocab1g.append(vocabNg)
+            synonyms = vocabs[vocabs["alias"] == keyword].index.values.tolist()
+        elif vocabNg is not None:
+            vocabs = vocabNg.append(vocab1g)
+            synonyms = vocabs[vocabs["alias"] == keyword].index.values.tolist()
+        else:
+            synonyms = None
+
+        cypherTag, linkType = toSpecialtag(keyword, synonyms, classification)
+        if cypherTag:
             mwoIds = getListIndexDataframe(df, keyword, classification)
             query = f'\nMATCH {issue.cypher_issue_all("issue")}' \
                     f'\nWHERE issue.{issue.databaseInfoIssue["properties"]["id"]} IN {mwoIds}' \
-                    f'\nMERGE (tag{tag.label} {{{tag.databaseInfoTag["properties"]["keyword"]}: \'{keyword}\'}})' \
-                    f'\nMERGE (issue)-[{linkType}]->(tag)' \
-                    f'\nRETURN 1'
+                    f'\nMERGE {cypherTag}' \
+                    f'\nMERGE (issue)-[{linkType}]->(tag)'
 
             queries.append(query)
 
     return queries
 
 
-def CypherLink_Ngram1gram(database):
+def cypherLink_Ngram1gram(database):
 
     queries = []
 
@@ -338,7 +354,7 @@ def CypherLink_Ngram1gram(database):
     return queries
 
 
-def CypherLink_itemIssue(database):
+def cypherLink_itemIssue(database):
 
     queries= []
 
@@ -362,16 +378,28 @@ def CypherLink_itemIssue(database):
     return queries
 
 
-def CypherCreate_itemsTree(database, current, queries=[]):
+def cypherCreate_itemsTree(database, current, queries=[]):
 
     item = TagItem(databaseInfo=database.schema)
 
     for children in current["children"]:
-        queries.append( f'\nMATCH (parent{item.label}{{{database.schema["tag"]["properties"]["keyword"]}:"{current["keyword"]}"}})' \
-                        f'\nMATCH (child{item.label}{{{database.schema["tag"]["properties"]["keyword"]}:"{children["keyword"]}"}})' \
-                        f'\nMERGE (parent)-[{database.schema["edges"]["item-item"]}]->(child)'
-                      )
+        query =  f'\nMATCH (parent{item.label}{{{database.schema["tag"]["properties"]["keyword"]}:"{current["keyword"]}"}})' \
+                 f'\nMATCH (child{item.label}{{{database.schema["tag"]["properties"]["keyword"]}:"{children["keyword"]}"}})'
+        if "approved" in children:
+            query += f'\nMERGE (parent)-[{database.schema["edges"]["item-item"]}{{{database.schema["tag"]["properties"]["approved"]}:{children["approved"]}}}]->(child)'
+        else:
+            query += f'\nMERGE (parent)-[{database.schema["edges"]["item-item"]}]->(child)'
+        queries.append(query)
         if "children" in children:
-            CypherCreate_itemsTree(database, children, queries)
+            cypherCreate_itemsTree(database, children, queries)
 
     return queries
+
+
+def cypherAddProperties_tagSynonyms(database, vocabulary1g, vocabularyNg):
+    tag = Tag(databaseInfo=database.schema)
+
+    for uniqueAlias in vocabulary1g["alias"].unique().tolist():
+        print(uniqueAlias)
+
+#    query = f'MATCH (tag{tag.label}{{{database.schema["tag"]["properties"]["keyword"]}:}})'
