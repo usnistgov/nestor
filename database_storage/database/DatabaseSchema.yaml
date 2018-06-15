@@ -53,6 +53,9 @@ tag:
     unknown: ':UNKNOWN'
     problem_item: ':PROBLEM_ITEM'
     solution_item: ':SOLUTION_ITEM'
+    other: ':OTHER'
+    na: ':NA'
+    stopword: ':STOP_WORD'
   properties:
     keyword: keyword
     synonyms: synonyms
@@ -67,6 +70,8 @@ edges:
   issue-unknown: ':CONTAINS'
   issue-problemitem: ':CONTAINS'
   issue-solutionitem: ':CONTAINS'
+  issue-na: ':CONTAINS'
+  issue-stopword: ':CONTAINS'
   issue-machine: ':COVERED'
   issue-operator: ':REQUESTED_BY'
   issue-technician: ':SOLVE_BY'

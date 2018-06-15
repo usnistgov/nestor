@@ -229,7 +229,7 @@ def cypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, pro
     return queries
 
 
-def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None):
+def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None, otherTag=False):
     """
     create the query for all the tages, and link it to the given issue
     :param binnaryDataframe:
@@ -249,30 +249,35 @@ def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None):
                    database.schema["edges"]["issue-item"]
         if classification == "S":
             return TagSolution(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_solutionTag_all("tag"),\
-                   database.schema["edges"][
-                "issue-solution"]
+                   database.schema["edges"]["issue-solution"]
         if classification == "P":
             return TagProblem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_problemTag_all("tag"),\
-                   database.schema["edges"][
-                "issue-problem"]
+                   database.schema["edges"]["issue-problem"]
         if classification == "U":
             return TagUnknown(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_unknownTag_all("tag"), \
-                   database.schema["edges"][
-                "issue-unknown"]
+                   database.schema["edges"]["issue-unknown"]
         if classification == "S I":
             return TagSolutionItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_solutionItemTag_all("tag"), \
-                   database.schema["edges"][
-                "issue-solutionitem"]
+                   database.schema["edges"]["issue-solutionitem"]
         if classification == "P I":
             return TagProblemItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_problemItemTag_all("tag"), \
-                   database.schema["edges"][
-                "issue-problemitem"]
+                   database.schema["edges"]["issue-problemitem"]
+        if classification == "NA":
+            return TagNA(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_naTag_all("tag"), \
+                   database.schema["edges"]["issue-na"]
+        if classification == "X":
+            return TagStopWord(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_stopWordTag_all("tag"), \
+                   database.schema["edges"]["issue-stopword"]
         return None, None
 
     queries = []
     issue = Issue(databaseInfo=database.schema)
 
-    df = dataframe.drop('NA', axis=1, level=0).drop('X', axis=1, level=0)
+    if otherTag:
+        df = dataframe
+    else:
+        df = dataframe.drop('NA', axis=1, level=0).drop('X', axis=1, level=0)
+
     for classification, keyword in tqdm(df, total=df.shape[1]):
 
         if vocab1g is not None:

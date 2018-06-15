@@ -830,3 +830,235 @@ class TagSolutionItem(TagNGram):
         query += f'\nSET {variable_tagSolutionItem} {self.databaseInfoTag["label"]["solution_item"]}'
         return query
 
+
+class TagOther(Tag):
+    """
+    An TAGONEGRAM inherit from TAG
+     it defines every information that refer to all the node TAGONEGRAM in our database.
+     It setup the properties and query to match with every subclass of the Hierarchy in the database
+     A TAGONEGRAM is define with a property KEYWORD in the database as well as the SYNONYMS that is a list of token
+
+     It is instantiate using:
+         - keyword : a String or array of string
+         - synonyms : array of string
+         - similarTo : array of string
+         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
+
+     It contains getter and setter for every properties, it is highly recommend to use the setter
+      because it represent the data as a standard way - the way it is store in the database
+     It contains a string representation
+     It contains a boolean representation
+     """
+
+    def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
+        super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['other']
+
+    def __bool__(self):
+        return not (
+            (self.keyword is None) and
+            (self.synonyms is None)
+        )
+
+    def __str__(self):
+        return f'{super().__str__()}'
+
+    def cypher_otherTag_keyword(self, variable_tagOther="other_tag"):
+        """
+         Create a Cypher query to return the specific node TAGONEGRAM define by the property KEYWORD
+         :param variable_tagOnGram: default "onegram_tag" to refer to a special node
+         :return: a string - Cypher Query : (onegram_tag:TAG:TAGONEGRAM{keyword:"x"})
+             OR empty string if the TAGONEGRAM has no KEYWORD
+         """
+
+        if not self.keyword:
+            return ""
+        return f'({variable_tagOther}{self.label}' + \
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\'' + "})"
+
+    def cypher_otherTag_all(self, variable_tagOther="other_tag"):
+        """
+        Create a Cypher query to return the specific node TAGONEGRAM define by all the possible properties (KEYWORD, SYNONYMS)
+        :param variable_tagOnGram: default "onegram_tag" to refer to a specific TAGONEGRAM
+        :return: a string - Cypher Query : (onegram_tag:TAG:TAGONEGRAM{keyword:"x", synonyms:["x","y"]})
+        """
+
+        query = f'({variable_tagOther}{self.label}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword:
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
+            if self.synonyms:
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_otherTag_merge(self, variable_tagOther="other_tag"):
+        """
+           Create a Cypher query to merge the node TAGONEGRAM using his property KEYWORD
+           and Set the missing properties (SYNONYMS)
+           :param variable_tagOnGram: default "onegram_tag" to refer to a specific TAG
+           :return: a string - Cypher Query : MERGE (onegram_tag:TAG:TAGONEGRAM{keyword:"x"})
+                                              SET onegram_tag.synonyms = ["x","y"]
+                  in the database, SYNONYMS is an array, so we add values to the array if not already in
+           """
+        if self.cypher_tag_merge(variable_tagOther) == "":
+            return ""
+        query = self.cypher_tag_merge(variable_tagOther)
+        query += f'\nSET {variable_tagOther} {self.databaseInfoTag["label"]["onegram"]}'
+        return query
+
+
+class TagNA(TagOther):
+    """
+    An TAGSOLUTIONITEM inherit from TAGNGRAM and so from TAG
+     it defines every information that refer to all the node TAGSOLUTIONITEM in our database.
+     A TAGSOLUTIONITEM is define with a property KEYWORD in the database as well as the SYNONYMS that is a list of token
+     a TAGSOLUTIONITEM is composed of two ONEGRAMTAG
+
+     It is instantiate using:
+         - keyword : a String or array of string
+         - synonyms : array of string
+         - similarTo : array of string
+         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
+
+     It contains getter and setter for every properties, it is highly recommend to use the setter
+      because it represent the data as a standard way - the way it is store in the database
+     It contains a string representation
+     It contains a boolean representation
+     """
+
+    def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
+        super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['na']
+
+    def __bool__(self):
+        return not (
+            (self.keyword is None) and
+            (self.synonyms is None)
+        )
+
+    def __str__(self):
+        return f'{super().__str__()}'
+
+    def cypher_naTag_keyword(self, variable_tagNA="na_tag"):
+        """
+         Create a Cypher query to return the specific node TAGSOLUTIONITEM define by the property KEYWORD
+         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a special node
+         :return: a string - Cypher Query : (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x"})
+             OR empty string if the TAGSOLUTIONITEM has no KEYWORD
+         """
+
+        if not self.keyword:
+            return ""
+        return f'({variable_tagNA}{self.label}' + \
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+
+    def cypher_naTag_all(self, variable_tagNA="na_tag"):
+        """
+        Create a Cypher query to return the specific node TAGSOLUTIONITEM define by all the possible properties (KEYWORD, SYNONYMS)
+        :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAGSOLUTIONITEM
+        :return: a string - Cypher Query : (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x", synonyms:["x","y"]})
+        """
+        query = f'({variable_tagNA}{self.label}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword:
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
+            if self.synonyms:
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_naTag_merge(self, variable_tagNA="na_tag"):
+        """
+         Create a Cypher query to merge the node TAGSOLUTIONITEM using his property KEYWORD
+         and Set the missing properties (SYNONYMS)
+         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAG
+         :return: a string - Cypher Query : MERGE (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x"})
+                                            SET solutionitem_tag.synonyms = ["x","y"]
+                in the database, SYNONYMS is an array, so we add values to the array if not already in
+         """
+        if self.cypher_tag_merge(variable_tagNA) == "":
+            return ""
+        query = self.cypher_otherTag_merge(variable_tagNA)
+        query += f'\nSET {variable_tagNA} {self.databaseInfoTag["label"]["solution_item"]}'
+        return query
+
+
+class TagStopWord(TagOther):
+    """
+    An TAGSOLUTIONITEM inherit from TAGNGRAM and so from TAG
+     it defines every information that refer to all the node TAGSOLUTIONITEM in our database.
+     A TAGSOLUTIONITEM is define with a property KEYWORD in the database as well as the SYNONYMS that is a list of token
+     a TAGSOLUTIONITEM is composed of two ONEGRAMTAG
+
+     It is instantiate using:
+         - keyword : a String or array of string
+         - synonyms : array of string
+         - similarTo : array of string
+         - databaseInfo: the dictionary that describe the database information (name of properties, and Label)
+
+     It contains getter and setter for every properties, it is highly recommend to use the setter
+      because it represent the data as a standard way - the way it is store in the database
+     It contains a string representation
+     It contains a boolean representation
+     """
+
+    def __init__(self, keyword=None, synonyms=None, similarTo=None, databaseInfo=None):
+        super().__init__(keyword, synonyms, similarTo, databaseInfo)
+        self.label += self.databaseInfoTag['label']['stopword']
+
+    def __bool__(self):
+        return not (
+            (self.keyword is None) and
+            (self.synonyms is None)
+        )
+
+    def __str__(self):
+        return f'{super().__str__()}'
+
+    def cypher_stopWordTag_keyword(self, variable_tagStopWord="stopword_tag"):
+        """
+         Create a Cypher query to return the specific node TAGSOLUTIONITEM define by the property KEYWORD
+         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a special node
+         :return: a string - Cypher Query : (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x"})
+             OR empty string if the TAGSOLUTIONITEM has no KEYWORD
+         """
+
+        if not self.keyword:
+            return ""
+        return f'({variable_tagStopWord}{self.label}' + \
+               "{" + f'{self.databaseInfoTag["properties"]["keyword"]}:"{self.keyword}"' + "})"
+
+    def cypher_stopWordTag_all(self, variable_tagStopWord="stopword_tag"):
+        """
+        Create a Cypher query to return the specific node TAGSOLUTIONITEM define by all the possible properties (KEYWORD, SYNONYMS)
+        :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAGSOLUTIONITEM
+        :return: a string - Cypher Query : (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x", synonyms:["x","y"]})
+        """
+        query = f'({variable_tagStopWord}{self.label}'
+        if self.keyword or self.synonyms is not None:
+            query += "{"
+            if self.keyword:
+                query += f'{self.databaseInfoTag["properties"]["keyword"]}:\'{self.keyword}\','
+            if self.synonyms:
+                query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
+            query = query[:-1] + "}"
+        return query + ")"
+
+    def cypher_stopWordTag_merge(self, variable_tagStopWord="stopword_tag"):
+        """
+         Create a Cypher query to merge the node TAGSOLUTIONITEM using his property KEYWORD
+         and Set the missing properties (SYNONYMS)
+         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAG
+         :return: a string - Cypher Query : MERGE (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x"})
+                                            SET solutionitem_tag.synonyms = ["x","y"]
+                in the database, SYNONYMS is an array, so we add values to the array if not already in
+         """
+        if self.cypher_tag_merge(variable_tagStopWord) == "":
+            return ""
+        query = self.cypher_otherTag_merge(variable_tagStopWord)
+        query += f'\nSET {variable_tagStopWord} {self.databaseInfoTag["label"]["solution_item"]}'
+        return query
+
