@@ -1,0 +1,55 @@
+<!-- Author: Lela Bones
+    This document contains the template for the rest of the documents-->
+<!DOCTYPE html>
+  <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device=width, initial-scale=1">
+        <title>Nestor Visual Dashboard</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!--         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script> -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<!--         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"> -->
+        <link rel="stylesheet" href="/css/sidebar.css">
+    </head>
+    <body>
+        {% include 'includes/_navbar.html' %} 
+        
+        <div id="wrapper">
+            
+            <!--Side Bar-->
+            <div id="sidebar-wrapper">
+                <ul class="sidebar-nav">
+                    <li><a href="/vis1">Vis1</a></li>
+                    <li><a href="/vis2">Vis2</a></li>
+                    <li><a href="/vis3">Vis3</a></li>
+                </ul>
+            </div>
+                    
+            <!--Page Content-->
+            <div id="page-content-wrapper">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <a href="#" class="btn btn-success" id="menu-toggle">Toggle Menu</a>
+                            <h1>Sidebar Layouts are cool</h1>
+                            <p>Test Test Test Test Test Test Test Test Test Test Test Test
+                                Test Test Test Test Test Test Test Test Test Test Test Test
+                                Test Test Test Test Test Test Test Test Test Test Test Test
+                                Test Test Test Test Test Test Test Test Test Test Test Test
+                                Test Test Test Test Test Test Test Test Test Test Test Test
+                                Test Test Test Test Test Test Test Test Test Test Test Test
+                                Test Test Test Test Test Test Test Test Test Test Test Test
+                                
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--         {% block body %}{% endblock %} -->
+        
+    
+    </body>
+</html>
