@@ -369,14 +369,14 @@ class Issue:
         except TypeError:
             self.time_to_return_to_operation = None
 
-    def _get_time_to_issue_work_order(self):
-        return self.time_to_issue_work_order
+    def _get_time_to_issue_workorder(self):
+        return self.time_to_issue_workorder
 
-    def _set_time_to_issue_work_order(self):
+    def _set_time_to_issue_workorder(self):
         try:
-            self.time_to_issue_work_order = self.date_workorder_start - self.date_machine_down
+            self.time_to_issue_workorder = self.date_workorder_start - self.date_machine_down
         except TypeError:
-            self.time_to_issue_work_order = None
+            self.time_to_issue_workorder = None
 
     def _get_time_to_travel(self):
         return self.time_to_travel
@@ -450,7 +450,7 @@ class Issue:
         self._set_time_work_order_completion()
         self._set_time_to_dispatch()
         self._set_time_to_return_to_operation()
-        self._set_time_to_issue_work_order()
+        self._set_time_to_issue_workorder()
         self._set_time_to_travel()
         self._set_time_to_solve_problem()
         self._set_time_to_diagnose()
@@ -505,7 +505,7 @@ class Issue:
                f'\ttime_work_order_completion  =  {self.time_work_order_completion}\n' \
                f'\ttime_to_dispatch  =  {self.time_to_dispatch}\n' \
                f'\ttime_to_return_to_operation  =  {self.time_to_return_to_operation}\n' \
-               f'\ttime_to_issue_work_order  =  {self.time_to_issue_work_order}\n' \
+               f'\ttime_to_issue_work_order  =  {self.time_to_issue_workorder}\n' \
                f'\ttime_to_travel  =  {self.time_to_travel}\n' \
                f'\ttime_to_solve_problem  =  {self.time_to_solve_problem}\n' \
                f'\ttime_to_diagnose  =  {self.time_to_diagnose}\n' \

@@ -2,6 +2,7 @@ issue:
   label:
     issue: ':ISSUE'
   properties:
+    id : id
     description_problem: description_of_problem
     description_solution: description_of_solution
     description_cause: description_of_cause
@@ -20,7 +21,7 @@ issue:
     date_problem_solve: date_problem_solve
     date_machine_up: date_machine_up
     date_workorder_completion : date_maintenanceworkorder_completion
-    id : id
+
 
 human:
   label:

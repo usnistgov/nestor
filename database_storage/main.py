@@ -229,7 +229,7 @@ def cypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, pro
     return queries
 
 
-def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None, otherTag=False):
+def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None, allTag=False):
     """
     create the query for all the tages, and link it to the given issue
     :param binnaryDataframe:
@@ -273,7 +273,7 @@ def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None, otherTag=F
     queries = []
     issue = Issue(databaseInfo=database.schema)
 
-    if otherTag:
+    if allTag:
         df = dataframe
     else:
         df = dataframe.drop('NA', axis=1, level=0).drop('X', axis=1, level=0)
@@ -374,6 +374,7 @@ def cypherLink_itemIssue(database):
             f'\nMERGE (issue)-[{database.schema["edges"]["issue-itemasproblem"]}]->(item)'
     queries.append(query)
 
+
     query = f'\nMATCH (issue{issue.label})-[{database.schema["edges"]["issue-solutionitem"]}]->(solutionitem{solutionItem.label})' \
             f'\nMATCH (issue)-[{database.schema["edges"]["issue-item"]}]->(item{item.label})' \
             f'\nWHERE (solutionitem)-[{database.schema["edges"]["solutionitem-item"]}]->(item)' \
@@ -397,6 +398,8 @@ def cypherCreate_itemsTree(database, current, queries=[]):
         queries.append(query)
         if "children" in children:
             cypherCreate_itemsTree(database, children, queries)
+            
+        print(query)
 
     return queries
 
