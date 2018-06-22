@@ -55,7 +55,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Item': 'I',
             'Problem Item': 'P I',
             'Solution Item': 'S I',
-            'Unknown': 'U',
+            'Ambiguous (Unknown)': 'U',
             'Stop-word': 'X',
             'Problem': 'P',
             'Solution': 'S',
@@ -262,6 +262,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             new_notes = self.textEdit_Ngram_NoteEditor.toPlainText()
             new_clf = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(),
                                                       pd.np.nan)
+            print("+++++++++")
+            print(self.buttonGroup_NGram_Classification.checkedButton().text())
+            print(self.buttonDictionary_NGram)
             self.dataframe_NGram = self._set_dataframeItemValue(self.dataframe_NGram, token, new_alias, new_clf, new_notes)
             self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
 
