@@ -27,7 +27,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'I': self.radioButton_1gram_ItemEditor,
             'X': self.radioButton_1gram_StopWordEditor,
             'U': self.radioButton_1gram_UnknownEditor,
-            '' : self.radioButton_1gram_NotClassifiedEditor
+            '' : self.radioButton_1gram_NotClassifiedEditor,
+            'nan' : self.radioButton_1gram_NotClassifiedEditor
         }
         self.buttonDictionary_1Gram = {
             'Item': 'I',
@@ -46,7 +47,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'X': self.radioButton_Ngram_StopWordEditor,
             'P': self.radioButton_Ngram_ProblemEditor,
             'S': self.radioButton_Ngram_SolutionEditor,
-            '': self.radioButton_Ngram_NotClassifiedEditor
+            '': self.radioButton_Ngram_NotClassifiedEditor,
+            'nan': self.radioButton_Ngram_NotClassifiedEditor
         }
 
         self.buttonDictionary_NGram = {
