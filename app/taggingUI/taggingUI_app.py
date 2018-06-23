@@ -27,8 +27,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'I': self.radioButton_1gram_ItemEditor,
             'X': self.radioButton_1gram_StopWordEditor,
             'U': self.radioButton_1gram_UnknownEditor,
-            '' : self.radioButton_1gram_NotClassifiedEditor,
-            'nan' : self.radioButton_1gram_NotClassifiedEditor
+            '' : self.radioButton_1gram_NotClassifiedEditor
         }
         self.buttonDictionary_1Gram = {
             'Item': 'I',
@@ -47,8 +46,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'X': self.radioButton_Ngram_StopWordEditor,
             'P': self.radioButton_Ngram_ProblemEditor,
             'S': self.radioButton_Ngram_SolutionEditor,
-            '': self.radioButton_Ngram_NotClassifiedEditor,
-            'nan': self.radioButton_Ngram_NotClassifiedEditor
+            '': self.radioButton_Ngram_NotClassifiedEditor
         }
 
         self.buttonDictionary_NGram = {
@@ -387,7 +385,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         #classification
         btn = self.classificationDictionary_1Gram.get(classification)
-        btn.toggle()  # toggle that button
+        try:
+            btn.toggle()  # toggle that button
+        except (AttributeError):
+            self.radioButton_1gram_NotClassifiedEditor.toggle()
+
 
     def _set_editorValue_NGram(self, alias, token, notes, classification):
         """
@@ -405,7 +407,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         # classification
         btn = self.classificationDictionary_NGram.get(classification)
-        btn.toggle()  # toggle that button
+        try:
+            btn.toggle()  # toggle that button
+        except (AttributeError):
+            self.radioButton_Ngram_NotClassifiedEditor.toggle()
 
 
     def _get_similarityMatches(self, token):
