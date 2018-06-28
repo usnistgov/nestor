@@ -10,20 +10,22 @@ import os, os.path
 # creates instance of the class Flask
 app = Flask(__name__)
 
-#loading in dataset
-dataset = tablib.Dataset()
-with open(os.path.join(os.path.dirname(__file__),'mine_vocab_1g.csv')) as f:
-    dataset.csv = f.read()
-    
-    save_path = '/home/msid/ltb3/TagApp/nestor/dashboard/flaskDash/templates/includes/'
-    completeName = os.path.join(save_path, '_data.html')
-    df = open(completeName, "w+")
-    df.write("<div class='table-responsive pre-scrollable'>")
-    df.write("<table class='table table-striped'>")
-    df.write(dataset.html[7:])
-    df.write("</table>")
-    df.write("</div>") 
-    df.close()
+#creates table for dashboard
+def data_table():
+    load_path = '/home/msid/ltb3/TagApp/nestor/dashboard/flaskDash/data/gs_data/'
+    dataset = tablib.Dataset()
+    with open(os.path.join(load_path, 'readable.csv')) as f:
+        dataset.csv = f.read()
+
+        save_path = './templates/includes/'
+        completeName = os.path.join(save_path, '_data.html')
+        df = open(completeName, "w+")
+        df.write("<div class='table-responsive pre-scrollable'>")
+        df.write("<table class='table table-striped'>")
+        df.write(dataset.html[7:])
+        df.write("</table>")
+        df.write("</div>") 
+        df.close()
     
 #locally creates a page
 @app.route('/')
