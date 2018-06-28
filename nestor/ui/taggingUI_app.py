@@ -65,7 +65,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Item': 'I',
             'Problem Item': 'P I',
             'Solution Item': 'S I',
-            'Unknown': 'U',
+            'Ambiguous (Unknown)': 'U',
             'Stop-word': 'X',
             'Problem': 'P',
             'Solution': 'S',
@@ -507,7 +507,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         #classification
         btn = self.classificationDictionary_1Gram.get(classification)
-        btn.toggle()  # toggle that button
+        try:
+            btn.toggle()  # toggle that button
+        except AttributeError:
+            self.radioButton_1gram_NotClassifiedEditor.toggle()
 
     def _set_editorValue_NGram(self, alias, token, notes, classification):
         """print all the information from the token to the right layout NGram
@@ -539,7 +542,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         # classification
         btn = self.classificationDictionary_NGram.get(classification)
-        btn.toggle()  # toggle that button
+        try:
+            btn.toggle()  # toggle that button
+        except AttributeError:
+            self.radioButton_Ngram_NotClassifiedEditor.toggle()
 
 
     def _get_similarityMatches(self, token):
