@@ -1,5 +1,5 @@
 
-Installation
+Installation[DEPRECATED]
 ------------
 
 This section will walk through the steps for downloading Anaconda, which

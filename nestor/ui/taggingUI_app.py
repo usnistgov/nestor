@@ -663,10 +663,3 @@ class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
 
-
-
-# if __name__ == "__main__":
-#     app = Qw.QApplication(sys.argv)
-#     window = MyTaggingToolWindow()
-#     window.show()
-#     sys.exit(app.exec_())

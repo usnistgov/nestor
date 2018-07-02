@@ -3,7 +3,8 @@
 
 
 .. toctree::
-   how_to_guide/anaconda_tut.rst
+   license.rst
+   how_to_guide/installation.rst
    how_to_guide/tutorial.rst
 
 
