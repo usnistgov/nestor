@@ -9,31 +9,14 @@ Using the Tagging Tool
 This section will walk through the steps for using the tagging tool
 application.
 
-Start the Application
----------------------
+Start the Application (0.3.0)
+-----------------------------
 
-1. Click on the nist-tagging-tool environment button
+1. Open a terminal window and navigate to the folder where the tagging tool is installed. For example, it may be installed in '/anaconda3/lib/python3.6/site-packages
+' on a Linux machine, but the installed location might vary from one computer to another and one OS to another.
 
-|image1|
 
-2. Click on the "run" button
-
-|image2|
-
-3. Select "Open Terminal"
-
-|image3|
-
-4. A new terminal will open that will look like the below:
-
-|image4|
-
-5. Within the terminal, navigate to the top level folder of the
-   application. Here, the folder is located at
-
-6. Type the command \|python -m app.taggingUI.main\|
-
-|image5|
+2. Launch the app by typing in 'python app.py'
 
 7. The application should open as seen below:
 
