@@ -40,9 +40,15 @@ Examples
 
 
 
-.. only:: html
-API Index and Documentation
-===========================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+API Reference
+=============
+
+.. toctree::
+   :caption: API Reference
+
+   source/nestor.rst
+
+
+:ref:`genindex`
+:ref:`modindex`
+:ref:`search`

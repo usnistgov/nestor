@@ -1,8 +1,5 @@
 
 
-
-
-
 Using the Tagging Tool
 ======================
 

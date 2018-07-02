@@ -3,7 +3,7 @@
 # This file is part of Nestor. It is subject to the license terms in the file
 # LICENSE.rst found in the top-level directory of this distribution.
 
-from nestor.ui import mainwindow
+from nestor._ui import mainwindow
 
 from PyQt5.QtWidgets import QApplication, QMessageBox, qApp
 from PyQt5 import QtCore

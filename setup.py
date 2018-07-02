@@ -50,7 +50,7 @@ except IOError:
     print("Could not open config file.")
 
 # packages = ['nestor',
-#             'nestor/database_storage',
+#             'nestor/_database_storage',
 #             'nestor/datasets']
 packages = find_packages()
 install_requires = ['numpy>=1.14.2',
@@ -68,6 +68,6 @@ extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_
 
 
 if config.getboolean('gui', 'use'):
-    packages.append('nestor.ui')
+    packages.append('nestor._ui')
 
 run_setup(packages, install_requires, extras_require)
