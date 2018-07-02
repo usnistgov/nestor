@@ -40,8 +40,8 @@ available for the purpose.
 
 __version__ = "0.2.1"
 
-# __all__ = ['keyword',
-#            'tagplots',
-#            'tagtrees',
-#            'datasets']
+__all__ = ['keyword',
+           'tagplots',
+           'tagtrees',
+           'datasets']
 

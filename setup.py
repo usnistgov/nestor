@@ -10,8 +10,10 @@ import configparser
 
 CONFIG_FILE = 'setup.cfg'
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
+
 
 def run_setup(packages, install_requires, extras_require):
     # populate the version_info dictionary with values stored in the version file

@@ -31,13 +31,13 @@ from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
 from itertools import product
 
-# __all__ = ['NLPSelect',
-#            'TokenExtractor',
-#            'generate_vocabulary_df',
-#            'get_tag_completeness',
-#            'tag_extractor',
-#            'token_to_alias',
-#            'ngram_automatch']
+__all__ = ['NLPSelect',
+           'TokenExtractor',
+           'generate_vocabulary_df',
+           'get_tag_completeness',
+           'tag_extractor',
+           'token_to_alias',
+           'ngram_automatch']
 
 
 class Transformer(TransformerMixin):
@@ -298,8 +298,12 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
         df.notes = np.nan
         if isinstance(init, Path) and init.is_file():  # filename is passed
             df_import = pd.read_csv(init, index_col=0)
-        else:  # assume input pandas df
-            df_import = init.copy()
+        else:
+            try:  # assume input pandas df
+                df_import = init.copy()
+            except AttributeError:
+                print('File not Found! Can\'t import!')
+                raise
         df.update(df_import)
         print('intialized successfully!')
         df.fillna('', inplace=True)

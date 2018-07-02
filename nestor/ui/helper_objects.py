@@ -58,6 +58,7 @@ class QTableWidget_token(Qw.QTableWidget):
             self.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
             self.setSelectionBehavior(Qw.QTableWidget.SelectRows)
 
+
 class QButtonGroup_similarityPattern(Qw.QButtonGroup):
 
     def __init__(self, layout):
@@ -101,7 +102,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
 
         self.spacer = Qw.QSpacerItem(20, 40, Qw.QSizePolicy.Minimum, Qw.QSizePolicy.Expanding)
         self.layout.addSpacerItem(self.spacer)
-
 
     def set_checkBoxes_rechecked(self, token_list, btn_checked):
         """check the button that was send in the btn_checked
@@ -164,7 +164,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         return checkedbtns
 
 
-class CompositionNGramItem():
+class CompositionNGramItem:
 
     def __init__(self, layout):
         self.layout = layout
@@ -263,7 +263,6 @@ class CompositionNGramItem():
 
         return layout
 
-
     def printView(self, dataframe, token_Ngram):
         """print the information of the
 
@@ -360,7 +359,7 @@ class MyMplCanvas(FigureCanvas):
         """
         self.dataframe=dataframe
 
-    def plot_it(self):
+    def plot_it(self, nbins=10):
         """print the plot here we have the original plot
         :return:
 
@@ -376,13 +375,18 @@ class MyMplCanvas(FigureCanvas):
             # with sns.axes_style('ticks') as style, \
             #         sns.plotting_context('poster') as context:
             sns.distplot(self.dataframe.dropna(),
-                         bins=10,
-                         # kde_kws={'cut': 0},
+                         bins=nbins,
+                         kde_kws={'cut': 0},
                          hist_kws={'align': 'mid'},
-                         kde=False,
-                         ax=self.axes)
+                         kde=True,
+                         ax=self.axes,
+                         color='xkcd:slate')
             self.axes.set_xlim(0.1, 1.0)
-            self.axes.set_xlabel('precision (PPV)')
+            self.axes.set_xlabel('fraction of MWO tokens getting tagged')
+            self.axes.set_title('Distribution over MWO\'s')
+            sns.despine(ax=self.axes, left=True, trim=True)
+            self.axes.get_yaxis().set_visible(False)
+
         plt.show()
         self.draw()
         self.resize_event()
