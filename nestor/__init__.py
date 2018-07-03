@@ -7,8 +7,8 @@ user-interaction to perform structured data extraction with minimal annotation t
 
 __version__ = "0.2.1"
 
-__all__ = ['keyword',
-           'tagplots',
-           'tagtrees',
-           'datasets']
+# __all__ = ['keyword',
+#            'tagplots',
+#            'tagtrees',
+#            'datasets']
 

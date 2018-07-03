@@ -8,7 +8,7 @@ import PyQt5.QtWidgets as Qw
 
 
 
-fname = 'selectCSVHeadersUI._ui'
+fname = 'selectCSVHeadersUI.ui'
 qtDesignerFile_selectCSVHeaders = Path('nestor/_ui')/fname
 Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(str(qtDesignerFile_selectCSVHeaders))
 

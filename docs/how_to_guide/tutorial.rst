@@ -6,8 +6,8 @@ Using the Tagging Tool
 This section will walk through the steps for using the tagging tool
 application.
 
-Start the Application (0.3.0)
------------------------------
+Start the Application
+---------------------
 
 1. Open a terminal window and navigate to the folder where the tagging tool is installed. For example, it may be installed in '/anaconda3/lib/python3.6/site-packages
 ' on a Linux machine, but the installed location might vary from one computer to another and one OS to another.
@@ -15,11 +15,11 @@ Start the Application (0.3.0)
 
 2. Launch the app by typing in 'python app.py'
 
-7. The application should open as seen below:
+3. The application should open as seen below:
 
 |image6|
 
-8. Open your .csv file with your MWOs. Included in the application, is a
+4. Open your .csv file with your MWOs. Included in the application, is a
    publicly available dataset. We will use this file (mine_raw.csv) as
    the example.
 
@@ -27,16 +27,16 @@ Start the Application (0.3.0)
 
 |image8|
 
-9. If you are using the application for the first time, hit “Next”
+5. If you are using the application for the first time, hit “Next”
 
 |image9|
 
-10. Select the column(s) that you would like to “tag.” In this example,
+6. Select the column(s) that you would like to “tag.” In this example,
    the column is “OriginalShorttext.” Hit “Next”.
 
 |image10|
 
-11. The application window will open as seen below:
+7. The application window will open as seen below:
 
 |image11|
 
