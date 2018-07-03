@@ -1,46 +1,24 @@
 nestor package
 ==============
 
+.. automodule:: nestor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
 .. toctree::
 
-    nestor.database_storage
-    nestor.ui
+    nestor.datasets
 
 Submodules
 ----------
 
-nestor.keyword module
----------------------
+.. toctree::
 
-.. automodule:: nestor.keyword
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   nestor.keyword
+   nestor.tagplots
+   nestor.tagtrees
 
-nestor.tagplots module
-----------------------
-
-.. automodule:: nestor.tagplots
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-nestor.tagtrees module
-----------------------
-
-.. automodule:: nestor.tagtrees
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: nestor
-    :members:
-    :undoc-members:
-    :show-inheritance:

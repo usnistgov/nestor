@@ -25,7 +25,7 @@ class DatabaseNeo4J(object):
         - uri: the server url
         - user: the user of the database
         - password: the passsword of the use
-        - schema : a dictionary the desrcibe the schame of the databse (node label, edges label, properies name) -see the YAML file database_storage/database/DatabaseSchema.yaml-
+        - schema : a dictionary the desrcibe the schame of the databse (node label, edges label, properies name) -see the YAML file _database_storage/database/DatabaseSchema.yaml-
 
     It also contains the methods to transform the result from self.runQuery() into dataframe
 
