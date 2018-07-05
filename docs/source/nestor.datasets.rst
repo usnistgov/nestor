@@ -6,10 +6,4 @@ nestor.datasets package
     :undoc-members:
     :show-inheritance:
 
-Submodules
-----------
-
-.. toctree::
-
-   nestor.datasets.base
 

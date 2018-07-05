@@ -1,12 +1,5 @@
 """
-Calendar heatmaps from Pandas time series data.
-Plot Pandas time series data sampled by day in a heatmap per calendar year,
-similar to GitHub's contributions calendar.
-
-adapted from:
-    'Martijn Vermaat' 14 Feb 2016
-    'martijn@vermaat.name'
-    'https://github.com/martijnvermaat/calmap'
+author: Thurston Sexton
 """
 from __future__ import unicode_literals
 
@@ -65,12 +58,17 @@ _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')
 
 
 def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
-             fillcolor='whitesmoke', linewidth=1, linecolor=None,
-             daylabels=calendar.day_abbr[:], dayticks=True,
+             linewidth=1, linecolor=None,
              monthlabels=calendar.month_abbr[1:], monthticks=True, ax=None,
              **kwargs):
     """
     Plot one year from a timeseries as a calendar heatmap.
+
+    adapted from:
+    'Martijn Vermaat' 14 Feb 2016
+    'martijn@vermaat.name'
+    'https://github.com/martijnvermaat/calmap'
+
     Parameters
     ----------
     data : Series
@@ -87,18 +85,11 @@ def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
         resampling data by day.
     cmap : matplotlib colormap name or object
         The mapping from data values to color space.
-    fillcolor : matplotlib color
-        Color to use for days without data.
     linewidth : float
         Width of the lines that will divide each day.
     linecolor : color
         Color of the lines that will divide each day. If `None`, the axes
         background color is used, or 'white' if it is transparent.
-    daylabels : list
-        Strings to use as labels for days, must be of length 7.
-    dayticks : list or int or bool
-        If `True`, label all days. If `False`, don't label days. If a list,
-        only label days with these indices. If an integer, label every n day.
     monthlabels : list
         Strings to use as labels for months, must be of length 12.
     monthticks : list or int or bool
