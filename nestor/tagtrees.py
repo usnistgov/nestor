@@ -3,6 +3,8 @@
 import networkx as nx
 
 from sklearn.preprocessing import MultiLabelBinarizer#, minmax_scale
+from sklearn.metrics.pairwise import cosine_similarity
+
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -36,31 +38,63 @@ def get_onehot(df, col, topn=700):
     return itm_event
 
 
-def node_adj_mat(itm_event):
-    coocc = itm_event.T.dot(itm_event)
-    occ = np.diagonal(np.copy(coocc))
+def node_adj_mat(itm_event, similarity='cosine', dag=False, pct_thres=None):
+    """
 
-    np.fill_diagonal(coocc.values, 0)
-    adj_mat = coocc / np.dot(np.sqrt(occ).T, np.sqrt(occ))
+    Parameters
+    ----------
+    itm_event
+    similarity: str
+        cosine: cosine similarity (from ``sklearn.metrix.pairwise``)
+        count: count (the number of co-occurrences of each tag-tag pair)
+    dag: bool
+        default adj_mat will be accross all nodes. This option will return a
+        directed, acyclic graph (DAG), useful for things like Sankey Diagrams.
+        Current implementation returns (P) -- (I) -- (S) structure (deletes others).
+    pct_thres: int or None
+        If int, between [0,100]. The lower percentile at which to threshold "adjacency".
+
+    Returns
+    -------
+    pandas.DataFrame, containing adjacency measures for each tag-tag (row-column) occurrence
+    """
+    adj_mat = itm_event.T.dot(itm_event)
+
+    if similarity is 'cosine':
+        adj_mat.loc[:, :] = cosine_similarity(itm_event.T)
+    else:
+        assert similarity is 'count', "Similarity must be one of ['cosine', 'count']!"
+    np.fill_diagonal(adj_mat.values, 0)
+
+    if dag:
+        for NE in 'IPS':
+            adj_mat.loc[NE,NE] = 0.
+        adj_mat.loc['P', 'S'] = 0.
+        adj_mat.loc['S', 'P'] = 0.
+
+    if pct_thres is not None:
+        assert 0 <= pct_thres <= 100, 'percentiles must be between [0,100]'
+        lower = np.percentile(adj_mat, pct_thres)
+        adj_mat[adj_mat < lower] = 0.
+
     return adj_mat
 
 
 def tag_network(adj_mat, column_lvl=0):
     G = nx.from_numpy_matrix(adj_mat.values)
     G = nx.relabel_nodes(G, dict(zip(G.nodes(), adj_mat.columns.get_level_values(column_lvl))))
-
     return G
 
 
-def tag_df_network(tag_df):
+def tag_df_network(tag_df, **node_adj_kws):
 
-    adj_mat = 100*node_adj_mat(tag_df)
+    adj_mat = node_adj_mat(tag_df, **node_adj_kws)
     G = tag_network(adj_mat, column_lvl=1)
     # print(tag_df.sum().xs(slice(None)))
     ct = tag_df.sum().xs(slice(None))
-    ct_std = np.log(1+(ct-ct.min(axis=0))/(ct.max(axis=0)-ct.min(axis=0)))
+    # ct_std = np.log(1+(ct-ct.min(axis=0))/(ct.max(axis=0)-ct.min(axis=0)))
     nx.set_node_attributes(G, 'count', ct.to_dict())
-    nx.set_node_attributes(G, 'size', (ct_std*(30-10) + 10).to_dict())
+    # nx.set_node_attributes(G, 'size', (ct_std*(30-10) + 10).to_dict())
     nx.set_node_attributes(G, 'NE', dict(tag_df.swaplevel(axis=1).columns.tolist()))
 
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
@@ -68,18 +102,18 @@ def tag_df_network(tag_df):
     #                       axis=1).reset_index()
     node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
     
-    # filter out the edges with less adjacency than average
-    edgeweights = adj_mat.values[np.triu_indices(min(adj_mat.shape[0], 50))]
-    thres, stdev = edgeweights.mean(), edgeweights.std()
-    mask = adj_mat < thres+0.2*stdev
+    # # filter out the edges with less adjacency than average
+    # edgeweights = adj_mat.values[np.triu_indices(min(adj_mat.shape[0], 50))]
+    # thres, stdev = edgeweights.mean(), edgeweights.std()
+    # mask = adj_mat < thres+0.2*stdev
     edge_info = adj_mat.copy()
-    edge_info[mask] = np.nan
+    # edge_info[mask] = np.nan
     
     edge_info.index, edge_info.columns = edge_info.index.droplevel(0), edge_info.columns.droplevel(0)
     edge_info = edge_info.stack(level=0).reset_index()
     edge_info.columns = ['source', 'target', 'weight']
     edge_info = edge_info.replace(0., np.nan)
-    edge_info.weight = np.log(1+edge_info.weight)
+    # edge_info.weight = np.log(1+edge_info.weight)
     
     return G, node_info, edge_info.dropna()
 
@@ -90,16 +124,24 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
 
     Parameters
     ----------
-    dist_mat: dataframe containing similarity matrix, indexed and named by tags
-    cent_prog: algorithm to use in calculating node centrality
+    dist_mat: pandas.DataFrame
+        contains similarity matrix, indexed and named by tags
+    cent_prog: str
+        algorithm to use in calculating node centrality
+
         pr: PageRank
         eig: eigencentrality
         btw: betweenness
         cls: closeness
-    tau: similarity threshold for retaining a node
-    dynamic: re-calculate centrality after adding every tag
-    write_dot: fname or None, where to save a .dot, if any.
-    verbose: print some stuff
+
+    tau: float
+        similarity threshold for retaining a node
+    dynamic: bool
+        whether to re-calculate centrality after popping every tag
+    write_dot: str or None
+        file location, where to save a .dot, if any.
+    verbose: bool
+        print some stuff
 
 
     """

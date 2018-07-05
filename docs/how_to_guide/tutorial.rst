@@ -247,11 +247,6 @@ begin using the report tab.
 
 
 
-.. |image1| image:: images/Graphic29_v2.png
-.. |image2| image:: images/Graphic30_v2.png
-.. |image3| image:: images/Graphic31_v2.png
-.. |image4| image:: images/Graphic32_v2.png
-.. |image5| image:: images/Graphic33_v2.png
 .. |image6| image:: images/Graphic34_v2.png
 .. |image7| image:: images/Graphic35_v2.png
 .. |image8| image:: images/Graphics36_v2.png

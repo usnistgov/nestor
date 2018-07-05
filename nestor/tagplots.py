@@ -23,7 +23,7 @@ def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, 
     if name is None:
         name = 'Tag Net'
 
-    G, node_info, edge_info = nestor.tagtrees.tag_df_network(tag_df)
+    G, node_info, edge_info = nestor.tagtrees.tag_df_network(tag_df[['I', 'P', 'S']])
     pos = pd.DataFrame(layout(G)).T.rename(columns={0: 'x', 1: 'y'})
     node_info = node_info.join(pos).reset_index().rename(columns={'index': 'tag'})
     nodes = hv.Nodes(node_info,

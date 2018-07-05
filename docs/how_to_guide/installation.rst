@@ -9,9 +9,10 @@ Install from PyPI
 
 1. Open a command line terminal 
 
-:Linux:		``Ctrl`` + ``Alt`` + ``T``
-:Windows:	``Windows`` + ``R`` -> Type 'cmd'
-:Mac: 		``⌘`` + ``Space`` -> Type 'Terminal'
+
+:Linux:      ``Ctrl`` + ``Alt`` + ``T``
+:Windows: 	 ``Windows`` + ``R`` -> Type 'cmd'
+:Mac: 		 ``⌘`` + ``Space`` -> Type 'Terminal'
 
 2. Type in ``pip install nestor`` and wait for the install to complete
 
