@@ -29,6 +29,7 @@ dist
 
 # exception
 <<<<<<< HEAD
+!data/public/
 !database_storage/database/DatabaseSchema.yaml
 !data/public/*.yaml
 =======
