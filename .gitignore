@@ -6,14 +6,33 @@ segments_6
 **/.ipynb_checkpoints
 
 # data folder
+<<<<<<< HEAD
 data/
+=======
+data/**
+build
+dist
+_build
+_static
+_templates
+_pdf
+.doctrees
+dist
+>>>>>>> master
 
 #   special file type
+**.spec
 **.pyc
 **.csv
 **.yaml
+**/reveal.js
 
 # exception
+<<<<<<< HEAD
 !data/public/
 !database_storage/database/DatabaseSchema.yaml
 !data/public/*.yaml
+=======
+!nestor/datasets/**
+!database_storage/database/DatabaseSchema.yaml
+>>>>>>> master
