@@ -14,4 +14,5 @@ Case Studies
 
    notebooks/survival-analysis.ipynb
    notebooks/gs_case_study.ipynb
+   notebooks/hvac_case_study.ipynb
 

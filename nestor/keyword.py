@@ -4,8 +4,7 @@ author: Thurston Sexton
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import re
-import string
+import re, sys, string
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
@@ -19,7 +18,7 @@ try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-3731
     if 'terminal' in ipy_str:
         from tqdm import tqdm
 except:
-    import sys
+
     if sys.stderr.isatty():
         from tqdm import tqdm
     else:

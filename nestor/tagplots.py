@@ -57,12 +57,15 @@ def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, 
 _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')
 
 
-def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
+def tagyearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
              linewidth=1, linecolor=None,
              monthlabels=calendar.month_abbr[1:], monthticks=True, ax=None,
              **kwargs):
     """
-    Plot one year from a timeseries as a calendar heatmap.
+    Plot a timeseries of (binary) tag occurrences as a calendar heatmap over weeks in the year.
+    any columns passed will be explicitly plotted as rows, with each week in the year as a column.
+    By default, occurences are summed, not averaged, but this aggregation over weeks may be any
+    valid option for the `pandas.Dataframe.agg()` method.
 
     adapted from:
     'Martijn Vermaat' 14 Feb 2016
@@ -105,29 +108,6 @@ def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
     -------
     ax : matplotlib Axes
         Axes object with the calendar heatmap.
-    Examples
-    --------
-    By default, `yearplot` plots the first year and sums the values per day:
-    .. plot::
-        :context: close-figs
-        calmap.yearplot(events)
-    We can choose which year is plotted with the `year` keyword argment:
-    .. plot::
-        :context: close-figs
-        calmap.yearplot(events, year=2015)
-    The appearance can be changed by using another colormap. Here we also use
-    a darker fill color for days without data and remove the lines:
-    .. plot::
-        :context: close-figs
-        calmap.yearplot(events, cmap='YlGn', fillcolor='grey',
-                        linewidth=0)
-    The axis tick labels can look a bit crowded. We can ask to draw only every
-    nth label, or explicitely supply the label indices. The labels themselves
-    can also be customized:
-    .. plot::
-        :context: close-figs
-        calmap.yearplot(events, monthticks=3, daylabels='MTWTFSS',
-                        dayticks=[0, 2, 4, 6])
     """
     if year is None:
         year = data.index.sort_values()[0].year
@@ -152,13 +132,6 @@ def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
         ax = plt.gca()
 
     if linecolor is None:
-        # Unfortunately, linecolor cannot be transparent, as it is drawn on
-        # top of the heatmap cells. Therefore it is only possible to mimic
-        # transparent lines by setting them to the axes background color. This
-        # of course won't work when the axes itself has a transparent
-        # background so in that case we default to white which will usually be
-        # the figure or canvas background color.
-        # linecolor = ax.get_axis_bgcolor()
         linecolor = ax.get_facecolor()
 
         if ColorConverter().to_rgba(linecolor)[-1] == 0:
@@ -224,10 +197,24 @@ def yearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
     return ax
 
 
-def calendarplot(data, how='sum', yearlabels=True, yearascending=True, yearlabel_kws=None,
+def tagcalendarplot(data, how='sum', yearlabels=True, yearascending=True, yearlabel_kws=None,
                  subplot_kws=None, gridspec_kws=None, fig_kws=None, **kwargs):
     """
-    Plot a timeseries as a calendar heatmap.
+    Plot a timeseries of (binary) tag occurrences as a calendar heatmap over weeks in the year.
+    any columns passed will be explicitly plotted as rows, with each week in the year as a column.
+    By default, occurences are summed, not averaged, but this aggregation over weeks may be any
+    valid option for the `pandas.Dataframe.agg()` method.
+
+
+    This function  will separate out multiple years within the data as multiple calendars. The
+    plotting has been heavily modified/altered/normalized, but the original version appeared here:
+
+
+    adapted from:
+     'Martijn Vermaat' 14 Feb 2016
+     'martijn@vermaat.name'
+     'https://github.com/martijnvermaat/calmap'
+
     Parameters
     ----------
     data : Series
@@ -258,12 +245,7 @@ def calendarplot(data, how='sum', yearlabels=True, yearascending=True, yearlabel
     fig, axes : matplotlib Figure and Axes
         Tuple where `fig` is the matplotlib Figure object `axes` is an array
         of matplotlib Axes objects with the calendar heatmaps, one per year.
-    Examples
-    --------
-    With `calendarplot` we can plot several years in one figure:
-    .. plot::
-        :context: close-figs
-        calmap.calendarplot(events)
+
     """
     yearlabel_kws = yearlabel_kws or {}
     subplot_kws = subplot_kws or {}
@@ -301,7 +283,7 @@ def calendarplot(data, how='sum', yearlabels=True, yearascending=True, yearlabel
     max_weeks = 0
 
     for year, ax in zip(years, axes):
-        yearplot(by_day, year=year, how=None, ax=ax, **kwargs)
+        tagyearplot(by_day, year=year, how=None, ax=ax, **kwargs)
         max_weeks = max(max_weeks, ax.get_xlim()[1])
 
         if yearlabels:
