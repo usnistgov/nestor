@@ -14,7 +14,7 @@ import pandas as pd
 from matplotlib.colors import ColorConverter
 
 
-def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, padding=None):
+def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, padding=None, **node_adj_kws):
     try:
         import nestor.tagtrees
     except ImportError:
@@ -22,14 +22,21 @@ def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, 
         raise
     if name is None:
         name = 'Tag Net'
+    adj_params = {
+        'similarity': 'cosine',
+        'dag': False,
+        'pct_thres': 0,
+    }
+    adj_params.update(node_adj_kws)
 
-    G, node_info, edge_info = nestor.tagtrees.tag_df_network(tag_df[['I', 'P', 'S']])
+    G, node_info, edge_info = nestor.tagtrees.tag_df_network(tag_df[['I', 'P', 'S']],
+                                                             **adj_params)
     pos = pd.DataFrame(layout(G)).T.rename(columns={0: 'x', 1: 'y'})
     node_info = node_info.join(pos).reset_index().rename(columns={'index': 'tag'})
     nodes = hv.Nodes(node_info,
                      kdims=['x', 'y', 'tag'],
-                     vdims=['size', 'NE', 'count'])
-    opts = {
+                     vdims=['NE', 'count'])
+    color_opts = {
         'P': 'crimson',
         'S': '#7ABC32',
         'I': '#4F81BD',
@@ -37,16 +44,22 @@ def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, layout_kws={}, 
         'NA': 'gray',
         'X': 'black'
     }
-    nodes = nodes.sort('NE').options(color_index='NE', cmap=opts, size='size')
+    # nodes = nodes.sort('NE').options(color_index='NE', cmap=opts, size='size')
     text = hv.Labels(node_info, ['x', 'y'], 'tag', group=name).options(text_font_size='8pt',
                                                                        xoffset=0.015, yoffset=-0.015,
                                                                        text_align='left')
+    # TODO add sankey (uses dag, no text)
+    graph = hv.Graph((edge_info, nodes),
+                     group=name, vdims='weight')
+    ops = {
+        'color_index': 'NE',
+        'cmap': color_opts,
+        'edge_color_index': 'weight',
+        'edge_cmap': 'Magma_r',
+        #     'node_size' : 'count',  # wait for HoloViews `op()` functionality!
+    }
 
-    graph = hv.Graph(((edge_info.source.values, edge_info.target.values, edge_info.weight.values),
-                      nodes), group=name, vdims='weight')
-    graph = graph.options(color_index='NE', cmap=opts,
-                          edge_color_index='weight', edge_cmap='Magma_r',
-                          node_size='size')
+    graph = graph.options(**ops)
 
     if padding is None:
         padding = dict(x=(-0.05, 1.05), y=(-0.05, 1.05))

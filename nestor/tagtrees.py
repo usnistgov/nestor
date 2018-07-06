@@ -68,9 +68,11 @@ def node_adj_mat(itm_event, similarity='cosine', dag=False, pct_thres=None):
 
     if dag:
         for NE in 'IPS':
-            adj_mat.loc[NE,NE] = 0.
-        adj_mat.loc['P', 'S'] = 0.
+            adj_mat.loc[NE,NE] = 0.  # no self-self
+        adj_mat.loc['P', 'S'] = 0.   # no action-action
         adj_mat.loc['S', 'P'] = 0.
+        adj_mat.loc['I', 'P'] = 0.   # ensure DAG
+        adj_mat.loc['S', 'I'] = 0.   # (P)->(I)->(S)
 
     if pct_thres is not None:
         assert 0 <= pct_thres <= 100, 'percentiles must be between [0,100]'
@@ -81,13 +83,23 @@ def node_adj_mat(itm_event, similarity='cosine', dag=False, pct_thres=None):
 
 
 def tag_network(adj_mat, column_lvl=0):
+    """
+    Takes in an adjacency matrix (pandas.DataFrame, assumes multi-col/row)
+    and returns a networkx Graph object with those nodes/edge weights.
+    """
     G = nx.from_numpy_matrix(adj_mat.values)
     G = nx.relabel_nodes(G, dict(zip(G.nodes(), adj_mat.columns.get_level_values(column_lvl))))
     return G
 
 
 def tag_df_network(tag_df, **node_adj_kws):
+    """
+    Starting from a multi-column binary tag-occurrence pandas.Dataframe (such as
+    output by the Nestor UI and the `nestor.keyword.tag_extractor()` method, create
+    a networkx graph, along with a node_info and edge_info dataframe for plotting
+    convenience (e.g. in nestor.tagplots)
 
+    """
     adj_mat = node_adj_mat(tag_df, **node_adj_kws)
     G = tag_network(adj_mat, column_lvl=1)
     # print(tag_df.sum().xs(slice(None)))
