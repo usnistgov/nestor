@@ -13,8 +13,60 @@ import numpy as np
 import pandas as pd
 from matplotlib.colors import ColorConverter
 
+color_opts = {
+        'P': 'crimson',
+        'S': '#7ABC32',
+        'I': '#4F81BD',
+        'U': '#ffc000',
+        'NA': 'gray',
+        'X': 'black'
+    }
 
-def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, padding=None, **node_adj_kws):
+
+def tag_relation_net(tag_df, name=None, kind='coocc',
+                     layout=nx.spring_layout,  layout_kws=None,
+                     padding=None, **node_adj_kws):
+    """
+    Explore tag relationships by create a Holoviews Graph Element. Nodes are tags
+    (colored by classification), and edges occur only when those tags happen together.
+
+    Parameters
+    ----------
+    tag_df :  pandas.DataFrame
+        standard Nestor tag occurrence matrix. Multi-column with top-level containing
+        tag classifications (named-entity NE) and 2nd level containing tags. Each row
+        corresponds to a single event (MWO), with binary indicators (1-occurs, 0-does not).
+    name : str
+        what to name this tag relation element. Creates a Holoviews group "name".
+    kind : str
+        coocc :
+            co-occurrence graph, where tags are connected if they occur in the same MWO,
+            above the value calculated for pct_thres. Connects all types together.
+        sankey :
+            Directed "flow" graph, currently implemented with a (P) -> (I) -> (S) structure.
+            Will require ``dag=True``. Alters default to ``similarity=count``
+    layout : object (function), optional
+        must take a graph object as input and output 2D coordinates for node locations
+        (e.g. all networkx.layout functions). Defaults to ``networkx.spring_layout``
+    layout_kws : dict, optional
+        options to pass to networkx layout functions
+    padding : dict, optional
+        contains "x" and "y" specifications for boundaries. Defaults:
+            ``{'x':(-0.05, 1.05), 'y':(-0.05, 1.05)}``
+        Only valid if ``kind`` is 'coocc'.
+
+    node_adj_kws :
+        keyword arguments for ``nestor.tagtrees.tag_df_network``. Valid options are
+            similarity : 'cosine' (default) or 'count'
+            dag : bool, default='False', (True if ``kind='sankey'``)
+            pct_thres : : int or None
+                If int, between [0,100]. The lower percentile at which to
+                threshold edges/adjacency.
+
+    Returns
+    -------
+    graph: holoviews.Holomap or holoviews.Graph element, pending sankey or cooccurrence input.
+    """
     try:
         import nestor.tagtrees
     except ImportError:
@@ -24,10 +76,23 @@ def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, padding=None, *
         name = 'Tag Net'
     adj_params = {
         'similarity': 'cosine',
-        'dag': False,
-        'pct_thres': 0,
     }
-    adj_params.update(node_adj_kws)
+
+    graph_types = {
+        'coocc':  hv.Graph,
+        'sankey': hv.Sankey,
+       }
+
+    if kind is 'sankey':
+        if node_adj_kws.get('dag', True) is False:
+            import warnings
+            warnings.warn('Sankey cannot be plotted with a co-occurrence net! Changing to DAG...')
+        adj_params['similarity'] = 'count'
+        adj_params.update(node_adj_kws)
+        adj_params['dag'] = True
+    else:
+        assert kind is 'coocc', 'You have passed an invalid graph type!'
+        adj_params.update(node_adj_kws)
 
     G, node_info, edge_info = nestor.tagtrees.tag_df_network(tag_df[['I', 'P', 'S']],
                                                              **adj_params)
@@ -36,20 +101,10 @@ def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, padding=None, *
     nodes = hv.Nodes(node_info,
                      kdims=['x', 'y', 'tag'],
                      vdims=['NE', 'count'])
-    color_opts = {
-        'P': 'crimson',
-        'S': '#7ABC32',
-        'I': '#4F81BD',
-        'U': '#ffc000',
-        'NA': 'gray',
-        'X': 'black'
-    }
+
     # nodes = nodes.sort('NE').options(color_index='NE', cmap=opts, size='size')
-    text = hv.Labels(node_info, ['x', 'y'], 'tag', group=name).options(text_font_size='8pt',
-                                                                       xoffset=0.015, yoffset=-0.015,
-                                                                       text_align='left')
-    # TODO add sankey (uses dag, no text)
-    graph = hv.Graph((edge_info, nodes),
+
+    graph = graph_types[kind]((edge_info, nodes),
                      group=name, vdims='weight')
     ops = {
         'color_index': 'NE',
@@ -61,19 +116,26 @@ def tag_relation_net(tag_df, layout=nx.spring_layout, name=None, padding=None, *
 
     graph = graph.options(**ops)
 
-    if padding is None:
-        padding = dict(x=(-0.05, 1.05), y=(-0.05, 1.05))
 
-    return (graph*text).redim.range(**padding)
+
+    if kind is 'sankey':
+        return graph
+    else:
+        text = hv.Labels(node_info, ['x', 'y'], 'tag', group=name).options(text_font_size='8pt',
+                                                                       xoffset=0.015, yoffset=-0.015,
+                                                                       text_align='left')
+        if padding is None:
+            padding = dict(x=(-0.05, 1.05), y=(-0.05, 1.05))
+        return (graph*text).redim.range(**padding)
 
 
 _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')
 
 
-def tagyearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
-             linewidth=1, linecolor=None,
-             monthlabels=calendar.month_abbr[1:], monthticks=True, ax=None,
-             **kwargs):
+def tagyearplot(tag_df, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
+                linewidth=1, linecolor=None,
+                monthlabels=calendar.month_abbr[1:], monthticks=True, ax=None,
+                **kwargs):
     """
     Plot a timeseries of (binary) tag occurrences as a calendar heatmap over weeks in the year.
     any columns passed will be explicitly plotted as rows, with each week in the year as a column.
@@ -87,8 +149,10 @@ def tagyearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
 
     Parameters
     ----------
-    data : Series
-        Data for the plot. Must be indexed by a DatetimeIndex.
+    tag_df :  pandas.DataFrame
+        standard Nestor tag occurrence matrix. Multi-column with top-level containing
+        tag classifications (named-entity NE) and 2nd level containing tags. Each row
+        corresponds to a single event (MWO), with binary indicators (1-occurs, 0-does not).
     year : integer
         Only data indexed by this year will be plotted. If `None`, the first
         year for which there is data will be plotted.
@@ -123,17 +187,17 @@ def tagyearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
         Axes object with the calendar heatmap.
     """
     if year is None:
-        year = data.index.sort_values()[0].year
+        year = tag_df.index.sort_values()[0].year
 
     if how is None:
         # Assume already sampled by day.
-        by_day = data
+        by_day = tag_df
     else:
         # Sample by day.
         if _pandas_18:
-            by_day = data.resample('W').agg(how)
+            by_day = tag_df.resample('W').agg(how)
         else:
-            by_day = data.resample('W', how=how)
+            by_day = tag_df.resample('W', how=how)
 
     # Min and max per day.
     if vmin is None:
@@ -210,8 +274,8 @@ def tagyearplot(data, year=None, how='sum', vmin=None, vmax=None, cmap='Reds',
     return ax
 
 
-def tagcalendarplot(data, how='sum', yearlabels=True, yearascending=True, yearlabel_kws=None,
-                 subplot_kws=None, gridspec_kws=None, fig_kws=None, **kwargs):
+def tagcalendarplot(tag_df, how='sum', yearlabels=True, yearascending=True, yearlabel_kws=None,
+                    subplot_kws=None, gridspec_kws=None, fig_kws=None, **kwargs):
     """
     Plot a timeseries of (binary) tag occurrences as a calendar heatmap over weeks in the year.
     any columns passed will be explicitly plotted as rows, with each week in the year as a column.
@@ -230,8 +294,10 @@ def tagcalendarplot(data, how='sum', yearlabels=True, yearascending=True, yearla
 
     Parameters
     ----------
-    data : Series
-        Data for the plot. Must be indexed by a DatetimeIndex.
+    tag_df :  pandas.DataFrame
+        standard Nestor tag occurrence matrix. Multi-column with top-level containing
+        tag classifications (named-entity NE) and 2nd level containing tags. Each row
+        corresponds to a single event (MWO), with binary indicators (1-occurs, 0-does not).
     how : string
         Method for resampling data by day. If `None`, assume data is already
         sampled by day and don't resample. Otherwise, this is passed to Pandas
@@ -265,7 +331,7 @@ def tagcalendarplot(data, how='sum', yearlabels=True, yearascending=True, yearla
     gridspec_kws = gridspec_kws or {}
     fig_kws = fig_kws or {}
 
-    years = np.unique(data.index.year)
+    years = np.unique(tag_df.index.year)
     if not yearascending:
         years = years[::-1]
 
@@ -276,12 +342,12 @@ def tagcalendarplot(data, how='sum', yearlabels=True, yearascending=True, yearla
 
     # We explicitely resample by day only once. This is an optimization.
     if how is None:
-        by_day = data
+        by_day = tag_df
     else:
         if _pandas_18:
-            by_day = data.resample('W').agg(how)
+            by_day = tag_df.resample('W').agg(how)
         else:
-            by_day = data.resample('W', how=how)
+            by_day = tag_df.resample('W', how=how)
             # normalize to unit norm
     by_day = by_day / np.sqrt(np.square(by_day).sum(axis=0))
 

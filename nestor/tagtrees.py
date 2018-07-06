@@ -10,58 +10,36 @@ import numpy as np
 from tqdm import tqdm
 
 
-def get_relevant(df, col, topn=20):
+
+def node_adj_mat(tag_df, similarity='cosine', dag=False, pct_thres=None):
     """
+    Calculate the similarity of tags, in the form of a similarity kernel.
+    Used as input to graph/network methods.
 
     Parameters
     ----------
-    df: a dataframe containing columns of tag assignments (comma-sep, str)
-    col: which column to extract
-    topn: how many of the top most frequent tags to return
-
-    Returns
-    -------
-    list of (tag,count,numpy.array) tuples
-    """
-    tags = [x[1][col].split(', ') for x in df.iterrows()]
-    binner = MultiLabelBinarizer().fit(tags)
-    vecs = binner.transform(tags)
-    counts = vecs.sum(axis=0)
-    relevant = [(binner.classes_[i], counts[i], vecs[:, i]) for i in counts.argsort()[-topn:][::-1]]
-    return relevant
-
-
-def get_onehot(df, col, topn=700):
-    itm_relevant = get_relevant(df, col, topn=topn)
-    itm_event = pd.DataFrame(columns=[i[0] for i in itm_relevant if i[0] != u''],
-                             data=np.array([i[2] for i in itm_relevant if i[0] != u'']).T)
-    return itm_event
-
-
-def node_adj_mat(itm_event, similarity='cosine', dag=False, pct_thres=None):
-    """
-
-    Parameters
-    ----------
-    itm_event
+    tag_df: pandas.DataFrame
+        standard Nestor tag occurrence matrix. Multi-column with top-level containing
+        tag classifications (named-entity NE) and 2nd level containing tags. Each row
+        corresponds to a single event (MWO), with binary indicators (1-occurs, 0-does not).
     similarity: str
         cosine: cosine similarity (from ``sklearn.metrix.pairwise``)
         count: count (the number of co-occurrences of each tag-tag pair)
     dag: bool
         default adj_mat will be accross all nodes. This option will return a
         directed, acyclic graph (DAG), useful for things like Sankey Diagrams.
-        Current implementation returns (P) -- (I) -- (S) structure (deletes others).
+        Current implementation returns (P) -> (I) -> (S) structure (deletes others).
     pct_thres: int or None
-        If int, between [0,100]. The lower percentile at which to threshold "adjacency".
+        If int, between [0,100]. The lower percentile at which to threshold edges/adjacency.
 
     Returns
     -------
     pandas.DataFrame, containing adjacency measures for each tag-tag (row-column) occurrence
     """
-    adj_mat = itm_event.T.dot(itm_event)
+    adj_mat = tag_df.T.dot(tag_df)
 
     if similarity is 'cosine':
-        adj_mat.loc[:, :] = cosine_similarity(itm_event.T)
+        adj_mat.loc[:, :] = cosine_similarity(tag_df.T)
     else:
         assert similarity is 'count', "Similarity must be one of ['cosine', 'count']!"
     np.fill_diagonal(adj_mat.values, 0)
@@ -99,33 +77,47 @@ def tag_df_network(tag_df, **node_adj_kws):
     a networkx graph, along with a node_info and edge_info dataframe for plotting
     convenience (e.g. in nestor.tagplots)
 
+    Parameters
+    ----------
+    tag_df :  pandas.DataFrame
+        standard Nestor tag occurrence matrix. Multi-column with top-level containing
+        tag classifications (named-entity NE) and 2nd level containing tags. Each row
+        corresponds to a single event (MWO), with binary indicators (1-occurs, 0-does not).
+    node_adj_kws :
+
+    Returns
+    -------
+
     """
+
     adj_mat = node_adj_mat(tag_df, **node_adj_kws)
     G = tag_network(adj_mat, column_lvl=1)
-    # print(tag_df.sum().xs(slice(None)))
-    ct = tag_df.sum().xs(slice(None))
-    # ct_std = np.log(1+(ct-ct.min(axis=0))/(ct.max(axis=0)-ct.min(axis=0)))
+
+    ct = tag_df.sum().xs(slice(None))  # counts
     nx.set_node_attributes(G, 'count', ct.to_dict())
+
+    # size scaling...wait for holoviews `op()` functionality
+    # ct_std = np.log(1+(ct-ct.min(axis=0))/(ct.max(axis=0)-ct.min(axis=0)))
     # nx.set_node_attributes(G, 'size', (ct_std*(30-10) + 10).to_dict())
+
+    # add tag classification
     nx.set_node_attributes(G, 'NE', dict(tag_df.swaplevel(axis=1).columns.tolist()))
 
+    # Deprecated
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
     #                        pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')],
     #                       axis=1).reset_index()
     node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
-    
-    # # filter out the edges with less adjacency than average
-    # edgeweights = adj_mat.values[np.triu_indices(min(adj_mat.shape[0], 50))]
-    # thres, stdev = edgeweights.mean(), edgeweights.std()
-    # mask = adj_mat < thres+0.2*stdev
+
     edge_info = adj_mat.copy()
-    # edge_info[mask] = np.nan
-    
     edge_info.index, edge_info.columns = edge_info.index.droplevel(0), edge_info.columns.droplevel(0)
+
+    # trick to get out source-target relationships with pandas
     edge_info = edge_info.stack(level=0).reset_index()
     edge_info.columns = ['source', 'target', 'weight']
     edge_info = edge_info.replace(0., np.nan)
-    # edge_info.weight = np.log(1+edge_info.weight)
+
+    # edge_info.weight = np.log(1+edge_info.weight)  # wait for Holoviews `op()` functionality
     
     return G, node_info, edge_info.dropna()
 
@@ -218,6 +210,37 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
 
     return D
 
+
+######### DEPRECATED ################
+
+def get_relevant(df, col, topn=20):
+    """
+    DEPRECATED!
+
+    Parameters
+    ----------
+    df: a dataframe containing columns of tag assignments (comma-sep, str)
+    col: which column to extract
+    topn: how many of the top most frequent tags to return
+
+    Returns
+    -------
+    list of (tag,count,numpy.array) tuples
+    """
+    tags = [x[1][col].split(', ') for x in df.iterrows()]
+    binner = MultiLabelBinarizer().fit(tags)
+    vecs = binner.transform(tags)
+    counts = vecs.sum(axis=0)
+    relevant = [(binner.classes_[i], counts[i], vecs[:, i]) for i in counts.argsort()[-topn:][::-1]]
+    return relevant
+
+
+def get_onehot(df, col, topn=700):
+    """DEPRECATED!"""
+    itm_relevant = get_relevant(df, col, topn=topn)
+    itm_event = pd.DataFrame(columns=[i[0] for i in itm_relevant if i[0] != u''],
+                             data=np.array([i[2] for i in itm_relevant if i[0] != u'']).T)
+    return itm_event
 
 
 
