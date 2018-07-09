@@ -69,7 +69,8 @@ except IOError:
 # packages = ['nestor',
 #             'nestor/_database_storage',
 #             'nestor/datasets']
-packages = find_packages()
+packages = find_packages(exclude='database_storage')
+
 install_requires = ['numpy>=1.14.2',
                     'pandas>=0.22.0',
                     'scikit-learn',

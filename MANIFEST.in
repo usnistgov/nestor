@@ -1,5 +1,5 @@
 include *.md *.rst
-recursive-include pymc3/examples/data *
+recursive-include nestor/datasets/*
 recursive-include source *
 recursive-include docs *
 include requirements.txt
