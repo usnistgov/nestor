@@ -1,0 +1,18 @@
+build:
+  image: latest
+
+formats:
+  - epub
+  - pdf
+
+
+python:
+  version: 3.6
+  setup_py_install: true
+  pip_install: true
+  extra_requirements:
+    - gui
+    - tree
+    - plot
+    - docs
+

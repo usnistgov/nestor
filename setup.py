@@ -84,7 +84,9 @@ def get_reqs(name):
 install_requires = get_reqs('defaults')
 extras_require = {'gui': get_reqs('gui'),
                   'tree': get_reqs('tree'),
-                  'plot': get_reqs('plot')}
+                  'plot': get_reqs('plot'),
+                  'docs': get_reqs('doc')}
+
 extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
 
 # install_requires = ['numpy>=1.14.2',
