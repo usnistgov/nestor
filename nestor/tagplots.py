@@ -125,7 +125,7 @@ def tag_relation_net(tag_df, name=None, kind='coocc',
                                                                        xoffset=0.015, yoffset=-0.015,
                                                                        text_align='left')
         if padding is None:
-            padding = dict(x=(-0.05, 1.05), y=(-0.05, 1.05))
+            padding = dict(x=(-1.05, 1.05), y=(-1.05, 1.05))
         return (graph*text).redim.range(**padding)
 
 

@@ -78,13 +78,13 @@ install_requires = ['numpy>=1.14.2',
 extras_require = {'gui': ['pyqt5', 'pyyaml', 'chardet',
                           'seaborn>=0.8.1', 'matplotlib>=2.2.2',
                           'fuzzywuzzy', 'python-levenshtein'],
-                  'tree': ['networkx==1.11'],
+                  'tree': ['networkx'],
                   'plot': ['bokeh', 'holoviews']}
 
 extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
 
 
-if config.getboolean('gui', 'use'):
-    packages.append('nestor._ui')
+# if config.getboolean('gui', 'use'):
+#     packages.append('nestor._ui')
 
 run_setup(packages, install_requires, extras_require)

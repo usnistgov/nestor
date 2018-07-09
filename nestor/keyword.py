@@ -53,7 +53,7 @@ class Transformer(TransformerMixin):
 class NLPSelect(Transformer):
     """
     Extract specified natural language columns from
-    a dask df, and combine into a single dask series.
+    a pd.DataFrame, and combine into a single series.
     """
 
     def __init__(self, columns=0, special_replace=None):
@@ -169,12 +169,6 @@ class TokenExtractor(TransformerMixin):
         self._model = TfidfVectorizer(**self.default_kws)
         self._tf_tot = None
 
-    def fit(self, X, y=None):
-        documents = _series_itervals(X)
-        self._model.fit(documents)
-
-        return self
-
     def fit_transform(self, X, y=None, **fit_params):
         documents = _series_itervals(X)
         # X is already a transformed view of dask_documents so
@@ -185,6 +179,10 @@ class TokenExtractor(TransformerMixin):
             X_tf = self._model.fit_transform(documents, y)
         self._tf_tot = np.array(X_tf.sum(axis=0))[0]
         return X_tf
+
+    def fit(self, X, y=None):
+        _ = self.fit_transform(X)
+        return self
 
     def transform(self, dask_documents, copy=True):
 
@@ -252,13 +250,13 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
         the (TRAINED) token extractor used to generate the ranked list of vocab.
     filename : str, optional
         the file location to read/write a csv containing a formatted vocabulary list
-    init : str or pandas.Dataframe, optional
+    init : str or pd.Dataframe, optional
         file location of csv or dataframe of existing vocab list to read and update
         token classification values from
 
     Returns
     -------
-    vocab : pandas.Dataframe
+    vocab : pd.Dataframe
         the correctly formatted vocabulary list for token:NE, alias matching
     """
 
@@ -303,7 +301,6 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
         print('intialized successfully!')
         df.fillna('', inplace=True)
 
-
     if filename is not None:
         df.to_csv(filename)
         print('saved locally!')
@@ -319,7 +316,7 @@ def _series_itervals(s):
 def _get_readable_tag_df(tag_df):
     """ helper function to take binary tag co-occurrence matrix and make comma-sep readable columns"""
     temp_df = pd.DataFrame(index=tag_df.index)  # empty init
-    for clf, clf_df in tag_df.drop('NA', axis=1).T.groupby(level=0):  # loop over top-level classes (ignore NA)
+    for clf, clf_df in tag_df.T.groupby(level=0):  # loop over top-level classes (ignore NA)
         join_em = lambda strings: ', '.join([x for x in strings if x != ''])  # func to join str
         strs = np.where(clf_df.T == 1, clf_df.T.columns.droplevel(0).values, '').T
         temp_df[clf] = pd.DataFrame(strs).apply(join_em)
@@ -331,7 +328,7 @@ def get_tag_completeness(tag_df):
 
     Parameters
     ----------
-    tag_df : pandas.DataFrame
+    tag_df : pd.DataFrame
         heirarchical-column df containing
 
     Returns
@@ -367,9 +364,9 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     ----------
     transformer: object KeywordExtractor
         instantiated, can be pre-trained
-    raw_text: pandas.Series
+    raw_text: pd.Series
         contains jargon/slang-filled raw text to be tagged
-    vocab_df: pandas.DataFrame, optional
+    vocab_df: pd.DataFrame, optional
         An existing vocabulary dataframe or .csv filename, expected in the format of
         kex.generate_vocabulary_df().
     readable: bool, default False
@@ -377,7 +374,7 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
 
     Returns
     -------
-    pandas.DataFrame, extracted tags for each document, whether binary indicator (default)
+    pd.DataFrame, extracted tags for each document, whether binary indicator (default)
     or in readable, categorized, comma-sep str format (readable=True, takes longer)
     """
 
@@ -440,9 +437,9 @@ def token_to_alias(raw_text, vocab):
 
     Parameters
     ----------
-    raw_text: pandas.Series
+    raw_text: pd.Series
         contains text with known jargon, slang, etc
-    vocab: pandas.DataFrame
+    vocab: pd.DataFrame
         contains alias' keyed on known slang, jargon, etc.
 
     Returns
@@ -463,7 +460,19 @@ def token_to_alias(raw_text, vocab):
     return clean_text
 
 
-def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
+ne_map = {'I I': 'I',  # two items makes one new item
+          'I P': 'P I', 'I S': 'S I', 'P I': 'P I', 'S I': 'S I',  # order-free
+          'P P': 'X', 'P S': 'X', 'S P': 'X', 'S S': 'X'}  # redundancies
+ne_types = 'IPSUX'
+
+
+def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
+    """ Experimental method to auto-match tag combinations into higher-level
+    concepts, for user-suggestion. Used in ``nestor._ui`` """
+    if NE_types is None:
+        NE_types = ne_types
+    if NE_map_rules is None:
+        NE_map_rules = ne_map
 
     vocab = voc1.copy()
     vocab.NE.replace('', np.nan, inplace=True)
@@ -490,3 +499,42 @@ def ngram_automatch(voc1, voc2, NE_types, NE_map_rules):
     voc2.loc[mask, 'NE'] = voc2.loc[mask, 'NE'].apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
     # voc2['score'] = tex2.scores_  # should already happen?
     return voc2
+
+
+def ngram_keyword_pipe(raw_text, vocab, vocab2):
+    """Experimental pipeline for one-shot n-gram extraction from raw text.
+    """
+    tex = TokenExtractor()
+    tex.fit(raw_text)  # bag of words matrix.
+    tags_df = tag_extractor(tex, raw_text, vocab_df=vocab)
+
+    replaced_text = token_to_alias(raw_text, vocab)  # raw_text, with token-->alias replacement
+    tex2 = TokenExtractor(ngram_range=(2, 2))  # new extractor (note 2-gram)
+    tex2.fit(replaced_text)
+
+    # experimental: we need [item_item action] 2-grams, so let's use 2-gram Items for a 3rd pass...
+    tex3 = TokenExtractor(ngram_range=(1, 2))
+    mask = (np.isin(vocab2.NE, ['I', 'P', 'S'])) & (vocab2.alias != '')
+    vocab_combo = pd.concat([vocab, vocab2[mask]])
+    vocab_combo['score'] = 0
+
+    # keep just in case of duplicates
+    vocab_combo = vocab_combo.reset_index().drop_duplicates(subset=['tokens']).set_index('tokens')
+    replaced_text2 = token_to_alias(replaced_text, vocab_combo)
+    tex3.fit(replaced_text2)
+
+    # make 2-gram dictionary
+    vocab3 = generate_vocabulary_df(tex3)
+    vocab3 = ngram_automatch(vocab_combo, vocab3)
+
+    # extract 2-gram tags from cleaned text
+    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3)
+
+    # merge 1 and 2-grams?
+    tag_df = tags_df.join(tags3_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
+    relation_df = tag_df.loc[:, ['P I', 'S I']]
+    untagged_df = tag_df.NA
+    untagged_df.columns = pd.MultiIndex.from_product([['NA'], untagged_df.columns])
+    tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U']]
+
+    return tag_df, relation_df, untagged_df

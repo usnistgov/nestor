@@ -94,14 +94,15 @@ def tag_df_network(tag_df, **node_adj_kws):
     G = tag_network(adj_mat, column_lvl=1)
 
     ct = tag_df.sum().xs(slice(None))  # counts
-    nx.set_node_attributes(G, 'count', ct.to_dict())
+    nx.set_node_attributes(G, name='count', values=ct.to_dict())
 
     # size scaling...wait for holoviews `op()` functionality
     # ct_std = np.log(1+(ct-ct.min(axis=0))/(ct.max(axis=0)-ct.min(axis=0)))
     # nx.set_node_attributes(G, 'size', (ct_std*(30-10) + 10).to_dict())
 
     # add tag classification
-    nx.set_node_attributes(G, 'NE', dict(tag_df.swaplevel(axis=1).columns.tolist()))
+    nx.set_node_attributes(G, name='NE',
+                           values=dict(tag_df.swaplevel(axis=1).columns.tolist()))
 
     # Deprecated
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
@@ -199,7 +200,7 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
         print(root)  # most "general" topic
         print(nx.isolates(D))  # child-less nodes (i.e. central AND dissimilar)
 
-    D.remove_nodes_from(nx.isolates(D))  # not useful for taxonomy
+    D.remove_nodes_from(list(nx.isolates(D)))  # not useful for taxonomy
 
     if dotfile is not None:
         from networkx.drawing.nx_pydot import graphviz_layout, write_dot
