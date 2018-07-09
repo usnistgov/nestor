@@ -5,19 +5,16 @@ from flask import Flask, render_template
 import pandas as pd
 import tablib
 import os, os.path
-
-
-# creates instance of the class Flask
-app = Flask(__name__)
+from pathlib import Path
 
 #creates table for dashboard
 def data_table():
-    load_path = '/home/msid/ltb3/TagApp/nestor/dashboard/flaskDash/data/gs_data/'
+    load_path = Path('data')
     dataset = tablib.Dataset()
-    with open(os.path.join(load_path, 'readable.csv')) as f:
+    with open(os.path.join(load_path, 'full_tech_names.csv')) as f:
         dataset.csv = f.read()
 
-        save_path = './templates/includes/'
+        save_path =  Path('data')/templates/includes
         completeName = os.path.join(save_path, '_data.html')
         df = open(completeName, "w+")
         df.write("<div class='table-responsive pre-scrollable'>")
@@ -26,7 +23,10 @@ def data_table():
         df.write("</table>")
         df.write("</div>") 
         df.close()
-    
+
+# creates instance of the class Flask
+app = Flask(__name__)
+
 #locally creates a page
 @app.route('/')
 def index():
@@ -49,6 +49,10 @@ def dashboard():
 @app.route('/help')
 def help():
     return render_template('help.html')
+
+@app.route('/flow')
+def flow():
+    return render_template('includes/_flow.html')
     
 if __name__ == '__main__':
     #runs app in debug mode
