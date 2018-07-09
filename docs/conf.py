@@ -25,10 +25,24 @@ project = 'nestor'
 # copyright = '2018, Thurston Sexton, Michael Brundage, Sascha Moccozet'
 author = "KEA Development Team"
 
-# The short X.Y version
-version = '0.2.1'
-# The full version, including alpha/beta/rc tags
-release = '0.2.1-alpha'
+from subprocess import Popen, PIPE
+
+def get_version():
+    """
+    Returns project version as string from 'git describe' command.
+    """
+    pipe = Popen('git describe --tags --always', stdout=PIPE, shell=True)
+    version = pipe.stdout.read()
+
+    if version:
+        return version.decode('utf-8').lstrip('v').rstrip()
+    else:
+        return 'X.Y'
+
+# The short X.Y version.
+version = get_version()
+# The full version, including alpha/beta/rc tags.
+release = version
 
 
 # -- General configuration ---------------------------------------------------

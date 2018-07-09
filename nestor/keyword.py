@@ -3,8 +3,13 @@ author: Thurston Sexton
 """
 import numpy as np
 import pandas as pd
-# from tqdm import tqdm
-import sys
+from pathlib import Path
+import re, sys, string
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.base import TransformerMixin
+from sklearn.utils.validation import check_is_fitted, NotFittedError
+from itertools import product
+
 try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
     ipy_str = str(type(get_ipython()))
     if 'zmqshell' in ipy_str:
@@ -13,23 +18,13 @@ try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-3731
     if 'terminal' in ipy_str:
         from tqdm import tqdm
 except:
+
     if sys.stderr.isatty():
         from tqdm import tqdm
     else:
         def tqdm(iterable, **kwargs):
             return iterable
 
-from pathlib import Path
-
-# import dask.dataframe as dd
-# import dask
-import re
-import sys
-import string
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.base import TransformerMixin
-from sklearn.utils.validation import check_is_fitted, NotFittedError
-from itertools import product
 
 __all__ = ['NLPSelect',
            'TokenExtractor',

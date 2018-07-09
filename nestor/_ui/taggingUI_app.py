@@ -12,7 +12,7 @@ import PyQt5.QtWidgets as Qw
 
 
 
-fname = 'taggingUI._ui'
+fname = 'taggingUI.ui'
 qtDesignerFile_taggingTool = Path('nestor/_ui')/fname
 Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(str(qtDesignerFile_taggingTool))
 
@@ -646,8 +646,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.closeFunction(event)
 
 
-# Now the ToS dialog ._ui file
-fname2 = 'termsOfUse._ui'
+# Now the ToS dialog .ui file
+fname2 = 'termsOfUse.ui'
 qtDesignerFile_tosDialog = Path('nestor/_ui')/fname2
 Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_tosDialog)
 

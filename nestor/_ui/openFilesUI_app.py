@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 import PyQt5.QtWidgets as Qw
 
 
-fname = 'openFilesUI._ui'
+fname = 'openFilesUI.ui'
 qtDesignerFile_openFiles = Path('nestor/_ui')/fname
 Ui_MainWindow_openFiles, QtBaseClass_openFiles = uic.loadUiType(str(qtDesignerFile_openFiles))
 

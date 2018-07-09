@@ -6,21 +6,22 @@
 
     <!-- Carousel
     ================================================== -->
-    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+    <div id="myCarousel" class="carousel slide" data-ride="carousel" style= "height: 750px;">
       <!-- Indicators -->
       <ol class="carousel-indicators">
         <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
         <li data-target="#myCarousel" data-slide-to="1"></li>
         <li data-target="#myCarousel" data-slide-to="2"></li>
       </ol>
-      <div class="carousel-inner" role="listbox">
-        <div class="item active">
+      <div class="carousel-inner" role="listbox" style= "height: 100%;">
+        <div class="item active" style= "height: 100%;">
           <img class="first-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="First slide">
-          <div class="container">
-            <div class="carousel-caption">
-              <h1>Example headline.</h1>
-              <p>Note: If you're viewing this page via a <code>file://</code> URL, the "next" and "previous" Glyphicon buttons on the left and right might not load/display properly due to web browser security rules.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Sign up today</a></p>
+          <div class="container" style= "height: 100%;">
+            <div class="carousel-caption" style= "height: 100%;">
+              <h1>Flow Diagram</h1>
+                <p>
+                {% include 'flow.html' %}
+                </p>
             </div>
           </div>
         </div>
@@ -54,5 +55,5 @@
         <span class="sr-only">Next</span>
       </a>
     </div><!-- /.carousel -->
-{% include 'includes/_data.html' %} 
+{% include 'includes/_data.html' %}
 {% endblock %}
