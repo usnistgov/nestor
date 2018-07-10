@@ -318,7 +318,7 @@ class CompositionNGramItem:
 
 
 class MyMplCanvas(FigureCanvas):
-    """the canvas used to print the plot in the right layout of the KPI UI
+    """the canvas used to print the plot in the right layout of the kpi UI
     All the characteristic in common for all the plot should be in this class
 
     Parameters

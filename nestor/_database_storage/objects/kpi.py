@@ -26,7 +26,7 @@ from nestor._database_storage.objects.issue import *
 
 
 class Kpi:
-    """a KPI represent all the informations that refer to create a query to create a kpi:
+    """a kpi represent all the informations that refer to create a query to create a kpi:
         This object contains every object for every kind of node possible into the database.
     
         it does not contains any array, but an object tha can contains a list for every of the object properties
