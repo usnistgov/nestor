@@ -20,7 +20,16 @@ data_dir = Path('..')/'data'/'sme_data'
 print(str(data_dir))
 # creates table for dashboard
 
+""" TODO 
+from bokeh.embed import server_document
+from bokeh.server.server import Server
 
+renderer = hv.renderer('bokeh')
+app = renderer.app(plot)
+server = Server({'/': app}, port=5006)
+server.start()
+html = server_document()
+"""
 
 # creates instance of the class Flask
 app = Flask(__name__)
