@@ -1,7 +1,15 @@
-<!--Author: Lela Bones
-    This document conatins the dashboard contents-->
 {% extends 'layout.html' %}
 
 {% block body %}
 WILL HAVE NODE GRAPH
+    {{ the_div|safe }}
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+    <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
+    {{ the_script|safe }}
 {% endblock %}
+
+
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+  <!---->
+<!--</html>-->
