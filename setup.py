@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 import configparser
 from subprocess import Popen, PIPE
-
+from pathlib import Path
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -69,22 +69,42 @@ except IOError:
 # packages = ['nestor',
 #             'nestor/_database_storage',
 #             'nestor/datasets']
-packages = find_packages()
-install_requires = ['numpy>=1.14.2',
-                    'pandas>=0.22.0',
-                    'scikit-learn',
-                    'tqdm>=4.23.0'
-                    ]
-extras_require = {'gui': ['pyqt5', 'pyyaml', 'chardet',
-                          'seaborn>=0.8.1', 'matplotlib>=2.2.2',
-                          'fuzzywuzzy', 'python-levenshtein'],
-                  'tree': ['networkx==1.11'],
-                  'plot': ['bokeh', 'holoviews']}
+packages = find_packages(exclude=[
+    'database_storage',
+    'database_storage.*',
+])
+
+
+def get_reqs(name):
+    req_file = Path('.')/'requirements'/(name+'.txt')
+    with open(req_file) as file:
+        return file.read().splitlines()
+
+
+install_requires = get_reqs('defaults')
+extras_require = {'gui': get_reqs('gui'),
+                  'tree': get_reqs('tree'),
+                  'plot': get_reqs('plot'),
+                  'docs': get_reqs('doc')}
 
 extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
 
+# install_requires = ['numpy>=1.14.2',
+#                     'pandas>=0.22.0',
+#                     'scikit-learn',
+#                     'tqdm>=4.23.0'
+#                     ]
+#
+# extras_require = {'gui': ['pyqt5', 'pyyaml', 'chardet',
+#                           'seaborn>=0.8.1', 'matplotlib>=2.2.2',
+#                           'fuzzywuzzy', 'python-levenshtein'],
+#                   'tree': ['networkx'],
+#                   'plot': ['bokeh', 'holoviews']}
+#
+# extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
 
-if config.getboolean('gui', 'use'):
-    packages.append('nestor._ui')
+
+# if config.getboolean('gui', 'use'):
+#     packages.append('nestor._ui')
 
 run_setup(packages, install_requires, extras_require)
