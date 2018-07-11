@@ -98,6 +98,7 @@ def tag_relation_net(tag_df, name=None, kind='coocc',
                                                              **adj_params)
     pos = pd.DataFrame(layout(G)).T.rename(columns={0: 'x', 1: 'y'})
     node_info = node_info.join(pos).reset_index().rename(columns={'index': 'tag'})
+
     nodes = hv.Nodes(node_info,
                      kdims=['x', 'y', 'tag'],
                      vdims=['NE', 'count'])
