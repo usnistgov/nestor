@@ -6,12 +6,16 @@ from werkzeug import secure_filename
 import pandas as pd
 import holoviews as hv
 from bokeh.embed import components, server_document
+from bokeh.server.server import Server
 import os, os.path
 from pathlib import Path
+
+from tornado.ioloop import IOLoop
+
 from .plots import TagPlot
 
 hv.extension('bokeh')
-renderer = hv.renderer('bokeh')
+
 # renderer = renderer.instance(mode='server')
 UPLOAD_FOLDER = '/tmp/'
 ALLOWED_EXTENSIONS = set(['csv'])
@@ -90,11 +94,13 @@ def dashboard():
 def Bar():
     # load the template Bar Graph
     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
-    bars = tagplot.hv_bar('tech')
+    bars = tagplot.hv_bar('mach')
     bars = bars.options(height=300, width=600)
     plot = hv.renderer('bokeh').get_plot(bars).state
     script, div = components(plot)
     # load the template Node Graph
+    tagplot.data_table('mach', 'A14')
+
     return render_template('bar.html', the_div=div, the_script=script)
 
 
@@ -105,10 +111,20 @@ def Node():
     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
     dmap = tagplot.hv_nodelink('tech')
     dmap = dmap.options(height=500, width=500, xaxis=None, yaxis=None, title_format='{label}')
-    plot = renderer.server_doc(dmap)#.state
+
+    renderer = hv.renderer('bokeh')
+
+    # plot = renderer.app(dmap)
+    # loop = IOLoop()
+    # loop.start()
+    # server = Server({'/':plot}, port=0, io_loop=loop)
+    # server.start()
+    plot = renderer.server_doc(dmap)
     script, div = components(plot)
+
     # load the template Node Graph
     return render_template('node.html', the_div=div, the_script=script)
+    # return render_template('node.html', the_app=server_document())
 
 
 # locally creates a page

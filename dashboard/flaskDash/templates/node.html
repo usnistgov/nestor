@@ -2,10 +2,17 @@
 
 {% block body %}
 WILL HAVE NODE GRAPH
-    {{ the_div|safe }}
-    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
-    <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
-    {{ the_script|safe }}
+
+    <div>
+        {{ the_div|safe }}
+        <!--{{ the_app|safe }}-->
+        <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
+        <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
+        {{ the_script|safe }}
+    </div>
+    <div>
+        {% include 'includes/_data.html' %}
+    </div>
 {% endblock %}
 
 

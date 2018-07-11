@@ -106,21 +106,23 @@ class TagPlot:
         return bars
 
 ################################
-    # def filter_df(self, obj_type, obj_name):
-    #     is_obj = self.filter_type_name(obj_type, obj_name)
-    #     return self.df[is_obj].head(50)
+    def filter_df(self, obj_type, obj_name):
+        is_obj = self.filter_type_name(obj_type, obj_name)
+        return self.df[is_obj].head(50)
 
-    # def data_table(self, obj_type, obj_name):
-    #     load_path = Path('../..')/'data'/'sme_data'
-    #     self.df = pd.read_csv(load_path/'MWOs_anon.csv')
-    #     self.df =self.df.loc[:, ['mach', 'date_received', 'issue', 'info', 'tech']]
-    #     if mask is not None:
-    #         self.df =self.df.loc[self.df[mask['target']]==mask['value']].head(50)
-    #     with open(Path('templates')/'includes'/'_data.html', 'w+') as fo:
-    #         self.df =self.df.head(50)
-    #         fo.write("<div style='overflow-y: scroll; height:600px;'>")
-    #         self.df.to_html(fo, classes=['table table-striped'])
-    #         fo.write("</div>")
+    def data_table(self, obj_type, obj_name):
+
+        df = self.filter_df(obj_type, obj_name).loc[:, ['mach',
+                                                        'date_received',
+                                                        'issue',
+                                                        'info',
+                                                        'tech']]
+
+        with open(Path('flaskDash')/'templates'/'includes'/'_data.html', 'w+') as fo:
+            # \df =self.df.head(50)
+            fo.write("<div style='overflow-y: scroll; height:600px;'>")
+            df.to_html(fo, classes=['table table-striped'])
+            fo.write("</div>")
 
 
 

@@ -8,4 +8,8 @@ WILL HAVE BAR GRAPH
     <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
     <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
     {{ the_script|safe }}
+
+    <div>
+        {% include 'includes/_data.html' %}
+    </div>
 {% endblock %}
