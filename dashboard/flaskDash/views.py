@@ -11,8 +11,11 @@ import os, os.path
 from pathlib import Path
 
 from tornado.ioloop import IOLoop
+from tornado.platform.asyncio import AnyThreadEventLoopPolicy
+import asyncio
+asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
 
-from .plots import TagPlot
+from .models import TagPlot
 
 hv.extension('bokeh')
 
@@ -105,26 +108,29 @@ def Bar():
 
 
 # locally creates a page
-@app.route('/node')
+@app.route('/node', methods=['GET'])
 def Node():
-    print(str(data_dir/'MWOs_anon.csv'))
+    # print(str(data_dir/'MWOs_anon.csv'))
     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
-    dmap = tagplot.hv_nodelink('tech')
-    dmap = dmap.options(height=500, width=500, xaxis=None, yaxis=None, title_format='{label}')
+    hmap = tagplot.hv_nodelink()
+    hmap = hmap.options(height=500, width=500, xaxis=None, yaxis=None, title_format='{label}')
 
-    renderer = hv.renderer('bokeh')
+    renderer = hv.renderer('bokeh').instance()
 
-    # plot = renderer.app(dmap)
-    # loop = IOLoop()
+    # app = renderer.app(dmap)
+    # loop = IOLoop.instance()
     # loop.start()
-    # server = Server({'/':plot}, port=0, io_loop=loop)
+    # server = Server({'/':app}, port=0)
     # server.start()
-    plot = renderer.server_doc(dmap)
+    # html = server_document()
+
+    plot = renderer.server_doc(hmap)
+    # plot.title = 'Nodelink Diagram'
     script, div = components(plot)
 
     # load the template Node Graph
     return render_template('node.html', the_div=div, the_script=script)
-    # return render_template('node.html', the_app=server_document())
+    # return render_template('node.html', the_script=html)
 
 
 # locally creates a page
