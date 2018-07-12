@@ -6,14 +6,14 @@ from werkzeug import secure_filename
 import pandas as pd
 import holoviews as hv
 from bokeh.embed import components, server_document
-from bokeh.server.server import Server
+# from bokeh.server.server import Server
 import os, os.path
 from pathlib import Path
 
-from tornado.ioloop import IOLoop
-from tornado.platform.asyncio import AnyThreadEventLoopPolicy
-import asyncio
-asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
+# from tornado.ioloop import IOLoop
+# from tornado.platform.asyncio import AnyThreadEventLoopPolicy
+# import asyncio
+# asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
 
 from .models import TagPlot
 
@@ -115,7 +115,7 @@ def Node():
     hmap = tagplot.hv_nodelink()
     hmap = hmap.options(height=500, width=500, xaxis=None, yaxis=None, title_format='{label}')
 
-    renderer = hv.renderer('bokeh').instance()
+    renderer = hv.renderer('bokeh')#.instance(mode='server')
 
     # app = renderer.app(dmap)
     # loop = IOLoop.instance()
@@ -124,7 +124,8 @@ def Node():
     # server.start()
     # html = server_document()
 
-    plot = renderer.server_doc(hmap)
+    plot = renderer.get_plot(hmap).state
+    # div = renderer.static_html(hmap)
     # plot.title = 'Nodelink Diagram'
     script, div = components(plot)
 

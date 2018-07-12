@@ -38,10 +38,10 @@ def node_adj_mat(tag_df, similarity='cosine', dag=False, pct_thres=None):
     """
     adj_mat = tag_df.T.dot(tag_df)
 
-    if similarity is 'cosine':
+    if similarity=='cosine':
         adj_mat.loc[:, :] = cosine_similarity(tag_df.T)
     else:
-        assert similarity is 'count', "Similarity must be one of ['cosine', 'count']!"
+        assert similarity=='count', "Similarity must be one of ['cosine', 'count']!"
     np.fill_diagonal(adj_mat.values, 0)
 
     if dag:

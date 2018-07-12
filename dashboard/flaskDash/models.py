@@ -15,11 +15,11 @@ class TagPlot:
 
         people = [
             'nathan_maldonado',
-            # 'angie_henderson',
+            'angie_henderson',
             'margaret_hawkins_dds',
             # "tommy_walter",
             "gabrielle_davis",
-            # "cristian_santos",
+            "cristian_santos",
         ]
         machs = [
             "A34",
@@ -33,11 +33,17 @@ class TagPlot:
                      'opts': people}
         }
 
-        self.node_thres = [1, 10]
+        self.node_thres = range(1, 10)
 
         # for network-based plot options
         self.weights = ['cosine', 'count']
-        self.edge_thres = [20, 80]
+        self.edge_thres = range(1, 81, 10)
+
+        self.table = hv.Table(self.df[['mach',
+                                       'date_received',
+                                       'issue',
+                                       'info',
+                                       'tech']])
 
     def filter_type_name(self, obj_type, obj_name):
         is_obj = self.df[obj_type].str.contains(obj_name, case=False).fillna(False)
@@ -52,111 +58,99 @@ class TagPlot:
 
         return self.tag_df.loc[is_obj, (cts >= upper).values]
 
-    def net_dict(self, obj_type, func):
-        hv_plots = {
-            (self.name_opt[obj_type]['name'],
-             name, weight, n_node, n_edge): func(
-                obj_type,
-                obj_name=name,
-                weight=weight,
-                n_thres=n_node,
-                e_thres=n_edge
-            ) for name, weight, n_node, n_edge in product(
-            self.name_opt[obj_type]['opts'],
-            self.weights,
-            self.node_thres,
-            self.edge_thres
-        )}
-        return hv_plots
-
-    def hv_nodelink(self):
+    def hv_nodelink(self, obj_type):
         kws = {
             'layout_kws': {'prog': 'neatopusher'},
         }
 
-        def load_nodelink(obj_type, obj_name, n_thres=10, e_thres=80, weight='cosine'):
+        #
+        def load_nodelink(obj_name, n_thres=10, e_thres=80, weight='cosine'):
             tags = self.filter_tags(obj_type, obj_name, n_thres)
             elem = tag_relation_net(tags, name='Nodelink',
                                     similarity=weight,
                                     pct_thres=e_thres,
                                     **kws)
-            return elem
+            elem = elem.options({'Graph': dict(edge_line_width=1.5,
+                                               edge_alpha=.3,
+                                               node_line_color='white',
+                                               xaxis=None, yaxis=None)})
+            return elem.options(width=500, height=500)
+            # SOME KIND OF BUG!
+            # return (elem.options(width=500, height=500) +
+            #         self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
 
-        type_dict = {**self.net_dict('tech', load_nodelink),
-                     **self.net_dict('mach', load_nodelink)}
-        # print(type_dict)
+        dmap = hv.DynamicMap(load_nodelink,
+                             #                              cache_size=1,
+                             kdims=['obj_name',
+                                    'n_thres',
+                                    'e_thres',
+                                    'weight']).options(framewise=True)
+        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
+                                 n_thres=self.node_thres,
+                                 e_thres=self.edge_thres,
+                                 weight=self.weights)
+        return dmap
 
-        hmap = hv.HoloMap(type_dict,
-                          kdims=[
-                              'Data',
-                              'Name',
-                              'Weight',
-                              'Top%',
-                              'edge-cutoff',
-                          ])
+    def hv_flow(self, obj_type):
+        kws = {
+            'kind':'sankey'
+        }
 
-        return hmap
-
-        # def load_person(obj_name, n_thres=1, e_thres=80, weight='cosine'):
-        #     # retrieve filtered data
-        #     tags = self.filter_tags('tech', obj_name, n_thres)
         #
-        #     # generate ``hv.Overlay`` from ``nestor.tagplots`
-        #     elem = tag_relation_net(tags, name=f'Tech. {obj_name}',
-        #                             similarity=weight, pct_thres=e_thres, **kws)
-        #     if kws['layout_kws']['pos'] is not None:
-        #         kws['layout_kws']['pos'] = elem.get(elem.children[0]).I.nodes.data[['x', 'y']]
-        #     return elem  # .cols(1)
-        #
-        #
-        # def load_machine(obj_name, n_thres=1, e_thres=80, weight='cosine'):
-        #     tags = self.filter_tags('mach', obj_name, n_thres)
-        #     elem = tag_relation_net(tags, name=f'Machine: {obj_name}',
-        #                             similarity=weight, pct_thres=e_thres, **kws)
-        #     if kws['layout_kws']['pos'] is not None:
-        #         kws['layout_kws']['pos'] = elem.get(elem.children[0]).I.nodes.data[['x', 'y']]
-        #     return elem  # .cols(1)
-        #
-        # param_grid = {
-        #     'tech': {
-        #         'range': self.people,
-        #         'func': load_person,
-        #     },
-        #     'mach': {
-        #         'range': self.machs,
-        #         'func': load_machine,
-        #     }
-        # }
-        #
-        # dmap = hv.DynamicMap(param_grid[obj_type]['func'],
-        #                      cache_size=1,
-        #                      kdims=['obj_name',
-        #                             'n_thres',
-        #                             'e_thres',
-        #                             'weight']).options(framewise=True)
-        # dmap = dmap.redim.values(obj_name=param_grid[obj_type]['range'],
-        #                          n_thres=range(1, 20),
-        #                          e_thres=range(15, 90),
-        #                          weight=['cosine', 'count'])
-        # return dmap
+        def load_flow(obj_name, n_thres=10, weight='cosine'):
+            tags = self.filter_tags(obj_type, obj_name, n_thres)
+            elem = tag_relation_net(tags, name='Nodelink',
+                                    similarity=weight,
+                                    **kws)
+            elem = elem.options({'Graph': dict(edge_line_width=1.5,
+                                               edge_alpha=.3,
+                                               node_line_color='white',
+                                               xaxis=None, yaxis=None)})
+            return elem.options(width=800, height=500)
+            # SOME KIND OF BUG!
+            # return (elem.options(width=500, height=500) +
+            #         self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
 
-    def hv_bar(self, obj_type):
+        dmap = hv.DynamicMap(load_flow,
+                             #                              cache_size=1,
+                             kdims=['obj_name',
+                                    'n_thres',
+                                    'weight']).options(framewise=True)
+        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
+                                 n_thres=self.node_thres,
+                                 weight=self.weights)
+        return dmap
 
-        temp = self.filter_tags('mach', 'A14', 5).drop(columns=['U']).sum()  # .rename(['class','tag_name'])#.reset_index()
-        temp = temp.groupby(level=0).nlargest(5).reset_index(level=0, drop=True)
+    def hv_bars(self, obj_type):
+        def load_bar(obj_name, n_thres=10, order='grouped'):
+            tags = self.filter_tags(obj_type, obj_name, n_thres).drop(columns=['U']).sum()
+            tags = tags.groupby(level=0).nlargest(10).reset_index(level=0, drop=True)
+            tags = tags.reset_index()
+            tags.columns = ['class', 'tag name', 'count']
 
-        temp = temp.reset_index()
-        temp.columns = ['class', 'tag name', 'count']
+            bar_kws = dict(color_index='class',
+                           xrotation=90,
+                           cmap=color_opts,
+                           tools=['hover'],
+                           line_color='w')
+            if order != 'grouped':
+                tags = tags.sort_values('count', ascending=False)
 
-        bar_kws = dict(color_index='class',
-                       xrotation=90,
-                       cmap=color_opts,
-                       tools=['hover'])
+            bars = hv.Bars(tags,
+                           kdims=['tag name'], vdims=['count', 'class']).options(**bar_kws)
 
-        bars = hv.Bars(temp.sort_values('count', ascending=False),
-                kdims=['tag name'], vdims=['count', 'class']).options(**bar_kws)
+            return (bars.options(width=800) +
+                    self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
 
-        return bars
+        dmap = hv.DynamicMap(load_bar,
+                             #                              cache_size=1,
+                             kdims=['obj_name',
+                                    'n_thres',
+                                    'order']).options(framewise=True)
+        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
+                                 n_thres=range(1, 20),
+                                 order=['grouped', 'sorted'])
+        return dmap
 
 ################################
     def filter_df(self, obj_type, obj_name):
@@ -178,7 +172,27 @@ class TagPlot:
             fo.write("</div>")
 
 
+if __name__ == '__main__':
+    from bokeh.server.server import Server
+    from tornado.ioloop import IOLoop
 
+    data_dir = Path('../..') / 'data' / 'sme_data'
+    tagplot = TagPlot(data_dir / 'MWOs_anon.csv',
+                      data_dir / 'binary_tags.h5')
 
+    renderer = hv.renderer('bokeh')
 
+    server = Server({
+        '/bars_tech': renderer.app(tagplot.hv_bars('tech').options(width=900)),
+        '/bars_mach': renderer.app(tagplot.hv_bars('mach').options(width=900)),
+        '/node_tech': renderer.app(tagplot.hv_nodelink('tech').options(width=600, height=600)),
+        '/node_mach': renderer.app(tagplot.hv_nodelink('mach').options(width=600, height=600)),
+        '/flow_tech': renderer.app(tagplot.hv_flow('tech').options(width=900, height=600)),
+        '/flow_mach': renderer.app(tagplot.hv_flow('mach').options(width=900, height=600)),
+    }, port=5006)
+
+    server.start()
+    server.show('/')
+    loop = IOLoop.current()
+    loop.start()
 
