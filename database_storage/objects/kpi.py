@@ -25,105 +25,350 @@ from database_storage.objects.human import *
 from database_storage.objects.tag import *
 from database_storage.helper import updateDict
 
+#
+# class Equation:
+#     def __init__(self, list):
 
 
-class Kpi:
-    def __init__(self, match=[], where = "", result = ""):
-        self._set_match(match)
-        self._set_where(where)
+
+class Equation:
+    """
+    THIS class represent the object KPI
+    """
+    def __init__(self, equationList):
+        self.equationList = equationList
+
+
+    def __add__(self, other):
+        return Equation(self.equationList + ["+"] + other.equationList)
+
+    def __sub__(self, other):
+        return Equation(self.equationList + ["-"] + other.equationList)
+
+    def __lshift__(self, other):
+        return Equation(self.equationList + ["<"] + other.equationList)
+
+    def __rshift__(self, other):
+        return Equation(self.equationList + [">"] + other.equationList)
+
+
+class Operand(Equation):
+
+    def __init__(self,property, operator, value, variable, result, label, linked, databaseInfo):
+
+        self.validOperator = {
+            '=': '=',
+            '<>': '<>',
+            '<': '<',
+            '>': '>',
+            '<=': '<=',
+            '>=': '>=',
+            '0': 'IS NULL',
+            '1': 'IS NOT NULL',
+            '-.': 'STARTS WITH',
+            '.-': 'ENDS WITH',
+            '-': 'CONTAINS',
+            '~': '=~'
+        }
+
+        self.databaseInfoObject = databaseInfo
+
+        self._set_property(property)
+        self._set_operator(operator)
+        self._set_value(value)
+        self._set_variable(variable)
+        self._set_linked(linked)
         self._set_result(result)
 
-    def _get_match(self):
-        return self.match
 
-    def _set_match(self, match):
-        if isinstance(match, str):
-            self.match = [match]
+        self.label = label
+
+
+        super().__init__([self])
+
+
+    def _get_property(self):
+        return self.property
+
+    def _set_property(self, property):
+        if property in self.databaseInfoObject["properties"].values():
+            self.property = property
         else:
-            self.match = match
+            self.property = None
 
-    def _get_where(self):
-        return self.where
+    def _get_operator(self):
+        return self.operator
 
-    def _set_where(self, where):
-        self.where = where
+    def _set_operator(self, operator):
+        if operator in self.validOperator:
+            self.operator = operator
+        else:
+            self.operator = None
+
+    def _get_value(self):
+        return self.value
+
+    def _set_value(self, value):
+        if isinstance(value, str):
+            self.value = f'"{value}"'
+        else:
+            self.value = value
+
+    def _get_variable(self):
+        return self.variable
+
+    def _set_variable(self, variable):
+        self.variable = variable
 
     def _get_result(self):
-        return self.result
+        return self.property
 
     def _set_result(self, result):
-        self.result = result
+        if result in self.databaseInfoObject["properties"].values():
+            self.result = result
+        else:
+            self.result = None
+
+    def _get_linked(self):
+        return self.linked
+
+    def _set_linked(self, linked):
+        self.linked = linked
 
 
     def __str__(self):
-        return   " / ".join(self.match) + "\n"\
-                 + self.where + "\n" \
-                 + self.result +"\n"
+        return f'MATCH {self.variable}.{self.property} {self.operator} {self.value} RETURN {self.result}'
 
-    def __add__(self, other):
-        kpi = Kpi(
-            match = self.merge_match(self.match , other.match),
-            where = self.merge_where(self.where, other.where, "AND"),
-            result = self.merge_result(self.result, other.result)
-        )
+    def cypher_filter(self):
+        match = ""
+        if self.linked:
+            match = self.linked
+        match += f'({self.variable}{self.label})'
 
-        return kpi
+        where = ""
+        if self.property and self.operator and self.value:
+            where = f'{self.variable}.{self.property} {self.validOperator[self.operator]}'
+            if self.operator not in ['1', '0']:
+                where += f' {self.value}'
 
-    def __lt__(self, other):
-        print("---------------------")
-        match = [f'{self.match.pop(-1)}-->{other.match[0]}']
-        print(match)
+        result = ""
+        if self.result:
+            result = f'{self.variable}.{self.result}'
 
-        lastmatch = self.merge_match(self.match, match)
-        #print(lastmatch)
+        return match, where, result
 
-        kpi = Kpi(
-            match = lastmatch,
-            where = self.merge_where(self.where, other.where, "AND"),
-            result = self.merge_result(self.result, other.result)
-        )
 
-        print(kpi.match)
-        return kpi
 
-    def merge_match(self, match, match1):
-        # print(match)
-        # print(match1)
-        # print("**")
 
-        if match and match1:
-            return match + match1
-        if match:
-            return match
-        if match1:
-            return match1
-        return []
+class OperandIssue(Operand):
 
-    def merge_where(self, where, where1, operator):
-        if where and where1:
-            return f'{where} {operator} {where1}'
-        if where :
-            return f'{where}'
-        if where1:
-            return f'{where1}'
-        return ""
+    def __init__(self,databaseInfo,  property=None, operator=None, value= None, variable="issue", result=None, linkedToIssue=True):
 
-    def merge_result(self, result, result1, function=None):
-        if function:
-            result1= f'{function}({result1})'
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-itemasproblem"]}]->'
 
-        if result and result1:
-            return f'{result},{result1}'
-        if result:
-            return f'{result}'
-        if result1:
-            return f'{result1}'
-        return ""
+        super().__init__(property = property,
+                         operator = operator,
+                         value = value,
+                         variable = variable,
+                         result = result,
+                         label = databaseInfo['issue']['label']['issue'],
+                         linked = linked,
+                         databaseInfo = databaseInfo['issue']
+                         )
 
-    def cypherQuery(self):
-        return f'MATCH {", ".join(self.match)}' \
-               f'\nWHERE {self.where}' \
-               f'\nRETURN {self.result}'
+#
+#
+# class Equation:
+#
+#     def __init__(self, operand, list = []):
+#         self.operand = operand
+#         self.list = list
+#
+#     def __add__(self, other):
+#
+#         list = self.list
+#
+#         list.append(Statement(
+#             leftOperand= self.operand,
+#             operator= "+",
+#             rightOperand= other.operand
+#         ))
+#         self.list =[]
+#
+#         return Equation(other.operand, list)
+#
+#     def __sub__(self, other):
+#
+#         list = self.list
+#
+#         list.append(Statement(
+#             leftOperand= self.operand,
+#             operator= "-",
+#             rightOperand= other.operand
+#         ))
+#         self.list =[]
+#
+#         return Equation(other.operand, list)
+#
+#     def __mul__(self, other):
+#
+#         list = self.list
+#
+#         list.append(Statement(
+#             leftOperand= self.operand,
+#             operator= "*",
+#             rightOperand= other.operand
+#         ))
+#         self.list =[]
+#
+#         return Equation(other.operand, list)
+#
+#     def __rshift__(self, other):
+#         list = self.list
+#
+#         list.append(Statement(
+#             leftOperand= self.operand,
+#             operator= ">>",
+#             rightOperand= other.operand
+#         ))
+#
+#         for l in other.list:
+#             print(l)
+#         for l in self.list:
+#             print(l)
+#
+#         self.list =[]
+#         other.list=[]
+#         return Equation(other.operand, list)
+#
+# class Operand(Equation):
+#     """
+#     THIS class represent the object KPI
+#     """
+#     def __init__(self, match, where, result):
+#         self.match = match
+#         self.where = where
+#         self.result = result
+#
+#         super().__init__(self, [])
+#
+#     def __str__(self):
+#         return f'[{self.match}]'
+#
+#
+# class Statement:
+#     """
+#     This class is the type of object that is store in the list
+#     """
+#     def __init__(self, leftOperand, operator, rightOperand):
+#         self.leftOperand = leftOperand
+#         self.operator = operator
+#         self.rightOperand = rightOperand
+#
+#     def __str__(self):
+#         return f'({self.leftOperand} {self.operator} {self.rightOperand})'
+#
+#
+#
+# class Kpi:
+#     def __init__(self, match=[], where = "", result = ""):
+#         self._set_match(match)
+#         self._set_where(where)
+#         self._set_result(result)
+#
+#     def _get_match(self):
+#         return self.match
+#
+#     def _set_match(self, match):
+#         if isinstance(match, str):
+#             self.match = [match]
+#         else:
+#             self.match = match
+#
+#     def _get_where(self):
+#         return self.where
+#
+#     def _set_where(self, where):
+#         self.where = where
+#
+#     def _get_result(self):
+#         return self.result
+#
+#     def _set_result(self, result):
+#         self.result = result
+#
+#
+#     def __str__(self):
+#         return   " / ".join(self.match) + "\n"\
+#                  + self.where + "\n" \
+#                  + self.result +"\n"
+#
+#     def __add__(self, other):
+#         kpi = Kpi(
+#             match = self.merge_match(self.match , other.match),
+#             where = self.merge_where(self.where, other.where, "AND"),
+#             result = self.merge_result(self.result, other.result)
+#         )
+#
+#         return kpi
+#
+#
+#     def __rshift__(self, other):
+#
+#         match = [f'{self.match.pop(-1)}-->{other.match[0]}']
+#
+#         lastmatch = self.merge_match(self.match, match)
+#         #print(lastmatch)
+#
+#         kpi = Kpi(
+#             match = lastmatch,
+#             where = self.merge_where(self.where, other.where, "AND"),
+#             result = self.merge_result(self.result, other.result)
+#         )
+#
+#         print(kpi.match)
+#         return kpi
+#
+#     def merge_match(self, match, match1):
+#         # print(match)
+#         # print(match1)
+#         # print("**")
+#
+#         if match and match1:
+#             return match + match1
+#         if match:
+#             return match
+#         if match1:
+#             return match1
+#         return []
+#
+#     def merge_where(self, where, where1, operator):
+#         if where and where1:
+#             return f'{where} {operator} {where1}'
+#         if where :
+#             return f'{where}'
+#         if where1:
+#             return f'{where1}'
+#         return ""
+#
+#     def merge_result(self, result, result1, function=None):
+#         if function:
+#             result1= f'{function}({result1})'
+#
+#         if result and result1:
+#             return f'{result},{result1}'
+#         if result:
+#             return f'{result}'
+#         if result1:
+#             return f'{result1}'
+#         return ""
+#
+#     def cypherQuery(self):
+#         return f'MATCH {", ".join(self.match)}' \
+#                f'\nWHERE {self.where}' \
+#                f'\nRETURN {self.result}'
+#
 
 
 # class Kpi:
