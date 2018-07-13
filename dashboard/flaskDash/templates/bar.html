@@ -4,12 +4,23 @@
 
 {% block body %}
 WILL HAVE BAR GRAPH
-    {{ the_div|safe }}
-    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
-    <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
-    {{ the_script|safe }}
-
-    <div>
-        {% include 'includes/_data.html' %}
-    </div>
+<!-- <form action="/bars_mach">
+<select name="feature_name">
+	{% for feature in feature_names %}
+		{% if feature == current_feature_name %}
+			<option selected value="{{ feature }}">{{ feature }}</option> 
+		{% else %} 
+			<option value="{{ feature }}">{{ feature }}</option> 
+		{% endif %}
+	{% endfor %}
+</select>
+<input type="submit">
+</form> -->
+ <div>
+    This Bokeh app below served by a Bokeh server that has been embedded
+    in another web app framework. For more information see the section
+    <a  target="_blank" href="https://bokeh.pydata.org/en/latest/docs/user_guide/server.html#embedding-bokeh-server-as-a-library">Embedding Bokeh Server as a Library</a>
+    in the User's Guide.
+  </div>
+{{ script|safe }}
 {% endblock %}

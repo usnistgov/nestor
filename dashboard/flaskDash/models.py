@@ -59,7 +59,6 @@ class TagPlot:
         ----------
         obj_type : class of object to filter on
         obj_name : sub-class/instance to filter on
-
         Returns
         -------
         pd.Series, mask for filtering df, tag_df.
@@ -70,13 +69,11 @@ class TagPlot:
     def filter_tags(self, obj_type, obj_name, n_thres=10):
         """
         apply filter to binary tag matrix (tag_df)
-
         Parameters
         ----------
         obj_type : passed to filter_type_name
         obj_name : passed to filter_type_name
         n_thres : only return nodes in the top ``n_thres`` percentile
-
         Returns
         -------
         pd.DataFrame, filtered binary tax matrix
@@ -93,11 +90,9 @@ class TagPlot:
         """
         Generates a hv.DynamicMap with a nodelink representation of
         filtered tags.
-
         Parameters
         ----------
         obj_type : class of object to show
-
         Returns
         -------
         hv.DynamicMap
@@ -138,11 +133,9 @@ class TagPlot:
         """
         Generates a hv.DynamicMap with a Sankey/flow representation of
         filtered tags.
-
         Parameters
         ----------
         obj_type : class of object to show
-
         Returns
         -------
         hv.DynamicMap
@@ -180,11 +173,9 @@ class TagPlot:
         """
         Generates a hv.DynamicMap with a bars/frequency representation of
         filtered tags.
-
         Parameters
         ----------
         obj_type : class of object to show
-
         Returns
         -------
         hv.DynamicMap
@@ -217,6 +208,7 @@ class TagPlot:
         dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
                                  n_thres=range(1, 20),
                                  order=['grouped', 'sorted'])
+#         curdoc().add_root(dmap)
         return dmap
 
 ######### DEPRECATED ##########
@@ -258,9 +250,8 @@ if __name__ == '__main__':
         '/flow_tech': renderer.app(tagplot.hv_flow('tech').options(width=900, height=600)),
         '/flow_mach': renderer.app(tagplot.hv_flow('mach').options(width=900, height=600)),
     }, port=5006)
-
+    server.allow_websocket_origin=["*"]
     server.start()
     server.show('/')
     loop = IOLoop.current()
     loop.start()
-

@@ -5,8 +5,8 @@ from flask import Flask, request, redirect, url_for, render_template
 from werkzeug import secure_filename
 import pandas as pd
 import holoviews as hv
-from bokeh.embed import components, server_document
-# from bokeh.server.server import Server
+from bokeh.embed import server_document
+from bokeh.server.server import Server
 import os, os.path
 from pathlib import Path
 
@@ -15,8 +15,9 @@ from pathlib import Path
 # import asyncio
 # asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
 
-from .models import TagPlot
-
+# from .models import TagPlot
+from bokeh.client import pull_session
+from bokeh.embed import server_session
 hv.extension('bokeh')
 
 # renderer = renderer.instance(mode='server')
@@ -93,50 +94,59 @@ def dashboard():
 
 
 # locally creates a page
-@app.route('/bar')
-def Bar():
-    # load the template Bar Graph
-    tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
-    bars = tagplot.hv_bar('mach')
-    bars = bars.options(height=300, width=600)
-    plot = hv.renderer('bokeh').get_plot(bars).state
-    script, div = components(plot)
-    # load the template Node Graph
-    tagplot.data_table('mach', 'A14')
+@app.route('/bar', methods=['GET'])
+def bar():
+#     # load the template Bar Graph
+#     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
+#     bars = tagplot.hv_bars('mach')
+#     bars = bars.options(height=300, width=600)
+#     plot = hv.renderer('bokeh').get_plot(bars).state
+#     script, div = components(plot)
+#     # load the template Node Graph
+#     tagplot.data_table('mach', 'A14')
 
-    return render_template('bar.html', the_div=div, the_script=script)
+#     return render_template('bar.html', the_div=div, the_script=script)
+    # pull a new session from a running Bokeh serve
+   with pull_session(url="http://localhost:5006") as session:
 
+#         session.document.roots[0].title.text = "Special Plot Title For A Specific User!"
+        
+        # generate a script to load the customized session
+        script = server_session(session_id=session.id, url='http://localhost:5006')
+
+        # use the script in the rendered page
+        return render_template("bar.html", script=script, template="Flask")
 
 # locally creates a page
-@app.route('/node', methods=['GET'])
-def Node():
-    # print(str(data_dir/'MWOs_anon.csv'))
-    tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
-    hmap = tagplot.hv_nodelink()
-    hmap = hmap.options(height=500, width=500, xaxis=None, yaxis=None, title_format='{label}')
+# @app.route('/node', methods=['GET'])
+# def node():
+#     # print(str(data_dir/'MWOs_anon.csv'))
+#     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
+#     hmap = tagplot.hv_nodelink()
+#     hmap = hmap.options(height=500, width=500, xaxis=None, yaxis=None, title_format='{label}')
 
-    renderer = hv.renderer('bokeh')#.instance(mode='server')
+#     renderer = hv.renderer('bokeh')#.instance(mode='server')
 
-    # app = renderer.app(dmap)
-    # loop = IOLoop.instance()
-    # loop.start()
-    # server = Server({'/':app}, port=0)
-    # server.start()
-    # html = server_document()
+#     # app = renderer.app(dmap)
+#     # loop = IOLoop.instance()
+#     # loop.start()
+#     # server = Server({'/':app}, port=0)
+#     # server.start()
+#     # html = server_document()
 
-    plot = renderer.get_plot(hmap).state
-    # div = renderer.static_html(hmap)
-    # plot.title = 'Nodelink Diagram'
-    script, div = components(plot)
+#     plot = renderer.get_plot(hmap).state
+#     # div = renderer.static_html(hmap)
+#     # plot.title = 'Nodelink Diagram'
+#     script, div = components(plot)
 
-    # load the template Node Graph
-    return render_template('node.html', the_div=div, the_script=script)
-    # return render_template('node.html', the_script=html)
+#     # load the template Node Graph
+#     return render_template('node.html', the_div=div, the_script=script)
+#     # return render_template('node.html', the_script=html)
 
 
 # locally creates a page
 @app.route('/flow')
-def Flow():    
+def flow():    
     # load the template Flow Graph
     return render_template('flow.html')
 
@@ -145,11 +155,6 @@ def Flow():
 @app.route('/help')
 def help_page():
     return render_template('help.html')
-
-
-@app.route('/flow')
-def flow():
-    return render_template('includes/_flow.html')
 
 
 if __name__ == '__main__':
