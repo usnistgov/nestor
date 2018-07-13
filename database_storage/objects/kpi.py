@@ -25,11 +25,6 @@ from database_storage.objects.human import *
 from database_storage.objects.tag import *
 from database_storage.helper import updateDict
 
-#
-# class Equation:
-#     def __init__(self, list):
-
-
 
 class Equation:
     """
@@ -37,6 +32,12 @@ class Equation:
     """
     def __init__(self, equationList):
         self.equationList = equationList
+
+        self.valideoperator= {
+            '+' : 'AND',
+            '-' : 'OR',
+            '*' : 'XOR'
+        }
 
 
     def __add__(self, other):
@@ -50,6 +51,34 @@ class Equation:
 
     def __rshift__(self, other):
         return Equation(self.equationList + [">"] + other.equationList)
+
+
+    def __str__(self):
+        res = ""
+        for statement in self.equationList:
+            res += f'\n{statement.__str__()}'
+        return res
+
+    def cypher_filterQuery(self):
+        match = set()
+        where = 'WHERE '
+        result = set()
+
+        tmpwhere = ""
+
+        for statement in self.equationList:
+            if isinstance(statement, str):
+                tmpwhere = f' {self.valideoperator[statement]} '
+            else:
+                m, w, r = statement.cypher_filter()
+                if m:
+                    match.add(m)
+                if w:
+                    where += f'{tmpwhere} {w}'
+                if r:
+                    result.add(r)
+                tmpwhere = ""
+        return f'MATCH {",".join(match)}\n{where}\nRETURN {",".join(result)}'
 
 
 class Operand(Equation):
@@ -162,10 +191,7 @@ class Operand(Equation):
 
 class OperandIssue(Operand):
 
-    def __init__(self,databaseInfo,  property=None, operator=None, value= None, variable="issue", result=None, linkedToIssue=True):
-
-        if linkedToIssue:
-            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-itemasproblem"]}]->'
+    def __init__(self,databaseInfo,  property=None, operator=None, value= None, variable="issue", result=None):
 
         super().__init__(property = property,
                          operator = operator,
@@ -173,10 +199,389 @@ class OperandIssue(Operand):
                          variable = variable,
                          result = result,
                          label = databaseInfo['issue']['label']['issue'],
-                         linked = linked,
+                         linked = None,
                          databaseInfo = databaseInfo['issue']
                          )
 
+class OperandHuman(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="human", linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['human']['label']['human'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['human']
+                         )
+
+class OperandTechnician(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="technician", linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-technician"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['human']['label']['human'] +
+                               databaseInfo['human']['label']['technician'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['human']
+                         )
+
+class OperandOperator(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="operator", linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-operator"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['human']['label']['human'] +
+                               databaseInfo['human']['label']['operator'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['human']
+                         )
+
+class OperandMachine(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="machine",
+                 linkedToIssue=True, result=None):
+
+        if property == databaseInfo["machine"]["properties"]["type"]:
+            variabletype = variable + "type"
+            if linkedToIssue:
+                linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-machine"]}]->' \
+                         f'({variable}{databaseInfo["machine"]["label"]["machine"]})-[{databaseInfo["edges"]["machine-machinetype"]}]->'
+            else:
+                linked = None
+
+            super().__init__(property=property,
+                             operator=operator,
+                             value=value,
+                             variable=variabletype,
+                             result=result,
+                             label=databaseInfo['machine']['label']['machine'],
+                             linked=linked,
+                             databaseInfo=databaseInfo['machine']
+                             )
+
+        else:
+            if linkedToIssue:
+                linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-machine"]}]->'
+            else:
+                linked = None
+
+            super().__init__(property=property,
+                             operator=operator,
+                             value=value,
+                             variable=variable,
+                             result=result,
+                             label=databaseInfo['machine']['label']['machine'],
+                             linked=linked,
+                             databaseInfo=databaseInfo['machine']
+                             )
+
+
+class OperandTag(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tag",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagOnegram(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagonegram",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label= databaseInfo['tag']['label']['tag'] +
+                                databaseInfo['tag']['label']['onegram'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagNgram(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagngram",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['ngram'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagOther(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagother",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['other'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagProblem(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagproblem",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-problem"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['onegram'] +
+                               databaseInfo['tag']['label']['problem'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagSolution(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagsolution",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-solution"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['onegram'] +
+                               databaseInfo['tag']['label']['solution'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagItem(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagitem",
+                 linkedToIssue=True, result=None):
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-item"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['onegram'] +
+                               databaseInfo['tag']['label']['item'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagItemAsProblem(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagitemasproblem",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-itemasproblem"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['onegram'] +
+                               databaseInfo['tag']['label']['item'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagItemAsSolution(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagitemassolution",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-itemassolution"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['onegram'] +
+                               databaseInfo['tag']['label']['item'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagProblemItem(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagproblemitem",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-problemitem"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['ngram'] +
+                               databaseInfo['tag']['label']['problem_item'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagSolutionItem(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagsolutionitem",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-solutionitem"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['ngram'] +
+                               databaseInfo['tag']['label']['solution_item'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+
+class OperandTagNa(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagna",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-na"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['other'] +
+                               databaseInfo['tag']['label']['na'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
+
+class OperandTagStopWord(Operand):
+
+    def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="tagstopword",
+                 linkedToIssue=True, result=None):
+
+        if linkedToIssue:
+            linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-stopword"]}]->'
+        else:
+            linked = None
+
+        super().__init__(property=property,
+                         operator=operator,
+                         value=value,
+                         variable=variable,
+                         result=result,
+                         label=databaseInfo['tag']['label']['tag'] +
+                               databaseInfo['tag']['label']['other'] +
+                               databaseInfo['tag']['label']['stopword'],
+                         linked=linked,
+                         databaseInfo=databaseInfo['tag']
+                         )
 #
 #
 # class Equation:

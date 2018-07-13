@@ -57,6 +57,7 @@ class DatabaseNeo4J(object):
                 result = session.write_transaction(self._execute_code, query)
             return 1, result
         except:
+            print("cannot run the query")
             return 0, None
 
     def runQueries(self, queries):
@@ -141,3 +142,16 @@ class DatabaseNeo4J(object):
         """
         result = tx.run(query)
         return result
+
+
+    def getAllPropertiesOf(self, label):
+        query = f'MATCH (node{label}) WITH DISTINCT keys(node) as keys\n' \
+                f'UNWIND keys AS keyslisting WITH DISTINCT keyslisting AS poprerties\n' \
+                f'RETURN poprerties'
+
+        result = self.runQuery(query)[1]
+
+        return list(r.values()[0] for r in result)
+
+
+
