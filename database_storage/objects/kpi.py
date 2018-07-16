@@ -64,6 +64,8 @@ class Equation:
         where = 'WHERE '
         result = set()
 
+        iswhere = False
+
         tmpwhere = ""
 
         for statement in self.equationList:
@@ -75,10 +77,15 @@ class Equation:
                     match.add(m)
                 if w:
                     where += f'{tmpwhere} {w}'
+                    iswhere = True
                 if r:
                     result.add(r)
                 tmpwhere = ""
-        return f'MATCH {",".join(match)}\n{where}\nRETURN {",".join(result)}'
+
+        if iswhere:
+            return f'MATCH {",".join(match)}\n{where}\nRETURN {",".join(result)}'
+        else:
+            return f'MATCH {",".join(match)}\nRETURN {",".join(result)}'
 
 
 class Operand(Equation):
@@ -267,7 +274,7 @@ class OperandMachine(Operand):
     def __init__(self, databaseInfo, property=None, operator=None, value=None, variable="machine",
                  linkedToIssue=True, result=None):
 
-        if property == databaseInfo["machine"]["properties"]["type"]:
+        if property == databaseInfo["machine"]["properties"]["type"] or result == databaseInfo["machine"]["properties"]["type"]:
             variabletype = variable + "type"
             if linkedToIssue:
                 linked = f'(issue{databaseInfo["issue"]["label"]["issue"]})-[{databaseInfo["edges"]["issue-machine"]}]->' \
