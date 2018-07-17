@@ -9,6 +9,8 @@ from bokeh.embed import server_document
 from bokeh.server.server import Server
 import os, os.path
 from pathlib import Path
+from bokeh.themes import Theme
+from tornado.ioloop import IOLoop
 
 # from tornado.ioloop import IOLoop
 # from tornado.platform.asyncio import AnyThreadEventLoopPolicy
@@ -92,7 +94,48 @@ def dashboard():
     # load the template dashboard
     return render_template('dashboard.html')
 
+    def hv_bars(self, obj_type):
+        """
+        Generates a hv.DynamicMap with a bars/frequency representation of
+        filtered tags.
+        Parameters
+        ----------
+        obj_type : class of object to show
+        Returns
+        -------
+        hv.DynamicMap
+        """
+        def load_bar(obj_name, n_thres=10, order='grouped'):
+            tags = self.filter_tags(obj_type, obj_name, n_thres).drop(columns=['U']).sum()
+            tags = tags.groupby(level=0).nlargest(10).reset_index(level=0, drop=True)
+            tags = tags.reset_index()
+            tags.columns = ['class', 'tag name', 'count']
 
+            bar_kws = dict(color_index='class',
+                           xrotation=90,
+                           cmap=color_opts,
+                           tools=['hover'],
+                           line_color='w')
+            if order != 'grouped':
+                tags = tags.sort_values('count', ascending=False)
+
+            bars = hv.Bars(tags,
+                           kdims=['tag name'], vdims=['count', 'class']).options(**bar_kws)
+
+            return (bars.options(width=800) +
+                    self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
+
+        dmap = hv.DynamicMap(load_bar,
+                             #                              cache_size=1,
+                             kdims=['obj_name',
+                                    'n_thres',
+                                    'order']).options(framewise=True)
+        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
+                                 n_thres=range(1, 20),
+                                 order=['grouped', 'sorted'])
+        
+        server = remderer.app(dmap)
+    
 # locally creates a page
 @app.route('/bar', methods=['GET'])
 def bar():
@@ -107,16 +150,21 @@ def bar():
 
 #     return render_template('bar.html', the_div=div, the_script=script)
     # pull a new session from a running Bokeh serve
-   with pull_session(url="http://localhost:5006") as session:
+#    with pull_session(url="http://localhost:5006") as session:
 
 #         session.document.roots[0].title.text = "Special Plot Title For A Specific User!"
         
         # generate a script to load the customized session
-        script = server_session(session_id=session.id, url='http://localhost:5006')
+        script = server_document('http://localhost:5006/bkapp')
 
         # use the script in the rendered page
         return render_template("bar.html", script=script, template="Flask")
 
+def bk_worker():
+    server.start()
+    server.io_loop.start()
+
+        
 # locally creates a page
 # @app.route('/node', methods=['GET'])
 # def node():
@@ -156,6 +204,8 @@ def flow():
 def help_page():
     return render_template('help.html')
 
+from threading import Thread
+Thread(target=bk_worker).start()
 
 if __name__ == '__main__':
     # runs app in debug mode
