@@ -36,7 +36,6 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         self.pushButton_selectCSVHeaders_save.clicked.connect(self.nextWindowFunction)
 
-
     def set_checkBoxesValues(self, headers):
         """create the list of checkbox based on the header attribute
         the header is created using the method set_CSVHeader
@@ -56,10 +55,10 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         y_headerColumn = 0
         x = 0
 
-        self.label_selectCSVHeaders_headerColumn = Qw.QLabel(self.centralwidget)
-        self.label_selectCSVHeaders_headerColumn.setObjectName("label_selectCSVHeaders_headerColumn")
-        self.label_selectCSVHeaders_headerColumn.setText("Your CSV header\n(check if you want to tag it)")
-        self.gridLayout_selectCSVHeaders_editor.addWidget(self.label_selectCSVHeaders_headerColumn, x,y_headerColumn,1,1 )
+        # self.label_selectCSVHeaders_headerColumn = Qw.QLabel(self.centralwidget)
+        # self.label_selectCSVHeaders_headerColumn.setObjectName("label_selectCSVHeaders_headerColumn")
+        # self.label_selectCSVHeaders_headerColumn.setText("Your CSV header\n(check if you want to tag it)")
+        # self.gridLayout_selectCSVHeaders_editor.addWidget(self.label_selectCSVHeaders_headerColumn, x,y_headerColumn)
 
         x += 1
 
