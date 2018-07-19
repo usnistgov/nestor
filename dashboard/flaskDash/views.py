@@ -17,7 +17,7 @@ from tornado.ioloop import IOLoop
 # import asyncio
 # asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
 
-# from .models import TagPlot
+from .models import TagPlot
 from bokeh.client import pull_session
 from bokeh.embed import server_session
 hv.extension('bokeh')
@@ -93,77 +93,15 @@ def dashboard():
 
     # load the template dashboard
     return render_template('dashboard.html')
-
-    def hv_bars(self, obj_type):
-        """
-        Generates a hv.DynamicMap with a bars/frequency representation of
-        filtered tags.
-        Parameters
-        ----------
-        obj_type : class of object to show
-        Returns
-        -------
-        hv.DynamicMap
-        """
-        def load_bar(obj_name, n_thres=10, order='grouped'):
-            tags = self.filter_tags(obj_type, obj_name, n_thres).drop(columns=['U']).sum()
-            tags = tags.groupby(level=0).nlargest(10).reset_index(level=0, drop=True)
-            tags = tags.reset_index()
-            tags.columns = ['class', 'tag name', 'count']
-
-            bar_kws = dict(color_index='class',
-                           xrotation=90,
-                           cmap=color_opts,
-                           tools=['hover'],
-                           line_color='w')
-            if order != 'grouped':
-                tags = tags.sort_values('count', ascending=False)
-
-            bars = hv.Bars(tags,
-                           kdims=['tag name'], vdims=['count', 'class']).options(**bar_kws)
-
-            return (bars.options(width=800) +
-                    self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
-
-        dmap = hv.DynamicMap(load_bar,
-                             #                              cache_size=1,
-                             kdims=['obj_name',
-                                    'n_thres',
-                                    'order']).options(framewise=True)
-        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
-                                 n_thres=range(1, 20),
-                                 order=['grouped', 'sorted'])
-        
-        server = remderer.app(dmap)
     
 # locally creates a page
-@app.route('/bar', methods=['GET'])
+@app.route('/bar')
 def bar():
-#     # load the template Bar Graph
-#     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
-#     bars = tagplot.hv_bars('mach')
-#     bars = bars.options(height=300, width=600)
-#     plot = hv.renderer('bokeh').get_plot(bars).state
-#     script, div = components(plot)
-#     # load the template Node Graph
-#     tagplot.data_table('mach', 'A14')
-
-#     return render_template('bar.html', the_div=div, the_script=script)
-    # pull a new session from a running Bokeh serve
-#    with pull_session(url="http://localhost:5006") as session:
-
-#         session.document.roots[0].title.text = "Special Plot Title For A Specific User!"
-        
+        with pull_session(url="http://localhost:5006/bars_mach") as session:
         # generate a script to load the customized session
-        script = server_document('http://localhost:5006/bkapp')
-
+            script = server_session(session_id=session.id, url='http://localhost:5006/bars_mach')
         # use the script in the rendered page
-        return render_template("bar.html", script=script, template="Flask")
-
-def bk_worker():
-    server.start()
-    server.io_loop.start()
-
+            return render_template("bar.html", script=script, template="Flask")
         
 # locally creates a page
 # @app.route('/node', methods=['GET'])
@@ -204,11 +142,15 @@ def flow():
 def help_page():
     return render_template('help.html')
 
-from threading import Thread
-Thread(target=bk_worker).start()
 
 if __name__ == '__main__':
     # runs app in debug mode
-    app.run(debug=True)
-    # app.run()
+    from werkzeug.wsgi import DispatcherMiddleware
+    from models import app as backend
+
+    application = DispatcherMiddleware(app, {
+        '/backend':     backend
+    })
+#         app.run(debug=True)
+        # app.run()
   

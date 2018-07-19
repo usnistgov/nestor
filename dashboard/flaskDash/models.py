@@ -249,9 +249,8 @@ if __name__ == '__main__':
         '/node_mach': renderer.app(tagplot.hv_nodelink('mach').options(width=600, height=600)),
         '/flow_tech': renderer.app(tagplot.hv_flow('tech').options(width=900, height=600)),
         '/flow_mach': renderer.app(tagplot.hv_flow('mach').options(width=900, height=600)),
-    }, port=5006)
-    server.allow_websocket_origin=["*"]
+    }, port=5006, allow_websocket_origin=["127.0.0.1:5000"])
     server.start()
     server.show('/')
     loop = IOLoop.current()
-loop.start()
+    loop.start()
