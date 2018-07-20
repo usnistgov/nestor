@@ -128,7 +128,7 @@ class TagPlot:
                              kdims=['obj_name',
                                     'n_thres',
                                     'e_thres',
-                                    'weight']).options(framewise=True)
+                                    'weight']).options(framewise=True, title_format='')
         dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
                                  n_thres=self.node_thres,
                                  e_thres=self.edge_thres,
@@ -169,7 +169,7 @@ class TagPlot:
                              #                              cache_size=1,
                              kdims=['obj_name',
                                     'n_thres',
-                                    'weight']).options(framewise=True)
+                                    'weight']).options(framewise=True, title_format='')
         dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
                                  n_thres=self.node_thres,
                                  weight=self.weights)
@@ -210,7 +210,7 @@ class TagPlot:
                              #                              cache_size=1,
                              kdims=['obj_name',
                                     'n_thres',
-                                    'order']).options(framewise=True)
+                                    'order']).options(framewise=True, title_format='')
         dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
                                  n_thres=range(1, 20),
                                  order=['grouped', 'sorted'])
