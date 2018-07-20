@@ -1,19 +1,20 @@
+<!--Author: Lela Bones
+    This document conatins the dashboard contents-->
 {% extends 'layout.html' %}
 
 {% block body %}
-WILL HAVE NODE GRAPH
-
-    <div>
-        {{ the_div|safe }}
-        {{ the_script|safe }}
-    </div>
-    <div>
-        {% include 'includes/_data.html' %}
-    </div>
+<h1>Node Diagram</h1>
+<form action="/node">
+<select name="feature_name">
+	{% for feature in feature_names %}
+		{% if feature == current_feature_name %}
+			<option selected value="{{ feature }}">{{ feature }}</option> 
+		{% else %} 
+			<option value="{{ feature }}">{{ feature }}</option> 
+		{% endif %}
+	{% endfor %}
+</select>
+    <input type="submit">
+</form>
+{{ script|safe }}
 {% endblock %}
-
-
-<!--<!DOCTYPE html>-->
-<!--<html>-->
-  <!---->
-<!--</html>-->
