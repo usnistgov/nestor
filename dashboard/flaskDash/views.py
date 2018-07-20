@@ -1,55 +1,26 @@
 # Author: Lela Bones
 # This document creates the instance of the app and runs it
 
-from flask import Flask, request, redirect, url_for, render_template
-from werkzeug import secure_filename
 import pandas as pd
 import holoviews as hv
 from bokeh.embed import server_document
 from bokeh.server.server import Server
 import os, os.path
 from pathlib import Path
-from bokeh.themes import Theme
-from tornado.ioloop import IOLoop
-
-# from tornado.ioloop import IOLoop
-# from tornado.platform.asyncio import AnyThreadEventLoopPolicy
-# import asyncio
-# asyncio.set_event_loop_policy(AnyThreadEventLoopPolicy())
-
 from .models import TagPlot
 from bokeh.client import pull_session
 from bokeh.embed import server_session
+from flask import Flask, flash, request, redirect, url_for, render_template
+from werkzeug.utils import secure_filename
+from flask import send_from_directory
 hv.extension('bokeh')
 
 # renderer = renderer.instance(mode='server')
-UPLOAD_FOLDER = '/tmp/'
-ALLOWED_EXTENSIONS = set(['csv'])
-
-data_dir = Path('..')/'data'/'sme_data'
-print(str(data_dir))
-# creates table for dashboard
-
-""" TODO 
-from bokeh.embed import server_document
-from bokeh.server.server import Server
-
-renderer = hv.renderer('bokeh')
-app = renderer.app(plot)
-server = Server({'/': app}, port=5006)
-server.start()
-html = server_document()
-"""
+UPLOAD_FOLDER = './flaskDash/tmp/'
+ALLOWED_EXTENSIONS = set(['csv', 'h5'])
 
 # creates instance of the class Flask
 app = Flask(__name__)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and \
-filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 
 # locally creates a page
 @app.route('/')
@@ -58,25 +29,32 @@ def index():
     return render_template('home.html')
 
 
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
         file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('index'))
-    return """
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    <p>%s</p>
-    """ % "<br>".join(os.listdir(app.config['UPLOAD_FOLDER'],))
+    return render_template('upload.html')
 
+from flask import send_from_directory
 
 # locally creates a page
 @app.route('/about')
@@ -159,12 +137,6 @@ def help_page():
 
 if __name__ == '__main__':
     # runs app in debug mode
-    from werkzeug.wsgi import DispatcherMiddleware
-    from models import app as backend
-
-    application = DispatcherMiddleware(app, {
-        '/backend':     backend
-    })
-#         app.run(debug=True)
+        app.run(host='0.0.0.0', port=5001, debug=True)
         # app.run()
   
