@@ -4,12 +4,17 @@
 
 {% block body %}
 WILL HAVE BAR GRAPH
-    {{ the_div|safe }}
-    <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
-    <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.13.0.min.js"></script>
-    {{ the_script|safe }}
-
-    <div>
-        {% include 'includes/_data.html' %}
-    </div>
+<!-- <form action="/bars_mach">
+<select name="feature_name">
+	{% for feature in feature_names %}
+		{% if feature == current_feature_name %}
+			<option selected value="{{ feature }}">{{ feature }}</option> 
+		{% else %} 
+			<option value="{{ feature }}">{{ feature }}</option> 
+		{% endif %}
+	{% endfor %}
+</select>
+<input type="submit">
+</form> -->
+{{ script|safe }}
 {% endblock %}
