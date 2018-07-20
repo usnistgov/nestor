@@ -93,7 +93,7 @@ def dashboard():
 
     # load the template dashboard
     return render_template('dashboard.html')
-    
+
 # locally creates a page
 @app.route('/bar')
 def bar():
@@ -102,10 +102,16 @@ def bar():
             script = server_session(session_id=session.id, url='http://localhost:5006/bars_mach')
         # use the script in the rendered page
             return render_template("bar.html", script=script, template="Flask")
-        
+
+
 # locally creates a page
-# @app.route('/node', methods=['GET'])
-# def node():
+@app.route('/node', methods=['GET'])
+def node():
+    with pull_session(url="http://localhost:5006/node_mach") as session:
+        # generate a script to load the customized session
+        script = server_session(session_id=session.id, url='http://localhost:5006/node_mach')
+        # use the script in the rendered page
+        return render_template("node.html", script=script, template="Flask")
 #     # print(str(data_dir/'MWOs_anon.csv'))
 #     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
 #     hmap = tagplot.hv_nodelink()
@@ -132,9 +138,14 @@ def bar():
 
 # locally creates a page
 @app.route('/flow')
-def flow():    
+def flow():
     # load the template Flow Graph
-    return render_template('flow.html')
+    # return render_template('flow.html')
+    with pull_session(url="http://localhost:5006/flow_mach") as session:
+        # generate a script to load the customized session
+        script = server_session(session_id=session.id, url='http://localhost:5006/flow_mach')
+        # use the script in the rendered page
+        return render_template("flow.html", script=script, template="Flask")
 
 
 # locally creates a page
