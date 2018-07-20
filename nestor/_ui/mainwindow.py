@@ -1,9 +1,9 @@
 import yaml
-import pandas as pd
+# import pandas as pd
 import chardet
-from .. import keyword as kex
+# from .. import keyword as kex
 
-from .helper_objects import *
+# from .helper_objects import *
 from .openFilesUI_app import *
 from .selectCSVHeadersUI_app import *
 from .taggingUI_app import *
@@ -12,7 +12,7 @@ from .taggingUI_app import *
 class MainWindow:
     def __init__(self):
         self.icnoPtah=None
-        self.yamlPath_config = "config.yaml"
+        self.yamlPath_config = Path('.')/"config.yaml"
         self.config_new = {
             'file':
                 {
@@ -50,7 +50,7 @@ class MainWindow:
             }
         }
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config, self.config_new)
-
+        self.config_new.update(self.config_default)
         self.tokenExtractor_1Gram = None
         self.tokenExtractor_nGram = None
 
@@ -161,14 +161,15 @@ class MainWindow:
 
             # Clean the natural lang text...merge columns.
             columns = self.config_new['file']['filePath_OriginalCSV']['headers']
-            nlp_selector = kex.NLPSelect(columns=columns)  # sklearn-style
+            special_replace = self.config_new.get('special_replace', None)
+            nlp_selector = kex.NLPSelect(columns=columns, special_replace=special_replace)  # sklearn-style
             self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # a series object
 
-            #init the token extractor and clean the raw text
+            # init the token extractor and clean the raw text
             self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
             list_tokenExtracted = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)  # helper list of tokens if wanted
 
-            #create the 1Gram dataframe
+            # create the 1Gram dataframe
             filename1 = Path(self.config_new['file']['filePath_1GrammCSV']['path'])
             self.dataframe_1Gram = kex.generate_vocabulary_df(self.tokenExtractor_1Gram, filename=filename1)
 
@@ -177,7 +178,7 @@ class MainWindow:
 
             self.window_selectCSVHeader.close()
 
-            #send the dataframes to the tagging window
+            # send the dataframes to the tagging window
             self.window_taggingTool._set_config(self.config_new)
             self.window_taggingTool._set_dataframes(self.dataframe_1Gram, self.dataframe_NGram)
             self.window_taggingTool._set_tokenExtractor(tokenExtractor_1Gram= self.tokenExtractor_1Gram)
@@ -233,16 +234,27 @@ class MainWindow:
         -------
 
         """
-        try:
+        if yaml_path.is_file():
             with open(yaml_path, 'r') as yamlfile:
                 config = yaml.load(yamlfile)
                 print("yaml file open")
-            return config
-        except FileNotFoundError:
+        else:
+            config = dict
             with open(yaml_path, 'w') as yamlfile:
-                yaml.dump(dict, yamlfile)
+                yaml.dump(config, yamlfile)
                 print("yaml file created")
-            return dict
+        return config
+
+        # try:
+        #     with open(yaml_path, 'r') as yamlfile:
+        #         config = yaml.load(yamlfile)
+        #         print("yaml file open")
+        #     return config
+        # except FileNotFoundError:
+        #     with open(yaml_path, 'w') as yamlfile:
+        #         yaml.dump(dict, yamlfile)
+        #         print("yaml file created")
+        #     return dict
 
 
     def saveYAMLConfig_File(self, yaml_path, dict):
