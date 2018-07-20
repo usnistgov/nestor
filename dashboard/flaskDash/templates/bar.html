@@ -3,8 +3,8 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-WILL HAVE BAR GRAPH
-<!-- <form action="/bars_mach">
+<h1>Bar Chart</h1>
+<form action="/bar">
 <select name="feature_name">
 	{% for feature in feature_names %}
 		{% if feature == current_feature_name %}
@@ -14,7 +14,7 @@ WILL HAVE BAR GRAPH
 		{% endif %}
 	{% endfor %}
 </select>
-<input type="submit">
-</form> -->
+    <input type="submit">
+</form>
 {{ script|safe }}
 {% endblock %}

@@ -93,59 +93,62 @@ def dashboard():
 
     # load the template dashboard
     return render_template('dashboard.html')
-
+feature_names = ['Machines', 'Technicians']
 # locally creates a page
 @app.route('/bar')
 def bar():
-        with pull_session(url="http://localhost:5006/bars_mach") as session:
-        # generate a script to load the customized session
-            script = server_session(session_id=session.id, url='http://localhost:5006/bars_mach')
-        # use the script in the rendered page
-            return render_template("bar.html", script=script, template="Flask")
-
-
+        current_feature_name = request.args.get('feature_name')
+        if current_feature_name == None:
+            current_feature_name = "Machines"
+        if current_feature_name == 'Machines':
+            with pull_session(url="http://localhost:5006/bars_mach") as session:
+                # generate a script to load the customized session
+                script = server_session(session_id=session.id, url='http://localhost:5006/bars_mach')
+                # use the script in the rendered page
+        if current_feature_name == 'Technicians':
+            with pull_session(url="http://localhost:5006/bars_tech") as session:
+                # generate a script to load the customized session
+                script = server_session(session_id=session.id, url='http://localhost:5006/bars_tech')
+                # use the script in the rendered page
+        return render_template("bar.html", script=script, template="Flask", feature_names=feature_names,  current_feature_name=current_feature_name)
+#             return render_template("bar.html", script=script, template="Flask")
+        
 # locally creates a page
-@app.route('/node', methods=['GET'])
+@app.route('/node')
 def node():
-    with pull_session(url="http://localhost:5006/node_mach") as session:
-        # generate a script to load the customized session
-        script = server_session(session_id=session.id, url='http://localhost:5006/node_mach')
-        # use the script in the rendered page
-        return render_template("node.html", script=script, template="Flask")
-#     # print(str(data_dir/'MWOs_anon.csv'))
-#     tagplot = TagPlot(data_dir/'MWOs_anon.csv', data_dir/'binary_tags.h5')
-#     hmap = tagplot.hv_nodelink()
-#     hmap = hmap.options(height=500, width=500, xaxis=None, yaxis=None, title_format='{label}')
-
-#     renderer = hv.renderer('bokeh')#.instance(mode='server')
-
-#     # app = renderer.app(dmap)
-#     # loop = IOLoop.instance()
-#     # loop.start()
-#     # server = Server({'/':app}, port=0)
-#     # server.start()
-#     # html = server_document()
-
-#     plot = renderer.get_plot(hmap).state
-#     # div = renderer.static_html(hmap)
-#     # plot.title = 'Nodelink Diagram'
-#     script, div = components(plot)
-
-#     # load the template Node Graph
-#     return render_template('node.html', the_div=div, the_script=script)
-#     # return render_template('node.html', the_script=html)
+        current_feature_name = request.args.get('feature_name')
+        if current_feature_name == None:
+            current_feature_name = "Machines"
+        if current_feature_name == 'Machines':
+            with pull_session(url="http://localhost:5006/node_mach") as session:
+                # generate a script to load the customized session
+                script = server_session(session_id=session.id, url='http://localhost:5006/node_mach')
+                # use the script in the rendered page
+        if current_feature_name == 'Technicians':
+            with pull_session(url="http://localhost:5006/node_tech") as session:
+                # generate a script to load the customized session
+                script = server_session(session_id=session.id, url='http://localhost:5006/node_tech')
+                # use the script in the rendered page
+        return render_template("node.html", script=script, template="Flask", feature_names=feature_names,  current_feature_name=current_feature_name)
 
 
 # locally creates a page
 @app.route('/flow')
-def flow():
-    # load the template Flow Graph
-    # return render_template('flow.html')
-    with pull_session(url="http://localhost:5006/flow_mach") as session:
-        # generate a script to load the customized session
-        script = server_session(session_id=session.id, url='http://localhost:5006/flow_mach')
-        # use the script in the rendered page
-        return render_template("flow.html", script=script, template="Flask")
+def flow():    
+        current_feature_name = request.args.get('feature_name')
+        if current_feature_name == None:
+            current_feature_name = "Machines"
+        if current_feature_name == 'Machines':
+            with pull_session(url="http://localhost:5006/flow_mach") as session:
+                # generate a script to load the customized session
+                script = server_session(session_id=session.id, url='http://localhost:5006/flow_mach')
+                # use the script in the rendered page
+        if current_feature_name == 'Technicians':
+            with pull_session(url="http://localhost:5006/flow_tech") as session:
+                # generate a script to load the customized session
+                script = server_session(session_id=session.id, url='http://localhost:5006/flow_tech')
+                # use the script in the rendered page
+        return render_template("flow.html", script=script, template="Flask", feature_names=feature_names,  current_feature_name=current_feature_name)
 
 
 # locally creates a page
