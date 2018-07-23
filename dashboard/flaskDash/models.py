@@ -160,7 +160,7 @@ class TagPlot:
                                                edge_alpha=.3,
                                                node_line_color='white',
                                                xaxis=None, yaxis=None)})
-            # return elem.options(width=800, height=500)
+            return elem.options(width=800, height=500)
             # SOME KIND OF BUG!
             # return (elem.options(width=500, height=500) +
             #         self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
@@ -255,7 +255,7 @@ if __name__ == '__main__':
         '/node_mach': renderer.app(tagplot.hv_nodelink('mach').options(width=600, height=600)),
         '/flow_tech': renderer.app(tagplot.hv_flow('tech').options(width=900, height=600)),
         '/flow_mach': renderer.app(tagplot.hv_flow('mach').options(width=900, height=600)),
-    }, port=5006, allow_websocket_origin=["127.0.0.1:5000"])
+    }, port=5006, allow_websocket_origin=["127.0.0.1:5000", "localhost:5000"])
     server.start()
     # server.show('/')
     loop = IOLoop.current()
