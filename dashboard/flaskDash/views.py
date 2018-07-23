@@ -30,6 +30,7 @@ def index():
 
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+FILES = []
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -52,7 +53,9 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return render_template('upload.html')
+            FILES.append(filename)
+            return render_template('upload.html', filename=FILES)
+    return render_template('upload.html', filename=FILES)
 
 from flask import send_from_directory
 
@@ -137,6 +140,6 @@ def help_page():
 
 if __name__ == '__main__':
     # runs app in debug mode
-        app.run(host='0.0.0.0', port=5001, debug=True)
+        app.run(port=5000, debug=True)
         # app.run()
   

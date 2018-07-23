@@ -4,6 +4,8 @@
       <input type=file name=file>
       <input type=submit value=Upload>
     </form>
-    <h2> Currently uploaded files: <h2>
-            
+    <h2> Currently uploaded files: </h2>
+        {% for file in filename %}
+          <li>{{file}}</li>
+{% endfor %}
 {% endblock %}
