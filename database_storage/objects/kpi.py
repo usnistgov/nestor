@@ -116,11 +116,19 @@ class Operand(Equation):
         self._set_linked(linked)
         self._set_result(result)
 
+        self.negatif = False
+
 
         self.label = label
 
 
         super().__init__([self])
+
+
+    def __neg__(self):
+        self.negatif = True
+
+        return self
 
 
     def _get_property(self):
@@ -191,6 +199,9 @@ class Operand(Equation):
         if self.result:
             result = f'{self.variable}.{self.result}'
 
+        if self.negatif:
+            where = "NOT " + where
+
         return match, where, result
 
 
@@ -209,6 +220,13 @@ class OperandIssue(Operand):
                          linked = None,
                          databaseInfo = databaseInfo['issue']
                          )
+
+    # def cypher_filter(self):
+    #     match, where, result = super().cypher_filter()
+    #
+    #
+    #
+    #     return match, where, result
 
 class OperandHuman(Operand):
 

@@ -551,25 +551,25 @@ class Issue:
             if self.machine_down:
                 query += f'{self.databaseInfoIssue["properties"]["machine_down"]}:\'{self.machine_down}\','
             if self.date_machine_up:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:\'{self.date_machine_up}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:\'{self.date_machine_up.isoformat()}\','
             if self.cost:
                 query += f'{self.databaseInfoIssue["properties"]["cost"]}:{self.cost},'
             if self.date_machine_down:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:\'{self.date_machine_down }\','
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:\'{self.date_machine_down.isoformat() }\','
             if self.date_workorder_start:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:\'{self.date_workorder_start}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:\'{self.date_workorder_start.isoformat()}\','
             if self.date_workorder_completion:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:\'{self.date_workorder_completion}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:\'{self.date_workorder_completion.isoformat()}\','
             if self.date_maintenance_technician_arrive:
-                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:\'{self.date_maintenance_technician_arrive}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:\'{self.date_maintenance_technician_arrive.isoformat()}\','
             if self.date_problem_found:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:\'{self.date_problem_found}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:\'{self.date_problem_found.isoformat()}\','
             if self.date_problem_solve:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:\'{self.date_problem_solve}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:\'{self.date_problem_solv.isoformat()}\','
             if self.date_part_ordered:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered.isoformat()}\','
             if self.date_part_received:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received.isoformat()}\','
             if self.id:
                 query += f'{self.databaseInfoIssue["properties"]["id"]}:{self.id},'
             query = query[:-1] + "}"
