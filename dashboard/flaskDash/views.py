@@ -13,15 +13,34 @@ from bokeh.embed import server_session
 from flask import Flask, flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
+import matplotlib.pyplot as plt
+import io
+import base64
 hv.extension('bokeh')
+
+app = Flask(__name__)
 
 # renderer = renderer.instance(mode='server')
 UPLOAD_FOLDER = './flaskDash/tmp/'
 ALLOWED_EXTENSIONS = set(['csv', 'h5'])
 
-# creates instance of the class Flask
-app = Flask(__name__)
+data_dir = Path('..') / 'data' / 'sme_data'
+df = pd.read_csv(data_dir  / 'MWOs_anon.csv')
+tf = pd.read_hdf(data_dir / 'binary_tags.h5')
 
+def data_table(self):
+    
+        df = self.loc[:, ['mach',
+                          'date_received',
+                          'issue',
+                          'info',
+                          'tech']]
+        with open(Path('flaskDash')/'templates'/'includes'/'_data.html', 'w+') as fo:
+            # \df =self.df.head(50)
+            fo.write("<div style='overflow-y: scroll; height:600px;'>")
+            df.to_html(fo, classes=['table table-striped'])
+            fo.write("</div>")
+    
 # locally creates a page
 @app.route('/')
 def index():
@@ -69,12 +88,16 @@ def about():
 # locally creates a page
 @app.route('/dashboard')
 def dashboard():
-    # data_table()
-    # TODO make this trigger with dropdown
-
-    # load the template dashboard
+#     problems = tf.P.sum().sort_values(ascending=False)[:10]
+#     probGraph = problems.plot(kind='bar', title = "Problem Tags")
+#     probGraph.set_xlabel("Aliases")
+#     probGraph.set_ylabel("Occurence")
+    data_table(df)
     return render_template('dashboard.html')
+
+#assigns the feature names for the dropdown
 feature_names = ['Machines', 'Technicians']
+
 # locally creates a page
 @app.route('/bar')
 def bar():
