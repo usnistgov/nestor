@@ -17,25 +17,25 @@ class TagPlot:
         self.tag_df = pd.read_hdf(tag_file, key='tags')
 
         # set allowed technician options here
-        # people = [
-        #     'nathan_maldonado',
-        #     'angie_henderson',
-        #     'margaret_hawkins_dds',
-        #     # "tommy_walter",
-        #     "gabrielle_davis",
-        #     "cristian_santos",
-        # ]
-        nplen = np.vectorize(len)
-        people = np.unique(self.df.tech.str.split(', ', expand=True).fillna('').values)
-        people = people[nplen(people) > 5]
+        people = [
+            'nathan_maldonado',
+            'angie_henderson',
+            'margaret_hawkins_dds',
+            # "tommy_walter",
+            "gabrielle_davis",
+            "cristian_santos",
+        ]
+        # nplen = np.vectorize(len)
+        # people = np.unique(self.df.tech.str.split(', ', expand=True).fillna('').values)
+        # people = people[nplen(people) > 5]
 
         # set allowed machine options here.
-        # machs = [
-        #     "A34",
-        #     "B19",
-        #     "A14",
-        # ]
-        machs = self.df.mach[self.df.mach.str.contains('A\d|B\d', na=False)].sort_values().unique()
+        machs = [
+            "A34",
+            "B19",
+            "A14",
+        ]
+        # machs = self.df.mach[self.df.mach.str.contains('A\d|B\d', na=False)].sort_values().unique()
 
         # put it together with pretty names
         self.name_opt = {
