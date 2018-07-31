@@ -51,6 +51,10 @@ def run_setup(packages, install_requires, extras_require):
             'Topic :: Scientific/Engineering :: Information Analysis',
             'Programming Language :: Python :: 3',
         ],
+        scripts=[
+            'scripts/nestor-gui',
+            'scripts/nestor-dash',
+        ],
         install_requires=install_requires,
         extras_require=extras_require,
         include_package_data=True,
@@ -88,23 +92,5 @@ extras_require = {'gui': get_reqs('gui'),
                   'docs': get_reqs('doc')}
 
 extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
-
-# install_requires = ['numpy>=1.14.2',
-#                     'pandas>=0.22.0',
-#                     'scikit-learn',
-#                     'tqdm>=4.23.0'
-#                     ]
-#
-# extras_require = {'gui': ['pyqt5', 'pyyaml', 'chardet',
-#                           'seaborn>=0.8.1', 'matplotlib>=2.2.2',
-#                           'fuzzywuzzy', 'python-levenshtein'],
-#                   'tree': ['networkx'],
-#                   'plot': ['bokeh', 'holoviews']}
-#
-# extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
-
-
-# if config.getboolean('gui', 'use'):
-#     packages.append('nestor._ui')
 
 run_setup(packages, install_requires, extras_require)

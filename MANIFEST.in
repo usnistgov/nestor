@@ -1,6 +1,7 @@
-include *.md *.rst
+include *.md *.rst *.ui
 recursive-include nestor/datasets/*
 recursive-include source *
 recursive-include docs *
 include requirements.txt
 include nestor/datasets/*.csv
+include nestor/_ui/*.ui

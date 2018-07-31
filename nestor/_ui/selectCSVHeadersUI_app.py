@@ -6,11 +6,10 @@ from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
 # from sympy.core.tests.test_arit import same_and_same_prec
 
-
-
 fname = 'selectCSVHeadersUI.ui'
-qtDesignerFile_selectCSVHeaders = Path('nestor/_ui')/fname
-Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(str(qtDesignerFile_selectCSVHeaders))
+script_dir = Path(__file__).parent
+# qtDesignerFile_selectCSVHeaders = Path('nestor/_ui')/fname
+Ui_MainWindow_selectCSVHeaders, QtBaseClass_selectCSVHeaders = uic.loadUiType(script_dir/fname)
 
 
 class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):

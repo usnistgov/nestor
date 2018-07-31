@@ -13,8 +13,8 @@ import PyQt5.QtWidgets as Qw
 
 
 fname = 'taggingUI.ui'
-qtDesignerFile_taggingTool = Path('nestor/_ui')/fname
-Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(str(qtDesignerFile_taggingTool))
+script_dir = Path(__file__).parent
+Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(script_dir/fname)
 
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
@@ -102,7 +102,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.pushButton_report_saveTrack.clicked.connect(self.onClick_saveTrack)
         self.pushButton_report_saveNewCsv.clicked.connect(self.onClick_saveNewCsv)
-        self.pushButton_report_saveBinnaryCsv.clicked.connect(self.onClick_saveBinnaryCsv)
+        self.pushButton_report_saveBinnaryCsv.clicked.connect(self.onClick_saveTagsHDFS)
 
         self.completenessPlot= myObjects.MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self. dataframe_completeness)
 
@@ -198,7 +198,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         print('DONE!')
 
 
-    def onClick_saveBinnaryCsv(self):
+    def onClick_saveTagsHDFS(self):
         """generate a new csv with the document and the tag occurences (0 if not 1 if )
         :return:
 
@@ -213,12 +213,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         if self.tag_df is None:
             self.onClick_saveTrack()
-        fname = Path('.')
-        print("Saving a Binary csv with tagged documents. ", str(fname.absolute()))
-        self.tag_df.to_csv(fname/'BINARY_TAGS.csv')
-        self.relation_df.to_csv(fname / 'BINARY_RELATIONS.csv')
+        # fname = Path('.')
+        fname, _ = Qw.QFileDialog.getSaveFileName(self, 'Save File')
+        if fname[-3:] != '.h5':
+            fname += '.h5'
+        # print(self.dataframe_Original.shape, self.tag_df.shape, self.relation_df.shape)
 
+        print(f"Saving {fname} as HDF5...")
+
+        self.dataframe_Original.to_hdf(fname, key='df')
+        self.tag_df.to_hdf(fname, key='tags')
+        self.relation_df.to_hdf(fname, key='rels')
         print('DONE')
+        #TODO add fname to config.yml as pre-loaded "update tag extraction"
 
 
 
@@ -648,7 +655,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 # Now the ToS dialog .ui file
 fname2 = 'termsOfUse.ui'
-qtDesignerFile_tosDialog = Path('nestor/_ui')/fname2
+qtDesignerFile_tosDialog = script_dir/fname2
 Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_tosDialog)
 
 

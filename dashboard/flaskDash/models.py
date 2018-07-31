@@ -238,12 +238,34 @@ class TagPlot:
     #         fo.write("</div>")
 #################################
 
+def serve_bokeh_tags(data_dir):
+    from bokeh.server.server import Server
+    from tornado.ioloop import IOLoop
+
+    tagplot = TagPlot(data_dir / 'MWOs_anon.csv',
+                      data_dir / 'binary_tags.h5')
+
+    renderer = hv.renderer('bokeh').instance(mode='server')
+
+    server = Server({
+        '/bars_tech': renderer.app(tagplot.hv_bars('tech').options(width=900)),
+        '/bars_mach': renderer.app(tagplot.hv_bars('mach').options(width=900)),
+        '/node_tech': renderer.app(tagplot.hv_nodelink('tech').options(width=600, height=600)),
+        '/node_mach': renderer.app(tagplot.hv_nodelink('mach').options(width=600, height=600)),
+        '/flow_tech': renderer.app(tagplot.hv_flow('tech').options(width=900, height=600)),
+        '/flow_mach': renderer.app(tagplot.hv_flow('mach').options(width=900, height=600)),
+    }, port=5006, allow_websocket_origin=["127.0.0.1:5000", "localhost:5000", "localhost:5006"])
+    server.start()
+    # server.show('/')
+    loop = IOLoop.current()
+    loop.start()
+
 
 if __name__ == '__main__':
     from bokeh.server.server import Server
     from tornado.ioloop import IOLoop
 
-    data_dir = Path('../..') / 'data' / 'sme_data'
+    data_dir = Path('..') / 'data' / 'sme_data'
     tagplot = TagPlot(data_dir / 'MWOs_anon.csv',
                       data_dir / 'binary_tags.h5')
 
