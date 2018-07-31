@@ -158,6 +158,7 @@ class TagPlot:
                                     **kws)
             elem = elem.options({'Graph': dict(edge_line_width=1.5,
                                                edge_alpha=.3,
+                                               color_cmap='blues',
                                                node_line_color='white',
                                                xaxis=None, yaxis=None)})
             return elem.options(width=800, height=500)
