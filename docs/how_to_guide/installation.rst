@@ -21,7 +21,7 @@ Install using local archive
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (This will be a local install downloaded from a `recent source code release on GitHub <https://github.com/usnistgov/nestor/releases>`__)
 
-1. Download the .zip file of the entire **nestor** installation from `the Github repository <https://github.com/usnistgov/nestor/archive/master.zip>`__
+1. Download the `.zip file <https://github.com/usnistgov/nestor/archive/master.zip>`__ of the entire **nestor** installation from the Github repository 
 
 2. Extract the files to a directory, preferably with write access.
 
