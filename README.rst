@@ -86,6 +86,7 @@ Contributors:
 :Thurston Sexton:               @tbsexton
 :Sascha Moccozet:               @saschaMoccozet
 :Madhusudanan Navinchandran:    @msngit
+:Michael Brundage:              @MichaelPBrundage
 :Emily Hastings:                @emhastings
 :Lela Bones:                    @lazyyybonez
 
