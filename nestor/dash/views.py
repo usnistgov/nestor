@@ -79,7 +79,7 @@ def upload_file():
             file.save(os.path.join(app.root_path,app.config['UPLOAD_FOLDER']))
             FILES.append(filename)
 
-            data_model.set_data_location(file.filename)
+            data_model.set_data_location(os.path.join(app.root_path,app.config['UPLOAD_FOLDER'], file.filename))
             proc = data_model.serve_data()
 
             return render_template('upload.html', filename=FILES)
