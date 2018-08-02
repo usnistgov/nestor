@@ -338,8 +338,8 @@ class TagPlot:
                                     'n_thres',
                                     'order']).options(framewise=True, title_format='')
         dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
-                                 n_thres=range(1, 20),
-                                 order=['grouped', 'sorted'])
+                                 n_thres=self.node_thres,
+                                 order=['sorted', 'grouped'])
 #         curdoc().add_root(dmap)
         return dmap
 

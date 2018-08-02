@@ -22,6 +22,6 @@ class DataModel:
     def serve_data(self):
         assert self.fname != None, 'File has not been assigned! Raising error...'
 
-        proc = Popen(["nestor-serve", self.fname])
+        proc = Popen(['python', str(Path(__file__).parent/"plotserve.py"), self.fname])
         return proc
 

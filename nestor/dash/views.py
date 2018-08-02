@@ -12,6 +12,7 @@ from flask import send_from_directory
 import io
 import base64
 hv.extension('bokeh')
+
 app_location = Path(__file__).parent
 
 app = Flask(__name__, template_folder=app_location/'templates')
@@ -19,8 +20,15 @@ app = Flask(__name__, template_folder=app_location/'templates')
 # renderer = renderer.instance(mode='server')
 
 
-UPLOAD_FOLDER = app_location/'tmp'
+UPLOAD_FOLDER = 'tmp'
 ALLOWED_EXTENSIONS = set(['csv', 'h5'])
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+FILES = []
+
+from nestor.dash.models import DataModel
+data_model = DataModel()
+
 
 # data_dir = Path('..') / 'data' / 'sme_data'
 # df = pd.read_csv(data_dir  / 'MWOs_anon.csv')
@@ -42,16 +50,10 @@ def data_table(self):
 # locally creates a page
 @app.route('/')
 def index():
-    print(app.template_folder)
     # loads the template home
     return render_template('home.html')
 
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-FILES = []
-
-from nestor.dash.models import DataModel
-data_model = DataModel()
 
 
 def allowed_file(filename):
@@ -74,10 +76,10 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(app.root_path,app.config['UPLOAD_FOLDER']))
             FILES.append(filename)
 
-            data_model.set_data_location(filename)
+            data_model.set_data_location(file.filename)
             proc = data_model.serve_data()
 
             return render_template('upload.html', filename=FILES)
@@ -95,14 +97,15 @@ def about():
 # locally creates a page
 @app.route('/dashboard')
 def dashboard():
-#     problems = tf.P.sum().sort_values(ascending=False)[:10]
-#     probGraph = problems.plot(kind='bar', title = "Problem Tags")
-#     probGraph.set_xlabel("Aliases")
-#     probGraph.set_ylabel("Occurence")
-#     data_table(df)
+    # problems = tf.P.sum().sort_values(ascending=False)[:10]
+    # probGraph = problems.plot(kind='bar', title = "Problem Tags")
+    # probGraph.set_xlabel("Aliases")
+    # probGraph.set_ylabel("Occurence")
+    # data_table(df)
     return render_template('dashboard.html')
 
-#assigns the feature names for the dropdown
+
+# assigns the feature names for the dropdown
 feature_names = ['Machines', 'Technicians']
 
 # locally creates a page
