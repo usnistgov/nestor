@@ -10,9 +10,6 @@ from pathlib import Path
 # string in below ...
 
 
-CONFIG_FILE = 'setup.cfg'
-
-
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
 
@@ -51,10 +48,18 @@ def run_setup(packages, install_requires, extras_require):
             'Topic :: Scientific/Engineering :: Information Analysis',
             'Programming Language :: Python :: 3',
         ],
-        scripts=[
-            'scripts/nestor-gui',
-            'scripts/nestor-dash',
-        ],
+        # scripts=[
+        #     'scripts/nestor-gui',
+        #     'scripts/nestor-dash',
+        #     'scripts/nestor-serve',
+        # ],
+        entry_points={
+            'console_scripts': [
+                'nestor-gui = nestor.ui:main',
+                'nestor-dash = nestor.dash:main',
+                'nestor-serve = nestor.dash.plotserve:main'
+            ],
+        },
         install_requires=install_requires,
         extras_require=extras_require,
         include_package_data=True,
@@ -62,13 +67,14 @@ def run_setup(packages, install_requires, extras_require):
     )
 
 
-config = configparser.ConfigParser()
-
-try:
-    with open(CONFIG_FILE) as f:
-        config.read_file(f)
-except IOError:
-    print("Could not open config file.")
+# CONFIG_FILE = 'setup.cfg'
+# config = configparser.ConfigParser()
+#
+# try:
+#     with open(CONFIG_FILE) as f:
+#         config.read_file(f)
+# except IOError:
+#     print("Could not open config file.")
 
 # packages = ['nestor',
 #             'nestor/_database_storage',

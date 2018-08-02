@@ -1,12 +1,17 @@
 import yaml
-# import pandas as pd
+import pandas as pd
 import chardet
+from pathlib import Path
+import PyQt5.QtWidgets as Qw
+
+import nestor.keyword as kex
+
 # from .. import keyword as kex
 
 # from .helper_objects import *
-from .openFilesUI_app import *
-from .selectCSVHeadersUI_app import *
-from .taggingUI_app import *
+from .openFilesUI_app import MyOpenFilesWindow
+from .selectCSVHeadersUI_app import MySelectCsvHeadersWindow
+from .taggingUI_app import MyTaggingToolWindow, TermsOfServiceDialog
 
 
 class MainWindow:

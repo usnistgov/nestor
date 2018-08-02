@@ -1,32 +1,30 @@
 # Author: Lela Bones
 # This document creates the instance of the app and runs it
 
-import pandas as pd
 import holoviews as hv
-from bokeh.embed import server_document
-from bokeh.server.server import Server
 import os, os.path
 from pathlib import Path
-from .models import TagPlot
 from bokeh.client import pull_session
 from bokeh.embed import server_session
 from flask import Flask, flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
-import matplotlib.pyplot as plt
 import io
 import base64
 hv.extension('bokeh')
+app_location = Path(__file__).parent
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=app_location/'templates')
 
 # renderer = renderer.instance(mode='server')
-UPLOAD_FOLDER = './flaskDash/tmp/'
+
+
+UPLOAD_FOLDER = app_location/'tmp'
 ALLOWED_EXTENSIONS = set(['csv', 'h5'])
 
-data_dir = Path('..') / 'data' / 'sme_data'
-df = pd.read_csv(data_dir  / 'MWOs_anon.csv')
-tf = pd.read_hdf(data_dir / 'binary_tags.h5')
+# data_dir = Path('..') / 'data' / 'sme_data'
+# df = pd.read_csv(data_dir  / 'MWOs_anon.csv')
+# tf = pd.read_hdf(data_dir / 'binary_tags.h5')
 
 def data_table(self):
     
@@ -44,12 +42,17 @@ def data_table(self):
 # locally creates a page
 @app.route('/')
 def index():
+    print(app.template_folder)
     # loads the template home
     return render_template('home.html')
 
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 FILES = []
+
+from nestor.dash.models import DataModel
+data_model = DataModel()
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -73,6 +76,10 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             FILES.append(filename)
+
+            data_model.set_data_location(filename)
+            proc = data_model.serve_data()
+
             return render_template('upload.html', filename=FILES)
     return render_template('upload.html', filename=FILES)
 
@@ -92,7 +99,7 @@ def dashboard():
 #     probGraph = problems.plot(kind='bar', title = "Problem Tags")
 #     probGraph.set_xlabel("Aliases")
 #     probGraph.set_ylabel("Occurence")
-    data_table(df)
+#     data_table(df)
     return render_template('dashboard.html')
 
 #assigns the feature names for the dropdown
@@ -161,8 +168,13 @@ def help_page():
     return render_template('help.html')
 
 
+def main():
+
+    app.run(port=5000, debug=True)
+
+
 if __name__ == '__main__':
     # runs app in debug mode
-        app.run(port=5000, debug=True)
+        main()
         # app.run()
   

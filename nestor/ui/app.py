@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-#
-# This file is part of Nestor. It is subject to the license terms in the file
-# LICENSE.rst found in the top-level directory of this distribution.
-
 from nestor.ui import mainwindow
 
 from PyQt5.QtWidgets import QApplication, QMessageBox, qApp
@@ -23,24 +18,28 @@ def exception_handler(type_, value, traceback_):
         msg.exec_()
 
 
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
 
     stylesheet = """
-    QGroupBox { 
-        border: 1px solid gray;
-        border-radius: 9px;
-        margin-top: 0.5em;
-        font-weight: bold;
-    }
-    QGroupBox::title {
-        subcontrol-origin: margin;
-        left: 10px;
-        padding: 0 3px 0 3px;
-    }
-    """
+        QGroupBox { 
+            border: 1px solid gray;
+            border-radius: 9px;
+            margin-top: 0.5em;
+            font-weight: bold;
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 3px 0 3px;
+        }
+        """
 
     app.setStyleSheet(stylesheet)
     window = mainwindow.MainWindow()
     sys.excepthook = exception_handler
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()

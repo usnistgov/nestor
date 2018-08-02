@@ -1,5 +1,5 @@
-import nestor._ui.helper_objects as myObjects
-from .. import keyword as kex
+from .helper_objects import CompositionNGramItem, MyMplCanvas, QButtonGroup_similarityPattern, QTableWidget_token
+import nestor.keyword as kex
 
 from pathlib import Path
 import pandas as pd
@@ -85,10 +85,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #self.alias_lookup = None
         self.similarityThreshold_alreadyChecked = 99
 
-        self.buttonGroup_1Gram_similarityPattern = myObjects.QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
-        self.tableWidget_1gram_TagContainer.__class__ = myObjects.QTableWidget_token
-        self.tableWidget_Ngram_TagContainer.__class__ = myObjects.QTableWidget_token
-        self.middleLayout_Ngram_Composition = myObjects.CompositionNGramItem(self.verticalLayout_Ngram_CompositionDisplay)
+        self.buttonGroup_1Gram_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
+        self.tableWidget_1gram_TagContainer.__class__ = QTableWidget_token
+        self.tableWidget_Ngram_TagContainer.__class__ = QTableWidget_token
+        self.middleLayout_Ngram_Composition = CompositionNGramItem(self.verticalLayout_Ngram_CompositionDisplay)
         self.tabWidget.setCurrentIndex(0)
 
         self.tableWidget_1gram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_table1Gram)
@@ -104,7 +104,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_report_saveNewCsv.clicked.connect(self.onClick_saveNewCsv)
         self.pushButton_report_saveBinnaryCsv.clicked.connect(self.onClick_saveTagsHDFS)
 
-        self.completenessPlot= myObjects.MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self. dataframe_completeness)
+        self.completenessPlot= MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self. dataframe_completeness)
 
         self.buttonGroup_NGram_Classification.buttonClicked.connect(self.onClick_changeClassification)
 

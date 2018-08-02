@@ -22,6 +22,8 @@ dist
 **.csv
 **.yaml
 **/reveal.js
+**.h5
+
 
 # exception
 !nestor/datasets/**

@@ -111,7 +111,7 @@ def tag_relation_net(tag_df, name=None, kind='coocc',
         'color_index': 'NE',
         'cmap': color_opts,
         'edge_color_index': 'weight',
-        'edge_cmap': 'Magma_r',
+        'edge_cmap': 'blues',
         #     'node_size' : 'count',  # wait for HoloViews `op()` functionality!
     }
 
@@ -170,11 +170,11 @@ class TagPlot:
                      'opts': people}
         }
         # filtering tags by count
-        self.node_thres = range(1, 10)
+        self.node_thres = np.arange(0.1, 10.1)
 
         # for network-based plot options
         self.weights = ['cosine', 'count']
-        self.edge_thres = range(1, 81, 10)
+        self.edge_thres = range(1, 91, 10)
 
         # global table that gets filtered in other plots
         self.table = hv.Table(self.df[['mach',
@@ -283,7 +283,7 @@ class TagPlot:
                                     **kws)
             elem = elem.options({'Graph': dict(edge_line_width=1.5,
                                                edge_alpha=.3,
-                                               color_cmap='blues',
+                                               edge_cmap='blues',
                                                node_line_color='white',
                                                xaxis=None, yaxis=None)})
             return elem.options(width=800, height=500)
