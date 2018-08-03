@@ -21,7 +21,7 @@ class DataModel:
 
     def serve_data(self):
         assert self.fname != None, 'File has not been assigned! Raising error...'
-
-        proc = Popen(['python', str(Path(__file__).parent/"plotserve.py"), self.fname])
+        exec_loc = Path(__file__).parent/"plotserve.py"
+        proc = Popen(['python', str(exec_loc), str(self.fname)])
         return proc
 
