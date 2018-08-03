@@ -186,10 +186,10 @@ class Issue:
         return self.machine_down
 
     def _set_machine_down(self, machine_down):
-        if machine_down == "y" or machine_down == "yes" or machine_down == "true" or machine_down == "t" or machine_down == "1":
-            self.machine_down = True
-        elif machine_down == "n" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
-            self.machine_down = False
+        if machine_down == "y" or machine_down == "Y" or machine_down == "yes" or machine_down == "true" or machine_down == "t" or machine_down == "1":
+            self.machine_down = "True"
+        elif machine_down == "n" or machine_down == "N" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
+            self.machine_down = "False"
         else:
             self.machine_down = None
 
@@ -528,7 +528,6 @@ class Issue:
         :param variable_issue: default "issue" to refer to a specific ISSUE
         :return: a string - Cypher Query : (issue:ISSUE{description_of_problem:"x", description_of_solution:"x", ...})
         """
-
         query = f'({variable_issue}{self.label}'
         if self.problem or self.solution or self.cause or self.effects or self.part_in_process or self.necessary_part \
                 or self.machine_down or self.date_machine_up or self.date_machine_down \
