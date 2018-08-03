@@ -19,8 +19,10 @@ app = Flask(__name__, template_folder=app_location/'templates')
 
 # renderer = renderer.instance(mode='server')
 
+print("making directory '.nestor-tmp'")
+UPLOAD_FOLDER = Path.home()/'.nestor-tmp'
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
-UPLOAD_FOLDER = 'tmp'
 ALLOWED_EXTENSIONS = set(['csv', 'h5'])
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -76,13 +78,17 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.root_path,app.config['UPLOAD_FOLDER']))
+            # save_loc = Path(app.root_path)/app.config['UPLOAD_FOLDER']/filename
+            save_loc = app.config['UPLOAD_FOLDER']/filename
+            print(save_loc)
+            file.save(str(save_loc))
+            file.close()
             FILES.append(filename)
 
-            data_model.set_data_location(os.path.join(app.root_path,app.config['UPLOAD_FOLDER'], file.filename))
+            data_model.set_data_location(save_loc)
             proc = data_model.serve_data()
 
-            return render_template('upload.html', filename=FILES)
+            # return render_template('upload.html', filename=FILES)
     return render_template('upload.html', filename=FILES)
 
 from flask import send_from_directory

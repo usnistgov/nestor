@@ -159,7 +159,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tag_readable = kex._get_readable_tag_df(tag_df)
 
         self.relation_df = tag_df.loc[:, ['P I', 'S I']]
-        self.tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'X', 'NA']]
+        self.tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'NA']]
         # tag_readable.head(10)
 
         # do statistics

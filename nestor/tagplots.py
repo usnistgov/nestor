@@ -170,7 +170,7 @@ class TagPlot:
                      'opts': people}
         }
         # filtering tags by count
-        self.node_thres = np.arange(0.1, 10.1)
+        self.node_thres = np.logspace(-1, 1)
 
         # for network-based plot options
         self.weights = ['cosine', 'count']

@@ -57,7 +57,7 @@ def run_setup(packages, install_requires, extras_require):
             'console_scripts': [
                 'nestor-gui = nestor.ui:main',
                 'nestor-dash = nestor.dash:main',
-                'nestor-serve = nestor.dash.plotserve:main'
+                # 'nestor-serve = nestor.dash.plotserve:main'
             ],
         },
         install_requires=install_requires,
@@ -92,11 +92,13 @@ def get_reqs(name):
 
 
 install_requires = get_reqs('defaults')
-extras_require = {'gui': get_reqs('gui'),
-                  'tree': get_reqs('tree'),
-                  'plot': get_reqs('plot'),
-                  'docs': get_reqs('doc')}
+extras_require = {
+    'docs': get_reqs('docs'),
+    'dash': get_reqs('dash'),
+}
 
-extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
+extras_require['all'] = extras_require['dash'] +\
+                        extras_require['docs']
+
 
 run_setup(packages, install_requires, extras_require)

@@ -504,6 +504,9 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
 def ngram_keyword_pipe(raw_text, vocab, vocab2):
     """Experimental pipeline for one-shot n-gram extraction from raw text.
     """
+    print("calculating the extracted tags and statistics...")
+    # do 1-grams
+    print('\n ONE GRAMS...')
     tex = TokenExtractor()
     tex.fit(raw_text)  # bag of words matrix.
     tags_df = tag_extractor(tex, raw_text, vocab_df=vocab)
@@ -528,6 +531,7 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     vocab3 = ngram_automatch(vocab_combo, vocab3)
 
     # extract 2-gram tags from cleaned text
+    print('\n TWO GRAMS...')
     tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3)
 
     # merge 1 and 2-grams?

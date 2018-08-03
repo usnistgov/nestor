@@ -17,7 +17,9 @@ from .taggingUI_app import MyTaggingToolWindow, TermsOfServiceDialog
 class MainWindow:
     def __init__(self):
         self.icnoPtah=None
-        self.yamlPath_config = Path('.')/"config.yaml"
+        self.yamlPath = Path.home()/'.nestor-tmp'
+        self.yamlPath.mkdir(parents=True, exist_ok=True)
+        self.yamlPath_config = self.yamlPath/"ui-config.yaml"
         self.config_new = {
             'file':
                 {
