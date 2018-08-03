@@ -80,8 +80,8 @@ def upload_file():
             filename = secure_filename(file.filename)
             # save_loc = Path(app.root_path)/app.config['UPLOAD_FOLDER']/filename
             save_loc = app.config['UPLOAD_FOLDER']/filename
-            print(save_loc)
-            file.save(str(save_loc))
+            # print(save_loc)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             file.close()
             FILES.append(filename)
 
