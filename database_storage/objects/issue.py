@@ -186,10 +186,10 @@ class Issue:
         return self.machine_down
 
     def _set_machine_down(self, machine_down):
-        if machine_down == "y" or machine_down == "yes" or machine_down == "true" or machine_down == "t" or machine_down == "1":
-            self.machine_down = True
-        elif machine_down == "n" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
-            self.machine_down = False
+        if machine_down == "y" or machine_down == "Y" or machine_down == "yes" or machine_down == "true" or machine_down == "t" or machine_down == "1":
+            self.machine_down = "True"
+        elif machine_down == "n" or machine_down == "N" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
+            self.machine_down = "False"
         else:
             self.machine_down = None
 
@@ -528,7 +528,6 @@ class Issue:
         :param variable_issue: default "issue" to refer to a specific ISSUE
         :return: a string - Cypher Query : (issue:ISSUE{description_of_problem:"x", description_of_solution:"x", ...})
         """
-
         query = f'({variable_issue}{self.label}'
         if self.problem or self.solution or self.cause or self.effects or self.part_in_process or self.necessary_part \
                 or self.machine_down or self.date_machine_up or self.date_machine_down \
@@ -551,25 +550,25 @@ class Issue:
             if self.machine_down:
                 query += f'{self.databaseInfoIssue["properties"]["machine_down"]}:\'{self.machine_down}\','
             if self.date_machine_up:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:\'{self.date_machine_up}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:\'{self.date_machine_up.isoformat()}\','
             if self.cost:
                 query += f'{self.databaseInfoIssue["properties"]["cost"]}:{self.cost},'
             if self.date_machine_down:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:\'{self.date_machine_down }\','
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:\'{self.date_machine_down.isoformat() }\','
             if self.date_workorder_start:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:\'{self.date_workorder_start}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:\'{self.date_workorder_start.isoformat()}\','
             if self.date_workorder_completion:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:\'{self.date_workorder_completion}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:\'{self.date_workorder_completion.isoformat()}\','
             if self.date_maintenance_technician_arrive:
-                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:\'{self.date_maintenance_technician_arrive}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:\'{self.date_maintenance_technician_arrive.isoformat()}\','
             if self.date_problem_found:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:\'{self.date_problem_found}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:\'{self.date_problem_found.isoformat()}\','
             if self.date_problem_solve:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:\'{self.date_problem_solve}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:\'{self.date_problem_solv.isoformat()}\','
             if self.date_part_ordered:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered.isoformat()}\','
             if self.date_part_received:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received.isoformat()}\','
             if self.id:
                 query += f'{self.databaseInfoIssue["properties"]["id"]}:{self.id},'
             query = query[:-1] + "}"

@@ -57,6 +57,7 @@ class DatabaseNeo4J(object):
                 result = session.write_transaction(self._execute_code, query)
             return 1, result
         except:
+            print("cannot run the query")
             return 0, None
 
     def runQueries(self, queries):
@@ -141,3 +142,63 @@ class DatabaseNeo4J(object):
         """
         result = tx.run(query)
         return result
+
+
+    def getAllPropertiesOf(self, node):
+        query = f'MATCH {node} WITH DISTINCT keys(node) as keys\n' \
+                f'UNWIND keys AS keyslisting WITH DISTINCT keyslisting AS poprerties\n' \
+                f'RETURN poprerties'
+
+        result = self.runQuery(query)[1]
+
+        return list(r.values()[0] for r in result)
+
+
+    def getAllNode(self):
+        nodeType = {
+            '(node:ISSUE)': 'issue',
+
+            '(node:HUMAN)' : 'human',
+            '(node:HUMAN:TECHNICIAN)' : 'technician',
+            '(node:HUMAN:OPERATOR)' : 'operator',
+
+            '(node:MACHINE)': 'machine',
+            '(node:MACHINE_TYPE)': 'type of machine',
+
+            '(node:TAG)': 'all tags',
+
+            '(node:TAG:ONE_GRAM)': 'tags one_gram',
+            '(node:TAG:N_GRAM)': 'tags n_gram',
+            '(node:TAG:OTHER)': 'tags other',
+
+            '(node:TAG:ONE_GRAM:PROBLEM)': 'tags problem',
+            '(node:TAG:ONE_GRAM:SOLUTION)': 'tags solution',
+            '(node:TAG:OTHER:NA)': 'tags na',
+            '(node:TAG:OTHER:STOPWORD)': 'tags stop_word',
+
+            '(node:TAG:N_GRAM:PROBLEM_ITEM)': 'tags problem_item',
+            '(node:TAG:N_GRAM:SOLUTION_ITEM)': 'tags solution_item',
+
+            '(node:TAG:ONE_GRAM:ITEM)': 'tags item',
+            '(node:TAG:ONE_GRAM:ITEM)<-[:PROBLEM]-(issue:ISSUE)' : 'tag item as problem',
+            '(node:TAG:ONE_GRAM:ITEM)<-[:SOLUTION]-(issue:ISSUE)' : 'tag item as solution',
+        }
+
+        nodeProperties = {}
+
+        for key, value in nodeType.items():
+            nodeResult = self.runQuery(f'MATCH {key}\nRETURN count(node) as count')
+            for res in nodeResult[1].records():
+                if res['count'] > 0:
+
+                    list = self.getAllPropertiesOf(key)
+                    nodeProperties[value] = list
+
+        return nodeProperties
+
+
+
+
+
+
+

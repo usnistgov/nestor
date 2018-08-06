@@ -26,7 +26,7 @@ from database_storage.objects.machine import *
 from  database_storage.helper import getListIndexDataframe
 
 
-def cypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, propertyToHeader_dict):
+def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, propertyToHeader_dict):
 
     def create_issue(row, propertyToHeader_issue, schema):
         """
@@ -125,7 +125,7 @@ def cypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, pro
         :param propertyToHeader_technician: a dictionaries that link the header of the CSV data to the properties of the object
         :return: an array of TECNICIANs empty if something goes wrong or if there are not technician un the csv
         """
-        charsplit = "/"
+        charsplit = '/'
         skills = []
         try:
             for skill in row[propertyToHeader_technician['technician']['skills']].split(charsplit):
@@ -184,23 +184,19 @@ def cypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, pro
         try:
             if row[propertyToHeader_machine['machine']['name']]:
                 machine = Machine(name=row[propertyToHeader_machine['machine']['name']], databaseInfo=schema)
-                # print(row[propertyToHeader_machine['name']])
 
                 try:
                     machine._set_manufacturer(row[propertyToHeader_machine['machine']['manufacturer']])
-                    # print(row[propertyToHeader_machine['manufacturer']])
                 except KeyError:
                     pass
 
                 try:
                     machine._set_machine_type(row[propertyToHeader_machine['machine']['type']])
-                    # print(row[propertyToHeader_machine['type']])
                 except KeyError:
                     pass
 
                 try:
                     machine._set_locasion(row[propertyToHeader_machine['machine']['locasion']])
-                    # print(row[propertyToHeader_machine['locasion']])
                 except KeyError:
                     pass
 
@@ -211,17 +207,17 @@ def cypherCreate_historicalMaintenanceWorkOrder(database, originalDataframe, pro
 
     queries = []
     for index, row in tqdm(originalDataframe.iterrows(), total=originalDataframe.shape[0]):
-        issue = create_issue(row, propertyToHeader_dict, database.schema)
+        issue = create_issue(row, propertyToHeader_dict, schema)
         issue._set_id(index)
-        machine = create_machine(row, propertyToHeader_dict, database.schema)
-        operators = create_operators(row, propertyToHeader_dict, database.schema)
-        technicians = create_technicians(row, propertyToHeader_dict, database.schema)
+        machine = create_machine(row, propertyToHeader_dict, schema)
+        operators = create_operators(row, propertyToHeader_dict, schema)
+        technicians = create_technicians(row, propertyToHeader_dict, schema)
 
         mwo = MaintenanceWorkOrder(issue=issue,
                                    machine=machine,
                                    operators=operators,
                                    technicians=technicians,
-                                   databaseInfo=database.schema
+                                   databaseSchema=schema
                                    )
 
         queries.append(mwo.cypher_mwo_createIssueOtherRelationship())
