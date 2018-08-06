@@ -31,7 +31,7 @@ FILES = []
 from nestor.dash.models import DataModel
 data_model = DataModel()
 
-
+hostname='localhost'
 # data_dir = Path('..') / 'data' / 'sme_data'
 # df = pd.read_csv(data_dir  / 'MWOs_anon.csv')
 # tf = pd.read_hdf(data_dir / 'binary_tags.h5')
@@ -145,7 +145,7 @@ def node():
                 script = server_session(session_id=session.id, url='http://localhost:5006/node_mach')
                 # use the script in the rendered page
         if current_feature_name == 'Technicians':
-            with pull_session(url="http://localhost:5006/node_tech") as session:
+            with pull_session(url='http://localhost:5006/node_tech') as session:
                 # generate a script to load the customized session
                 script = server_session(session_id=session.id, url='http://localhost:5006/node_tech')
                 # use the script in the rendered page
@@ -178,7 +178,7 @@ def help_page():
 
 
 def main():
-
+    app.secret_key='super secret key'
     app.run(port=5000, debug=True, host='0.0.0.0')
 
 
