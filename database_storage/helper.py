@@ -19,22 +19,6 @@ from tqdm import tqdm
 from datetime import datetime
 import collections
 
-# def openYAMLFile(yaml_path, dict=None):
-#     """
-#     open a Yaml file based on the given path
-#     the there are no file, setup the yaml file based on the given dict
-#     :return: a dictionary
-#     """
-#     try:
-#         with open(yaml_path, 'r') as yamlfile:
-#             config = yaml.load(yamlfile)
-#             print("yaml file open")
-#         return config
-#     except FileNotFoundError:
-#         with open(yaml_path, 'w') as yamlfile:
-#             yaml.dump(dict, yamlfile)
-#             print("yaml file created")
-#         return dict
 
 def openYAMLFile(yaml_path):
     """
