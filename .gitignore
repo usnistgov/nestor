@@ -1,11 +1,14 @@
 segments_6
 
 #   special folder cache or others
-**/__pycache__/**
-**.idea/**
+**/__pycache__/
+.idea/
 **/.ipynb_checkpoints
 
 # data folder
+<<<<<<< HEAD
+data/
+=======
 data/**
 build
 dist
@@ -15,6 +18,7 @@ _templates
 _pdf
 .doctrees
 dist
+>>>>>>> master
 
 #   special file type
 **.spec
@@ -26,5 +30,10 @@ dist
 
 
 # exception
+<<<<<<< HEAD
+!database_storage/database/DatabaseSchema.yaml
+!data/public/*.yaml
+=======
 !nestor/datasets/**
 !database_storage/database/DatabaseSchema.yaml
+>>>>>>> master

@@ -74,7 +74,6 @@ def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, prope
                 issue._set_cost(row[propertyToHeader_issue['issue']['cost']])
             except KeyError:
                 pass
-            # TODO add a date clenizer for only 1 value
             try:
                 issue._set_date_machine_down(row[propertyToHeader_issue['issue']['date_machine_down']])
             except KeyError:
@@ -398,12 +397,3 @@ def cypherCreate_itemsTree(database, current, queries=[]):
         print(query)
 
     return queries
-
-
-def cypherAddProperties_tagSynonyms(database, vocabulary1g, vocabularyNg):
-    tag = Tag(databaseInfo=database.schema)
-
-    for uniqueAlias in vocabulary1g["alias"].unique().tolist():
-        print(uniqueAlias)
-
-#    query = f'MATCH (tag{tag.label}{{{database.schema["tag"]["properties"]["keyword"]}:}})'
