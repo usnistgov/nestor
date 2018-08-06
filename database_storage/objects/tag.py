@@ -144,25 +144,6 @@ class Tag:
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_tag_merge(self, variable_tag="tag"):
-        """
-         Create a Cypher query to merge the node TAG using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tag: default "tag" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (tag:TAG{keyword:"x"})
-                                            SET tag.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-        if not self.keyword:
-            return ""
-        query = f'\nMERGE {self.cypher_tag_keyword(variable_tag)}'
-        if self.synonyms:
-            for synonym in self.synonyms:
-                query += f'\nFOREACH(x in CASE WHEN \'{synonym}\' in {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} THEN [] ELSE [1] END |' \
-                         f' SET {variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]} = coalesce({variable_tag}.{self.databaseInfoTag["properties"]["synonyms"]},[]) + \'{synonym}\' )'
-
-        return query
-
 
 class TagOneGram(Tag):
     """
@@ -226,20 +207,6 @@ class TagOneGram(Tag):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_oneGramTag_merge(self, variable_tagOnGram="onegram_tag"):
-        """
-           Create a Cypher query to merge the node TAGONEGRAM using his property KEYWORD
-           and Set the missing properties (SYNONYMS)
-           :param variable_tagOnGram: default "onegram_tag" to refer to a specific TAG
-           :return: a string - Cypher Query : MERGE (onegram_tag:TAG:TAGONEGRAM{keyword:"x"})
-                                              SET onegram_tag.synonyms = ["x","y"]
-                  in the database, SYNONYMS is an array, so we add values to the array if not already in
-           """
-        if self.cypher_tag_merge(variable_tagOnGram) == "":
-            return ""
-        query = self.cypher_tag_merge(variable_tagOnGram)
-        query += f'\nSET {variable_tagOnGram} {self.databaseInfoTag["label"]["onegram"]}'
-        return query
 
 class TagItem(TagOneGram):
     """
@@ -328,22 +295,6 @@ class TagItem(TagOneGram):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_itemTag_merge(self, variable_tagItem="tag_item"):
-        """
-           Create a Cypher query to merge the node TAGITEM using his property KEYWORD
-           and Set the missing properties (SYNONYMS)
-           :param variable_tagItem: default "tag_item" to refer to a specific TAG
-           :return: a string - Cypher Query : MERGE (tag_item:TAG:TAGONEGRAM:TAGITEM{keyword:"x"})
-                                              SET tag_item.synonyms = ["x","y"]
-                  in the database, SYNONYMS is an array, so we add values to the array if not already in
-           """
-        if self.cypher_oneGramTag_merge(variable_tagItem) == "":
-            return ""
-
-        query = self.cypher_oneGramTag_merge(variable_tagItem)
-        query += f'\nSET {variable_tagItem} {self.databaseInfoTag["label"]["item"]}'
-        return query
-
 
 class TagProblem(TagOneGram):
     """
@@ -404,22 +355,6 @@ class TagProblem(TagOneGram):
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
-
-    def cypher_problemTag_merge(self, variable_tagProblem="tag_problem"):
-        """
-         Create a Cypher query to merge the node TAGPROBLEM using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagProblem: default "tag_problem" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (tag_problem:TAG:TAGONEGRAM:TAGPROBLEM{keyword:"x"})
-                                            SET tag_problem.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-        if self.cypher_oneGramTag_merge(variable_tagProblem) == "":
-            return ""
-
-        query = self.cypher_oneGramTag_merge(variable_tagProblem)
-        query += f'\nSET {variable_tagProblem} {self.databaseInfoTag["label"]["problem"]}'
-        return query
 
 
 class TagSolution(TagOneGram):
@@ -482,23 +417,6 @@ class TagSolution(TagOneGram):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_solutionTag_merge(self, variable_tagSolution="tag_solution"):
-        """
-         Create a Cypher query to merge the node TAGSOLUTION using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagSolution: default "tag_solution" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (tag_solution:TAG:TAGONEGRAM:TAGSOLUTION{keyword:"x"})
-                                            SET tag_solution.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-
-        if self.cypher_oneGramTag_merge(variable_tagSolution) == "":
-            return ""
-
-        query = self.cypher_oneGramTag_merge(variable_tagSolution)
-        query += f'\nSET {variable_tagSolution} {self.databaseInfoTag["label"]["solution"]}'
-        return query
-
 
 class TagUnknown(TagOneGram):
     """
@@ -559,22 +477,6 @@ class TagUnknown(TagOneGram):
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
-
-    def cypher_unknownTag_merge(self, variable_tagUnknown="tag_unknown"):
-        """
-         Create a Cypher query to merge the node TAGUNKNOWN using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagUnknown: default "tag_unknown" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (tag_unknown:TAG:TAGONEGRAM:TAGUNKNOWN{keyword:"x"})
-                                            SET tag_unknown.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-
-        if self.cypher_oneGramTag_merge(variable_tagUnknown) == "":
-            return ""
-        query = self.cypher_oneGramTag_merge(variable_tagUnknown)
-        query += f'\nSET {variable_tagUnknown} {self.databaseInfoTag["label"]["unknown"]}'
-        return query
 
 
 class TagNGram(Tag):
@@ -660,20 +562,6 @@ class TagNGram(Tag):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_nGramTag_merge(self, variable_tagNGram="ngram_tag"):
-        """
-         Create a Cypher query to merge the node TAGNGRAM using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagNGram: default "ngram_tag" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (ngram_tag:TAG:TAGNGRAM{keyword:"x"})
-                                            SET ngram_tag.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-        if self.cypher_tag_merge(variable_tagNGram) == "":
-            return ""
-        query = self.cypher_tag_merge(variable_tagNGram)
-        query += f'\nSET {variable_tagNGram} {self.databaseInfoTag["label"]["ngram"]}'
-        return query
 
 class TagProblemItem(TagNGram):
     """
@@ -737,20 +625,6 @@ class TagProblemItem(TagNGram):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_problemItemTag_merge(self, variable_tagProblemItem="problemitem_tag"):
-        """
-         Create a Cypher query to merge the node TAGPROBLEMITEM using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagProblemItem: default "problemitem_tag" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (problemitem_tag:TAG:TAGNGRAM:TAGPROBLEMITEM{keyword:"x"})
-                                            SET problemitem_tag.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-        if self.cypher_tag_merge(variable_tagProblemItem) == "":
-            return ""
-        query = self.cypher_nGramTag_merge(variable_tagProblemItem)
-        query += f'\nSET {variable_tagProblemItem} {self.databaseInfoTag["label"]["problem_item"]}'
-        return query
 
 
 class TagSolutionItem(TagNGram):
@@ -815,21 +689,6 @@ class TagSolutionItem(TagNGram):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_solutionItemTag_merge(self, variable_tagSolutionItem="solutionitem_tag"):
-        """
-         Create a Cypher query to merge the node TAGSOLUTIONITEM using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x"})
-                                            SET solutionitem_tag.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-        if self.cypher_tag_merge(variable_tagSolutionItem) == "":
-            return ""
-        query = self.cypher_nGramTag_merge(variable_tagSolutionItem)
-        query += f'\nSET {variable_tagSolutionItem} {self.databaseInfoTag["label"]["solution_item"]}'
-        return query
-
 
 class TagOther(Tag):
     """
@@ -893,21 +752,6 @@ class TagOther(Tag):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_otherTag_merge(self, variable_tagOther="other_tag"):
-        """
-           Create a Cypher query to merge the node TAGONEGRAM using his property KEYWORD
-           and Set the missing properties (SYNONYMS)
-           :param variable_tagOnGram: default "onegram_tag" to refer to a specific TAG
-           :return: a string - Cypher Query : MERGE (onegram_tag:TAG:TAGONEGRAM{keyword:"x"})
-                                              SET onegram_tag.synonyms = ["x","y"]
-                  in the database, SYNONYMS is an array, so we add values to the array if not already in
-           """
-        if self.cypher_tag_merge(variable_tagOther) == "":
-            return ""
-        query = self.cypher_tag_merge(variable_tagOther)
-        query += f'\nSET {variable_tagOther} {self.databaseInfoTag["label"]["onegram"]}'
-        return query
-
 
 class TagNA(TagOther):
     """
@@ -970,21 +814,6 @@ class TagNA(TagOther):
             query = query[:-1] + "}"
         return query + ")"
 
-    def cypher_naTag_merge(self, variable_tagNA="na_tag"):
-        """
-         Create a Cypher query to merge the node TAGSOLUTIONITEM using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x"})
-                                            SET solutionitem_tag.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-        if self.cypher_tag_merge(variable_tagNA) == "":
-            return ""
-        query = self.cypher_otherTag_merge(variable_tagNA)
-        query += f'\nSET {variable_tagNA} {self.databaseInfoTag["label"]["solution_item"]}'
-        return query
-
 
 class TagStopWord(TagOther):
     """
@@ -1046,19 +875,3 @@ class TagStopWord(TagOther):
                 query += f'{self.databaseInfoTag["properties"]["synonyms"]}:' + '[\'' + '\',\''.join(self.synonyms) + '\'],'
             query = query[:-1] + "}"
         return query + ")"
-
-    def cypher_stopWordTag_merge(self, variable_tagStopWord="stopword_tag"):
-        """
-         Create a Cypher query to merge the node TAGSOLUTIONITEM using his property KEYWORD
-         and Set the missing properties (SYNONYMS)
-         :param variable_tagSolutionItem: default "solutionitem_tag" to refer to a specific TAG
-         :return: a string - Cypher Query : MERGE (solutionitem_tag:TAG:TAGNGRAM:TAGSOLUTIONITEM{keyword:"x"})
-                                            SET solutionitem_tag.synonyms = ["x","y"]
-                in the database, SYNONYMS is an array, so we add values to the array if not already in
-         """
-        if self.cypher_tag_merge(variable_tagStopWord) == "":
-            return ""
-        query = self.cypher_otherTag_merge(variable_tagStopWord)
-        query += f'\nSET {variable_tagStopWord} {self.databaseInfoTag["label"]["solution_item"]}'
-        return query
-
