@@ -10,9 +10,6 @@ from pathlib import Path
 # string in below ...
 
 
-CONFIG_FILE = 'setup.cfg'
-
-
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
 
@@ -51,6 +48,18 @@ def run_setup(packages, install_requires, extras_require):
             'Topic :: Scientific/Engineering :: Information Analysis',
             'Programming Language :: Python :: 3',
         ],
+        # scripts=[
+        #     'scripts/nestor-gui',
+        #     'scripts/nestor-dash',
+        #     'scripts/nestor-serve',
+        # ],
+        entry_points={
+            'console_scripts': [
+                'nestor-gui = nestor.ui:main',
+                'nestor-dash = nestor.dash:main',
+                # 'nestor-serve = nestor.dash.plotserve:main'
+            ],
+        },
         install_requires=install_requires,
         extras_require=extras_require,
         include_package_data=True,
@@ -58,13 +67,14 @@ def run_setup(packages, install_requires, extras_require):
     )
 
 
-config = configparser.ConfigParser()
-
-try:
-    with open(CONFIG_FILE) as f:
-        config.read_file(f)
-except IOError:
-    print("Could not open config file.")
+# CONFIG_FILE = 'setup.cfg'
+# config = configparser.ConfigParser()
+#
+# try:
+#     with open(CONFIG_FILE) as f:
+#         config.read_file(f)
+# except IOError:
+#     print("Could not open config file.")
 
 # packages = ['nestor',
 #             'nestor/_database_storage',
@@ -82,29 +92,13 @@ def get_reqs(name):
 
 
 install_requires = get_reqs('defaults')
-extras_require = {'gui': get_reqs('gui'),
-                  'tree': get_reqs('tree'),
-                  'plot': get_reqs('plot'),
-                  'docs': get_reqs('doc')}
+extras_require = {
+    'docs': get_reqs('docs'),
+    'dash': get_reqs('dash'),
+}
 
-extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
+extras_require['all'] = extras_require['dash'] +\
+                        extras_require['docs']
 
-# install_requires = ['numpy>=1.14.2',
-#                     'pandas>=0.22.0',
-#                     'scikit-learn',
-#                     'tqdm>=4.23.0'
-#                     ]
-#
-# extras_require = {'gui': ['pyqt5', 'pyyaml', 'chardet',
-#                           'seaborn>=0.8.1', 'matplotlib>=2.2.2',
-#                           'fuzzywuzzy', 'python-levenshtein'],
-#                   'tree': ['networkx'],
-#                   'plot': ['bokeh', 'holoviews']}
-#
-# extras_require['all'] = extras_require['gui'] + extras_require['tree'] + extras_require['plot']
-
-
-# if config.getboolean('gui', 'use'):
-#     packages.append('nestor._ui')
 
 run_setup(packages, install_requires, extras_require)

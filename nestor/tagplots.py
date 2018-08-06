@@ -98,6 +98,7 @@ def tag_relation_net(tag_df, name=None, kind='coocc',
                                                              **adj_params)
     pos = pd.DataFrame(layout(G)).T.rename(columns={0: 'x', 1: 'y'})
     node_info = node_info.join(pos).reset_index().rename(columns={'index': 'tag'})
+
     nodes = hv.Nodes(node_info,
                      kdims=['x', 'y', 'tag'],
                      vdims=['NE', 'count'])
@@ -110,7 +111,7 @@ def tag_relation_net(tag_df, name=None, kind='coocc',
         'color_index': 'NE',
         'cmap': color_opts,
         'edge_color_index': 'weight',
-        'edge_cmap': 'Magma_r',
+        'edge_cmap': 'blues',
         #     'node_size' : 'count',  # wait for HoloViews `op()` functionality!
     }
 
@@ -127,6 +128,220 @@ def tag_relation_net(tag_df, name=None, kind='coocc',
         if padding is None:
             padding = dict(x=(-1.05, 1.05), y=(-1.05, 1.05))
         return (graph*text).redim.range(**padding)
+
+
+class TagPlot:
+    """
+    Central holder for holoviews dynamic-maps, to be served as a Bokeh App.
+    TODO make this data-set agnostic!
+    """
+    def __init__(self, data_file):
+
+        # load up the data
+        self.df = pd.read_hdf(data_file, key='df')
+        self.tag_df = pd.read_hdf(data_file, key='tags')
+
+        # set allowed technician options here
+        people = [
+            'nathan_maldonado',
+            'angie_henderson',
+            'margaret_hawkins_dds',
+            # "tommy_walter",
+            "gabrielle_davis",
+            "cristian_santos",
+        ]
+        # nplen = np.vectorize(len)
+        # people = np.unique(self.df.tech.str.split(', ', expand=True).fillna('').values)
+        # people = people[nplen(people) > 5]
+
+        # set allowed machine options here.
+        machs = [
+            "A34",
+            "B19",
+            "A14",
+        ]
+        # machs = self.df.mach[self.df.mach.str.contains('A\d|B\d', na=False)].sort_values().unique()
+
+        # put it together with pretty names
+        self.name_opt = {
+            'mach': {'name': 'Machine',
+                     'opts': machs},
+            'tech': {'name': 'Technician',
+                     'opts': people}
+        }
+        # filtering tags by count
+        self.node_thres = np.logspace(-1, 1)
+
+        # for network-based plot options
+        self.weights = ['cosine', 'count']
+        self.edge_thres = range(1, 91, 10)
+
+        # global table that gets filtered in other plots
+        self.table = hv.Table(self.df[['mach',
+                                       'date_received',
+                                       'issue',
+                                       'info',
+                                       'tech']])
+
+    def filter_type_name(self, obj_type, obj_name):
+        """
+        build a mask to filter data on
+        Parameters
+        ----------
+        obj_type : class of object to filter on
+        obj_name : sub-class/instance to filter on
+        Returns
+        -------
+        pd.Series, mask for filtering df, tag_df.
+        """
+        is_obj = self.df[obj_type].str.contains(obj_name, case=False).fillna(False)
+        return is_obj
+
+    def filter_tags(self, obj_type, obj_name, n_thres=10):
+        """
+        apply filter to binary tag matrix (tag_df)
+        Parameters
+        ----------
+        obj_type : passed to filter_type_name
+        obj_name : passed to filter_type_name
+        n_thres : only return nodes in the top ``n_thres`` percentile
+        Returns
+        -------
+        pd.DataFrame, filtered binary tax matrix
+        """
+        is_obj = self.filter_type_name(obj_type, obj_name)
+
+        assert 0 <= n_thres <= 100, 'percentiles must be between [0,100]'
+        cts = self.tag_df.loc[is_obj, :].sum()
+        upper = max(1, np.percentile(cts, 100 - n_thres))
+
+        return self.tag_df.loc[is_obj, (cts >= upper).values]
+
+    def hv_nodelink(self, obj_type):
+        """
+        Generates a hv.DynamicMap with a nodelink representation of
+        filtered tags.
+        Parameters
+        ----------
+        obj_type : class of object to show
+        Returns
+        -------
+        hv.DynamicMap
+        """
+        kws = {
+            'layout_kws': {'prog': 'neatopusher'},
+        }
+
+        #
+        def load_nodelink(obj_name, n_thres=10, e_thres=80, weight='cosine'):
+            tags = self.filter_tags(obj_type, obj_name, n_thres)
+            elem = tag_relation_net(tags, name='Nodelink',
+                                    similarity=weight,
+                                    pct_thres=e_thres,
+                                    **kws)
+            elem = elem.options({'Graph': dict(edge_line_width=1.5,
+                                               edge_alpha=.3,
+                                               node_line_color='white',
+                                               xaxis=None, yaxis=None)})
+            return elem.options(width=500, height=500)
+            # SOME KIND OF BUG!
+            # return (elem.options(width=500, height=500) +
+            #         self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
+
+        dmap = hv.DynamicMap(load_nodelink,
+                             #                              cache_size=1,
+                             kdims=['obj_name',
+                                    'n_thres',
+                                    'e_thres',
+                                    'weight']).options(framewise=True, title_format='')
+        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
+                                 n_thres=self.node_thres,
+                                 e_thres=self.edge_thres,
+                                 weight=self.weights)
+        return dmap
+
+    def hv_flow(self, obj_type):
+        """
+        Generates a hv.DynamicMap with a Sankey/flow representation of
+        filtered tags.
+        Parameters
+        ----------
+        obj_type : class of object to show
+        Returns
+        -------
+        hv.DynamicMap
+        """
+        kws = {
+            'kind':'sankey'
+        }
+
+        #
+        def load_flow(obj_name, n_thres=10, weight='cosine'):
+            tags = self.filter_tags(obj_type, obj_name, n_thres)
+            elem = tag_relation_net(tags, name='Nodelink',
+                                    similarity=weight,
+                                    **kws)
+            elem = elem.options({'Graph': dict(edge_line_width=1.5,
+                                               edge_alpha=.3,
+                                               edge_cmap='blues',
+                                               node_line_color='white',
+                                               xaxis=None, yaxis=None)})
+            return elem.options(width=800, height=500)
+            # SOME KIND OF BUG!
+            # return (elem.options(width=500, height=500) +
+            #         self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
+
+        dmap = hv.DynamicMap(load_flow,
+                             #                              cache_size=1,
+                             kdims=['obj_name',
+                                    'n_thres',
+                                    'weight']).options(framewise=True, title_format='')
+        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
+                                 n_thres=self.node_thres,
+                                 weight=self.weights)
+        return dmap
+
+    def hv_bars(self, obj_type):
+        """
+        Generates a hv.DynamicMap with a bars/frequency representation of
+        filtered tags.
+        Parameters
+        ----------
+        obj_type : class of object to show
+        Returns
+        -------
+        hv.DynamicMap
+        """
+        def load_bar(obj_name, n_thres=10, order='grouped'):
+            tags = self.filter_tags(obj_type, obj_name, n_thres).drop(columns=['U']).sum()
+            tags = tags.groupby(level=0).nlargest(10).reset_index(level=0, drop=True)
+            tags = tags.reset_index()
+            tags.columns = ['class', 'tag name', 'count']
+
+            bar_kws = dict(color_index='class',
+                           xrotation=90,
+                           cmap=color_opts,
+                           tools=['hover'],
+                           line_color='w')
+            if order != 'grouped':
+                tags = tags.sort_values('count', ascending=False)
+
+            bars = hv.Bars(tags,
+                           kdims=['tag name'], vdims=['count', 'class']).options(**bar_kws)
+
+            return (bars.options(width=800) +
+                    self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
+
+        dmap = hv.DynamicMap(load_bar,
+                             #                              cache_size=1,
+                             kdims=['obj_name',
+                                    'n_thres',
+                                    'order']).options(framewise=True, title_format='')
+        dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
+                                 n_thres=self.node_thres,
+                                 order=['sorted', 'grouped'])
+#         curdoc().add_root(dmap)
+        return dmap
 
 
 _pandas_18 = StrictVersion(pd.__version__) >= StrictVersion('0.18')

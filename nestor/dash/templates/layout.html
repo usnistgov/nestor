@@ -1,0 +1,66 @@
+<!-- Author: Lela Bones
+    This document contains the template for the rest of the documents-->
+<!DOCTYPE html>
+  <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device=width, initial-scale=1">
+        <title>Nestor Visual Dashboard</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!--         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script> -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<!--         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"> -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <link
+            href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.16.min.css"
+            rel="stylesheet" type="text/css">
+        <link
+            href="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.16.min.css"
+            rel="stylesheet" type="text/css">
+        <link
+            href="https://cdn.pydata.org/bokeh/release/bokeh-tables-0.12.16.min.css"
+            rel="stylesheet" type="text/css">
+
+        <script src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.16.min.js"></script>
+        <script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.16.min.js"></script>
+        <script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-0.12.16.min.js"></script>
+
+
+
+    </head>
+    <body>
+        {% include 'includes/_navbar.html' %} 
+        
+        <div id="wrapper">
+            
+            <!--Side Bar-->
+            <div id="sidebar-wrapper">
+                <ul class="sidebar-nav">
+                    <li><a href="/bar">Bar Graph</a></li>
+                    <li><a href="/node">Node-Link Diagram</a></li>
+                    <li><a href="/flow">Flow Diagram</a></li>
+                </ul>
+            </div>
+                    
+            <!--Page Content-->
+            <div id="page-content-wrapper">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            {% block body %}{% endblock %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <script>
+            $("#menu-toggle").click( function (e){
+                e.preventDefault();
+                $("#wrapper").toggleClass("menuDisplayed");
+            });
+        </script>
+    </body>
+</html>

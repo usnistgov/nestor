@@ -1,0 +1,11 @@
+{% extends 'layout.html' %} {% block body %}
+    <h1>Upload a .csv or a .h5 file</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    <h2> Currently uploaded files: </h2>
+        {% for file in filename %}
+          <li>{{file}}</li>
+{% endfor %}
+{% endblock %}
