@@ -28,6 +28,9 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         self.buttonGroup_CSVHeaders_Checkbox = Qw.QButtonGroup()
         self.buttonGroup_CSVHeaders_Checkbox.setExclusive(False)
 
+        self.list_Combobox = []
+        self.defaultCBValue = "Not Applicable"
+
         self.pushButton_selectCSVHeaders_uncheckAll.clicked.connect(
             lambda: self.onClick_check(False))
         self.pushButton_selectCSVHeaders_checkAll.clicked.connect(
@@ -77,10 +80,11 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             self.gridLayout_selectCSVHeaders_editor.addWidget(checkBox, x, y_headerColumn, 1, 1)
             self.buttonGroup_CSVHeaders_Checkbox.addButton(checkBox)
 
-            self.comboBox = Qw.QComboBox(self.centralwidget)
-            self.comboBox.setObjectName(f'comboBox_{header}')
-            self.comboBox.addItems(["issue.problem",'issue.solution','machine.name'])
-            self.gridLayout_selectCSVHeaders_editor.addWidget(self.comboBox, x, y_headerColumn +1, 1, 1)
+            comboBox = Qw.QComboBox(self.centralwidget)
+            comboBox.setObjectName(f'{header}')
+            comboBox.addItems([self.defaultCBValue,"issue.problem",'issue.solution','machine.name'])
+            self.gridLayout_selectCSVHeaders_editor.addWidget(comboBox, x, y_headerColumn +1, 1, 1)
+            self.list_Combobox.append(comboBox)
 
     def onClick_check(self, check):
         """called when we want to set the checkbox to check:True of uncheck:False
@@ -117,6 +121,13 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         return checked
 
     def get_csvheader(self):
+
+        dict = {}
+        for button in self.list_Combobox:
+            if button.currentText() != self.defaultCBValue:
+                dict[button.currentText()] = button.objectName()
+                print(button.currentText())
+        return dict
 
 
 
@@ -156,6 +167,8 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         for button in self.buttonGroup_CSVHeaders_Checkbox.buttons():
             if button.isChecked():
                 checked.append(button.text())
+
+        self.get_csvheader()
 
         if checked:
             config['file']['filePath_OriginalCSV']['headers'] = checked

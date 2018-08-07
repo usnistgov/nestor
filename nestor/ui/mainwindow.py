@@ -19,6 +19,9 @@ class MainWindow:
         self.icnoPtah=None
         self.yamlPath = Path.home()/'.nestor-tmp'
         self.yamlPath.mkdir(parents=True, exist_ok=True)
+
+        self.yamlPath_CSVHeader = self.yamlPath/"headerCSV.yaml"
+
         self.yamlPath_config = self.yamlPath/"ui-config.yaml"
         self.config_new = {
             'file':
@@ -73,9 +76,11 @@ class MainWindow:
         self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow, self.selectWindow_to_taggingWindow)
         self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow, self.onClick_windowTaggingTool_selectTab)
 
+
         #send the old config value to initialize the view
         self.window_OpenFiles.set_config(self.config_default)
         self.window_OpenFiles.show()
+
 
     def onClick_windowTaggingTool_selectTab(self, index):
         """when changing the tab in the taggingUI window (from the 1gram to the Ngram)
@@ -91,6 +96,7 @@ class MainWindow:
         -------
 
         """
+
         # if Ngramm
         if index == 1:
             # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(init = NEED THIS)
@@ -119,13 +125,6 @@ class MainWindow:
         done, self.config_new = self.window_OpenFiles.get_config(self.config_new)
 
         if done:
-            # print(self.config_new['file']['filePath_OriginalCSV']['path'])
-            # print(self.config_new['file']['filePath_1GrammCSV']['path'])
-            # print(self.config_new['file']['filePath_nGrammCSV']['path'] )
-            # print(self.config_new['value']['numberToken_show'])
-            # print(self.config_new['value']['similarityMatrix_threshold'])
-            # print(self.config_new['value']['similarityMatrix_alreadyChecked'])
-
             self.window_OpenFiles.close()
 
             # add values to the original dataframe
@@ -161,7 +160,6 @@ class MainWindow:
 
         """
         done, self.config_new = self.window_selectCSVHeader.get_config(self.config_new)
-
         if done:
 
             # [print(l) for l in self.config_new['file']['filePath_OriginalCSV']['headers']]
@@ -252,17 +250,6 @@ class MainWindow:
                 print("yaml file created")
         return config
 
-        # try:
-        #     with open(yaml_path, 'r') as yamlfile:
-        #         config = yaml.load(yamlfile)
-        #         print("yaml file open")
-        #     return config
-        # except FileNotFoundError:
-        #     with open(yaml_path, 'w') as yamlfile:
-        #         yaml.dump(dict, yamlfile)
-        #         print("yaml file created")
-        #     return dict
-
 
     def saveYAMLConfig_File(self, yaml_path, dict):
         """save a Yaml file based on the given path
@@ -339,8 +326,8 @@ class MainWindow:
             app.exec_()
 
 
-# if __name__ == "__main__":
-#     app = Qw.QApplication(sys.argv)
-#     main = MainWindow()
-#     sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = Qw.QApplication(sys.argv)
+    main = MainWindow()
+    sys.exit(app.exec_())
 
