@@ -18,10 +18,8 @@ class MainWindow:
     def __init__(self):
         self.icnoPtah=None
         self.yamlPath = Path.home()/'.nestor-tmp'
+        print(self.yamlPath)
         self.yamlPath.mkdir(parents=True, exist_ok=True)
-
-        self.yamlPath_CSVHeader = self.yamlPath/"headerCSV.yaml"
-
         self.yamlPath_config = self.yamlPath/"ui-config.yaml"
         self.config_new = {
             'file':
@@ -57,6 +55,48 @@ class MainWindow:
                            'S P': 'X',
                            'P S': 'X'},
                 'NE_types': 'IPSUX'
+            },
+            'csvheader_mapping':{
+                'issue':
+                    {
+                        'description_problem': None,
+                        'description_solution': None,
+                        'description_cause': None,
+                        'description_effect': None,
+                        'machine_down': None,
+                        'necessary_part': None,
+                        'part_in_process': None,
+                        'cost': None,
+                        'id': None,
+
+                        'date_machine_down': None,
+                        'date_workorder_start': None,
+                        'date_maintenance_technician_arrive': None,
+                        'date_solution_found': None,
+                        'date_part_ordered': None,
+                        'date_part_received': None,
+                        'date_solution_solve': None,
+                        'date_machine_up': None,
+                        'date_workorder_completion': None
+                    },
+                'technician':
+                    {
+                        'name': None,
+                        'skills': None,
+                        'crafts': None
+                    },
+                'operator':
+                    {
+                        'name': None
+                    },
+                'machine':
+                    {
+                        'name': None,
+                        'manufacturer': None,
+                        'locasion': None,
+                        'type': None
+                    }
+
             }
         }
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config, self.config_new)
@@ -80,6 +120,9 @@ class MainWindow:
         #send the old config value to initialize the view
         self.window_OpenFiles.set_config(self.config_default)
         self.window_OpenFiles.show()
+
+        #self.window_OpenFiles.lineEdit_openFiles_OriginalCSV.setText("/Users/sam11/Git/nestor/data/gs_data/readable.csv")
+
 
 
     def onClick_windowTaggingTool_selectTab(self, index):
@@ -136,8 +179,6 @@ class MainWindow:
                 encoding = chardet.detect(open(self.config_new['file']['filePath_OriginalCSV']['path'], 'rb').read())['encoding']
                 self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'], encoding=encoding)
 
-            # set the checkBox in the window
-            self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())
 
             #if the csv file of the old and the new config are equals the header will be equals
             if self.config_default['file']['filePath_OriginalCSV']['path'] == self.config_new['file']['filePath_OriginalCSV']['path'] \
@@ -145,6 +186,10 @@ class MainWindow:
                 self.config_new['file']['filePath_OriginalCSV']['headers'] = self.config_default['file']['filePath_OriginalCSV']['headers']
 
             self.window_selectCSVHeader.set_config(self.config_new)
+
+            # set the checkBox in the window
+            self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())
+
             self.window_selectCSVHeader.show()
 
     def selectWindow_to_taggingWindow(self):
@@ -160,6 +205,7 @@ class MainWindow:
 
         """
         done, self.config_new = self.window_selectCSVHeader.get_config(self.config_new)
+
         if done:
 
             # [print(l) for l in self.config_new['file']['filePath_OriginalCSV']['headers']]

@@ -4,6 +4,9 @@ from pathlib import Path
 from PyQt5.QtCore import QCoreApplication, Qt, QSize
 from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
+
+import collections
+
 # from sympy.core.tests.test_arit import same_and_same_prec
 
 fname = 'selectCSVHeadersUI.ui'
@@ -30,6 +33,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         self.list_Combobox = []
         self.defaultCBValue = "Not Applicable"
+        self.csvHeaderMapping = None
 
         self.pushButton_selectCSVHeaders_uncheckAll.clicked.connect(
             lambda: self.onClick_check(False))
@@ -53,22 +57,21 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         """
         self.headers = headers
-
         y_headerColumn = 0
         x = 0
-
-        # self.label_selectCSVHeaders_headerColumn = Qw.QLabel(self.centralwidget)
-        # self.label_selectCSVHeaders_headerColumn.setObjectName("label_selectCSVHeaders_headerColumn")
-        # self.label_selectCSVHeaders_headerColumn.setText("Your CSV header\n(check if you want to tag it)")
-        # self.gridLayout_selectCSVHeaders_editor.addWidget(self.label_selectCSVHeaders_headerColumn, x,y_headerColumn)
-
-        x += 1
 
         self.line1 = Qw.QFrame(self.centralwidget)
         self.line1.setFrameShape(Qw.QFrame.HLine)
         self.line1.setFrameShadow(Qw.QFrame.Sunken)
         self.line1.setObjectName("line1")
         self.gridLayout_selectCSVHeaders_editor.addWidget(self.line1, x,y_headerColumn , 1, 1)
+
+        listPossibleHeaderMapping = [self.defaultCBValue]
+        print(type(self.csvHeaderMapping))
+        if self.csvHeaderMapping:
+            for key, value in self.csvHeaderMapping.items():
+                for v in value:
+                    listPossibleHeaderMapping.append(f'{key}.{v}')
 
 
         for header in self.headers:
@@ -82,7 +85,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
             comboBox = Qw.QComboBox(self.centralwidget)
             comboBox.setObjectName(f'{header}')
-            comboBox.addItems([self.defaultCBValue,"issue.problem",'issue.solution','machine.name'])
+            comboBox.addItems(listPossibleHeaderMapping)
             self.gridLayout_selectCSVHeaders_editor.addWidget(comboBox, x, y_headerColumn +1, 1, 1)
             self.list_Combobox.append(comboBox)
 
@@ -122,12 +125,15 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
     def get_csvheader(self):
 
-        dict = {}
         for button in self.list_Combobox:
+
             if button.currentText() != self.defaultCBValue:
-                dict[button.currentText()] = button.objectName()
-                print(button.currentText())
-        return dict
+                key = button.currentText().split(".")[0]
+                value = button.currentText().split(".")[1]
+
+                self.csvHeaderMapping[key][value] = button.objectName()
+
+        return self.csvHeaderMapping
 
 
 
@@ -148,6 +154,8 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
                 if button.text() in config['file']['filePath_OriginalCSV']['headers']:
                     button.setChecked(True)
 
+        self.csvHeaderMapping = config.get('csvheader_mapping')
+
 
     def get_config(self, config):
         """replace the given config dict with a new one based on the window values
@@ -163,15 +171,37 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         -------
 
         """
+
+        def updateDict(d, u):
+            """
+            recursivly merge 2 dictionary
+            :param d:
+            :param u:
+            :return:
+            """
+            for k, v in u.items():
+                if isinstance(v, collections.Mapping):
+                    d[k] = updateDict(d.get(k, {}), v)
+                else:
+                    d[k] = v
+            return d
+
         checked = []
         for button in self.buttonGroup_CSVHeaders_Checkbox.buttons():
             if button.isChecked():
                 checked.append(button.text())
 
-        self.get_csvheader()
-
         if checked:
             config['file']['filePath_OriginalCSV']['headers'] = checked
+
+            self.get_csvheader()
+
+            for k, key2 in self.csvHeaderMapping.items():
+                for k2, value in key2.items():
+                    if value:
+                        config['csvheader_mapping'][k][k2] = f'{value}'
+
+
             return True, config
         else:
             Qw.QMessageBox.about(self, 'Can\'t save', "You might want to select at least 1 value")
@@ -194,13 +224,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         if event.key() == Qt.Key_Return:
             self.nextWindowFunction()
-    # def closeEvent(self, event):
-    #     """
-    #     trigger when we close the window
-    #     :param event:
-    #     :return:
-    #     """
-    #     self.closeFunction(self)
+
 
 if __name__ == "__main__":
     app = Qw.QApplication(sys.argv)
