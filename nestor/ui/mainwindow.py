@@ -182,10 +182,15 @@ class MainWindow:
                     and self.config_default['file']['filePath_OriginalCSV']['path'] is not None:
                 self.config_new['file']['filePath_OriginalCSV']['headers'] = self.config_default['file']['filePath_OriginalCSV']['headers']
 
+
+            # set the checkBox and the dropdown in the window
+            self.window_selectCSVHeader.csvHeaderMapping = self.config_new.get('csvheader_mapping')
+            self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())
+
             self.window_selectCSVHeader.set_config(self.config_new)
 
-            # set the checkBox in the window
-            self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())
+
+
 
             self.window_selectCSVHeader.show()
 
@@ -368,9 +373,4 @@ class MainWindow:
             print('exiting program...')
             app.exec_()
 
-
-if __name__ == "__main__":
-    app = Qw.QApplication(sys.argv)
-    main = MainWindow()
-    sys.exit(app.exec_())
 

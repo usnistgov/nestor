@@ -66,6 +66,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         self.line1.setObjectName("line1")
         self.gridLayout_selectCSVHeaders_editor.addWidget(self.line1, x,y_headerColumn , 1, 1)
 
+        # Get the list of possible header to link the CSV header
         listPossibleHeaderMapping = [self.defaultCBValue]
         print(type(self.csvHeaderMapping))
         if self.csvHeaderMapping:
@@ -77,12 +78,14 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         for header in self.headers:
             x += 1
 
+            #create the checkboxes
             checkBox = Qw.QCheckBox(self.centralwidget)
             checkBox.setObjectName(f'checkBox_{header}')
             checkBox.setText(header)
             self.gridLayout_selectCSVHeaders_editor.addWidget(checkBox, x, y_headerColumn, 1, 1)
             self.buttonGroup_CSVHeaders_Checkbox.addButton(checkBox)
 
+            #reate the dropdownmenu
             comboBox = Qw.QComboBox(self.centralwidget)
             comboBox.setObjectName(f'{header}')
             comboBox.addItems(listPossibleHeaderMapping)
@@ -124,6 +127,16 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         return checked
 
     def get_csvheader(self):
+        """
+            update the csvHeaderMapping based on the dropdown menu on the right of the app
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
 
         for button in self.list_Combobox:
 
@@ -154,8 +167,6 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
                 if button.text() in config['file']['filePath_OriginalCSV']['headers']:
                     button.setChecked(True)
 
-        self.csvHeaderMapping = config.get('csvheader_mapping')
-
 
     def get_config(self, config):
         """replace the given config dict with a new one based on the window values
@@ -172,19 +183,6 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         """
 
-        def updateDict(d, u):
-            """
-            recursivly merge 2 dictionary
-            :param d:
-            :param u:
-            :return:
-            """
-            for k, v in u.items():
-                if isinstance(v, collections.Mapping):
-                    d[k] = updateDict(d.get(k, {}), v)
-                else:
-                    d[k] = v
-            return d
 
         checked = []
         for button in self.buttonGroup_CSVHeaders_Checkbox.buttons():
@@ -194,8 +192,8 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         if checked:
             config['file']['filePath_OriginalCSV']['headers'] = checked
 
+            # update the config to contains the mapping between the csv header and the data type
             self.get_csvheader()
-
             for k, key2 in self.csvHeaderMapping.items():
                 for k2, value in key2.items():
                     if value:
@@ -225,9 +223,3 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         if event.key() == Qt.Key_Return:
             self.nextWindowFunction()
 
-
-if __name__ == "__main__":
-    app = Qw.QApplication(sys.argv)
-    window = MySelectCsvHeadersWindow("/Users/sam11/Git/ml-py/app/taggingUI/csv/app_vocab.csv")
-    window.show()
-    sys.exit(app.exec_())

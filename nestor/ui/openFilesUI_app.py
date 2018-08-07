@@ -197,19 +197,4 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         if event.key() == Qt.Key_Return:
             self.nextWindowFunction()
 
-    # def closeEvent(self, event):
-    #     """
-    #     trigger when we close the window
-    #     :param event:
-    #     :return:
-    #     """
-    #
-    #     self.closeFunction(self)
-
-
-if __name__ == "__main__":
-    app = Qw.QApplication(sys.argv)
-    window = MyOpenFilesWindow()
-    window.show()
-    sys.exit(app.exec_())
 
