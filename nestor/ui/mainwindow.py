@@ -121,9 +121,6 @@ class MainWindow:
         self.window_OpenFiles.set_config(self.config_default)
         self.window_OpenFiles.show()
 
-        #self.window_OpenFiles.lineEdit_openFiles_OriginalCSV.setText("/Users/sam11/Git/nestor/data/gs_data/readable.csv")
-
-
 
     def onClick_windowTaggingTool_selectTab(self, index):
         """when changing the tab in the taggingUI window (from the 1gram to the Ngram)
