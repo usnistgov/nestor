@@ -25,8 +25,8 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
 
-        self.buttonGroup_CSVHeaders = Qw.QButtonGroup()
-        self.buttonGroup_CSVHeaders.setExclusive(False)
+        self.buttonGroup_CSVHeaders_Checkbox = Qw.QButtonGroup()
+        self.buttonGroup_CSVHeaders_Checkbox.setExclusive(False)
 
         self.pushButton_selectCSVHeaders_uncheckAll.clicked.connect(
             lambda: self.onClick_check(False))
@@ -75,7 +75,12 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
             checkBox.setObjectName(f'checkBox_{header}')
             checkBox.setText(header)
             self.gridLayout_selectCSVHeaders_editor.addWidget(checkBox, x, y_headerColumn, 1, 1)
-            self.buttonGroup_CSVHeaders.addButton(checkBox)
+            self.buttonGroup_CSVHeaders_Checkbox.addButton(checkBox)
+
+            self.comboBox = Qw.QComboBox(self.centralwidget)
+            self.comboBox.setObjectName(f'comboBox_{header}')
+            self.comboBox.addItems(["issue.problem",'issue.solution','machine.name'])
+            self.gridLayout_selectCSVHeaders_editor.addWidget(self.comboBox, x, y_headerColumn +1, 1, 1)
 
     def onClick_check(self, check):
         """called when we want to set the checkbox to check:True of uncheck:False
@@ -89,7 +94,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
         -------
 
         """
-        for button in self.buttonGroup_CSVHeaders.buttons():
+        for button in self.buttonGroup_CSVHeaders_Checkbox.buttons():
             button.setChecked(check)
 
 
@@ -106,10 +111,14 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         """
         checked = []
-        for button in self.buttonGroup_CSVHeaders.buttons():
+        for button in self.buttonGroup_CSVHeaders_Checkbox.buttons():
             if button.isChecked():
                 checked.append(button.text())
         return checked
+
+    def get_csvheader(self):
+
+
 
     def set_config(self, config):
         """add to the window the values from the config dict
@@ -124,7 +133,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         """
         if config['file']['filePath_OriginalCSV']['headers'] is not None:
-            for button in self.buttonGroup_CSVHeaders.buttons():
+            for button in self.buttonGroup_CSVHeaders_Checkbox.buttons():
                 if button.text() in config['file']['filePath_OriginalCSV']['headers']:
                     button.setChecked(True)
 
@@ -144,7 +153,7 @@ class MySelectCsvHeadersWindow(Qw.QMainWindow, Ui_MainWindow_selectCSVHeaders):
 
         """
         checked = []
-        for button in self.buttonGroup_CSVHeaders.buttons():
+        for button in self.buttonGroup_CSVHeaders_Checkbox.buttons():
             if button.isChecked():
                 checked.append(button.text())
 
