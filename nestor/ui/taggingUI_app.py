@@ -10,6 +10,8 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
 
+import time
+
 
 
 fname = 'taggingUI.ui'
@@ -28,8 +30,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #TODO make the "areyoysure" exit action
         #self.actionExit.triggered.connect(self.close_application)
 
-        if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+        self.iconPath = iconPath
+
+        if self.iconPath:
+            self.setWindowIcon(QtGui.QIcon(self.iconPath))
 
         self.similarityThreshold_alreadyChecked = 100
 
@@ -110,7 +114,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         # Load up the terms of service class/window
-        self.terms_of_use = TermsOfServiceDialog(iconPath=iconPath) # doesn't need a close button, just "x" out
+        self.terms_of_use = TermsOfServiceDialog(iconPath=self.iconPath) # doesn't need a close button, just "x" out
         self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
 
         self.tabWidget.currentChanged.connect(changeTag)
@@ -140,6 +144,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         -------
 
         """
+
+        #block any action on the main window
+        self.setEnabled(False)
+
+        # get the main wondow possition
+        rect = self.geometry()
+        rect.setHeight(70)
+        rect.setWidth(200)
+
+        self.window_DialogWait = DialogWait(iconPath=self.iconPath)
+        self.window_DialogWait.setGeometry(rect)
+        # block the Dialog_wait in front of all other windows
+        self.window_DialogWait.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.window_DialogWait.show()
+        Qw.QApplication.processEvents()
+
+
         print("progress saving; calculating the extracted tags and statistics...")
         # do 1-grams
         print('\n ONE GRAMS...')
@@ -147,13 +168,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                          self.clean_rawText,
                                          vocab_df=self.dataframe_1Gram)
         # self.tags_read = kex._get_readable_tag_df(self.tags_df)
-
+        self.window_DialogWait.setProgress(30)
+        Qw.QApplication.processEvents()
         # do 2-grams
         print('\n TWO GRAMS...')
         tags2_df = kex.tag_extractor(self.tokenExtractor_nGram,
                                           self.clean_rawText_1Gram,
                                           vocab_df=self.dataframe_NGram[self.dataframe_NGram.alias.notna()])
 
+        self.window_DialogWait.setProgress(60)
+        Qw.QApplication.processEvents()
         # merge 1 and 2-grams.
         tag_df = tags_df.join(tags2_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
         self.tag_readable = kex._get_readable_tag_df(tag_df)
@@ -169,6 +193,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.label_report_completeDocs.setText(f'Complete Docs: {tag_comp} of {len(self.tag_df)}, or {tag_comp/len(tag_df):.2%}')
         self.label_report_emptyDocs.setText(f'Empty Docs: {tag_empt} of {len(self.tag_df)}, or {tag_empt/len(self.tag_df):.2%}')
 
+        self.window_DialogWait.setProgress(90)
+        Qw.QApplication.processEvents()
         self.completenessPlot._set_dataframe(tag_pct)
         nbins = int(np.percentile(tag_df.sum(axis=1), 90))
         print(f'Docs have at most {nbins} tokens (90th percentile)')
@@ -176,6 +202,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.dataframe_completeness = tag_pct
         # return tag_readable, tag_df
+        self.window_DialogWait.setProgress(99)
+        Qw.QApplication.processEvents()
+        self.window_DialogWait.close()
+
+        self.setEnabled(True)
+
+
 
     def onClick_saveNewCsv(self):
         """generate a new csv with the original csv and the generated token for the document
@@ -670,3 +703,21 @@ class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
 
+
+fname3 = 'dialogWait.ui'
+Ui_MainWindow_DialogWait, QtBaseClass_DialogWait = uic.loadUiType(script_dir/fname3)
+
+
+class DialogWait(Qw.QDialog, Ui_MainWindow_DialogWait):
+
+    def __init__(self, iconPath=None):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_DialogWait.__init__(self)
+        self.setupUi(self)
+        self.progressBar_DialogWait.setValue(0)
+
+        if iconPath:
+            self.setWindowIcon(QtGui.QIcon(iconPath))
+
+    def setProgress(self, value):
+        self.progressBar_DialogWait.setValue(value)
