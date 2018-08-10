@@ -7,13 +7,120 @@
     <x>0</x>
     <y>0</y>
     <width>571</width>
-    <height>434</height>
+    <height>571</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Connect to Database</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
+   <item row="7" column="0">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="1">
+      <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_RunQueries">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Store Data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_DeleteData">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Remove data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <layout class="QGridLayout" name="gridLayout_6">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_DialogDatabaseConnection_ServerName">
+       <property name="text">
+        <string>Server</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_ServerName"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_DialogDatabaseConnection_PortNumber">
+       <property name="text">
+        <string>Port</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_PortNumber">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="0">
+    <layout class="QGridLayout" name="gridLayout_5">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_Connect">
+       <property name="text">
+        <string>Connect</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_ConnectInfo">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="frame">
+        <bool>false</bool>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Normal</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="2" column="0">
@@ -101,89 +208,87 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <layout class="QGridLayout" name="gridLayout_6">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_DialogDatabaseConnection_ServerName">
-       <property name="text">
-        <string>Server</string>
+   <item row="5" column="0">
+    <layout class="QGridLayout" name="gridLayout_7">
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="checkBox_DialogDatabaseConnection_TagNg">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
+       <property name="text">
+        <string>Store the NGram Tag data ?</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_DialogDatabaseConnection_Queries</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QCheckBox" name="checkBox_DialogDatabaseConnection_ItemToItem">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Link Item to Item hierarchy ?</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_DialogDatabaseConnection_Queries</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QCheckBox" name="checkBox_DialogDatabaseConnection_IssueToItem">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Update Issue to Item Tag links ?</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_DialogDatabaseConnection_Queries</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QCheckBox" name="checkBox_DialogDatabaseConnection_OriginalData">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Store the data from your Work Order CSV ?</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_DialogDatabaseConnection_Queries</string>
+       </attribute>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_ServerName"/>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_DialogDatabaseConnection_PortNumber">
-       <property name="text">
-        <string>Port</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_PortNumber">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="0">
-    <layout class="QGridLayout" name="gridLayout_5">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_Connect">
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_ConnectInfo">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="frame">
-        <bool>false</bool>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Normal</enum>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="clearButtonEnabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="4" column="0">
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="1">
-      <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_RunQueries">
+      <widget class="QCheckBox" name="checkBox_DialogDatabaseConnection_Tag1g">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Store Data</string>
+        <string>Store the 1Gram Tag data ?</string>
        </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_DialogDatabaseConnection_Queries</string>
+       </attribute>
       </widget>
      </item>
-     <item row="0" column="0">
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="checkBox_DialogDatabaseConnection_1gToNg">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Link 1gram Tag to Ngram Tag ?</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_DialogDatabaseConnection_Queries</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="6" column="0">
       <widget class="QProgressBar" name="progressBar_DialogDatabaseConnection_RunQueries">
        <property name="value">
         <number>0</number>
@@ -192,8 +297,22 @@
      </item>
     </layout>
    </item>
+   <item row="4" column="0">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup_DialogDatabaseConnection_Queries">
+   <property name="exclusive">
+    <bool>false</bool>
+   </property>
+  </buttongroup>
+ </buttongroups>
 </ui>

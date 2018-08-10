@@ -93,9 +93,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.clean_rawText_1Gram=None
 
         self.tag_df = None
+        self.relation_df = None
         self.tag_readable = None
-
-        self.database = None
 
         self.dataframe_completeness=None
         #self.alias_lookup = None
@@ -134,194 +133,24 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.tabWidget.currentChanged.connect(changeTag)
 
+
+        self.pushButton_report_toDatabase.setEnabled(True)
+
+
     def onClick_exportToGraphDatabase(self):
-
-
-        def onClick_connectDatabase():
-
-            if self.database:
-                print("database exists")
-                self.database.close()
-                self.database = None
-
-            self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(False)
-
-            username, password, server, port = self.dialog_DatabaseConnection.get_input()
-            uri = f'bolt://{server}:{port}'
-
-            print(username,password, uri )
-
-            dict = {
-                'issue': {'label': {'issue': ':ISSUE'},
-                          'properties': {'id': 'id',
-                                         'description_problem': 'description_of_problem',
-                                         'description_solution': 'description_of_solution',
-                                         'description_cause': 'description_of_cause',
-                                         'description_effect': 'description_of_effect',
-                                         'machine_down': 'machine_down',
-                                         'necessary_part': 'necessary_part',
-                                         'part_in_process': 'part_in_process',
-                                         'cost': 'cost',
-                                         'date_machine_down': 'date_machine_down',
-                                         'date_workorder_start': 'date_maintenanceworkorder_start',
-                                         'date_maintenance_technician_arrive': 'date_maintenance_technician_arrive',
-                                         'date_problem_found': 'date_problem_found',
-                                         'date_part_ordered': 'date_part_ordered',
-                                         'date_part_received': 'date_part_received',
-                                         'date_problem_solve': 'date_problem_solve',
-                                         'date_machine_up': 'date_machine_up',
-                                         'date_workorder_completion': 'date_maintenanceworkorder_completion'}},
-                'human': {'label': {'human': ':HUMAN',
-                                    'technician': ':TECHNICIAN',
-                                    'operator': ':OPERATOR'},
-                          'properties': {'name': 'name', 'skills': 'skills', 'crafts': 'crafts'}},
-                'machine': {'label': {'machine': ':MACHINE', 'type': ':MACHINE_TYPE'},
-                            'properties': {'name': 'name',
-                                           'manufacturer': 'manufacturer',
-                                           'location': 'location',
-                                           'type': 'type'}},
-                'tag': {'label': {'tag': ':TAG',
-                                  'onegram': ':ONE_GRAM',
-                                  'ngram': ':N_GRAM',
-                                  'item': ':ITEM',
-                                  'problem': ':PROBLEM',
-                                  'solution': ':SOLUTION',
-                                  'unknown': ':UNKNOWN',
-                                  'problem_item': ':PROBLEM_ITEM',
-                                  'solution_item': ':SOLUTION_ITEM',
-                                  'other': ':OTHER',
-                                  'na': ':NA',
-                                  'stopword': ':STOP_WORD'},
-                        'properties': {'keyword': 'keyword',
-                                       'synonyms': 'synonyms',
-                                       'approved': 'approved'}},
-                'edges': {'issue-itemasproblem': ':PROBLEM',
-                          'issue-itemassolution': ':SOLUTION',
-                          'issue-item': ':CONTAINS',
-                          'issue-problem': ':CONTAINS',
-                          'issue-solution': ':CONTAINS',
-                          'issue-unknown': ':CONTAINS',
-                          'issue-problemitem': ':CONTAINS',
-                          'issue-solutionitem': ':CONTAINS',
-                          'issue-na': ':CONTAINS',
-                          'issue-stopword': ':CONTAINS',
-                          'issue-machine': ':COVERED',
-                          'issue-operator': ':REQUESTED_BY',
-                          'issue-technician': ':SOLVE_BY',
-                          'machine-machinetype': ':IS_A',
-                          'item-item': ':PARENT_OF',
-                          'problemitem-problem': ':COMPOSED_OF',
-                          'problemitem-item': ':COMPOSED_OF',
-                          'problemitem-unknown': ':COMPOSED_OF',
-                          'solutionitem-solution': ':COMPOSED_OF',
-                          'solutionitem-item': ':COMPOSED_OF',
-                          'solutionitem-unknown': ':COMPOSED_OF'}}
-
-            try:
-                self.database = DatabaseNeo4J(user = username,
-                                     password=password,
-                                     uri=uri,
-                                     schema=dict)
-
-                self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
-                    f'Connection created')
-
-
-                self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(True)
-
-            except (neo4j.exceptions.AddressError, neo4j.exceptions.ServiceUnavailable):
-                self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
-                    f'FAIL to connect to the server or port')
-
-            except neo4j.exceptions.AuthError:
-                self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
-                    f'FAIL during authentication for username or password')
-
-
-
-
-        def onClick_runQuery():
-
-            self.dialog_DatabaseConnection.setEnabled(False)
-            self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
-                f'Please wait while storing your data onto the database!!')
-
-
-            if self.tag_readable is None:
-                self.onClick_saveTrack()
-
-            df_original= self.dataframe_Original.fillna("")
-
-            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(10)
-
-            Qw.QApplication.processEvents()
-
-
-            self.database.runQueries(cypherQuery.cypherCreate_historicalMaintenanceWorkOrder(
-                schema = self.database.schema,
-                originalDataframe = df_original,
-                propertyToHeader_dict = self.config['csvheader_mapping']
-            ))
-            print("\nDONE -----> Data from Original CSV Work Order stored !!")
-
-            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(30)
-            Qw.QApplication.processEvents()
-
-            self.database.runQueries(cypherQuery.cypherCreate_tag(
-                schema = self.database.schema,
-                dataframe = self.tag_df,
-                vocab1g = self.dataframe_1Gram,
-                vocabNg = self.dataframe_NGram
-            ))
-            print("\nDONE -----> Data from Tag1g Stored!!")
-            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(60)
-            Qw.QApplication.processEvents()
-
-            self.database.runQueries(cypherQuery.cypherCreate_tag(
-                schema= self.database.schema,
-                dataframe = self.relation_df,
-                vocab1g = self.dataframe_1Gram,
-                vocabNg = self.dataframe_NGram
-            ))
-            print("\nDONE ----->  Data from TagNg stored !!")
-            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(90)
-            Qw.QApplication.processEvents()
-
-            self.database.runQueries(cypherQuery.cypherLink_Ngram1gram(
-                schema=self.database.schema
-            ))
-            print("\nDONE ----->  TagNg --> Tag1g link created !!")
-
-            self.database.runQueries(cypherQuery.cypherLink_itemIssue(
-                schema=self.database.schema
-            ))
-            print("\nDONE ----->  item -> issue link upated !!")
-
-
-            #         self.database.runQueries(cypherQuery.cypherCreate_itemsTree(
-            #     schema=self.database.schema
-            # ))
-            # print("DONE ----->  Item hierarchy created !!")
-
-            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(99)
-
-            self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
-                f'All your data have been stored!!')
-
-            self.dialog_DatabaseConnection.setEnabled(True)
-
-            Qw.QApplication.processEvents()
-
-
-        self.setEnabled(False)
 
         rect = self.geometry()
         rect.setHeight(300)
         rect.setWidth(200)
 
-        self.dialog_DatabaseConnection = DialogDatabaseConnection(iconPath=self.iconPath)
-        self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_Connect.clicked.connect(onClick_connectDatabase)
-        self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_RunQueries.clicked.connect(onClick_runQuery)
+        self.dialog_DatabaseConnection = DialogDatabaseConnection(
+            original_df = self.dataframe_Original,
+            bin1g_df = self.tag_df,
+            binNg_df = self.relation_df,
+            vocab1g_df = self.dataframe_1Gram,
+            vocabNg_df =  self.dataframe_NGram,
+            csv_header = self.config['csvheader_mapping'],
+            iconPath=self.iconPath)
 
         self.dialog_DatabaseConnection.setGeometry(rect)
         self.dialog_DatabaseConnection.setWindowFlags(Qt.WindowStaysOnTopHint)
@@ -330,8 +159,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         #self.Qw.QApplication.processEvents()
 
-
-        self.setEnabled(True)
 
     def onClick_changeClassification(self, btn):
         new_clf = self.buttonDictionary_NGram.get(btn.text())
@@ -359,7 +186,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
 
         #block any action on the main window
-        self.setEnabled(False)
 
         # get the main wondow possition
         rect = self.geometry()
@@ -418,11 +244,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Qw.QApplication.processEvents()
         window_DialogWait.close()
 
-        self.setEnabled(True)
 
         self.pushButton_report_saveNewCsv.setEnabled(True)
         self.pushButton_report_saveBinnaryCsv.setEnabled(True)
-        #self.pushButton_report_toDatabase.setEnabled(True)
+        self.pushButton_report_toDatabase.setEnabled(True)
 
         Qw.QApplication.processEvents()
 
@@ -938,11 +763,20 @@ Ui_MainWindow_DatabaseConnection, QtBaseClass_DialogDatabaseConnection = uic.loa
 
 class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
-    def __init__(self, iconPath=None):
+    def __init__(self, original_df, bin1g_df, binNg_df, vocab1g_df, vocabNg_df, csv_header, iconPath=None):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_DatabaseConnection.__init__(self)
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        self.original_df = original_df
+        self.bin1g_df = bin1g_df
+        self.binNg_df = binNg_df
+        self.vocab1g_df = vocab1g_df
+        self.vocabNg_df = vocabNg_df
+        self.csv_header = csv_header
+
+        self.database = None
 
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
@@ -955,12 +789,256 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.lineEdit_DialogDatabaseConnection_PortNumber.setText("7687")
 
 
+        self.checkBox_DialogDatabaseConnection_OriginalData.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseConnection_Tag1g.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseConnection_TagNg.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseConnection_1gToNg.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseConnection_IssueToItem.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseConnection_ItemToItem.clicked.connect(self.check_checkBoxGroup)
+
+        self.pushButton_DialogDatabaseConnection_Connect.clicked.connect(self.onClick_connectDatabase)
+        self.pushButton_DialogDatabaseConnection_RunQueries.clicked.connect(self.onClick_runQuery)
+        self.pushButton_DialogDatabaseConnection_DeleteData.clicked.connect(self.onClick_removeData)
+
+
     def get_input(self):
-
-
         return  self.lineEdit_DialogDatabaseConnection_Username.text(), \
                 self.lineEdit_DialogDatabaseConnection_Password.text(),\
                 self.lineEdit_DialogDatabaseConnection_ServerName.text(),\
                 self.lineEdit_DialogDatabaseConnection_PortNumber.text()
+
+    def onClick_connectDatabase(self):
+
+        self.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(False)
+
+        username, password, server, port = self.get_input()
+        uri = f'bolt://{server}:{port}'
+
+
+        dict = {
+            'issue': {'label': {'issue': ':ISSUE'},
+                      'properties': {'id': 'id',
+                                     'description_problem': 'description_of_problem',
+                                     'description_solution': 'description_of_solution',
+                                     'description_cause': 'description_of_cause',
+                                     'description_effect': 'description_of_effect',
+                                     'machine_down': 'machine_down',
+                                     'necessary_part': 'necessary_part',
+                                     'part_in_process': 'part_in_process',
+                                     'cost': 'cost',
+                                     'date_machine_down': 'date_machine_down',
+                                     'date_workorder_start': 'date_maintenanceworkorder_start',
+                                     'date_maintenance_technician_arrive': 'date_maintenance_technician_arrive',
+                                     'date_problem_found': 'date_problem_found',
+                                     'date_part_ordered': 'date_part_ordered',
+                                     'date_part_received': 'date_part_received',
+                                     'date_problem_solve': 'date_problem_solve',
+                                     'date_machine_up': 'date_machine_up',
+                                     'date_workorder_completion': 'date_maintenanceworkorder_completion'}},
+            'human': {'label': {'human': ':HUMAN',
+                                'technician': ':TECHNICIAN',
+                                'operator': ':OPERATOR'},
+                      'properties': {'name': 'name', 'skills': 'skills', 'crafts': 'crafts'}},
+            'machine': {'label': {'machine': ':MACHINE', 'type': ':MACHINE_TYPE'},
+                        'properties': {'name': 'name',
+                                       'manufacturer': 'manufacturer',
+                                       'location': 'location',
+                                       'type': 'type'}},
+            'tag': {'label': {'tag': ':TAG',
+                              'onegram': ':ONE_GRAM',
+                              'ngram': ':N_GRAM',
+                              'item': ':ITEM',
+                              'problem': ':PROBLEM',
+                              'solution': ':SOLUTION',
+                              'unknown': ':UNKNOWN',
+                              'problem_item': ':PROBLEM_ITEM',
+                              'solution_item': ':SOLUTION_ITEM',
+                              'other': ':OTHER',
+                              'na': ':NA',
+                              'stopword': ':STOP_WORD'},
+                    'properties': {'keyword': 'keyword',
+                                   'synonyms': 'synonyms',
+                                   'approved': 'approved'}},
+            'edges': {'issue-itemasproblem': ':PROBLEM',
+                      'issue-itemassolution': ':SOLUTION',
+                      'issue-item': ':CONTAINS',
+                      'issue-problem': ':CONTAINS',
+                      'issue-solution': ':CONTAINS',
+                      'issue-unknown': ':CONTAINS',
+                      'issue-problemitem': ':CONTAINS',
+                      'issue-solutionitem': ':CONTAINS',
+                      'issue-na': ':CONTAINS',
+                      'issue-stopword': ':CONTAINS',
+                      'issue-machine': ':COVERED',
+                      'issue-operator': ':REQUESTED_BY',
+                      'issue-technician': ':SOLVE_BY',
+                      'machine-machinetype': ':IS_A',
+                      'item-item': ':PARENT_OF',
+                      'problemitem-problem': ':COMPOSED_OF',
+                      'problemitem-item': ':COMPOSED_OF',
+                      'problemitem-unknown': ':COMPOSED_OF',
+                      'solutionitem-solution': ':COMPOSED_OF',
+                      'solutionitem-item': ':COMPOSED_OF',
+                      'solutionitem-unknown': ':COMPOSED_OF'}}
+
+        try:
+            self.database = DatabaseNeo4J(user = username,
+                                 password=password,
+                                 uri=uri,
+                                 schema=dict)
+
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                f'Connection created')
+
+
+            self.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(True)
+            self.pushButton_DialogDatabaseConnection_DeleteData.setEnabled(True)
+
+
+
+        except (neo4j.exceptions.AddressError, neo4j.exceptions.ServiceUnavailable):
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                f'FAIL to connect to the server or port')
+            self.database = None
+
+        except neo4j.exceptions.AuthError:
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                f'FAIL during authentication for username or password')
+            self.database = None
+
+        self.check_checkBoxGroup()
+
+    def onClick_runQuery(self):
+
+        self.database.dropConstraints()
+        self.database.dropIndexes()
+        self.database.createIndexes()
+        self.database.createConstraints()
+
+
+        self.setEnabled(False)
+        self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+            f'Please wait while storing your data onto the database!!')
+
+        df_original = self.original_df.fillna("")
+
+        self.progressBar_DialogDatabaseConnection_RunQueries.setValue(10)
+
+        Qw.QApplication.processEvents()
+
+        if self.checkBox_DialogDatabaseConnection_OriginalData.isChecked():
+            self.database.runQueries(cypherQuery.cypherCreate_historicalMaintenanceWorkOrder(
+                schema=self.database.schema,
+                originalDataframe=df_original,
+                propertyToHeader_dict=self.csv_header
+            ))
+            print("\nDONE -----> Data from Original CSV Work Order stored !!")
+
+        self.progressBar_DialogDatabaseConnection_RunQueries.setValue(30)
+        Qw.QApplication.processEvents()
+
+
+        if self.checkBox_DialogDatabaseConnection_Tag1g.isChecked():
+            self.database.runQueries(cypherQuery.cypherCreate_tag(
+                schema=self.database.schema,
+                dataframe=self.bin1g_df,
+                vocab1g=self.vocab1g_df,
+                vocabNg=self.vocabNg_df
+            ))
+            print("\nDONE -----> Data from Tag1g Stored!!")
+        self.progressBar_DialogDatabaseConnection_RunQueries.setValue(60)
+        Qw.QApplication.processEvents()
+
+        if self.checkBox_DialogDatabaseConnection_TagNg.isChecked():
+            self.database.runQueries(cypherQuery.cypherCreate_tag(
+                schema=self.database.schema,
+                dataframe=self.binNg_df,
+                vocab1g=self.vocab1g_df,
+                vocabNg=self.vocabNg_df
+            ))
+            print("\nDONE ----->  Data from TagNg stored !!")
+        self.progressBar_DialogDatabaseConnection_RunQueries.setValue(90)
+        Qw.QApplication.processEvents()
+
+        if self.checkBox_DialogDatabaseConnection_1gToNg.isChecked():
+            self.database.runQueries(cypherQuery.cypherLink_Ngram1gram(
+                schema=self.database.schema
+            ))
+            print("\nDONE ----->  TagNg --> Tag1g link created !!")
+
+
+        if self.checkBox_DialogDatabaseConnection_IssueToItem.isChecked():
+            self.database.runQueries(cypherQuery.cypherLink_itemIssue(
+                schema=self.database.schema
+            ))
+            print("\nDONE ----->  item -> issue link upated !!")
+
+        if self.checkBox_DialogDatabaseConnection_ItemToItem.isChecked():
+            # self.database.runQueries(cypherQuery.cypherCreate_itemsTree(
+            #     schema=self.database.schema
+            # ))
+            print("DONE ----->  Item hierarchy created !!")
+
+        self.progressBar_DialogDatabaseConnection_RunQueries.setValue(99)
+
+        self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+            f'All your data have been stored!!')
+
+        self.setEnabled(True)
+        Qw.QApplication.processEvents()
+
+    def check_checkBoxGroup(self):
+
+        if self.database is not None and self.original_df is not None and self.csv_header is not None:
+            self.checkBox_DialogDatabaseConnection_OriginalData.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseConnection_OriginalData.setEnabled(False)
+            self.checkBox_DialogDatabaseConnection_OriginalData.setChecked(False)
+
+        if self.checkBox_DialogDatabaseConnection_OriginalData.isChecked() and self.vocab1g_df is not None and self.vocabNg_df is not None:
+            if self.bin1g_df is not None:
+                self.checkBox_DialogDatabaseConnection_Tag1g.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseConnection_Tag1g.setEnabled(False)
+                self.checkBox_DialogDatabaseConnection_Tag1g.setChecked(False)
+
+            if self.binNg_df is not None:
+                self.checkBox_DialogDatabaseConnection_TagNg.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseConnection_TagNg.setEnabled(False)
+                self.checkBox_DialogDatabaseConnection_TagNg.setChecked(False)
+        else:
+            self.checkBox_DialogDatabaseConnection_Tag1g.setEnabled(False)
+            self.checkBox_DialogDatabaseConnection_Tag1g.setChecked(False)
+            self.checkBox_DialogDatabaseConnection_TagNg.setEnabled(False)
+            self.checkBox_DialogDatabaseConnection_TagNg.setChecked(False)
+
+        if self.checkBox_DialogDatabaseConnection_Tag1g.isChecked() and self.checkBox_DialogDatabaseConnection_TagNg.isChecked():
+            self.checkBox_DialogDatabaseConnection_1gToNg.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseConnection_1gToNg.setEnabled(False)
+            self.checkBox_DialogDatabaseConnection_1gToNg.setChecked(False)
+
+
+        if self.checkBox_DialogDatabaseConnection_1gToNg.isChecked():
+            self.checkBox_DialogDatabaseConnection_IssueToItem.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseConnection_IssueToItem.setEnabled(False)
+            self.checkBox_DialogDatabaseConnection_IssueToItem.setChecked(False)
+
+        if self.checkBox_DialogDatabaseConnection_Tag1g.isChecked():
+            self.checkBox_DialogDatabaseConnection_ItemToItem.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseConnection_ItemToItem.setEnabled(False)
+            self.checkBox_DialogDatabaseConnection_ItemToItem.setChecked(False)
+
+    def onClick_removeData(self):
+        dialog_sure = Qw.QMessageBox.question(self, 'Dalate Data', "Are you sure you want to remove your data??",
+                                           Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
+        if dialog_sure == Qw.QMessageBox.Yes:
+            self.database.deleteData()
+            print('We delete your data.')
+        else:
+            print('We are NOT going to remove your data.')
 
 
