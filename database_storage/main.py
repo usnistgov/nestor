@@ -40,6 +40,10 @@ def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, prope
         issue = None
 
         try:
+            # print("----------")
+            # print(row)
+            # print(propertyToHeader_dict)
+            # print(schema)
             issue = Issue(problem=row[propertyToHeader_issue['issue']['description_problem']],
                           databaseInfo=schema)
             try:
@@ -206,6 +210,7 @@ def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, prope
 
     queries = []
     for index, row in tqdm(originalDataframe.iterrows(), total=originalDataframe.shape[0]):
+        #print(row)
         issue = create_issue(row, propertyToHeader_dict, schema)
         issue._set_id(index)
         machine = create_machine(row, propertyToHeader_dict, schema)
@@ -224,12 +229,13 @@ def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, prope
     return queries
 
 
-def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None, allTag=False):
+def cypherCreate_tag(schema, dataframe, vocab1g=None, vocabNg=None, allTag=False):
     """
     create the query for all the tages, and link it to the given issue
     :param binnaryDataframe:
     :return:
     """
+
 
     def toSpecialtag(keyword, synonyms, classification):
         """
@@ -240,33 +246,33 @@ def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None, allTag=Fal
         """
 
         if classification == "I":
-            return TagItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_itemTag_all("tag"), \
-                   database.schema["edges"]["issue-item"]
+            return TagItem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_itemTag_all("tag"), \
+                   schema["edges"]["issue-item"]
         if classification == "S":
-            return TagSolution(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_solutionTag_all("tag"),\
-                   database.schema["edges"]["issue-solution"]
+            return TagSolution(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_solutionTag_all("tag"),\
+                   schema["edges"]["issue-solution"]
         if classification == "P":
-            return TagProblem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_problemTag_all("tag"),\
-                   database.schema["edges"]["issue-problem"]
+            return TagProblem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_problemTag_all("tag"),\
+                   schema["edges"]["issue-problem"]
         if classification == "U":
-            return TagUnknown(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_unknownTag_all("tag"), \
-                   database.schema["edges"]["issue-unknown"]
+            return TagUnknown(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_unknownTag_all("tag"), \
+                   schema["edges"]["issue-unknown"]
         if classification == "S I":
-            return TagSolutionItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_solutionItemTag_all("tag"), \
-                   database.schema["edges"]["issue-solutionitem"]
+            return TagSolutionItem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_solutionItemTag_all("tag"), \
+                   schema["edges"]["issue-solutionitem"]
         if classification == "P I":
-            return TagProblemItem(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_problemItemTag_all("tag"), \
-                   database.schema["edges"]["issue-problemitem"]
+            return TagProblemItem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_problemItemTag_all("tag"), \
+                   schema["edges"]["issue-problemitem"]
         if classification == "NA":
-            return TagNA(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_naTag_all("tag"), \
-                   database.schema["edges"]["issue-na"]
+            return TagNA(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_naTag_all("tag"), \
+                   schema["edges"]["issue-na"]
         if classification == "X":
-            return TagStopWord(keyword=keyword, synonyms=synonyms, databaseInfo=database.schema).cypher_stopWordTag_all("tag"), \
-                   database.schema["edges"]["issue-stopword"]
+            return TagStopWord(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_stopWordTag_all("tag"), \
+                   schema["edges"]["issue-stopword"]
         return None, None
 
     queries = []
-    issue = Issue(databaseInfo=database.schema)
+    issue = Issue(databaseInfo=schema)
 
     if allTag:
         df = dataframe
@@ -297,102 +303,102 @@ def cypherCreate_tag(database, dataframe, vocab1g=None, vocabNg=None, allTag=Fal
     return queries
 
 
-def cypherLink_Ngram1gram(database):
+def cypherLink_Ngram1gram(schema):
 
     queries = []
 
-    problemItem = TagProblemItem(databaseInfo=database.schema)
-    solutionItem = TagSolutionItem(databaseInfo=database.schema)
-    item = TagItem(databaseInfo=database.schema)
-    problem = TagProblem(databaseInfo=database.schema)
-    solution = TagSolution(databaseInfo=database.schema)
-    unknown = TagUnknown(databaseInfo=database.schema)
+    problemItem = TagProblemItem(databaseInfo=schema)
+    solutionItem = TagSolutionItem(databaseInfo=schema)
+    item = TagItem(databaseInfo=schema)
+    problem = TagProblem(databaseInfo=schema)
+    solution = TagSolution(databaseInfo=schema)
+    unknown = TagUnknown(databaseInfo=schema)
 
     query = f'\nMATCH (problemitem{problemItem.label})' \
-            f'\nWITH problemitem, split(problemitem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nWITH problemitem, split(problemitem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
             f'\nUNWIND halfTags AS halfTag' \
-            f'\nMATCH (problem{problem.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
-            f'\nMERGE (problemitem)-[{database.schema["edges"]["problemitem-problem"]}]->(problem)'
+            f'\nMATCH (problem{problem.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (problemitem)-[{schema["edges"]["problemitem-problem"]}]->(problem)'
     queries.append(query)
 
     query = f'\nMATCH (problemitem{problemItem.label})' \
-            f'\nWITH problemitem, split(problemitem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nWITH problemitem, split(problemitem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
             f'\nUNWIND halfTags AS halfTag' \
-            f'\nMATCH (item{item.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
-            f'\nMERGE (problemitem)-[{database.schema["edges"]["problemitem-item"]}]->(item)'
+            f'\nMATCH (item{item.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (problemitem)-[{schema["edges"]["problemitem-item"]}]->(item)'
     queries.append(query)
 
     query = f'\nMATCH (problemitem{problemItem.label})' \
-            f'\nWITH problemitem, split(problemitem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nWITH problemitem, split(problemitem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
             f'\nUNWIND halfTags AS halfTag' \
-            f'\nMATCH (unknown{unknown.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
-            f'\nMERGE (problemitem)-[{database.schema["edges"]["problemitem-unknown"]}]->(unknown)'
+            f'\nMATCH (unknown{unknown.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (problemitem)-[{schema["edges"]["problemitem-unknown"]}]->(unknown)'
     queries.append(query)
 
 
     query = f'\nMATCH (solutionItem{solutionItem.label})' \
-            f'\nWITH solutionItem, split(solutionItem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nWITH solutionItem, split(solutionItem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
             f'\nUNWIND halfTags AS halfTag' \
-            f'\nMATCH (solution{solution.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
-            f'\nMERGE (solutionItem)-[{database.schema["edges"]["solutionitem-solution"]}]->(solution)'
+            f'\nMATCH (solution{solution.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (solutionItem)-[{schema["edges"]["solutionitem-solution"]}]->(solution)'
     queries.append(query)
 
     query = f'\nMATCH (solutionItem{solutionItem.label})' \
-            f'\nWITH solutionItem, split(solutionItem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nWITH solutionItem, split(solutionItem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
             f'\nUNWIND halfTags AS halfTag' \
-            f'\nMATCH (item{item.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
-            f'\nMERGE (solutionItem)-[{database.schema["edges"]["solutionitem-item"]}]->(item)'
+            f'\nMATCH (item{item.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (solutionItem)-[{schema["edges"]["solutionitem-item"]}]->(item)'
     queries.append(query)
 
     query = f'\nMATCH (solutionItem{problemItem.label})' \
-            f'\nWITH solutionItem, split(solutionItem.{database.schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nWITH solutionItem, split(solutionItem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
             f'\nUNWIND halfTags AS halfTag' \
-            f'\nMATCH (unkknown{unknown.label}{{{database.schema["tag"]["properties"]["keyword"]}: halfTag}})' \
-            f'\nMERGE (solutionItem)-[{database.schema["edges"]["solutionitem-unknown"]}]->(unknown)'
+            f'\nMATCH (unkknown{unknown.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (solutionItem)-[{schema["edges"]["solutionitem-unknown"]}]->(unknown)'
     queries.append(query)
 
     return queries
 
 
-def cypherLink_itemIssue(database):
+def cypherLink_itemIssue(schema):
 
     queries= []
 
-    issue= Issue(databaseInfo=database.schema)
-    problemItem = TagProblemItem(databaseInfo=database.schema)
-    solutionItem = TagSolutionItem(databaseInfo=database.schema)
-    item = TagItem(databaseInfo=database.schema)
+    issue= Issue(databaseInfo=schema)
+    problemItem = TagProblemItem(databaseInfo=schema)
+    solutionItem = TagSolutionItem(databaseInfo=schema)
+    item = TagItem(databaseInfo=schema)
 
-    query = f'\nMATCH (issue{issue.label})-[{database.schema["edges"]["issue-problemitem"]}]->(problemitem{problemItem.label})' \
-            f'\nMATCH (issue)-[{database.schema["edges"]["issue-item"]}]->(item{item.label})' \
-            f'\nWHERE (problemitem)-[{database.schema["edges"]["problemitem-item"]}]->(item)' \
-            f'\nMERGE (issue)-[{database.schema["edges"]["issue-itemasproblem"]}]->(item)'
+    query = f'\nMATCH (issue{issue.label})-[{schema["edges"]["issue-problemitem"]}]->(problemitem{problemItem.label})' \
+            f'\nMATCH (issue)-[{schema["edges"]["issue-item"]}]->(item{item.label})' \
+            f'\nWHERE (problemitem)-[{schema["edges"]["problemitem-item"]}]->(item)' \
+            f'\nMERGE (issue)-[{schema["edges"]["issue-itemasproblem"]}]->(item)'
     queries.append(query)
 
 
-    query = f'\nMATCH (issue{issue.label})-[{database.schema["edges"]["issue-solutionitem"]}]->(solutionitem{solutionItem.label})' \
-            f'\nMATCH (issue)-[{database.schema["edges"]["issue-item"]}]->(item{item.label})' \
-            f'\nWHERE (solutionitem)-[{database.schema["edges"]["solutionitem-item"]}]->(item)' \
-            f'\nMERGE (issue)-[{database.schema["edges"]["issue-itemassolution"]}]->(item)'
+    query = f'\nMATCH (issue{issue.label})-[{schema["edges"]["issue-solutionitem"]}]->(solutionitem{solutionItem.label})' \
+            f'\nMATCH (issue)-[{schema["edges"]["issue-item"]}]->(item{item.label})' \
+            f'\nWHERE (solutionitem)-[{schema["edges"]["solutionitem-item"]}]->(item)' \
+            f'\nMERGE (issue)-[{schema["edges"]["issue-itemassolution"]}]->(item)'
     queries.append(query)
 
     return queries
 
 
-def cypherCreate_itemsTree(database, current, queries=[]):
+def cypherCreate_itemsTree(schema, current, queries=[]):
 
-    item = TagItem(databaseInfo=database.schema)
+    item = TagItem(databaseInfo=schema)
 
     for children in current["children"]:
-        query =  f'\nMATCH (parent{item.label}{{{database.schema["tag"]["properties"]["keyword"]}:"{current["keyword"]}"}})' \
-                 f'\nMATCH (child{item.label}{{{database.schema["tag"]["properties"]["keyword"]}:"{children["keyword"]}"}})'
+        query =  f'\nMATCH (parent{item.label}{{{schema["tag"]["properties"]["keyword"]}:"{current["keyword"]}"}})' \
+                 f'\nMATCH (child{item.label}{{{schema["tag"]["properties"]["keyword"]}:"{children["keyword"]}"}})'
         if "approved" in children:
-            query += f'\nMERGE (parent)-[{database.schema["edges"]["item-item"]}{{{database.schema["tag"]["properties"]["approved"]}:{children["approved"]}}}]->(child)'
+            query += f'\nMERGE (parent)-[{schema["edges"]["item-item"]}{{{schema["tag"]["properties"]["approved"]}:{children["approved"]}}}]->(child)'
         else:
-            query += f'\nMERGE (parent)-[{database.schema["edges"]["item-item"]}]->(child)'
+            query += f'\nMERGE (parent)-[{schema["edges"]["item-item"]}]->(child)'
         queries.append(query)
         if "children" in children:
-            cypherCreate_itemsTree(database, children, queries)
+            cypherCreate_itemsTree(schema, children, queries)
             
         print(query)
 

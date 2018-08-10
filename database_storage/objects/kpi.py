@@ -16,8 +16,6 @@ THE IDEA OF THIS KPI OBJECT IS STILL IN PROCESS, LOTS OF THE IDEA MIGHT CHANGE I
 """
 
 
-import networkx as nx
-
 
 from database_storage.objects.issue import *
 from database_storage.objects.machine import *

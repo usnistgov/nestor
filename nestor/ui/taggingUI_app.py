@@ -1,3 +1,5 @@
+import neo4j
+
 from .helper_objects import CompositionNGramItem, MyMplCanvas, QButtonGroup_similarityPattern, QTableWidget_token
 import nestor.keyword as kex
 
@@ -10,7 +12,12 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
 
-import time
+
+
+from database_storage.database.database import DatabaseNeo4J
+from database_storage import main as cypherQuery
+
+
 
 
 
@@ -22,6 +29,7 @@ Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(script_dir/f
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def __init__(self, iconPath=None, closeFunction=None, changeTag=None):
+
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_taggingTool.__init__(self)
         self.setupUi(self)
@@ -78,12 +86,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dataframe_Original=None
         self.dataframe_1Gram = None
         self.dataframe_NGram = None
+
         self.tokenExtractor_nGram = None
         self.tokenExtractor_1Gram = None
+
         self.clean_rawText_1Gram=None
-        self.dataframe_1Gram=None
+
         self.tag_df = None
         self.tag_readable = None
+
+        self.database = None
 
         self.dataframe_completeness=None
         #self.alias_lookup = None
@@ -112,6 +124,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.buttonGroup_NGram_Classification.buttonClicked.connect(self.onClick_changeClassification)
 
+        self.pushButton_report_toDatabase.clicked.connect(self.onClick_exportToGraphDatabase)
+
+
 
         # Load up the terms of service class/window
         self.terms_of_use = TermsOfServiceDialog(iconPath=self.iconPath) # doesn't need a close button, just "x" out
@@ -119,6 +134,204 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.tabWidget.currentChanged.connect(changeTag)
 
+    def onClick_exportToGraphDatabase(self):
+
+
+        def onClick_connectDatabase():
+
+            if self.database:
+                print("database exists")
+                self.database.close()
+                self.database = None
+
+            self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(False)
+
+            username, password, server, port = self.dialog_DatabaseConnection.get_input()
+            uri = f'bolt://{server}:{port}'
+
+            print(username,password, uri )
+
+            dict = {
+                'issue': {'label': {'issue': ':ISSUE'},
+                          'properties': {'id': 'id',
+                                         'description_problem': 'description_of_problem',
+                                         'description_solution': 'description_of_solution',
+                                         'description_cause': 'description_of_cause',
+                                         'description_effect': 'description_of_effect',
+                                         'machine_down': 'machine_down',
+                                         'necessary_part': 'necessary_part',
+                                         'part_in_process': 'part_in_process',
+                                         'cost': 'cost',
+                                         'date_machine_down': 'date_machine_down',
+                                         'date_workorder_start': 'date_maintenanceworkorder_start',
+                                         'date_maintenance_technician_arrive': 'date_maintenance_technician_arrive',
+                                         'date_problem_found': 'date_problem_found',
+                                         'date_part_ordered': 'date_part_ordered',
+                                         'date_part_received': 'date_part_received',
+                                         'date_problem_solve': 'date_problem_solve',
+                                         'date_machine_up': 'date_machine_up',
+                                         'date_workorder_completion': 'date_maintenanceworkorder_completion'}},
+                'human': {'label': {'human': ':HUMAN',
+                                    'technician': ':TECHNICIAN',
+                                    'operator': ':OPERATOR'},
+                          'properties': {'name': 'name', 'skills': 'skills', 'crafts': 'crafts'}},
+                'machine': {'label': {'machine': ':MACHINE', 'type': ':MACHINE_TYPE'},
+                            'properties': {'name': 'name',
+                                           'manufacturer': 'manufacturer',
+                                           'location': 'location',
+                                           'type': 'type'}},
+                'tag': {'label': {'tag': ':TAG',
+                                  'onegram': ':ONE_GRAM',
+                                  'ngram': ':N_GRAM',
+                                  'item': ':ITEM',
+                                  'problem': ':PROBLEM',
+                                  'solution': ':SOLUTION',
+                                  'unknown': ':UNKNOWN',
+                                  'problem_item': ':PROBLEM_ITEM',
+                                  'solution_item': ':SOLUTION_ITEM',
+                                  'other': ':OTHER',
+                                  'na': ':NA',
+                                  'stopword': ':STOP_WORD'},
+                        'properties': {'keyword': 'keyword',
+                                       'synonyms': 'synonyms',
+                                       'approved': 'approved'}},
+                'edges': {'issue-itemasproblem': ':PROBLEM',
+                          'issue-itemassolution': ':SOLUTION',
+                          'issue-item': ':CONTAINS',
+                          'issue-problem': ':CONTAINS',
+                          'issue-solution': ':CONTAINS',
+                          'issue-unknown': ':CONTAINS',
+                          'issue-problemitem': ':CONTAINS',
+                          'issue-solutionitem': ':CONTAINS',
+                          'issue-na': ':CONTAINS',
+                          'issue-stopword': ':CONTAINS',
+                          'issue-machine': ':COVERED',
+                          'issue-operator': ':REQUESTED_BY',
+                          'issue-technician': ':SOLVE_BY',
+                          'machine-machinetype': ':IS_A',
+                          'item-item': ':PARENT_OF',
+                          'problemitem-problem': ':COMPOSED_OF',
+                          'problemitem-item': ':COMPOSED_OF',
+                          'problemitem-unknown': ':COMPOSED_OF',
+                          'solutionitem-solution': ':COMPOSED_OF',
+                          'solutionitem-item': ':COMPOSED_OF',
+                          'solutionitem-unknown': ':COMPOSED_OF'}}
+
+            try:
+                self.database = DatabaseNeo4J(user = username,
+                                     password=password,
+                                     uri=uri,
+                                     schema=dict)
+
+                self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                    f'Connection created')
+
+
+                self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(True)
+
+            except (neo4j.exceptions.AddressError, neo4j.exceptions.ServiceUnavailable):
+                self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                    f'FAIL to connect to the server or port')
+
+            except neo4j.exceptions.AuthError:
+                self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                    f'FAIL during authentication for username or password')
+
+
+
+
+        def onClick_runQuery():
+
+            self.dialog_DatabaseConnection.setEnabled(False)
+            self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                f'Please wait while storing your data onto the database!!')
+
+
+            if self.tag_readable is None:
+                self.onClick_saveTrack()
+
+            df_original= self.dataframe_Original.fillna("")
+
+            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(10)
+
+            Qw.QApplication.processEvents()
+
+
+            self.database.runQueries(cypherQuery.cypherCreate_historicalMaintenanceWorkOrder(
+                schema = self.database.schema,
+                originalDataframe = df_original,
+                propertyToHeader_dict = self.config['csvheader_mapping']
+            ))
+            print("\nDONE -----> Data from Original CSV Work Order stored !!")
+
+            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(30)
+            Qw.QApplication.processEvents()
+
+            self.database.runQueries(cypherQuery.cypherCreate_tag(
+                schema = self.database.schema,
+                dataframe = self.tag_df,
+                vocab1g = self.dataframe_1Gram,
+                vocabNg = self.dataframe_NGram
+            ))
+            print("\nDONE -----> Data from Tag1g Stored!!")
+            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(60)
+            Qw.QApplication.processEvents()
+
+            self.database.runQueries(cypherQuery.cypherCreate_tag(
+                schema= self.database.schema,
+                dataframe = self.relation_df,
+                vocab1g = self.dataframe_1Gram,
+                vocabNg = self.dataframe_NGram
+            ))
+            print("\nDONE ----->  Data from TagNg stored !!")
+            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(90)
+            Qw.QApplication.processEvents()
+
+            self.database.runQueries(cypherQuery.cypherLink_Ngram1gram(
+                schema=self.database.schema
+            ))
+            print("\nDONE ----->  TagNg --> Tag1g link created !!")
+
+            self.database.runQueries(cypherQuery.cypherLink_itemIssue(
+                schema=self.database.schema
+            ))
+            print("\nDONE ----->  item -> issue link upated !!")
+
+
+            #         self.database.runQueries(cypherQuery.cypherCreate_itemsTree(
+            #     schema=self.database.schema
+            # ))
+            # print("DONE ----->  Item hierarchy created !!")
+
+            self.dialog_DatabaseConnection.progressBar_DialogDatabaseConnection_RunQueries.setValue(99)
+
+            self.dialog_DatabaseConnection.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                f'All your data have been stored!!')
+
+            self.dialog_DatabaseConnection.setEnabled(True)
+
+            Qw.QApplication.processEvents()
+
+
+        self.setEnabled(False)
+
+        rect = self.geometry()
+        rect.setHeight(300)
+        rect.setWidth(200)
+
+        self.dialog_DatabaseConnection = DialogDatabaseConnection(iconPath=self.iconPath)
+        self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_Connect.clicked.connect(onClick_connectDatabase)
+        self.dialog_DatabaseConnection.pushButton_DialogDatabaseConnection_RunQueries.clicked.connect(onClick_runQuery)
+
+        self.dialog_DatabaseConnection.setGeometry(rect)
+        self.dialog_DatabaseConnection.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.dialog_DatabaseConnection.show()
+
+
+        #self.Qw.QApplication.processEvents()
+
+
+        self.setEnabled(True)
 
     def onClick_changeClassification(self, btn):
         new_clf = self.buttonDictionary_NGram.get(btn.text())
@@ -153,11 +366,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         rect.setHeight(70)
         rect.setWidth(200)
 
-        self.window_DialogWait = DialogWait(iconPath=self.iconPath)
-        self.window_DialogWait.setGeometry(rect)
+        window_DialogWait = DialogWait(iconPath=self.iconPath)
+        window_DialogWait.setGeometry(rect)
         # block the Dialog_wait in front of all other windows
-        self.window_DialogWait.setWindowFlags(Qt.WindowStaysOnTopHint)
-        self.window_DialogWait.show()
+        window_DialogWait.show()
         Qw.QApplication.processEvents()
 
 
@@ -168,7 +380,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                          self.clean_rawText,
                                          vocab_df=self.dataframe_1Gram)
         # self.tags_read = kex._get_readable_tag_df(self.tags_df)
-        self.window_DialogWait.setProgress(30)
+        window_DialogWait.setProgress(30)
         Qw.QApplication.processEvents()
         # do 2-grams
         print('\n TWO GRAMS...')
@@ -176,7 +388,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                           self.clean_rawText_1Gram,
                                           vocab_df=self.dataframe_NGram[self.dataframe_NGram.alias.notna()])
 
-        self.window_DialogWait.setProgress(60)
+        window_DialogWait.setProgress(60)
         Qw.QApplication.processEvents()
         # merge 1 and 2-grams.
         tag_df = tags_df.join(tags2_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
@@ -193,7 +405,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.label_report_completeDocs.setText(f'Complete Docs: {tag_comp} of {len(self.tag_df)}, or {tag_comp/len(tag_df):.2%}')
         self.label_report_emptyDocs.setText(f'Empty Docs: {tag_empt} of {len(self.tag_df)}, or {tag_empt/len(self.tag_df):.2%}')
 
-        self.window_DialogWait.setProgress(90)
+        window_DialogWait.setProgress(90)
         Qw.QApplication.processEvents()
         self.completenessPlot._set_dataframe(tag_pct)
         nbins = int(np.percentile(tag_df.sum(axis=1), 90))
@@ -202,12 +414,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.dataframe_completeness = tag_pct
         # return tag_readable, tag_df
-        self.window_DialogWait.setProgress(99)
+        window_DialogWait.setProgress(99)
         Qw.QApplication.processEvents()
-        self.window_DialogWait.close()
+        window_DialogWait.close()
 
         self.setEnabled(True)
 
+        self.pushButton_report_saveNewCsv.setEnabled(True)
+        self.pushButton_report_saveBinnaryCsv.setEnabled(True)
+        #self.pushButton_report_toDatabase.setEnabled(True)
+
+        Qw.QApplication.processEvents()
 
 
     def onClick_saveNewCsv(self):
@@ -229,7 +446,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         print("Saving a Readable csv with tagged documents. ", str(fname))
         self.dataframe_Original.join(self.tag_readable).to_csv(fname)
         print('DONE!')
-
 
     def onClick_saveTagsHDFS(self):
         """generate a new csv with the document and the tag occurences (0 if not 1 if )
@@ -259,8 +475,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.relation_df.to_hdf(fname, key='rels')
         print('DONE')
         #TODO add fname to config.yml as pre-loaded "update tag extraction"
-
-
 
     def onSelectedItem_table1Gram(self):
         """action when we select an item from the 1Gram table view
@@ -587,7 +801,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         except AttributeError:
             self.radioButton_Ngram_NotClassifiedEditor.toggle()
 
-
     def _get_similarityMatches(self, token):
         """get the list of token similar to the given token
 
@@ -612,6 +825,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         return matches
 
+
     def keyPressEvent(self, event):
         """listenr on the keyboard
 
@@ -633,7 +847,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             elif self.tabWidget.currentIndex() ==1:
                 self.onClick_updateButton_NGram()
 
-
     def _set_config(self, config):
         """add to the window the values from the config dict
 
@@ -652,8 +865,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.similarityThreshold_alreadyChecked = config['value']['similarityMatrix_alreadyChecked']
 
         self.horizontalSlider_1gram_FindingThreshold.setValue(config['value']['similarityMatrix_threshold'])
-
-
 
     def _get_config(self, config):
         """replace the given config dict with a new one based on the window values
@@ -706,8 +917,6 @@ class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
 
 fname3 = 'dialogWait.ui'
 Ui_MainWindow_DialogWait, QtBaseClass_DialogWait = uic.loadUiType(script_dir/fname3)
-
-
 class DialogWait(Qw.QDialog, Ui_MainWindow_DialogWait):
 
     def __init__(self, iconPath=None):
@@ -715,9 +924,43 @@ class DialogWait(Qw.QDialog, Ui_MainWindow_DialogWait):
         Ui_MainWindow_DialogWait.__init__(self)
         self.setupUi(self)
         self.progressBar_DialogWait.setValue(0)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
 
     def setProgress(self, value):
         self.progressBar_DialogWait.setValue(value)
+
+
+fname4 = 'dialogDatabaseConnection.ui'
+Ui_MainWindow_DatabaseConnection, QtBaseClass_DialogDatabaseConnection = uic.loadUiType(script_dir/fname4)
+
+class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
+
+    def __init__(self, iconPath=None):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_DatabaseConnection.__init__(self)
+        self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        if iconPath:
+            self.setWindowIcon(QtGui.QIcon(iconPath))
+
+        self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText('Not connected to any database')
+
+        self.lineEdit_DialogDatabaseConnection_Username.setText("neo4j")
+        self.lineEdit_DialogDatabaseConnection_Password.setText("GREYSTONE!!")
+        self.lineEdit_DialogDatabaseConnection_ServerName.setText("localhost")
+        self.lineEdit_DialogDatabaseConnection_PortNumber.setText("7687")
+
+
+    def get_input(self):
+
+
+        return  self.lineEdit_DialogDatabaseConnection_Username.text(), \
+                self.lineEdit_DialogDatabaseConnection_Password.text(),\
+                self.lineEdit_DialogDatabaseConnection_ServerName.text(),\
+                self.lineEdit_DialogDatabaseConnection_PortNumber.text()
+
+
