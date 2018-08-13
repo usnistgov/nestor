@@ -3,6 +3,8 @@ import neo4j
 from .helper_objects import CompositionNGramItem, MyMplCanvas, QButtonGroup_similarityPattern, QTableWidget_token
 import nestor.keyword as kex
 
+from simplecrypt import encrypt, decrypt
+
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -803,7 +805,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
     def get_input(self):
         return  self.lineEdit_DialogDatabaseConnection_Username.text(), \
-                self.lineEdit_DialogDatabaseConnection_Password.text(),\
+                encrypt('password', self.lineEdit_DialogDatabaseConnection_Password.text()),\
                 self.lineEdit_DialogDatabaseConnection_ServerName.text(),\
                 self.lineEdit_DialogDatabaseConnection_PortNumber.text()
 
@@ -883,7 +885,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
         try:
             self.database = DatabaseNeo4J(user = username,
-                                 password=password,
+                                 password=decrypt('password', password).decode('utf8'),
                                  uri=uri,
                                  schema=dict)
 
