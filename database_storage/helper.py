@@ -26,9 +26,9 @@ def openYAMLFile(yaml_path):
     :return: a dictionary
     """
     with open(yaml_path, 'r') as yamlfile:
-        config = yaml.load(yamlfile)
+        d = yaml.load(yamlfile)
         print("yaml file open")
-    return config
+    return d
 
 
 def isoStringToDate(date):

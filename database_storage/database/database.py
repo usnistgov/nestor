@@ -197,8 +197,3 @@ class DatabaseNeo4J(object):
         return nodeProperties
 
 
-
-
-
-
-

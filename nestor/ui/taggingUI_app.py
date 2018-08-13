@@ -19,8 +19,7 @@ import PyQt5.QtWidgets as Qw
 
 from database_storage.database.database import DatabaseNeo4J
 from database_storage import main as cypherQuery
-
-
+from  database_storage.helper import openYAMLFile
 
 
 
@@ -791,6 +790,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.lineEdit_DialogDatabaseConnection_ServerName.setText("localhost")
         self.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText("7687")
         self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText("7474")
+        self.lineEdit_DialogDatabaseConnection_OpenSchema.setText("/Users/sam11/Git/nestor/database_storage/database/DatabaseSchema.yaml")
 
 
         self.checkBox_DialogDatabaseConnection_OriginalData.clicked.connect(self.check_checkBoxGroup)
@@ -800,6 +800,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.checkBox_DialogDatabaseConnection_IssueToItem.clicked.connect(self.check_checkBoxGroup)
         self.checkBox_DialogDatabaseConnection_ItemToItem.clicked.connect(self.check_checkBoxGroup)
 
+        self.pushButton_DialogDatabaseConnection_OpenSchema.clicked.connect(self.onClick_openSchema)
         self.pushButton_DialogDatabaseConnection_Connect.clicked.connect(self.onClick_connectDatabase)
         self.pushButton_DialogDatabaseConnection_RunQueries.clicked.connect(self.onClick_runQuery)
         self.pushButton_DialogDatabaseConnection_DeleteData.clicked.connect(self.onClick_removeData)
@@ -809,6 +810,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
     def get_input(self):
         return  self.lineEdit_DialogDatabaseConnection_Username.text(), \
                 encrypt('password', self.lineEdit_DialogDatabaseConnection_Password.text()),\
+                self.lineEdit_DialogDatabaseConnection_OpenSchema.text(),\
                 self.lineEdit_DialogDatabaseConnection_ServerName.text(),\
                 self.lineEdit_DialogDatabaseConnection_ServerPortNumber.text(),\
                 self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.text()
@@ -816,7 +818,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
     def onClick_openDatabase(self):
 
-        username, password, server, serverPort, browserPort = self.get_input()
+        username, password, schema_path, server, serverPort, browserPort = self.get_input()
 
         url = f'{server}:{browserPort}'
 
@@ -827,81 +829,17 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
         self.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(False)
 
-        username, password, server, serverPort, browserPort = self.get_input()
+        username, password, schema_path, server, serverPort, browserPort = self.get_input()
         uri = f'bolt://{server}:{serverPort}'
 
 
-        dict = {
-            'issue': {'label': {'issue': ':ISSUE'},
-                      'properties': {'id': 'id',
-                                     'description_problem': 'description_of_problem',
-                                     'description_solution': 'description_of_solution',
-                                     'description_cause': 'description_of_cause',
-                                     'description_effect': 'description_of_effect',
-                                     'machine_down': 'machine_down',
-                                     'necessary_part': 'necessary_part',
-                                     'part_in_process': 'part_in_process',
-                                     'cost': 'cost',
-                                     'date_machine_down': 'date_machine_down',
-                                     'date_workorder_start': 'date_maintenanceworkorder_start',
-                                     'date_maintenance_technician_arrive': 'date_maintenance_technician_arrive',
-                                     'date_problem_found': 'date_problem_found',
-                                     'date_part_ordered': 'date_part_ordered',
-                                     'date_part_received': 'date_part_received',
-                                     'date_problem_solve': 'date_problem_solve',
-                                     'date_machine_up': 'date_machine_up',
-                                     'date_workorder_completion': 'date_maintenanceworkorder_completion'}},
-            'human': {'label': {'human': ':HUMAN',
-                                'technician': ':TECHNICIAN',
-                                'operator': ':OPERATOR'},
-                      'properties': {'name': 'name', 'skills': 'skills', 'crafts': 'crafts'}},
-            'machine': {'label': {'machine': ':MACHINE', 'type': ':MACHINE_TYPE'},
-                        'properties': {'name': 'name',
-                                       'manufacturer': 'manufacturer',
-                                       'location': 'location',
-                                       'type': 'type'}},
-            'tag': {'label': {'tag': ':TAG',
-                              'onegram': ':ONE_GRAM',
-                              'ngram': ':N_GRAM',
-                              'item': ':ITEM',
-                              'problem': ':PROBLEM',
-                              'solution': ':SOLUTION',
-                              'unknown': ':UNKNOWN',
-                              'problem_item': ':PROBLEM_ITEM',
-                              'solution_item': ':SOLUTION_ITEM',
-                              'other': ':OTHER',
-                              'na': ':NA',
-                              'stopword': ':STOP_WORD'},
-                    'properties': {'keyword': 'keyword',
-                                   'synonyms': 'synonyms',
-                                   'approved': 'approved'}},
-            'edges': {'issue-itemasproblem': ':PROBLEM',
-                      'issue-itemassolution': ':SOLUTION',
-                      'issue-item': ':CONTAINS',
-                      'issue-problem': ':CONTAINS',
-                      'issue-solution': ':CONTAINS',
-                      'issue-unknown': ':CONTAINS',
-                      'issue-problemitem': ':CONTAINS',
-                      'issue-solutionitem': ':CONTAINS',
-                      'issue-na': ':CONTAINS',
-                      'issue-stopword': ':CONTAINS',
-                      'issue-machine': ':COVERED',
-                      'issue-operator': ':REQUESTED_BY',
-                      'issue-technician': ':SOLVE_BY',
-                      'machine-machinetype': ':IS_A',
-                      'item-item': ':PARENT_OF',
-                      'problemitem-problem': ':COMPOSED_OF',
-                      'problemitem-item': ':COMPOSED_OF',
-                      'problemitem-unknown': ':COMPOSED_OF',
-                      'solutionitem-solution': ':COMPOSED_OF',
-                      'solutionitem-item': ':COMPOSED_OF',
-                      'solutionitem-unknown': ':COMPOSED_OF'}}
-
         try:
+            schema = openYAMLFile(schema_path)
+
             self.database = DatabaseNeo4J(user = username,
                                  password=decrypt('password', password).decode('utf8'),
                                  uri=uri,
-                                 schema=dict)
+                                 schema=schema)
 
             self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
                 f'Connection created')
@@ -920,6 +858,11 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         except neo4j.exceptions.AuthError:
             self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
                 f'FAIL during authentication for username or password')
+            self.database = None
+
+        except FileNotFoundError:
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
+                f'FAIL cannot open the file {schema_path}')
             self.database = None
 
         self.check_checkBoxGroup()
@@ -995,7 +938,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
             # ))
             print("DONE ----->  Item hierarchy created !!")
 
-        self.progressBar_DialogDatabaseConnection_RunQueries.setValue(99)
+        self.progressBar_DialogDatabaseConnection_RunQueries.setValue(100)
 
         self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
             f'All your data have been stored!!')
@@ -1056,5 +999,14 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
             print('We delete your data.')
         else:
             print('We are NOT going to remove your data.')
+
+
+    def onClick_openSchema(self):
+
+        options = Qw.QFileDialog.Options()
+        fileName, _ = Qw.QFileDialog.getOpenFileName(self, self.lineEdit_DialogDatabaseConnection_OpenSchema.objectName(), "",
+                                                     "YAML Files (*.yaml *.yml)", options=options)
+        if fileName:
+            self.lineEdit_DialogDatabaseConnection_OpenSchema.setText(fileName)
 
 
