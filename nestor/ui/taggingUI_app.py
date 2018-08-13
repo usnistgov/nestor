@@ -4,6 +4,7 @@ from .helper_objects import CompositionNGramItem, MyMplCanvas, QButtonGroup_simi
 import nestor.keyword as kex
 
 from simplecrypt import encrypt, decrypt
+import webbrowser
 
 from pathlib import Path
 import pandas as pd
@@ -788,7 +789,8 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.lineEdit_DialogDatabaseConnection_Username.setText("neo4j")
         self.lineEdit_DialogDatabaseConnection_Password.setText("GREYSTONE!!")
         self.lineEdit_DialogDatabaseConnection_ServerName.setText("localhost")
-        self.lineEdit_DialogDatabaseConnection_PortNumber.setText("7687")
+        self.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText("7687")
+        self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText("7474")
 
 
         self.checkBox_DialogDatabaseConnection_OriginalData.clicked.connect(self.check_checkBoxGroup)
@@ -801,20 +803,32 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.pushButton_DialogDatabaseConnection_Connect.clicked.connect(self.onClick_connectDatabase)
         self.pushButton_DialogDatabaseConnection_RunQueries.clicked.connect(self.onClick_runQuery)
         self.pushButton_DialogDatabaseConnection_DeleteData.clicked.connect(self.onClick_removeData)
+        self.pushButton_DialogDatabaseConnection_OpenDatabaseBrowser.clicked.connect(self.onClick_openDatabase)
 
 
     def get_input(self):
         return  self.lineEdit_DialogDatabaseConnection_Username.text(), \
                 encrypt('password', self.lineEdit_DialogDatabaseConnection_Password.text()),\
                 self.lineEdit_DialogDatabaseConnection_ServerName.text(),\
-                self.lineEdit_DialogDatabaseConnection_PortNumber.text()
+                self.lineEdit_DialogDatabaseConnection_ServerPortNumber.text(),\
+                self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.text()
+
+
+    def onClick_openDatabase(self):
+
+        username, password, server, serverPort, browserPort = self.get_input()
+
+        url = f'{server}:{browserPort}'
+
+        webbrowser.open_new(url)
+
 
     def onClick_connectDatabase(self):
 
         self.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(False)
 
-        username, password, server, port = self.get_input()
-        uri = f'bolt://{server}:{port}'
+        username, password, server, serverPort, browserPort = self.get_input()
+        uri = f'bolt://{server}:{serverPort}'
 
 
         dict = {
