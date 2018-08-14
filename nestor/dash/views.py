@@ -179,7 +179,7 @@ def help_page():
 
 def main():
     app.secret_key='super secret key'
-    app.run(port=5000, debug=True, host='localhost')
+    app.run(port=5000, debug=True)
 
 
 if __name__ == '__main__':
