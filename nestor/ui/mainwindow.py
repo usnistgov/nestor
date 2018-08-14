@@ -1,4 +1,4 @@
-import yaml
+import pyaml, yaml
 import pandas as pd
 import chardet
 from pathlib import Path
@@ -298,7 +298,7 @@ class MainWindow:
         else:
             config = dict
             with open(yaml_path, 'w') as yamlfile:
-                yaml.dump(config, yamlfile)
+                pyaml.dump(config, yamlfile)
                 print("yaml file created")
         return config
 
@@ -319,7 +319,7 @@ class MainWindow:
 
         """
         with open(yaml_path, 'w') as yamlfile:
-            yaml.dump(dict, yamlfile)
+            pyaml.dump(dict, yamlfile)
             print("yaml file save")
 
 

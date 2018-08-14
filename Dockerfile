@@ -19,7 +19,7 @@ EXPOSE 5006
 
 RUN apt-get clean
 RUN apt-get update
-RUN apt-get -y install gcc
+#RUN apt-get -y install gcc
 
 RUN pip install .[dash]
 ENTRYPOINT ["/bin/sh", "-c", "nestor-dash"]
