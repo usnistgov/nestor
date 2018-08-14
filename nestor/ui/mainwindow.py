@@ -5,6 +5,7 @@ from pathlib import Path
 import PyQt5.QtWidgets as Qw
 
 import nestor.keyword as kex
+from collections import OrderedDict
 
 # from .. import keyword as kex
 
@@ -56,51 +57,56 @@ class MainWindow:
                            'P S': 'X'},
                 'NE_types': 'IPSUX'
             },
-            'csvheader_mapping':{
-                'issue':
-                    {
-                        'description_problem': None,
-                        'description_solution': None,
-                        'description_cause': None,
-                        'description_effect': None,
-                        'machine_down': None,
-                        'necessary_part': None,
-                        'part_in_process': None,
-                        'cost': None,
-                        'id': None,
-
-                        'date_machine_down': None,
-                        'date_workorder_start': None,
-                        'date_maintenance_technician_arrive': None,
-                        'date_solution_found': None,
-                        'date_part_ordered': None,
-                        'date_part_received': None,
-                        'date_solution_solve': None,
-                        'date_machine_up': None,
-                        'date_workorder_completion': None
-                    },
-                'technician':
-                    {
-                        'name': None,
-                        'skills': None,
-                        'crafts': None
-                    },
-                'operator':
-                    {
-                        'name': None
-                    },
-                'machine':
-                    {
-                        'name': None,
-                        'manufacturer': None,
-                        'locasion': None,
-                        'type': None
-                    }
-
-            }
+            'csvheader_mapping': None
         }
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config, self.config_new)
         self.config_new.update(self.config_default)
+
+        self.csvHeaderMapping_path = self.yamlPath / "csvHeaderMapping.yaml"
+        self.csvHeaderMapping = {
+            'issue':
+                {
+                    'description_problem': 'issue-description_problem',
+                    'description_solution': 'issue-description_solution',
+                    'description_cause': 'issue-description_cause',
+                    'description_effect': 'issue-description_effect',
+                    'machine_down': 'issue-machine_down',
+                    'necessary_part': 'issue-necessary_part',
+                    'part_in_process': 'issue-part_in_process',
+                    'cost': 'issue-cost',
+                    'id': 'issue-id',
+
+                    'date_machine_down': 'issue-date_machine_down',
+                    'date_workorder_start' : 'issue-date_workorder_start',
+                    'date_maintenance_technician_arrive': 'issue-date_maintenance_technician_arrive',
+                    'date_solution_found': 'issue-date_solution_found',
+                    'date_part_ordered': 'issue-date_part_ordered',
+                    'date_part_received': 'issue-date_part_received',
+                    'date_solution_solve': 'issue-date_solution_solve',
+                    'date_machine_up': 'issue-date_machine_up',
+                    'date_workorder_completion' : 'issue-date_workorder_completion',
+                },
+            'technician':
+                {
+                    'name': 'technician-name',
+                    'skills': 'technician-skills',
+                    'crafts': 'technician-crafts',
+                },
+            'operator':
+                {
+                    'name': 'operator-name'
+                },
+
+            'machine':
+                {
+                    'name': 'machine-name',
+                    'manufacturer': 'machine-manufacturer',
+                    'locasion': 'machine-locasion',
+                    'type': 'machine-type'
+                }
+            }
+        self.csvHeaderMapping = self.openYAMLConfig_File(self.csvHeaderMapping_path, self.csvHeaderMapping)
+
         self.tokenExtractor_1Gram = None
         self.tokenExtractor_nGram = None
 
@@ -187,9 +193,7 @@ class MainWindow:
             self.window_selectCSVHeader.csvHeaderMapping = self.config_new.get('csvheader_mapping')
             self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())
 
-            self.window_selectCSVHeader.set_config(self.config_new)
-
-
+            self.window_selectCSVHeader.set_config(self.config_new, self.csvHeaderMapping)
 
 
             self.window_selectCSVHeader.show()

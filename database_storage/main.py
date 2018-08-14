@@ -210,9 +210,9 @@ def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, prope
 
     queries = []
     for index, row in tqdm(originalDataframe.iterrows(), total=originalDataframe.shape[0]):
-        #print(row)
         issue = create_issue(row, propertyToHeader_dict, schema)
-        issue._set_id(index)
+        if issue is not None:
+            issue._set_id(index)
         machine = create_machine(row, propertyToHeader_dict, schema)
         operators = create_operators(row, propertyToHeader_dict, schema)
         technicians = create_technicians(row, propertyToHeader_dict, schema)
