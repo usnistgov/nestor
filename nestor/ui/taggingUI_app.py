@@ -295,11 +295,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         print(f"Saving {fname} as HDF5...")
 
-        self.dataframe_Original.to_hdf(fname, key='df')
+        col_map = self.config['csvheader_mapping']
+        save_df = self.dataframe_Original[list(col_map.keys())]
+        save_df = save_df.rename(columns=col_map)
+        save_df.to_hdf(fname, key='df')
+
         self.tag_df.to_hdf(fname, key='tags')
         self.relation_df.to_hdf(fname, key='rels')
         print('DONE')
-        #TODO add fname to config.yml as pre-loaded "update tag extraction"
+        # TODO add fname to config.yml as pre-loaded "update tag extraction"
 
     def onSelectedItem_table1Gram(self):
         """action when we select an item from the 1Gram table view
