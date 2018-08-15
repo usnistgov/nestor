@@ -63,7 +63,7 @@ class MainWindow:
         self.config_new.update(self.config_default)
 
         self.csvHeaderMapping_path = self.yamlPath / "csvHeaderMapping.yaml"
-        self.csvHeaderMapping = {
+        self.csvHeaderOriginal = {
             'issue':
                 {
                     'description_problem': 'issue-description_problem',
@@ -105,7 +105,7 @@ class MainWindow:
                     'type': 'machine-type'
                 }
             }
-        self.csvHeaderMapping = self.openYAMLConfig_File(self.csvHeaderMapping_path, self.csvHeaderMapping)
+        self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path, self.csvHeaderOriginal)
 
         self.tokenExtractor_1Gram = None
         self.tokenExtractor_nGram = None
@@ -193,7 +193,7 @@ class MainWindow:
             self.window_selectCSVHeader.csvHeaderMapping = self.config_new.get('csvheader_mapping')
             self.window_selectCSVHeader.set_checkBoxesValues(self.dataframe_Original.columns.values.tolist())
 
-            self.window_selectCSVHeader.set_config(self.config_new, self.csvHeaderMapping)
+            self.window_selectCSVHeader.set_config(self.config_new, self.csvHeaderOriginal)
 
 
             self.window_selectCSVHeader.show()
@@ -236,7 +236,7 @@ class MainWindow:
             self.window_selectCSVHeader.close()
 
             # send the dataframes to the tagging window
-            self.window_taggingTool._set_config(self.config_new)
+            self.window_taggingTool._set_config(self.config_new, self.csvHeaderOriginal)
             self.window_taggingTool._set_dataframes(self.dataframe_1Gram, self.dataframe_NGram)
             self.window_taggingTool._set_tokenExtractor(tokenExtractor_1Gram= self.tokenExtractor_1Gram)
             self.window_taggingTool._set_cleanRawText(clean_rawText=self.clean_rawText)
