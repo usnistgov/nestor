@@ -1,4 +1,3 @@
-
 from simplecrypt import encrypt, decrypt
 import neo4j
 import webbrowser
