@@ -137,8 +137,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.tabWidget.currentChanged.connect(changeTag)
 
-        # if dbModule_exists:
-        #     self.pushButton_report_toDatabase.setEnabled(True)
+        self.pushButton_report_toDatabase.setEnabled(True)
+
 
 
     def onClick_exportToGraphDatabase(self):
@@ -153,7 +153,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             binNg_df = self.relation_df,
             vocab1g_df = self.dataframe_1Gram,
             vocabNg_df =  self.dataframe_NGram,
-            csv_header = self.config['csvheader_mapping'],
+            csvHeaderMapping = self.config['csvheader_mapping'],
+            csvHeaderOriginal = self.csvHeaderOriginal,
             iconPath=self.iconPath)
 
         self.dialog_DatabaseConnection.setGeometry(rect)
@@ -679,7 +680,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             elif self.tabWidget.currentIndex() ==1:
                 self.onClick_updateButton_NGram()
 
-    def _set_config(self, config):
+    def _set_config(self, config, csvHeaderOriginal):
         """add to the window the values from the config dict
 
         Parameters
@@ -692,6 +693,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         """
         self.config=config
+        self.csvHeaderOriginal = csvHeaderOriginal
         self.tableWidget_1gram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
         self.tableWidget_Ngram_TagContainer.set_vocabLimit(int(self.config['value']['numberToken_show']))
         self.similarityThreshold_alreadyChecked = config['value']['similarityMatrix_alreadyChecked']

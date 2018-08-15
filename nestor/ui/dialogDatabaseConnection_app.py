@@ -20,7 +20,7 @@ Ui_MainWindow_DatabaseConnection, QtBaseClass_DialogDatabaseConnection = uic.loa
 
 class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
-    def __init__(self, original_df, bin1g_df, binNg_df, vocab1g_df, vocabNg_df, csv_header, iconPath=None):
+    def __init__(self, original_df, bin1g_df, binNg_df, vocab1g_df, vocabNg_df, csvHeaderMapping, csvHeaderOriginal,  iconPath=None):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_DatabaseConnection.__init__(self)
         self.setupUi(self)
@@ -33,7 +33,8 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.vocabNg_df = vocabNg_df
 
         #ici tu fait le reverse !!!
-        self.csv_header = csv_header
+
+        self.set_csvHeader(csvHeaderMapping, csvHeaderOriginal)
 
         self.database = None
 
@@ -42,8 +43,12 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
         self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText('Not connected to any database')
 
+        self.lineEdit_DialogDatabaseConnection_Username.setText("neo4j")
+        self.lineEdit_DialogDatabaseConnection_Password.setText("GREYSTONE!!")
+        self.lineEdit_DialogDatabaseConnection_ServerName.setText("localhost")
         self.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText("7687")
         self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText("7474")
+        self.lineEdit_DialogDatabaseConnection_OpenSchema.setText("/Users/sam11/Git/nestor/database_storage/database/DatabaseSchema.yaml")
 
 
         self.checkBox_DialogDatabaseConnection_OriginalData.clicked.connect(self.check_checkBoxGroup)
@@ -58,6 +63,20 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.pushButton_DialogDatabaseConnection_RunQueries.clicked.connect(self.onClick_runQuery)
         self.pushButton_DialogDatabaseConnection_DeleteData.clicked.connect(self.onClick_removeData)
         self.pushButton_DialogDatabaseConnection_OpenDatabaseBrowser.clicked.connect(self.onClick_openDatabase)
+
+
+        self.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(True)
+
+
+    def set_csvHeader(self, csvHeaderMapping, csvHeaderOriginal):
+
+        for key1, value1 in csvHeaderOriginal.items():
+            for key2, value2 in value1.items():
+                for keyO, valueO in csvHeaderMapping.items():
+                    if valueO == value2:
+                        csvHeaderOriginal[key1][key2] = keyO
+
+        self.csv_header = csvHeaderOriginal
 
 
     def get_input(self):
