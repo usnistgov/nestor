@@ -137,9 +137,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.tabWidget.currentChanged.connect(changeTag)
 
-        self.pushButton_report_toDatabase.setEnabled(True)
-
-
 
     def onClick_exportToGraphDatabase(self):
 
@@ -161,8 +158,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dialog_DatabaseConnection.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.dialog_DatabaseConnection.show()
 
-
-        #self.Qw.QApplication.processEvents()
 
 
     def onClick_changeClassification(self, btn):
@@ -252,8 +247,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_report_saveNewCsv.setEnabled(True)
         self.pushButton_report_saveBinnaryCsv.setEnabled(True)
 
-        if dbModule_exists:
-            self.pushButton_report_toDatabase.setEnabled(True)
+        # if dbModule_exists:
+        #     self.pushButton_report_toDatabase.setEnabled(True)
 
         Qw.QApplication.processEvents()
 

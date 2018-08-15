@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>605</width>
-    <height>557</height>
+    <width>565</width>
+    <height>529</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -266,6 +266,9 @@
      </item>
      <item row="1" column="0">
       <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_OpenDatabaseBrowser">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Open Database</string>
        </property>

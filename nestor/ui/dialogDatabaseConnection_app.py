@@ -43,13 +43,6 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
         self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText('Not connected to any database')
 
-        self.lineEdit_DialogDatabaseConnection_Username.setText("neo4j")
-        self.lineEdit_DialogDatabaseConnection_Password.setText("GREYSTONE!!")
-        self.lineEdit_DialogDatabaseConnection_ServerName.setText("localhost")
-        self.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText("7687")
-        self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText("7474")
-        self.lineEdit_DialogDatabaseConnection_OpenSchema.setText("/Users/sam11/Git/nestor/database_storage/database/DatabaseSchema.yaml")
-
 
         self.checkBox_DialogDatabaseConnection_OriginalData.clicked.connect(self.check_checkBoxGroup)
         self.checkBox_DialogDatabaseConnection_Tag1g.clicked.connect(self.check_checkBoxGroup)
@@ -64,9 +57,13 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.pushButton_DialogDatabaseConnection_DeleteData.clicked.connect(self.onClick_removeData)
         self.pushButton_DialogDatabaseConnection_OpenDatabaseBrowser.clicked.connect(self.onClick_openDatabase)
 
+        self.sheetColor = {
+                "blue":"color: rgb(27, 143, 255);",
+                "red":"color: rgb(252, 21, 7);",
+                "green":"color: rgb(28, 189, 27);"
+            }
 
-        self.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(True)
-
+        self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(self.sheetColor['blue'])
 
     def set_csvHeader(self, csvHeaderMapping, csvHeaderOriginal):
 
@@ -116,9 +113,13 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
             self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
                 f'Connection created')
 
-
             self.pushButton_DialogDatabaseConnection_RunQueries.setEnabled(True)
             self.pushButton_DialogDatabaseConnection_DeleteData.setEnabled(True)
+            self.pushButton_DialogDatabaseConnection_OpenDatabaseBrowser.setEnabled(True)
+
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(self.sheetColor['green'])
+
+            self.check_checkBoxGroup()
 
 
 
@@ -126,18 +127,22 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
             self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
                 f'FAIL to connect to the server or port')
             self.database = None
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(self.sheetColor['red'])
+
 
         except neo4j.exceptions.AuthError:
             self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
                 f'FAIL during authentication for username or password')
             self.database = None
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(self.sheetColor['red'])
+
 
         except FileNotFoundError:
             self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
                 f'FAIL cannot open the file {schema_path}')
             self.database = None
+            self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(self.sheetColor['red'])
 
-        self.check_checkBoxGroup()
 
     def onClick_runQuery(self):
 
@@ -150,6 +155,7 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.setEnabled(False)
         self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
             f'Please wait while storing your data onto the database!!')
+        self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(self.sheetColor['blue'])
 
         df_original = self.original_df.fillna("")
 
@@ -214,6 +220,8 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
         self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
             f'All your data have been stored!!')
+
+        self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(self.sheetColor['green'])
 
         self.setEnabled(True)
         Qw.QApplication.processEvents()
