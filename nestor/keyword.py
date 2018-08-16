@@ -478,7 +478,18 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     vocab.NE.replace('', np.nan, inplace=True)
     # first we need to substitute alias' for their NE identifier
     NE_dict = vocab.NE.fillna('U').to_dict()
-    NE_dict.update(vocab.fillna('U').reset_index()[['NE', 'alias']].drop_duplicates().set_index('alias').NE.to_dict())
+    NE_dict.update(vocab
+        .fillna('U')
+        .reset_index()[['NE', 'alias']]
+        .drop_duplicates()
+        .set_index('alias')
+        .NE.to_dict()
+    )
+
+    _ = NE_dict.pop('', None)
+
+    print('found bug! \t', _)
+
     NE_sub = sorted(NE_dict, key=len, reverse=True)
     # print(NE_sub)
     # print(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
@@ -496,7 +507,10 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     NE_map.update(NE_map_rules)
     # print(NE_map)
     # apply rule substitutions
-    voc2.loc[mask, 'NE'] = voc2.loc[mask, 'NE'].apply(lambda x: NE_map[x])  # special logic for custom NE type-combinations (config.yaml)
+    voc2.loc[mask, 'NE'] = (voc2
+        .loc[mask, 'NE']
+        .apply(lambda x: NE_map.get(x, ''))  # TODO ne_sub matching issue??
+    )  # special logic for custom NE type-combinations (config.yaml)
     # voc2['score'] = tex2.scores_  # should already happen?
     return voc2
 
