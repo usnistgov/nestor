@@ -1,13 +1,13 @@
 Installation
 ------------
 
-This guide helps you to install the Tagging Tool App onto your computer. There are two modes for installation. They are as follows.
+This guide will help you to install the Tagging Tool App onto your computer. There are two modes for installation. They are as follows.
 
 Install from PyPI
 ~~~~~~~~~~~~~~~~~
-(This will do a cloud install to your python installation directory)
+ (This will do a cloud install to your python installation directory)
 
-1. Open a command line terminal 
+1. Open a command line terminal
 
 
 :Linux:      ``Ctrl`` + ``Alt`` + ``T``
