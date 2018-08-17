@@ -13,7 +13,7 @@ Start the Application
 ' on a Linux machine, but the installed location might vary from one computer to another and one OS to another.
 
 
-2. Launch the app by typing in 'python app.py'
+2. Launch the app by typing in 'python ui/app.py'
 
 3. The application should open as seen below:
 
@@ -32,9 +32,13 @@ Start the Application
 |image9|
 
 6. Select the column(s) that you would like to “tag.” In this example,
-   the column is “OriginalShorttext.” Hit “Next”.
+   the column is “OriginalShorttext.” There is also a drop-down to
+   say what the column likely represents - this is for the graph based
+   representation of the tags later on. The choice made in this
+   example is "issue-description_problem". Hit “Next”.
 
 |image10|
+|image101|
 
 7. The application window will open as seen below:
 
@@ -152,19 +156,19 @@ into detail on the “N Gram Token” tab.
 
 |image21|
 
-   -  Problem Item: This is a problem-item (or item-problem) pair. For
+   -  **Problem Item**: This is a problem-item (or item-problem) pair. For
       example, “hydraulic” is an item and “leak” is a problem so
       “hydraulic leak” is a problem-item pair. The tool will
       pre-populate some problem-item pairs using the 1 grams that are
       classified as problems and items.
 
-   -  Solution Item: This is a solution-item (or item-solution) pair.
+   -  **Solution Item**: This is a solution-item (or item-solution) pair.
       For example, “hydraulic” is an item and “replace” is a solution so
       “replace hydraulic” is a solution-item pair. The tool will
       pre-populate some solution-item pairs using the 1 grams that are
       classified as solutions and items.
 
-   -  Item: This is for pairs of items that are de facto 1-grams. For
+   -  **Item**: This is for pairs of items that are de facto 1-grams. For
       example “grease” is an item, line is an “item”, but a
       “grease_line” is most likely its own “item". The tool will
       pre-populate some items based on 1 grams that are both items.
@@ -174,23 +178,23 @@ into detail on the “N Gram Token” tab.
 
 |image22|
 
-   -  Problem: This is a problem that is a 2 gram. This will be left up
+   -  **Problem**: This is a problem that is a 2 gram. This will be left up
       to the user to classify as these will not be pre-populated using 1
       gram classifications. Please note that 2 gram problems, since they
       are really being treated as 1-grams, must have an underscore (_)
       in their alias, between the 2 individual problems.
 
-   -  Solution: This is a solution that is a 2 gram. This will be left
+   -  **Solution**: This is a solution that is a 2 gram. This will be left
       up to the user to classify as these will not be pre-populated
       using 1 gram classifications. Please note that 2 gram solutions,
       since they are really being treated as 1-grams, must have an
       underscore (_) in their alias, between the 2 individual solutions.
 
-   -  Ambigious (Unknown): This is an unknown 2 gram that needs more
+   -  **Ambigious (Unknown)**: This is an unknown 2 gram that needs more
       context. This will be left up to the user to classify as these
       will not be pre-populated using 1 gram classifications.
 
-   -  Stop-word: This is 2 gram stop-word. This will be pre-populated
+   -  **Stop-word**: This is 2 gram stop-word. This will be pre-populated
       when a “solution” 1 gram is paired with a “problem” ‘ gram. The
       user can decide if any other 2 grams are not useful.
 
@@ -231,12 +235,12 @@ begin using the report tab.
 
 |image27|
 
-   -  binary_tags: The left most column contains the work order number,
+   -  **binary_tags**: The left most column contains the work order number,
       while the headers contain all 1 gram tags. A “0” is placed when
       the work order does not contain the tag in the header and a “1” is
       placed when the tag in the header is contained in the work order.
 
-   -  binary_relations: The left most column contains the work order
+   -  **binary_relations**: The left most column contains the work order
       number, while the headers contain Problem-Item and Solution-Item
       tag combinations. A “0” is placed when the work order does not
       contain the tag in the header and a “1” is placed when the tag in
@@ -247,26 +251,27 @@ begin using the report tab.
 
 
 
-.. |image6| image:: images/Graphic34_v2.png
-.. |image7| image:: images/Graphic35_v2.png
-.. |image8| image:: images/Graphics36_v2.png
-.. |image9| image:: images/Graphics37_v2.png
-.. |image10| image:: images/Graphics38_v2.png
-.. |image11| image:: images/Graphics40_v2.png
-.. |image12| image:: images/Graphics41_v2.png
-.. |image13| image:: images/Graphics42_v2.png
-.. |image14| image:: images/Graphics43_v2.png
-.. |image15| image:: images/Graphics44_v2.png
-.. |image16| image:: images/Graphics45_v2.png
-.. |image17| image:: images/Graphics46_v2.png
-.. |image18| image:: images/Graphics47_v2.png
-.. |image19| image:: images/Graphics48_v2.png
-.. |image20| image:: images/Graphics49_v2.png
-.. |image21| image:: images/Graphics50_v2.png
-.. |image22| image:: images/Graphics51_v2.png
-.. |image23| image:: images/Graphics52_v2.png
-.. |image24| image:: images/Graphics53_v2.png
-.. |image25| image:: images/Graphics54_v2.png
-.. |image26| image:: images/Graphics55_v2.png
-.. |image27| image:: images/Graphics56_v2.png
+.. |image6| image:: images/Graphic34_v3.png
+.. |image7| image:: images/Graphic35_v3.png
+.. |image8| image:: images/Graphics36_v3.png
+.. |image9| image:: images/Graphics37_v3.png
+.. |image10| image:: images/Graphics38_v3.png
+.. |image101| image:: images/Graphics38_v3_2.png
+.. |image11| image:: images/Graphics40_v3.png
+.. |image12| image:: images/Graphics41_v3.png
+.. |image13| image:: images/Graphics42_v3.png
+.. |image14| image:: images/Graphics43_v3.png
+.. |image15| image:: images/Graphics44_v3.png
+.. |image16| image:: images/Graphics45_v3.png
+.. |image17| image:: images/Graphics46_v3.png
+.. |image18| image:: images/Graphics47_v3.png
+.. |image19| image:: images/Graphics48_v3.png
+.. |image20| image:: images/Graphics49_v3.png
+.. |image21| image:: images/Graphics50_v3.png
+.. |image22| image:: images/Graphics51_v3.png
+.. |image23| image:: images/Graphics52_v3.png
+.. |image24| image:: images/Graphics53_v3.png
+.. |image25| image:: images/Graphics54_v3.png
+.. |image26| image:: images/Graphics55_v3.png
+.. |image27| image:: images/Graphics56_v3.png
 
