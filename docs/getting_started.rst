@@ -1,6 +1,7 @@
 .. _getting_started:
 
-
+Getting Started
+===============
 
 .. toctree::
    license.rst

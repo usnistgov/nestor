@@ -171,6 +171,7 @@ latex_elements = {
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
+    # 'preamble': '\\addto\\captionsenglish{\\renewcommand{\\contentsname}{Table of contents}}',
 
     # Latex figure (float) alignment
     #
