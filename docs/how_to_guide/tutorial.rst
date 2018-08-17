@@ -251,8 +251,8 @@ begin using the report tab.
 
 
 
-.. |image6| image:: images/Graphic34_v3.png
-.. |image7| image:: images/Graphic35_v3.png
+.. |image6| image:: images/Graphics34_v3.png
+.. |image7| image:: images/Graphics35_v3.png
 .. |image8| image:: images/Graphics36_v3.png
 .. |image9| image:: images/Graphics37_v3.png
 .. |image10| image:: images/Graphics38_v3.png
