@@ -9,11 +9,14 @@ application.
 Start the Application
 ---------------------
 
-1. Open a terminal window and navigate to the folder where the tagging tool is installed. For example, it may be installed in '/anaconda3/lib/python3.6/site-packages
-' on a Linux machine, but the installed location might vary from one computer to another and one OS to another.
+1. Open a terminal window 
+
+:Linux:      ``Ctrl`` + ``Alt`` + ``T``
+:Windows:    ``Windows`` + ``R`` -> Type 'cmd'
+:Mac:        ``⌘`` + ``Space`` -> Type 'Terminal'
 
 
-2. Launch the app by typing in 'python ui/app.py'
+2. Launch the app by typing in ``nestor-gui``
 
 3. The application should open as seen below:
 
@@ -32,15 +35,16 @@ Start the Application
 |image9|
 
 6. Select the column(s) that you would like to “tag.” In this example,
-   the column is “OriginalShorttext.” There is also a drop-down to
-   say what the column likely represents - this is for the graph based
-   representation of the tags later on. The choice made in this
-   example is "issue-description_problem". Hit “Next”.
+   the column is “OriginalShorttext.” 
 
 |image10|
+
+7. (OPTIONAL - COMING SOON) There is also a drop-down to say what the column likely represents - this is for the graph based
+   representation of the tags - COMING SOON! The choice made in this example is "issue-description_problem". Hit “Next”.
+
 |image101|
 
-7. The application window will open as seen below:
+8. The application window will open as seen below:
 
 |image11|
 
@@ -54,18 +58,18 @@ into detail on the “1 Gram Token” tab.
 
 -  This window contains the following information:
 
-   -  “tokens”: The token as seen in the corpus and ranked by TF-IDF
-      weighting.
+   -  **tokens**: The token as seen in the corpus and ranked by `TF-IDF weighting <http://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting>`__.
 
-   -  “NE”: This is a “Named Entity.” This column will track the
+   -  **NE**: This is a “Named Entity.” This column will track the
       classifications of the tokens, which will be explained in more
-      detail later.
+      detail later in the `Named Entity Classification Step <#sec:Classify>`__.
 
-   -  “alias”: This column tracks any aliases for tokens as made by the
+   -  **alias**: This column tracks any aliases for tokens as made by the
       tool. These represent your new “tags."
 
-   -  “notes”: This column tracks your notes for any tokens you have
+   -  **notes**: This column tracks your notes for any tokens you have
       mapped to an alias.
+
 
 -  Next, select a token to “tag.” In this example, we use “replace.”
 
@@ -73,8 +77,7 @@ into detail on the “1 Gram Token” tab.
 |image13|
 
 -  The “similar pattern” field will display words similar to the token
-   using an “edit-distance"-based metric, via
-   *`fuzzywuzzy <https://github.com/seatgeek/fuzzywuzzy>`__*. Any term
+   using an “edit-distance"-based metric, via `fuzzywuzzy <https://github.com/seatgeek/fuzzywuzzy>`__. Any term
    that is selected here will be given the same alias and classification
    as the original token. So in this example, if “replaced” is selected,
    it will be given the same alias, notes, and classification as
@@ -89,25 +92,26 @@ into detail on the “1 Gram Token” tab.
 
 |image15|
 
+.. _sec:Classify:
+
 -  This field is where the user can classify the “token.” The
    classifications provided are:
 
-   -  “Item”: The objects directly relevant to the issue such as
+   -  **Item**: The objects directly relevant to the issue such as
       machine, resources, parts, etc. An example is a “pump” is always
       an item, however, “pumping” would not be an item.
 
-   -  “Problem”: The problem that is occurring at an item. An example is
+   -  **Problem**: The problem that is occurring at an item. An example is
       “leak” is always a problem.
 
-   -  “Solution”: The solution action taken on an item. An example is
+   -  **Solution**: The solution action taken on an item. An example is
       “replace” is always a solution.
 
-   -  “Ambiguous (Unknown)”: Words that are unknown without more
+   -  **Ambiguous (Unknown)**: Words that are unknown without more
       context. An example is “oil” as this can be an item or a solution.
-      This is further described in the N Gram Token tab section
-      `4.3 <#sec:Ngram>`__
+      This is further described in the `N Gram Token tab section <#sec:Ngram>`__
 
-   -  “Stop-word”: A word that does not matter for analysis. For
+   -  **Stop-word**: A word that does not matter for analysis. For
       example, “see” or “according” are stop-words.
 
 |image16|
@@ -129,7 +133,7 @@ into detail on the “N Gram Token” tab.
 -  The N Gram token tab will provide detail on common 2 grams tokens,
    ordered in TF-IDF ranking, for the corpus (e.g., “hydraulic leak” is
    a common 2 gram in some data sets). The 2 grams can also provide more
-   context for the “Uknown” classifications from the above section. For
+   context for the “Unknown” classifications from the above section. For
    example, “oil” is unknown until the user is provided more context.
 
 |image18|
@@ -156,47 +160,21 @@ into detail on the “N Gram Token” tab.
 
 |image21|
 
-   -  **Problem Item**: This is a problem-item (or item-problem) pair. For
-      example, “hydraulic” is an item and “leak” is a problem so
-      “hydraulic leak” is a problem-item pair. The tool will
-      pre-populate some problem-item pairs using the 1 grams that are
-      classified as problems and items.
+- **Problem Item**: This is a problem-item (or item-problem) pair. For example, “hydraulic” is an item and “leak” is a problem so “hydraulic leak” is a problem-item pair. The tool will pre-populate some problem-item pairs using the 1 grams that are classified as problems and items. The user will need to confirm these pairs are correct. 
 
-   -  **Solution Item**: This is a solution-item (or item-solution) pair.
-      For example, “hydraulic” is an item and “replace” is a solution so
-      “replace hydraulic” is a solution-item pair. The tool will
-      pre-populate some solution-item pairs using the 1 grams that are
-      classified as solutions and items.
+-  **Solution Item**: This is a solution-item (or item-solution) pair. For example, “hydraulic” is an item and “replace” is a solution so “replace hydraulic” is a solution-item pair. The tool will pre-populate some solution-item pairs using the 1 grams that are classified as solutions and items. The user will need to confirm these pairs are correct. 
 
-   -  **Item**: This is for pairs of items that are de facto 1-grams. For
-      example “grease” is an item, line is an “item”, but a
-      “grease_line” is most likely its own “item". The tool will
-      pre-populate some items based on 1 grams that are both items.
-      Please note that 2 gram items, since they are really being treated
-      as 1-grams, must have an underscore (_) in their alias, between
-      the 2 individual items as seen below:
+-  **Item**: This is for pairs of items that are de facto 1-grams. For example “grease” is an item, line is an “item”, but a “grease_line” is most likely its own “item". The tool will pre-populate some items based on 1 grams that are both items. The user will need to confirm these pairs are correct. Please note that 2 gram items, since they are really being treated as 1-grams, must have an underscore (_) in their alias, between the 2 individual items as seen below:
 
 |image22|
 
-   -  **Problem**: This is a problem that is a 2 gram. This will be left up
-      to the user to classify as these will not be pre-populated using 1
-      gram classifications. Please note that 2 gram problems, since they
-      are really being treated as 1-grams, must have an underscore (_)
-      in their alias, between the 2 individual problems.
+-  **Problem**: This is a problem that is a 2 gram. This will be left up to the user to classify as these will not be pre-populated using 1 gram classifications. Please note that 2 gram problems, since they are  being treated as 1-grams, must have an underscore (_) in their alias, between the 2 individual problems.
 
-   -  **Solution**: This is a solution that is a 2 gram. This will be left
-      up to the user to classify as these will not be pre-populated
-      using 1 gram classifications. Please note that 2 gram solutions,
-      since they are really being treated as 1-grams, must have an
-      underscore (_) in their alias, between the 2 individual solutions.
+-  **Solution**: This is a solution that is a 2 gram. This will be left up to the user to classify as these will not be pre-populated using 1 gram classifications. Please note that 2 gram solutions, since they are really being treated as 1-grams, must have an underscore (_) in their alias, between the 2 individual solutions.
 
-   -  **Ambigious (Unknown)**: This is an unknown 2 gram that needs more
-      context. This will be left up to the user to classify as these
-      will not be pre-populated using 1 gram classifications.
+-  **Ambigious (Unknown)**: This is an unknown 2 gram that needs more context. This will be left up to the user to classify as these will not be pre-populated using 1 gram classifications.
 
-   -  **Stop-word**: This is 2 gram stop-word. This will be pre-populated
-      when a “solution” 1 gram is paired with a “problem” ‘ gram. The
-      user can decide if any other 2 grams are not useful.
+-  **Stop-word**: This is 2 gram stop-word. This will be pre-populated when a “solution” 1 gram is paired with a “problem” ‘ gram. The user can decide if any other 2 grams are not useful.
 
 Report tab
 ----------------------------------
@@ -205,7 +183,7 @@ Once the user is done tagging their desired amount of tokens, they can
 begin using the report tab.
 
 -  Please make sure to hit the “update tag extraction” button before
-   proceeding. This may take some time to compute.
+   proceeding. This may take some time to compute. Please note on Windows computers, the application may state "Not Responding", however, the application is often still running. 
 
 |image23|
 
@@ -217,7 +195,13 @@ begin using the report tab.
 
 |image24|
 
--  Summary statistics are also shown.
+-  Summary statistics are also shown: 
+
+   -  **Tag PPV**: This is the Tag `Positive Predictive Value (PPV) <https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values>`__.
+
+   -  **Complete Docs**: This is the number of MWOs that have all of the tokens completely tagged. In this example, 548 MWOs are completely tagged out of a possible 5485, which is 9.99%. 
+
+   -  **Empty Docs**: This is the number of MWOs that have zero tokens tagged. In this example, 953 MWOs have no tokens tagged out of a possible 5485, which is 17.37%. 
 
 |image25|
 
@@ -235,16 +219,9 @@ begin using the report tab.
 
 |image27|
 
-   -  **binary_tags**: The left most column contains the work order number,
-      while the headers contain all 1 gram tags. A “0” is placed when
-      the work order does not contain the tag in the header and a “1” is
-      placed when the tag in the header is contained in the work order.
+-  **binary_tags**: The left most column contains the work order number, while the headers contain all 1 gram tags. A “0” is placed when the work order does not contain the tag in the header and a “1” is placed when the tag in the header is contained in the work order.
 
-   -  **binary_relations**: The left most column contains the work order
-      number, while the headers contain Problem-Item and Solution-Item
-      tag combinations. A “0” is placed when the work order does not
-      contain the tag in the header and a “1” is placed when the tag in
-      the header is contained in the work order.
+-  **binary_relations**: The left most column contains the work order number, while the headers contain Problem-Item and Solution-Item tag combinations. A “0” is placed when the work order does not contain the tag in the header and a “1” is placed when the tag in the header is contained in the work order.
 
 
 

@@ -75,7 +75,7 @@ Points of Contact
 ~~~~~~~~~~~~~~~~~
 
 -  `Michael Brundage <https://www.nist.gov/people/michael-p-brundage>`__    Principal Investigator
--  `Thurston Sexton <https://github.com/tbsexton>`__                        Technical Lead
+-  `Thurston Sexton <https://github.com/tbsexton>`__                        Nestor Technical Lead
 
 
 Contributors:
@@ -83,8 +83,8 @@ Contributors:
 
 :Thurston Sexton:               @tbsexton
 :Sascha Moccozet:               @saschaMoccozet
-:Madhusudanan Navinchandran:    @msngit
 :Michael Brundage:              @MichaelPBrundage
+:Madhusudanan Navinchandran:    @msngit
 :Emily Hastings:                @emhastings
 :Lela Bones:                    @lelatbones
 
