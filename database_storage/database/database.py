@@ -196,4 +196,19 @@ class DatabaseNeo4J(object):
 
         return nodeProperties
 
+    def getTokenTagClassification(self):
+
+       return self.runQuery(f'MATCH (tag:TAG)\
+                        UNWIND tag.synonyms as token\
+                        RETURN token AS tokens, tag.keyword AS alias,\
+                        CASE\
+                            WHEN "PROBLEM" in labels(tag) THEN "P"\
+                            WHEN "ITEM" in labels(tag) THEN "I"\
+                            WHEN "SOLUTION" in labels(tag) THEN "S"\
+                            WHEN "UNKNOWN" in labels(tag) THEN "U"\
+                            WHEN "SOLUTION_ITEM" in labels(tag) THEN "S I"\
+                            WHEN "PROBLEM_ITEM" in labels(tag) THEN "P I"\
+                            ELSE ""\
+                        END AS NE')
+
 
