@@ -226,8 +226,6 @@ begin using the report tab.
 
 
 
-
-
 .. |image6| image:: images/Graphics34_v3.png
 .. |image7| image:: images/Graphics35_v3.png
 .. |image8| image:: images/Graphics36_v3.png
