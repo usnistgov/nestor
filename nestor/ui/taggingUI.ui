@@ -20,7 +20,7 @@
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -609,24 +609,8 @@
            <layout class="QGridLayout" name="gridLayout_report_general">
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_report_action">
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_report_saveNewCsv">
-                <property name="text">
-                 <string>New file with columns [I,P,S,X,U]. Tags are comma-
-separated for readability. NA tags ommitted. 
- It will be save in your csv folder as READABLE_TAGS</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveTrack">
-                <property name="text">
-                 <string>UPDATE TAG EXTRACTION</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <spacer name="verticalSpacer_9">
+              <item row="6" column="0">
+               <spacer name="verticalSpacer_10">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
                 </property>
@@ -641,32 +625,8 @@ separated for readability. NA tags ommitted.
                 </property>
                </spacer>
               </item>
-              <item row="3" column="0" colspan="3">
-               <widget class="Line" name="line_6">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_report_keepTrack">
-                <property name="text">
-                 <string>Save your progress. DO THIS BEFORE SAVING A CSV!</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveNewCsv">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>create new CSV</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="0">
-               <spacer name="verticalSpacer_10">
+              <item row="4" column="0">
+               <spacer name="verticalSpacer_9">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
                 </property>
@@ -691,6 +651,63 @@ computationally and for vizualization. . </string>
                 </property>
                </widget>
               </item>
+              <item row="7" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>create a binary CSV</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveNewCsv">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>create new CSV</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_report_saveNewCsv">
+                <property name="text">
+                 <string>New file with columns [I,P,S,X,U]. Tags are comma-
+separated for readability. NA tags ommitted. 
+ It will be save in your csv folder as READABLE_TAGS</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveTrack">
+                <property name="text">
+                 <string>UPDATE TAG EXTRACTION</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" colspan="3">
+               <widget class="Line" name="line_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_report_keepTrack">
+                <property name="text">
+                 <string>Save your progress. DO THIS BEFORE SAVING A CSV!</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="0">
+               <widget class="QLabel" name="label_report_toDatabase">
+                <property name="text">
+                 <string>Add the data onto a database</string>
+                </property>
+               </widget>
+              </item>
               <item row="8" column="0">
                <spacer name="verticalSpacer_12">
                 <property name="orientation">
@@ -707,13 +724,13 @@ computationally and for vizualization. . </string>
                 </property>
                </spacer>
               </item>
-              <item row="7" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
+              <item row="9" column="1">
+               <widget class="QPushButton" name="pushButton_report_toDatabase">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>create a binary CSV</string>
+                 <string>Export to GraphDatabase</string>
                 </property>
                </widget>
               </item>
@@ -809,42 +826,10 @@ computationally and for vizualization. . </string>
     </property>
     <addaction name="actionAbout_TagTool"/>
    </widget>
-   <widget class="QMenu" name="menuDatabase">
-    <property name="title">
-     <string>Database</string>
-    </property>
-    <addaction name="actionConnect"/>
-    <addaction name="actionRun_Query"/>
-    <addaction name="actionOpen_Database"/>
-   </widget>
-   <widget class="QMenu" name="menuAuto_populate">
-    <property name="title">
-     <string>Auto-populate</string>
-    </property>
-    <widget class="QMenu" name="menu_AutoPopulate_FromDatabase">
-     <property name="title">
-      <string>From Database</string>
-     </property>
-     <addaction name="action_AutoPopulate_FromDatabase_1gramVocab"/>
-     <addaction name="action_AutoPopulate_FromDatabase_NgramVocab"/>
-    </widget>
-    <widget class="QMenu" name="menu_AutoPopulate_FromCSV">
-     <property name="title">
-      <string>From CSV</string>
-     </property>
-     <addaction name="action_AutoPopulate_FromCSV_1gramVocab"/>
-     <addaction name="action_AutoPopulate_FromCSV_NgramVocab"/>
-    </widget>
-    <addaction name="menu_AutoPopulate_FromDatabase"/>
-    <addaction name="menu_AutoPopulate_FromCSV"/>
-    <addaction name="actionFrom_AutoPopulate_From1gramVocab"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuDatabase"/>
-   <addaction name="menuAuto_populate"/>
-   <addaction name="menuAbout"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_1Gram_Vocab">
@@ -900,55 +885,6 @@ computationally and for vizualization. . </string>
   <action name="actionAbout_TagTool">
    <property name="text">
     <string>about TagTool</string>
-   </property>
-  </action>
-  <action name="actionConnect">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Connect</string>
-   </property>
-  </action>
-  <action name="actionRun_Query">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Run Query</string>
-   </property>
-  </action>
-  <action name="actionOpen_Database">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Open Database</string>
-   </property>
-  </action>
-  <action name="action_AutoPopulate_FromDatabase_1gramVocab">
-   <property name="text">
-    <string>1gram Vocab</string>
-   </property>
-  </action>
-  <action name="action_AutoPopulate_FromDatabase_NgramVocab">
-   <property name="text">
-    <string>Ngram Vocab</string>
-   </property>
-  </action>
-  <action name="actionFrom_AutoPopulate_From1gramVocab">
-   <property name="text">
-    <string>From 1gram Vocab</string>
-   </property>
-  </action>
-  <action name="action_AutoPopulate_FromCSV_1gramVocab">
-   <property name="text">
-    <string>1gram Vocab</string>
-   </property>
-  </action>
-  <action name="action_AutoPopulate_FromCSV_NgramVocab">
-   <property name="text">
-    <string>Ngram Vocab</string>
    </property>
   </action>
  </widget>
