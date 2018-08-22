@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 import configparser
 from subprocess import Popen, PIPE
 from pathlib import Path
+from version import get_version
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -12,20 +13,6 @@ from pathlib import Path
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
-
-
-def get_version():
-    """
-    Returns project version as string from 'git describe' command.
-    """
-    pipe = Popen('git describe --tags --always', stdout=PIPE, shell=True)
-    version = pipe.stdout.read()
-    if version:
-        return version.decode('utf-8').lstrip('v').rstrip()
-    else:
-        return 'X.Y'
-
-print(get_version())
 
 def run_setup(packages, install_requires, extras_require):
     # populate the version_info dictionary with values stored in the version file
