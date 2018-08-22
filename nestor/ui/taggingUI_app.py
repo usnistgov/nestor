@@ -11,7 +11,6 @@ dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
 
 
 
-
 if dbModule_exists:
     from .dialogDatabaseConnection_app import DialogDatabaseConnection
     from database_storage.helper import resultToObservationDataframe
@@ -372,9 +371,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.pushButton_report_saveNewCsv.setEnabled(True)
         self.pushButton_report_saveBinnaryCsv.setEnabled(True)
-
-        # if dbModule_exists:
-        #     self.pushButton_report_toDatabase.setEnabled(True)
 
         Qw.QApplication.processEvents()
 

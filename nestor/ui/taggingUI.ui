@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>EATT Knowledge:  TagTool</string>
+   <string>NIST: Nestor Tagging Tool</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -20,7 +20,7 @@
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -684,10 +684,11 @@ separated for readability. NA tags ommitted.
               <item row="7" column="0">
                <widget class="QLabel" name="label_report_saveBinnary">
                 <property name="text">
-                 <string>New file with hierarchical columns [I,P,S,X,U]
-[&lt;tags in vocabulary&gt;]. (1) indicates presence 
-of a tag, (0) that it is missing. Much more efficient 
-computationally and for vizualization. . </string>
+                 <string>New binary file store (*.h5) with three keys: 
+
+ &quot;df&quot;: columns from original data with updated headers 
+ &quot;tags&quot;: binary occurrence matrix for each tag-document pair
+ &quot;rels&quot;: PI/SI-document pair occurrence matrix</string>
                 </property>
                </widget>
               </item>
@@ -713,7 +714,7 @@ computationally and for vizualization. . </string>
                  <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>create a binary CSV</string>
+                 <string>create a HDFS (binary)</string>
                 </property>
                </widget>
               </item>
@@ -967,7 +968,7 @@ computationally and for vizualization. . </string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_1Gram_Classification"/>
   <buttongroup name="buttonGroup_NGram_Classification"/>
+  <buttongroup name="buttonGroup_1Gram_Classification"/>
  </buttongroups>
 </ui>
