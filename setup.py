@@ -14,18 +14,20 @@ from version import get_version
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
 
+VERSION = get_version()
+
 def run_setup(packages, install_requires, extras_require):
     # populate the version_info dictionary with values stored in the version file
     # print(packages)
     setup(
         name = "Nestor",
-        version = get_version(),
+        version = VERSION,
         author = "Thurston Sexton",
         author_email = "thurston.sexton@nist.gov",
         description = ("Quantifying tacit human knowledge for Smart Manufacturing Maintenance,\
                         for maintnenance-based investigatory analysis"),
         keywords = "nlp smart manufacturing maintenance tag app",
-        url = "https://github.com/usnistgov/nestor",
+        url = "https://github.com/usnistgov/nestor/",
         packages=packages,
         long_description=read('README.rst'),
         classifiers=[
