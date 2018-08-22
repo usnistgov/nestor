@@ -148,6 +148,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromCSV)
 
+        self.actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromCSV)
+
         if dbModule_exists:
 
             self.actionConnect.setEnabled(True)
@@ -249,12 +251,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.menu_Database_connect.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.menu_Database_connect.show()
 
-        self.menu_Database_connect.lineEdit_DialogDatabaseConnection_Username.setText("neo4j")
-        self.menu_Database_connect.lineEdit_DialogDatabaseConnection_Password.setText("GREYSTONE!!")
-        self.menu_Database_connect.lineEdit_DialogDatabaseConnection_OpenSchema.setText("/Users/sam11/Git/nestor/database_storage/database/DatabaseSchema.yaml")
-        self.menu_Database_connect.lineEdit_DialogDatabaseConnection_ServerName.setText("localhost")
-        self.menu_Database_connect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText("7687")
-        self.menu_Database_connect.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText("7474")
 
     def onClick_DialogConnectToDatabase(self):
         self.database = self.menu_Database_connect.get_database()

@@ -302,4 +302,14 @@ qtDesignerFile_tosDialog = script_dir/fname3
 Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_tosDialog)
 
 
+class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
+    """Class to instantiate window showing NIST license. FUTURE: any other versioning information."""
+    def __init__(self, iconPath=None, closeFunction=None):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_tosDialog.__init__(self)
+        self.setupUi(self)
+        self.closeFunction = closeFunction
+
+        if iconPath:
+            self.setWindowIcon(QtGui.QIcon(iconPath))
 
