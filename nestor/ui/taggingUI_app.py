@@ -9,11 +9,12 @@ simplecrypt_spec = importlib.util.find_spec("simplecrypt")
 
 dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
 
-from database_storage.helper import resultToObservationDataframe
+
 
 
 if dbModule_exists:
-    from .menu_app import  DialogDatabaseConnection, DialogDatabaseRunQuery ,TermsOfServiceDialog
+    from .dialogDatabaseConnection_app import DialogDatabaseConnection
+    from database_storage.helper import resultToObservationDataframe
 
 
 from pathlib import Path
@@ -372,6 +373,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.pushButton_report_saveNewCsv.setEnabled(True)
         self.pushButton_report_saveBinnaryCsv.setEnabled(True)
 
+        # if dbModule_exists:
+        #     self.pushButton_report_toDatabase.setEnabled(True)
+
         Qw.QApplication.processEvents()
 
     def onClick_saveNewCsv(self):
@@ -540,7 +544,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
 
             self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
-
             self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
             self.tableWidget_Ngram_TagContainer.selectRow(self.tableWidget_Ngram_TagContainer.currentRow() + 1)
 
@@ -855,6 +858,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         self.closeFunction(event)
 
+
+# Now the ToS dialog .ui file
+fname2 = 'termsOfUse.ui'
+qtDesignerFile_tosDialog = script_dir/fname2
+Ui_MainWindow_tosDialog, QtBaseClass_tos_Dialog = uic.loadUiType(qtDesignerFile_tosDialog)
+
+
+class TermsOfServiceDialog(Qw.QDialog, Ui_MainWindow_tosDialog):
+    """Class to instantiate window showing NIST license. FUTURE: any other versioning information."""
+    def __init__(self, iconPath=None, closeFunction=None):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_tosDialog.__init__(self)
+        self.setupUi(self)
+        self.closeFunction = closeFunction
+
+        if iconPath:
+            self.setWindowIcon(QtGui.QIcon(iconPath))
 
 
 fname3 = 'dialogWait.ui'

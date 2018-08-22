@@ -5,7 +5,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import seaborn as sns
-from qtpy import QtGui
 
 
 class QTableWidget_token(Qw.QTableWidget):
@@ -45,11 +44,7 @@ class QTableWidget_token(Qw.QTableWidget):
 
         """
 
-
-
-
         if self.dataframe is not None:
-
             temp_df = self.dataframe.reset_index()
             nrows, ncols = temp_df.shape
             self.setColumnCount(ncols - 1)  # ignore score column
@@ -58,20 +53,10 @@ class QTableWidget_token(Qw.QTableWidget):
                 for j in range(ncols - 1):  # ignore score column
                     self.setItem(i, j, Qw.QTableWidgetItem(str(temp_df.iat[i, j])))
 
-            i
-            try:
-                for index in self.userUpdate:
-                    if index <1000:
-                        self.item(index, 0).setBackground(QtGui.QColor(77, 255, 184))
-
-            except AttributeError:
-                pass
-
             self.resizeColumnsToContents()
             self.resizeRowsToContents()
             self.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
             self.setSelectionBehavior(Qw.QTableWidget.SelectRows)
-
 
 
 class QButtonGroup_similarityPattern(Qw.QButtonGroup):
