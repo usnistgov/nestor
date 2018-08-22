@@ -23,7 +23,7 @@ Start the Application
 |image6|
 
 4. Open your .csv file with your MWOs. Included in the application, is a
-   publicly available dataset. We will use this file (mine_raw.csv) as
+   publicly available dataset. We will use this file (excavators.csv) as
    the example.
 
 |image7|
