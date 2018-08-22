@@ -138,36 +138,24 @@ class MyOpenFilesWindow(Qw.QMainWindow, Ui_MainWindow_openFiles):
         -------
 
         """
-        # if we are on a Windows machine
-        if os.name == 'nt':
-            separator = '\\'
-        else:
-            separator = '/'
 
+        og_path = Path(self.lineEdit_openFiles_OriginalCSV.text())
         if self.lineEdit_openFiles_OriginalCSV.text():
-            config['file']['filePath_OriginalCSV']['path'] = self.lineEdit_openFiles_OriginalCSV.text()
-            path_list = config['file']['filePath_OriginalCSV']['path'].split(separator)
-            name_list = path_list[-1].split('.')
+            config['file']['filePath_OriginalCSV']['path'] = str(og_path.absolute())
 
             if self.lineEdit_openFiles_1GramCSV.text():
-                config['file']['filePath_1GrammCSV']['path'] = self.lineEdit_openFiles_1GramCSV.text()
+                g1_path = Path(self.lineEdit_openFiles_1GramCSV.text())
             else:
-                path = path_list
-                name = "_1Gram.".join(name_list)
-                path[-1] = name
-                path = separator.join(path)
-
-                config['file']['filePath_1GrammCSV']['path'] = path
+                g1_fname, g1_ext = og_path.stem, og_path.suffix
+                g1_path = Path(og_path.parent, g1_fname+'_1GramVocab'+g1_ext)
+            config['file']['filePath_1GrammCSV']['path'] = str(g1_path.absolute())
 
             if self.lineEdit_openFiles_NgramCSV.text():
-                config['file']['filePath_nGrammCSV']['path'] = self.lineEdit_openFiles_NgramCSV.text()
-            else :
-                path = path_list
-                name = "_nGram.".join(name_list)
-                path[-1] = name
-                path = separator.join(path)
-
-                config['file']['filePath_nGrammCSV']['path'] = path
+                gN_path = Path(self.lineEdit_openFiles_NgramCSV.text())
+            else:
+                gN_fname, gN_ext = og_path.stem, og_path.suffix
+                gN_path = Path(og_path.parent, gN_fname+'_NGramVocab'+gN_ext)
+            config['file']['filePath_nGrammCSV']['path'] = str(gN_path.absolute())
 
             config['value']['numberToken_show'] = self.lineEdit_openFiles_numberTokenShow.text()
             config['value']['similarityMatrix_threshold'] = self.horizontalSlider_openFiles_similarityMatrixThreshold.value()
