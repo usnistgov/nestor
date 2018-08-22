@@ -11,7 +11,7 @@ dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
 
 
 if dbModule_exists:
-    from .dialogDatabaseConnection_app import  DialogDatabaseConnection
+    from .dialogDatabaseConnection_app import DialogDatabaseConnection
 
 
 from pathlib import Path
@@ -128,8 +128,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.buttonGroup_NGram_Classification.buttonClicked.connect(self.onClick_changeClassification)
 
         self.pushButton_report_toDatabase.clicked.connect(self.onClick_exportToGraphDatabase)
-
-
 
         # Load up the terms of service class/window
         self.terms_of_use = TermsOfServiceDialog(iconPath=self.iconPath) # doesn't need a close button, just "x" out

@@ -26,6 +26,8 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
+        self.projectPath = Path(__file__).parent.parent.parent
+
         self.original_df = original_df
         self.bin1g_df = bin1g_df
         self.binNg_df = binNg_df
@@ -43,6 +45,8 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
         self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText('Not connected to any database')
 
+        self.dbschema_path =self.projectPath/'database_storage'/'database'/'DatabaseSchema.yaml'
+        self.lineEdit_DialogDatabaseConnection_OpenSchema.setText(str(self.dbschema_path))
 
         self.checkBox_DialogDatabaseConnection_OriginalData.clicked.connect(self.check_checkBoxGroup)
         self.checkBox_DialogDatabaseConnection_Tag1g.clicked.connect(self.check_checkBoxGroup)

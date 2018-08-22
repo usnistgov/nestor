@@ -5,6 +5,9 @@ from PyQt5 import QtCore
 import sys
 import traceback
 
+from pathlib import Path
+
+import os
 
 def exception_handler(type_, value, traceback_):
     if qApp.thread() is QtCore.QThread.currentThread():
@@ -42,4 +45,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+   main()

@@ -4,6 +4,8 @@ import chardet
 from pathlib import Path
 import PyQt5.QtWidgets as Qw
 
+import os
+
 import nestor.keyword as kex
 from collections import OrderedDict
 
@@ -18,6 +20,7 @@ from .taggingUI_app import MyTaggingToolWindow, TermsOfServiceDialog
 class MainWindow:
     def __init__(self):
         self.icnoPtah=None
+        self.projectPath = Path(__file__).parent.parent.parent
         self.yamlPath = Path.home()/'.nestor-tmp'
         print(self.yamlPath)
         self.yamlPath.mkdir(parents=True, exist_ok=True)
@@ -62,50 +65,11 @@ class MainWindow:
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config, self.config_new)
         self.config_new.update(self.config_default)
 
-        self.csvHeaderMapping_path = self.yamlPath / "csvHeaderMapping.yaml"
-        self.csvHeaderOriginal = {
-            'issue':
-                {
-                    'description_problem': 'issue-description_problem',
-                    'description_solution': 'issue-description_solution',
-                    'description_cause': 'issue-description_cause',
-                    'description_effect': 'issue-description_effect',
-                    'machine_down': 'issue-machine_down',
-                    'necessary_part': 'issue-necessary_part',
-                    'part_in_process': 'issue-part_in_process',
-                    'cost': 'issue-cost',
-                    'id': 'issue-id',
 
-                    'date_machine_down': 'issue-date_machine_down',
-                    'date_workorder_start' : 'issue-date_workorder_start',
-                    'date_maintenance_technician_arrive': 'issue-date_maintenance_technician_arrive',
-                    'date_solution_found': 'issue-date_solution_found',
-                    'date_part_ordered': 'issue-date_part_ordered',
-                    'date_part_received': 'issue-date_part_received',
-                    'date_solution_solve': 'issue-date_solution_solve',
-                    'date_machine_up': 'issue-date_machine_up',
-                    'date_workorder_completion' : 'issue-date_workorder_completion',
-                },
-            'technician':
-                {
-                    'name': 'technician-name',
-                    'skills': 'technician-skills',
-                    'crafts': 'technician-crafts',
-                },
-            'operator':
-                {
-                    'name': 'operator-name'
-                },
+        self.csvHeaderMapping_path = self.projectPath/ 'database_storage' / 'database'/ 'csvHeader.yaml'
+        self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path)
 
-            'machine':
-                {
-                    'name': 'machine-name',
-                    'manufacturer': 'machine-manufacturer',
-                    'locasion': 'machine-locasion',
-                    'type': 'machine-type'
-                }
-            }
-        self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path, self.csvHeaderOriginal)
+        print(self.csvHeaderOriginal)
 
         self.tokenExtractor_1Gram = None
         self.tokenExtractor_nGram = None
