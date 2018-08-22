@@ -31,6 +31,7 @@ def get_version():
         if '-' in version:
             if version.endswith('-dirty'):
                 raise RuntimeError('The working tree is dirty')
+            print(version)
             version = '.post'.join(version.split('-')[:2])
 
     else:
