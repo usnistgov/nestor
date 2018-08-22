@@ -84,37 +84,29 @@ class MainWindow:
         self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow, self.selectWindow_to_taggingWindow)
         self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow)
 
+        self.window_taggingTool.actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.onClick_windowTaggingTool_selectTab)
+
 
         #send the old config value to initialize the view
         self.window_OpenFiles.set_config(self.config_default)
         self.window_OpenFiles.show()
 
-    # # DEPRECATED!
-    # def onClick_windowTaggingTool_selectTab(self, index):
-    #     """when changing the tab in the taggingUI window (from the 1gram to the Ngram)
-    #     Update the Ngram Dataframe and print it back
-    #     :return:
-    #
-    #     Parameters
-    #     ----------
-    #     index :
-    #
-    #
-    #     Returns
-    #     -------
-    #
-    #     """
-    #
-    #     # if Ngramm
-    #     if index == 1:
-    #         # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(init = NEED THIS)
-    #         self.update_ngram_from_1gram(init=self.dataframe_NGram)
-    #         self.window_taggingTool._set_dataframes(dataframe_NGram=self.dataframe_NGram)
-    #     # elif index == 2:
-    #     #     df = self.window_taggingTool.dataframe_completeness
-    #     #     self.window_taggingTool.completenessPlot._set_dataframe(df)
-    #     #     self.window_taggingTool.completenessPlot.plot_it()
-    #
+    def onClick_windowTaggingTool_selectTab(self, index):
+        """when changing the tab in the taggingUI window (from the 1gram to the Ngram)
+        Update the Ngram Dataframe and print it back
+        :return:
+
+        Parameters
+        ----------
+        index :
+
+
+        Returns
+        -------
+
+        """
+        self.update_ngram_from_1gram(init=self.dataframe_NGram)
+        self.window_taggingTool._set_dataframes(dataframe_NGram=self.dataframe_NGram)
 
     def openWindow_to_selectWindow(self):
         """When click on the save button in the OpenFiles Window

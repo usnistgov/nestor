@@ -148,8 +148,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromCSV)
 
-        self.actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromCSV)
-
         if dbModule_exists:
 
             self.actionConnect.setEnabled(True)
@@ -159,7 +157,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_1gramVocab)
             self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_NgramVocab)
-
 
 
     def setMenu_AutoPopulate_FromCSV(self):
