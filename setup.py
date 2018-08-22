@@ -31,11 +31,12 @@ def run_setup(packages, install_requires, extras_require):
         packages=packages,
         long_description=read('README.rst'),
         classifiers=[
-            "Development Status :: 2 - Pre-Alpha",
-            'Intended Audience :: Science/Research'
+            "Development Status :: 3 - Alpha",
+            'Intended Audience :: Science/Research',
             'Intended Audience :: Manufacturing',
             'Topic :: Scientific/Engineering :: Information Analysis',
             'Programming Language :: Python :: 3',
+            'License :: Public Domain'
         ],
         # scripts=[
         #     'scripts/nestor-gui',
