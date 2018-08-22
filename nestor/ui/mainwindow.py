@@ -84,14 +84,14 @@ class MainWindow:
         #instanciate windows
         self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah, self.close_otherWindow, self.openWindow_to_selectWindow)
         self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow, self.selectWindow_to_taggingWindow)
-        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow, self.onClick_windowTaggingTool_selectTab)
+        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow)
 
 
         #send the old config value to initialize the view
         self.window_OpenFiles.set_config(self.config_default)
         self.window_OpenFiles.show()
 
-
+    # DEPRECATED!
     def onClick_windowTaggingTool_selectTab(self, index):
         """when changing the tab in the taggingUI window (from the 1gram to the Ngram)
         Update the Ngram Dataframe and print it back
