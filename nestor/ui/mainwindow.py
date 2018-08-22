@@ -69,8 +69,6 @@ class MainWindow:
         self.csvHeaderMapping_path = self.projectPath/ 'nestor' / 'ui'/ 'csvHeader.yaml'
         self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path)
 
-        print(self.csvHeaderOriginal)
-
         self.tokenExtractor_1Gram = None
         self.tokenExtractor_nGram = None
 

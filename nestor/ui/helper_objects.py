@@ -1,5 +1,6 @@
 from PyQt5.QtCore import Qt
 import PyQt5.QtWidgets as Qw
+import PyQt5.QtGui as Qg
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -61,7 +62,7 @@ class QTableWidget_token(Qw.QTableWidget):
             try:
                 for index in self.userUpdate:
                     if index <1000:
-                        self.item(index, 0).setBackground(QtGui.QColor(77, 255, 184))
+                        self.item(index, 0).setBackground(Qg.QColor(77, 255, 184))
 
             except AttributeError:
                 pass

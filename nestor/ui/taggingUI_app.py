@@ -7,7 +7,9 @@ import importlib
 neo4j_spec = importlib.util.find_spec("neo4j")
 simplecrypt_spec = importlib.util.find_spec("simplecrypt")
 
-dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
+#dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
+
+dbModule_exists = False
 
 
 
