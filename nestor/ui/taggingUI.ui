@@ -20,7 +20,7 @@
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -810,6 +810,9 @@ computationally and for vizualization. . </string>
     <addaction name="actionAbout_TagTool"/>
    </widget>
    <widget class="QMenu" name="menuDatabase">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Database</string>
     </property>
@@ -818,10 +821,16 @@ computationally and for vizualization. . </string>
     <addaction name="actionOpen_Database"/>
    </widget>
    <widget class="QMenu" name="menuAuto_populate">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>Auto-populate</string>
     </property>
     <widget class="QMenu" name="menu_AutoPopulate_FromDatabase">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="title">
       <string>From Database</string>
      </property>
@@ -829,6 +838,9 @@ computationally and for vizualization. . </string>
      <addaction name="action_AutoPopulate_FromDatabase_NgramVocab"/>
     </widget>
     <widget class="QMenu" name="menu_AutoPopulate_FromCSV">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="title">
       <string>From CSV</string>
      </property>
