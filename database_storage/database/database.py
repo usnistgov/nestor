@@ -14,7 +14,6 @@ Description:
    but will respect the graph schema created to solve our problem
    It use the neo4j driver for python
 """
-import pandas as pd
 from tqdm import tqdm
 from neo4j.v1 import GraphDatabase
 
@@ -26,7 +25,7 @@ class DatabaseNeo4J(object):
         - uri: the server url
         - user: the user of the database
         - password: the passsword of the use
-        - schema : a dictionary the desrcibe the schame of the databse (node label, edges label, properies name) -see the YAML file database_storage/database/DatabaseSchema.yaml-
+        - schema : a dictionary the desrcibe the schame of the databse (node label, edges label, properies name) -see the YAML file _database_storage/database/DatabaseSchema.yaml-
 
     It also contains the methods to transform the result from self.runQuery() into dataframe
 
@@ -58,7 +57,22 @@ class DatabaseNeo4J(object):
                 result = session.write_transaction(self._execute_code, query)
             return 1, result
         except:
+            print("cannot run the query")
             return 0, None
+
+    def runQueries(self, queries):
+        """
+        execute all the query from an array of queries
+        :param queries:
+        :return: 1
+        """
+
+        for query in tqdm(queries):
+            done, result = self.runQuery(query)
+
+            if not done:
+                print("ERROR on Maintenance Work Order \tOn query\n", query, "\n\n")
+        return 1
 
     def deleteData(self):
         """
@@ -99,6 +113,25 @@ class DatabaseNeo4J(object):
         return 1
 
 
+    def createConstraints(self):
+        """
+        Create the constriants on the database
+        :return: 1 if it works
+        """
+        self.runQuery(f'CREATE CONSTRAINT ON (issue{self.schema["issue"]["label"]["issue"]}) ASSERT issue.{self.schema["issue"]["properties"]["id"]} IS UNIQUE')
+        return 1
+
+    def dropConstraints(self):
+        """
+        Delete all constraints from the database
+        :return: 1 if it works
+        """
+        with self._driver.session() as session:
+            indexes = session.write_transaction(self._execute_code, "CALL db.constraints")
+            for index in indexes:
+                session.write_transaction(self._execute_code, "DROP %s" % (index[0]))
+        return 1
+
     @staticmethod
     def _execute_code(tx, query):
         """
@@ -109,3 +142,73 @@ class DatabaseNeo4J(object):
         """
         result = tx.run(query)
         return result
+
+
+    def getAllPropertiesOf(self, node):
+        query = f'MATCH {node} WITH DISTINCT keys(node) as keys\n' \
+                f'UNWIND keys AS keyslisting WITH DISTINCT keyslisting AS poprerties\n' \
+                f'RETURN poprerties'
+
+        result = self.runQuery(query)[1]
+
+        return list(r.values()[0] for r in result)
+
+
+    def getAllNode(self):
+        nodeType = {
+            '(node:ISSUE)': 'issue',
+
+            '(node:HUMAN)' : 'human',
+            '(node:HUMAN:TECHNICIAN)' : 'technician',
+            '(node:HUMAN:OPERATOR)' : 'operator',
+
+            '(node:MACHINE)': 'machine',
+            '(node:MACHINE_TYPE)': 'type of machine',
+
+            '(node:TAG)': 'all tags',
+
+            '(node:TAG:ONE_GRAM)': 'tags one_gram',
+            '(node:TAG:N_GRAM)': 'tags n_gram',
+            '(node:TAG:OTHER)': 'tags other',
+
+            '(node:TAG:ONE_GRAM:PROBLEM)': 'tags problem',
+            '(node:TAG:ONE_GRAM:SOLUTION)': 'tags solution',
+            '(node:TAG:OTHER:NA)': 'tags na',
+            '(node:TAG:OTHER:STOPWORD)': 'tags stop_word',
+
+            '(node:TAG:N_GRAM:PROBLEM_ITEM)': 'tags problem_item',
+            '(node:TAG:N_GRAM:SOLUTION_ITEM)': 'tags solution_item',
+
+            '(node:TAG:ONE_GRAM:ITEM)': 'tags item',
+            '(node:TAG:ONE_GRAM:ITEM)<-[:PROBLEM]-(issue:ISSUE)' : 'tag item as problem',
+            '(node:TAG:ONE_GRAM:ITEM)<-[:SOLUTION]-(issue:ISSUE)' : 'tag item as solution',
+        }
+
+        nodeProperties = {}
+
+        for key, value in nodeType.items():
+            nodeResult = self.runQuery(f'MATCH {key}\nRETURN count(node) as count')
+            for res in nodeResult[1].records():
+                if res['count'] > 0:
+
+                    list = self.getAllPropertiesOf(key)
+                    nodeProperties[value] = list
+
+        return nodeProperties
+
+    def getTokenTagClassification(self):
+
+       return self.runQuery(f'MATCH (tag:TAG)\
+                        UNWIND tag.synonyms as token\
+                        RETURN token AS tokens, tag.keyword AS alias,\
+                        CASE\
+                            WHEN "PROBLEM" in labels(tag) THEN "P"\
+                            WHEN "ITEM" in labels(tag) THEN "I"\
+                            WHEN "SOLUTION" in labels(tag) THEN "S"\
+                            WHEN "UNKNOWN" in labels(tag) THEN "U"\
+                            WHEN "SOLUTION_ITEM" in labels(tag) THEN "S I"\
+                            WHEN "PROBLEM_ITEM" in labels(tag) THEN "P I"\
+                            ELSE ""\
+                        END AS NE')
+
+

@@ -19,22 +19,6 @@ from tqdm import tqdm
 from datetime import datetime
 import collections
 
-# def openYAMLFile(yaml_path, dict=None):
-#     """
-#     open a Yaml file based on the given path
-#     the there are no file, setup the yaml file based on the given dict
-#     :return: a dictionary
-#     """
-#     try:
-#         with open(yaml_path, 'r') as yamlfile:
-#             config = yaml.load(yamlfile)
-#             print("yaml file open")
-#         return config
-#     except FileNotFoundError:
-#         with open(yaml_path, 'w') as yamlfile:
-#             yaml.dump(dict, yamlfile)
-#             print("yaml file created")
-#         return dict
 
 def openYAMLFile(yaml_path):
     """
@@ -42,9 +26,9 @@ def openYAMLFile(yaml_path):
     :return: a dictionary
     """
     with open(yaml_path, 'r') as yamlfile:
-        config = yaml.load(yamlfile)
+        d = yaml.load(yamlfile)
         print("yaml file open")
-    return config
+    return d
 
 
 def isoStringToDate(date):
@@ -56,17 +40,17 @@ def isoStringToDate(date):
     """
     try:
         return datetime(year=int(date[:4]), month=int(date[5:7]), day=int(date[8:10]), hour=int(date[11:13]), minute=int(date[14:16]))
-    except AttributeError and ValueError:
+    except (AttributeError, ValueError):
         pass
 
     try:
         return datetime(year=int(date[:4]), month=int(date[5:7]), day=int(date[8:10]), hour=int(date[11:13]))
-    except AttributeError and ValueError:
+    except (AttributeError, ValueError):
         pass
 
     try:
         return datetime(year=int(date[:4]), month=int(date[5:7]), day=int(date[8:10]))
-    except AttributeError and ValueError:
+    except (AttributeError, ValueError):
         pass
 
     return None
@@ -114,6 +98,7 @@ def resultToObservationDataframe(result):
         print("The dataframe cannot be created")
     return dataframe_observation
 
+
 def standardizeString(string):
     """
     clean the string for all the string input into the database
@@ -123,3 +108,19 @@ def standardizeString(string):
     :return: a clean string
     """
     return string.replace('\\','\\\\').replace("'","\\'").lstrip()
+
+
+def getListCollumnDataframe(dataframe, rownumber, classification):
+    """
+    for a given dataframe , a row number and a classification,
+    Return a Serie of the 1 value
+    """
+    serie = dataframe[classification].iloc[rownumber]
+    return serie[serie > 0].index.values
+
+
+def getListIndexDataframe(dataframe, keyword, classification):
+    serie = dataframe[classification][keyword]
+
+    return serie[serie > 0].axes[0].tolist()
+

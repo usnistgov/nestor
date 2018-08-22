@@ -89,7 +89,8 @@ class Issue:
                  date_maintenance_technician_arrive=None,
                  date_problem_found=None, date_problem_solved=None,
                  date_part_ordered=None, date_part_received=None,
-                 databaseInfo=None):
+                 databaseInfo=None,
+                 id=None):
         self.databaseInfoIssue = databaseInfo['issue']
         self.label = self.databaseInfoIssue['label']['issue']
 
@@ -116,6 +117,14 @@ class Issue:
 
         self._set_date_part_ordered(date_part_ordered)
         self._set_date_part_received(date_part_received)
+
+        self._set_id(id)
+
+    def _get_id(self):
+        return self.id
+
+    def _set_id(self, id):
+        self.id = id
 
     def _get_problem(self):
         return self.problem
@@ -177,10 +186,10 @@ class Issue:
         return self.machine_down
 
     def _set_machine_down(self, machine_down):
-        if machine_down == "y" or machine_down == "yes" or machine_down == "true" or machine_down == "t" or machine_down == "1":
-            self.machine_down = True
-        elif machine_down == "n" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
-            self.machine_down = False
+        if machine_down == "y" or machine_down == "Y" or machine_down == "yes" or machine_down == "true" or machine_down == "t" or machine_down == "1":
+            self.machine_down = "True"
+        elif machine_down == "n" or machine_down == "N" or machine_down == "no" or machine_down == "false" or machine_down == "f" or machine_down == "0":
+            self.machine_down = "False"
         else:
             self.machine_down = None
 
@@ -360,14 +369,14 @@ class Issue:
         except TypeError:
             self.time_to_return_to_operation = None
 
-    def _get_time_to_issue_work_order(self):
-        return self.time_to_issue_work_order
+    def _get_time_to_issue_workorder(self):
+        return self.time_to_issue_workorder
 
-    def _set_time_to_issue_work_order(self):
+    def _set_time_to_issue_workorder(self):
         try:
-            self.time_to_issue_work_order = self.date_workorder_start - self.date_machine_down
+            self.time_to_issue_workorder = self.date_workorder_start - self.date_machine_down
         except TypeError:
-            self.time_to_issue_work_order = None
+            self.time_to_issue_workorder = None
 
     def _get_time_to_travel(self):
         return self.time_to_travel
@@ -441,7 +450,7 @@ class Issue:
         self._set_time_work_order_completion()
         self._set_time_to_dispatch()
         self._set_time_to_return_to_operation()
-        self._set_time_to_issue_work_order()
+        self._set_time_to_issue_workorder()
         self._set_time_to_travel()
         self._set_time_to_solve_problem()
         self._set_time_to_diagnose()
@@ -496,7 +505,7 @@ class Issue:
                f'\ttime_work_order_completion  =  {self.time_work_order_completion}\n' \
                f'\ttime_to_dispatch  =  {self.time_to_dispatch}\n' \
                f'\ttime_to_return_to_operation  =  {self.time_to_return_to_operation}\n' \
-               f'\ttime_to_issue_work_order  =  {self.time_to_issue_work_order}\n' \
+               f'\ttime_to_issue_work_order  =  {self.time_to_issue_workorder}\n' \
                f'\ttime_to_travel  =  {self.time_to_travel}\n' \
                f'\ttime_to_solve_problem  =  {self.time_to_solve_problem}\n' \
                f'\ttime_to_diagnose  =  {self.time_to_diagnose}\n' \
@@ -519,7 +528,6 @@ class Issue:
         :param variable_issue: default "issue" to refer to a specific ISSUE
         :return: a string - Cypher Query : (issue:ISSUE{description_of_problem:"x", description_of_solution:"x", ...})
         """
-
         query = f'({variable_issue}{self.label}'
         if self.problem or self.solution or self.cause or self.effects or self.part_in_process or self.necessary_part \
                 or self.machine_down or self.date_machine_up or self.date_machine_down \
@@ -542,24 +550,26 @@ class Issue:
             if self.machine_down:
                 query += f'{self.databaseInfoIssue["properties"]["machine_down"]}:\'{self.machine_down}\','
             if self.date_machine_up:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:\'{self.date_machine_up}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_up"]}:\'{self.date_machine_up.isoformat()}\','
             if self.cost:
                 query += f'{self.databaseInfoIssue["properties"]["cost"]}:{self.cost},'
             if self.date_machine_down:
-                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:\'{self.date_machine_down }\','
+                query += f'{self.databaseInfoIssue["properties"]["date_machine_down"]}:\'{self.date_machine_down.isoformat() }\','
             if self.date_workorder_start:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:\'{self.date_workorder_start}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_start"]}:\'{self.date_workorder_start.isoformat()}\','
             if self.date_workorder_completion:
-                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:\'{self.date_workorder_completion}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_workorder_completion"]}:\'{self.date_workorder_completion.isoformat()}\','
             if self.date_maintenance_technician_arrive:
-                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:\'{self.date_maintenance_technician_arrive}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_maintenance_technician_arrive"]}:\'{self.date_maintenance_technician_arrive.isoformat()}\','
             if self.date_problem_found:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:\'{self.date_problem_found}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_found"]}:\'{self.date_problem_found.isoformat()}\','
             if self.date_problem_solve:
-                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:\'{self.date_problem_solve}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_problem_solve"]}:\'{self.date_problem_solv.isoformat()}\','
             if self.date_part_ordered:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_part_ordered"]}:\'{self.date_part_ordered.isoformat()}\','
             if self.date_part_received:
-                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received}\','
+                query += f'{self.databaseInfoIssue["properties"]["date_part_received"]}:\'{self.date_part_received.isoformat()}\','
+            if self.id:
+                query += f'{self.databaseInfoIssue["properties"]["id"]}:{self.id},'
             query = query[:-1] + "}"
         return query + ")"

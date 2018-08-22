@@ -2,6 +2,7 @@ issue:
   label:
     issue: ':ISSUE'
   properties:
+    id : id
     description_problem: description_of_problem
     description_solution: description_of_solution
     description_cause: description_of_cause
@@ -20,6 +21,7 @@ issue:
     date_problem_solve: date_problem_solve
     date_machine_up: date_machine_up
     date_workorder_completion : date_maintenanceworkorder_completion
+
 
 human:
   label:
@@ -52,9 +54,13 @@ tag:
     unknown: ':UNKNOWN'
     problem_item: ':PROBLEM_ITEM'
     solution_item: ':SOLUTION_ITEM'
+    other: ':OTHER'
+    na: ':NA'
+    stopword: ':STOP_WORD'
   properties:
     keyword: keyword
     synonyms: synonyms
+    approved: approved
 
 edges:
   issue-itemasproblem: ':PROBLEM'
@@ -65,16 +71,17 @@ edges:
   issue-unknown: ':CONTAINS'
   issue-problemitem: ':CONTAINS'
   issue-solutionitem: ':CONTAINS'
+  issue-na: ':CONTAINS'
+  issue-stopword: ':CONTAINS'
   issue-machine: ':COVERED'
   issue-operator: ':REQUESTED_BY'
   issue-technician: ':SOLVE_BY'
   machine-machinetype: ':IS_A'
   item-item: ':PARENT_OF'
-#  problemitem-problem: ':COMPOSED_OF'
-#  problemitem-item: ':COMPOSED_OF'
-#  solutionitem-solution: ':COMPOSED_OF'
-#  solutionitem-item: ':COMPOSED_OF'
-#  solutionitem-onegram: ':COMPOSED_OF'
-#  problemitem-onegram: ':COMPOSED_OF'
-  ngram-onegram: ':COMPOSED_OF'
+  problemitem-problem: ':COMPOSED_OF'
+  problemitem-item: ':COMPOSED_OF'
+  problemitem-unknown: ':COMPOSED_OF'
+  solutionitem-solution: ':COMPOSED_OF'
+  solutionitem-item: ':COMPOSED_OF'
+  solutionitem-unknown: ':COMPOSED_OF'
 

@@ -15,71 +15,20 @@ Description:
     but will respect the graph schema created to solve our problem.
 """
 
-
+from tqdm import tqdm
 
 from database_storage.objects.human import *
 from database_storage.objects.issue import *
 from database_storage.objects.maintenanceworkorder import *
 from database_storage.objects.tag import *
-from tqdm import tqdm
-
 from database_storage.objects.machine import *
 
-charsplit = ','
-def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
-    """
-    This function is used to import a certain kind of CSV data into the graph database
-    The data should follow this structure but doesn't have to contains all the headers.
-    The header's name are define by the input -propertyToHeader_dict- :
-        * Maintenance Work order specific information:
-            - description_of_problem
-            - description_of_solution
-            - description_of_cause
-            - description_of_effect
-            - machine_down
-            - necessary_part
-            - part_in_process
-            - cost
-            - date_machine_down
-            - date_maintenanceworkorder_start
-            - date_maintenance_technician_arrive
-            - date_problem_found
-            - date_part_ordered
-            - date_part_received
-            - date_problem_solve
-            - date_machine_up
-            - date_maintenanceworkorder_completion
-        Technician information:
-            - name
-            - skills
-            - crafts
-        Operator information:
-            - name
-        Machine information:
-            - name
-            - manufacturer
-            - location
-            - type
-        Tag Item, Tag Solution, Tag Problem, Tag Unknown, Tag ProblemItem, Tag SolutionItem Infornations:
-            - keyword
-            - synonyms
-
-    In our case, the Tag informations are extracted using the KeyWordExtractor module we created for this purpose
-    Or the tagging App (UI created in front end to extract the tag)
-
-    To see an example of this CSV, you can see the OpenSource Public Mining Data <Refer to Melinda's project>
+from  database_storage.helper import getListIndexDataframe
 
 
+def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, propertyToHeader_dict):
 
-    :param database: Database object from the module database_storage.database.database
-    :param dataframe: Dataframe object from the Pandas Library - represent the of the CSV file -
-        See example of the CSV in data/mine_data/csvHeader.yaml
-    :param propertyToHeader_dict: dictionary which match the header of the Dataframe (and so tha csv file)
-        to the database property and node see example in the file data/mine_data/mine_raw.csv
-    :return: 1 when the function has been executed with success - your data are now in your graph database -
-    """
-
-    def create_issue(row,propertyToHeader_issue):
+    def create_issue(row, propertyToHeader_issue, schema):
         """
         Create the Object ISSUE from a row in the dataframe that represent the READABLECSV created by the key.py file
 
@@ -91,8 +40,16 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         issue = None
 
         try:
+            # print("----------")
+            # print(row)
+            # print(propertyToHeader_dict)
+            # print(schema)
             issue = Issue(problem=row[propertyToHeader_issue['issue']['description_problem']],
-                          databaseInfo=database.schema)
+                          databaseInfo=schema)
+            try:
+                issue._set_id(row[propertyToHeader_issue['issue']['id']])
+            except:
+                pass
             try:
                 issue._set_solution(row[propertyToHeader_issue['issue']['description_solution']])
             except KeyError:
@@ -121,7 +78,6 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
                 issue._set_cost(row[propertyToHeader_issue['issue']['cost']])
             except KeyError:
                 pass
-            #TODO add a date clenizer for only 1 value
             try:
                 issue._set_date_machine_down(row[propertyToHeader_issue['issue']['date_machine_down']])
             except KeyError:
@@ -139,7 +95,8 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
             except KeyError:
                 pass
             try:
-                issue._set_date_maintenance_technician_arrive(row[propertyToHeader_issue['issue']['date_maintenance_technician_arrive']])
+                issue._set_date_maintenance_technician_arrive(
+                    row[propertyToHeader_issue['issue']['date_maintenance_technician_arrive']])
             except KeyError:
                 pass
             try:
@@ -163,7 +120,7 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
             pass
         return issue
 
-    def create_technicians(row, propertyToHeader_technician):
+    def create_technicians(row, propertyToHeader_technician, schema):
         """
         Create an array of TECHNICIAN Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
@@ -171,7 +128,7 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         :param propertyToHeader_technician: a dictionaries that link the header of the CSV data to the properties of the object
         :return: an array of TECNICIANs empty if something goes wrong or if there are not technician un the csv
         """
-        charsplit = "/"
+        charsplit = '/'
         skills = []
         try:
             for skill in row[propertyToHeader_technician['technician']['skills']].split(charsplit):
@@ -190,13 +147,14 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         try:
             if row[propertyToHeader_technician['technician']['name']]:
                 for name in row[propertyToHeader_technician['technician']['name']].split(charsplit):
-                    technicians.append(Technician(name=name, skills=skills, crafts=crafts, databaseInfo=database.schema))
+                    technicians.append(
+                        Technician(name=name, skills=skills, crafts=crafts, databaseInfo=schema))
         except KeyError:
             pass
 
         return technicians
 
-    def create_operators(row,propertyToHeader_operator):
+    def create_operators(row, propertyToHeader_operator, schema):
         """
         Create an array of OPERATOR Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
@@ -209,13 +167,13 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
         try:
             if row[propertyToHeader_operator['operator']['name']]:
                 for name in row[propertyToHeader_operator['operator']['name']].split(charsplit):
-                    operators.append(Operator(name=name, databaseInfo=database.schema))
+                    operators.append(Operator(name=name, databaseInfo=schema))
         except KeyError:
             pass
 
         return operators
 
-    def create_machine(row, propertyToHeader_machine):
+    def create_machine(row, propertyToHeader_machine, schema):
         """
         Create a MACHINE Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
 
@@ -228,24 +186,20 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
 
         try:
             if row[propertyToHeader_machine['machine']['name']]:
-                machine = Machine(name=row[propertyToHeader_machine['machine']['name']], databaseInfo=database.schema)
-                #print(row[propertyToHeader_machine['name']])
+                machine = Machine(name=row[propertyToHeader_machine['machine']['name']], databaseInfo=schema)
 
                 try:
                     machine._set_manufacturer(row[propertyToHeader_machine['machine']['manufacturer']])
-                    #print(row[propertyToHeader_machine['manufacturer']])
                 except KeyError:
                     pass
 
                 try:
                     machine._set_machine_type(row[propertyToHeader_machine['machine']['type']])
-                    #print(row[propertyToHeader_machine['type']])
                 except KeyError:
                     pass
 
                 try:
                     machine._set_locasion(row[propertyToHeader_machine['machine']['locasion']])
-                    #print(row[propertyToHeader_machine['locasion']])
                 except KeyError:
                     pass
 
@@ -254,206 +208,198 @@ def graphDatabase_from_TaggedCSV(database, dataframe, propertyToHeader_dict):
 
         return machine
 
-    def create_items(row, propertyToHeader_item):
-        """
-        Create an array of TAGITEMS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
+    queries = []
+    for index, row in tqdm(originalDataframe.iterrows(), total=originalDataframe.shape[0]):
+        issue = create_issue(row, propertyToHeader_dict, schema)
+        if issue is not None:
+            issue._set_id(index)
+        machine = create_machine(row, propertyToHeader_dict, schema)
+        operators = create_operators(row, propertyToHeader_dict, schema)
+        technicians = create_technicians(row, propertyToHeader_dict, schema)
 
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_item: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGITEMS empty if something goes wrong or if there are not item_tag un the csv
-        """
-        charsplit = ','
-        items = []
+        mwo = MaintenanceWorkOrder(issue=issue,
+                                   machine=machine,
+                                   operators=operators,
+                                   technicians=technicians,
+                                   databaseSchema=schema
+                                   )
 
-        try:
-            if row[propertyToHeader_item['item']["keyword"]]:
-                for item in row[propertyToHeader_item['item']["keyword"]].split(charsplit):
-                    items.append(TagItem(keyword=item, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return items
-
-    def create_problems(row, propertyToHeader_problem):
-        """
-        Create an array of TAGPROBLEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_problem: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGPROBLEM empty if something goes wrong or if there are not problem_tag un the csv
-        """
-        charsplit = ','
-        problems = []
-
-        try:
-            if row[propertyToHeader_problem['problem']["keyword"]]:
-                for problem in row[propertyToHeader_problem['problem']["keyword"]].split(charsplit):
-                    problems.append(TagProblem(keyword=problem, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return problems
-
-    def create_solutions(row, propertyToHeader_solution):
-        """
-        Create an array of TAGSOLUTION Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_solution: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGSOLUTION empty if something goes wrong or if there are not solution_tag un the csv
-        """
-        charsplit = ','
-        solutions = []
-
-        try:
-            if row[propertyToHeader_solution['solution']["keyword"]]:
-                for solution in row[propertyToHeader_solution['solution']["keyword"]].split(charsplit):
-                    solutions.append(TagSolution(keyword=solution, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return solutions
-
-    def create_unknowns(row, propertyToHeader_unknown):
-        """
-        Create an array of TAGUNKNOWNS Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_unknown: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGUNKNOWNS empty if something goes wrong or if there are not unknown_tag un the csv
-        """
-        charsplit = ','
-        unknowns = []
-
-        try:
-            if row[propertyToHeader_unknown['unknown']["keyword"]]:
-                for unknown in row[propertyToHeader_unknown['unknown']["keyword"]].split(charsplit):
-                    unknowns.append(TagUnknown(keyword=unknown, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return unknowns
-
-    def create_problemItems(row, propertyToHeader_problemItem):
-        """
-        Create an array of TAGPROBLEMITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_problemItem: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGPROBLEMITEM empty if something goes wrong or if there are not problemitem_tag un the csv
-        """
-        charsplit = ','
-        problemItems = []
-
-        try:
-            if row[propertyToHeader_problemItem['problemitem']["keyword"]]:
-                for problemItem in row[propertyToHeader_problemItem['problemitem']["keyword"]].split(charsplit):
-                    problemItems.append(TagProblemItem(keyword=problemItem, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return problemItems
-
-    def create_solutionItems(row, propertyToHeader_solutionItem):
-        """
-        Create an array of TAGSOLUTIONITEM Objects from a row in the dataframe that represent the READABLECSV created by the key.py file
-
-        :param row: a row from the dataframe that represent a whole MaintemanceWorkOrder from the CSV file
-        :param propertyToHeader_solutionItem: a dictionaries that link the header of the CSV data to the properties of the object
-        :return: an array of TAGSOLUTIONITEM empty if something goes wrong or if there are not solutionitem_tag un the csv
-        """
-        charsplit = ','
-        solutionItems = []
-
-        try:
-            if row[propertyToHeader_solutionItem['solutionitem']["keyword"]]:
-                for solutionItem in row[propertyToHeader_solutionItem['solutionitem']["keyword"]].split(charsplit):
-                    solutionItems.append(TagSolutionItem(keyword=solutionItem, databaseInfo=database.schema))
-        except KeyError:
-            pass
-
-        return solutionItems
-
-
-    def TODO_inagine_linkedItem(items):
-        """
-        This function is actually used to create a child for the item and so make the ITEM --> ITEM relationship
-        It is temporaly and only use to tray some queries
-
-        It should be implemented from the user as an item hierarchy
-        :param items:
-        :return:
-        """
-        charsplit="_"
-        newItems = []
-
-        for item in items:
-            if not charsplit in item._get_keyword():
-                newItems.append(item)
-            else:
-                tmp = item._get_keyword().split(charsplit)
-                item._set_children(tmp, database.schema)
-                newItems.append(item)
-        return newItems
-
-
-    #for each row in the dataframe
-    for index, row in tqdm(dataframe.iterrows(), total=dataframe.shape[0]):
-
-        # creat the objects
-        issue = create_issue(row, propertyToHeader_dict)
-        machine = create_machine(row, propertyToHeader_dict)
-        operators = create_operators(row, propertyToHeader_dict)
-        technicians = create_technicians(row, propertyToHeader_dict)
-        items = create_items(row, propertyToHeader_dict)
-        problems = create_problems(row, propertyToHeader_dict)
-        solutions = create_solutions(row, propertyToHeader_dict)
-        unknowns = create_unknowns(row, propertyToHeader_dict)
-        problemItems = create_problemItems(row, propertyToHeader_dict)
-        solutionItems = create_solutionItems(row, propertyToHeader_dict)
-
-        #create a Maintenance Work Order object from the object above
-        mwo = MaintenanceWorkOrder(issue = issue,
-                                   machine = machine,
-                                   operators = operators,
-                                   technicians = technicians,
-                                   tag_items = items,
-                                   tag_problems = problems,
-                                   tag_solutions = solutions,
-                                   tag_unknowns = unknowns,
-                                   tag_problemItems = problemItems,
-                                   tag_solutionsItems = solutionItems,
-                                   databaseInfo=database.schema
-        )
-
-        queries = []
-        #create nodes and the relationship between issue and node
         queries.append(mwo.cypher_mwo_createIssueOtherRelationship())
 
-        #link each TagNGram with his composed OneGram
-        queries += mwo.cypher_mwo_createNgram1GramRelationaship()
-
-        #link each item to his parents
-        #for the example we will assume that and ITEM_ITEM is composed of two ITEMs
-        newItems = TODO_inagine_linkedItem(items)
-        # for i in mwo.tag_items:
-        #     print(i)
-        queries += mwo.cypher_mwo_createItemItemRelationaship()
+    return queries
 
 
-        #link the Item to Issue based on PROBLEM or SOLUTION
-        queries += mwo.cypher_mwo_updateIssueItemRelationaship()
+def cypherCreate_tag(schema, dataframe, vocab1g=None, vocabNg=None, allTag=False):
+    """
+    create the query for all the tages, and link it to the given issue
+    :param binnaryDataframe:
+    :return:
+    """
 
 
-        #run the query into the database
+    def toSpecialtag(keyword, synonyms, classification):
+        """
+        Create a tag object from the type based on the classification
+        :param keyword: the name of the tag
+        :param classification: the type of tag I=Item, P=Problem, S=Solution, U=Unknown, S I=SolutionItem, P I=ProblemItem
+        :return:
+        """
 
-        for query in queries:
-            #print(query)
-            done, result = database.runQuery(query)
-            if not done:
-                print(query)
-                #print("ERROR on Maintenance Work Order ", index, "\tOn query", query, "\n\n")
+        if classification == "I":
+            return TagItem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_itemTag_all("tag"), \
+                   schema["edges"]["issue-item"]
+        if classification == "S":
+            return TagSolution(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_solutionTag_all("tag"),\
+                   schema["edges"]["issue-solution"]
+        if classification == "P":
+            return TagProblem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_problemTag_all("tag"),\
+                   schema["edges"]["issue-problem"]
+        if classification == "U":
+            return TagUnknown(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_unknownTag_all("tag"), \
+                   schema["edges"]["issue-unknown"]
+        if classification == "S I":
+            return TagSolutionItem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_solutionItemTag_all("tag"), \
+                   schema["edges"]["issue-solutionitem"]
+        if classification == "P I":
+            return TagProblemItem(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_problemItemTag_all("tag"), \
+                   schema["edges"]["issue-problemitem"]
+        if classification == "NA":
+            return TagNA(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_naTag_all("tag"), \
+                   schema["edges"]["issue-na"]
+        if classification == "X":
+            return TagStopWord(keyword=keyword, synonyms=synonyms, databaseInfo=schema).cypher_stopWordTag_all("tag"), \
+                   schema["edges"]["issue-stopword"]
+        return None, None
 
-    return 1
+    queries = []
+    issue = Issue(databaseInfo=schema)
+
+    if allTag:
+        df = dataframe
+    else:
+        df = dataframe.drop('NA', axis=1, level=0).drop('X', axis=1, level=0)
+
+    for classification, keyword in tqdm(df, total=df.shape[1]):
+
+        if vocab1g is not None:
+            vocabs = vocab1g.append(vocabNg)
+            synonyms = vocabs[vocabs["alias"] == keyword].index.values.tolist()
+        elif vocabNg is not None:
+            vocabs = vocabNg.append(vocab1g)
+            synonyms = vocabs[vocabs["alias"] == keyword].index.values.tolist()
+        else:
+            synonyms = None
+
+        cypherTag, linkType = toSpecialtag(keyword, synonyms, classification)
+        if cypherTag:
+            mwoIds = getListIndexDataframe(df, keyword, classification)
+            query = f'\nMATCH {issue.cypher_issue_all("issue")}' \
+                    f'\nWHERE issue.{issue.databaseInfoIssue["properties"]["id"]} IN {mwoIds}' \
+                    f'\nMERGE {cypherTag}' \
+                    f'\nMERGE (issue)-[{linkType}]->(tag)'
+
+            queries.append(query)
+
+    return queries
 
 
+def cypherLink_Ngram1gram(schema):
+
+    queries = []
+
+    problemItem = TagProblemItem(databaseInfo=schema)
+    solutionItem = TagSolutionItem(databaseInfo=schema)
+    item = TagItem(databaseInfo=schema)
+    problem = TagProblem(databaseInfo=schema)
+    solution = TagSolution(databaseInfo=schema)
+    unknown = TagUnknown(databaseInfo=schema)
+
+    query = f'\nMATCH (problemitem{problemItem.label})' \
+            f'\nWITH problemitem, split(problemitem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nUNWIND halfTags AS halfTag' \
+            f'\nMATCH (problem{problem.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (problemitem)-[{schema["edges"]["problemitem-problem"]}]->(problem)'
+    queries.append(query)
+
+    query = f'\nMATCH (problemitem{problemItem.label})' \
+            f'\nWITH problemitem, split(problemitem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nUNWIND halfTags AS halfTag' \
+            f'\nMATCH (item{item.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (problemitem)-[{schema["edges"]["problemitem-item"]}]->(item)'
+    queries.append(query)
+
+    query = f'\nMATCH (problemitem{problemItem.label})' \
+            f'\nWITH problemitem, split(problemitem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nUNWIND halfTags AS halfTag' \
+            f'\nMATCH (unknown{unknown.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (problemitem)-[{schema["edges"]["problemitem-unknown"]}]->(unknown)'
+    queries.append(query)
+
+
+    query = f'\nMATCH (solutionItem{solutionItem.label})' \
+            f'\nWITH solutionItem, split(solutionItem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nUNWIND halfTags AS halfTag' \
+            f'\nMATCH (solution{solution.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (solutionItem)-[{schema["edges"]["solutionitem-solution"]}]->(solution)'
+    queries.append(query)
+
+    query = f'\nMATCH (solutionItem{solutionItem.label})' \
+            f'\nWITH solutionItem, split(solutionItem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nUNWIND halfTags AS halfTag' \
+            f'\nMATCH (item{item.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (solutionItem)-[{schema["edges"]["solutionitem-item"]}]->(item)'
+    queries.append(query)
+
+    query = f'\nMATCH (solutionItem{problemItem.label})' \
+            f'\nWITH solutionItem, split(solutionItem.{schema["tag"]["properties"]["keyword"]}, " ") AS halfTags' \
+            f'\nUNWIND halfTags AS halfTag' \
+            f'\nMATCH (unkknown{unknown.label}{{{schema["tag"]["properties"]["keyword"]}: halfTag}})' \
+            f'\nMERGE (solutionItem)-[{schema["edges"]["solutionitem-unknown"]}]->(unknown)'
+    queries.append(query)
+
+    return queries
+
+
+def cypherLink_itemIssue(schema):
+
+    queries= []
+
+    issue= Issue(databaseInfo=schema)
+    problemItem = TagProblemItem(databaseInfo=schema)
+    solutionItem = TagSolutionItem(databaseInfo=schema)
+    item = TagItem(databaseInfo=schema)
+
+    query = f'\nMATCH (issue{issue.label})-[{schema["edges"]["issue-problemitem"]}]->(problemitem{problemItem.label})' \
+            f'\nMATCH (issue)-[{schema["edges"]["issue-item"]}]->(item{item.label})' \
+            f'\nWHERE (problemitem)-[{schema["edges"]["problemitem-item"]}]->(item)' \
+            f'\nMERGE (issue)-[{schema["edges"]["issue-itemasproblem"]}]->(item)'
+    queries.append(query)
+
+
+    query = f'\nMATCH (issue{issue.label})-[{schema["edges"]["issue-solutionitem"]}]->(solutionitem{solutionItem.label})' \
+            f'\nMATCH (issue)-[{schema["edges"]["issue-item"]}]->(item{item.label})' \
+            f'\nWHERE (solutionitem)-[{schema["edges"]["solutionitem-item"]}]->(item)' \
+            f'\nMERGE (issue)-[{schema["edges"]["issue-itemassolution"]}]->(item)'
+    queries.append(query)
+
+    return queries
+
+
+def cypherCreate_itemsTree(schema, current, queries=[]):
+
+    item = TagItem(databaseInfo=schema)
+
+    for children in current["children"]:
+        query =  f'\nMATCH (parent{item.label}{{{schema["tag"]["properties"]["keyword"]}:"{current["keyword"]}"}})' \
+                 f'\nMATCH (child{item.label}{{{schema["tag"]["properties"]["keyword"]}:"{children["keyword"]}"}})'
+        if "approved" in children:
+            query += f'\nMERGE (parent)-[{schema["edges"]["item-item"]}{{{schema["tag"]["properties"]["approved"]}:{children["approved"]}}}]->(child)'
+        else:
+            query += f'\nMERGE (parent)-[{schema["edges"]["item-item"]}]->(child)'
+        queries.append(query)
+        if "children" in children:
+            cypherCreate_itemsTree(schema, children, queries)
+            
+        print(query)
+
+    return queries
