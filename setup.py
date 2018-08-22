@@ -17,10 +17,8 @@ def read(fname):
 VERSION = get_version()
 
 def run_setup(packages, install_requires, extras_require):
-    # populate the version_info dictionary with values stored in the version file
-    # print(packages)
     setup(
-        name = "Nestor",
+        name = "nist-nestor",
         version = VERSION,
         author = "Thurston Sexton",
         author_email = "thurston.sexton@nist.gov",
@@ -38,11 +36,6 @@ def run_setup(packages, install_requires, extras_require):
             'Programming Language :: Python :: 3',
             'License :: Public Domain'
         ],
-        # scripts=[
-        #     'scripts/nestor-gui',
-        #     'scripts/nestor-dash',
-        #     'scripts/nestor-serve',
-        # ],
         entry_points={
             'console_scripts': [
                 'nestor-gui = nestor.ui:main',
@@ -57,23 +50,10 @@ def run_setup(packages, install_requires, extras_require):
     )
 
 
-# CONFIG_FILE = 'setup.cfg'
-# config = configparser.ConfigParser()
-#
-# try:
-#     with open(CONFIG_FILE) as f:
-#         config.read_file(f)
-# except IOError:
-#     print("Could not open config file.")
-
-# packages = ['nestor',
-#             'nestor/_database_storage',
-#             'nestor/datasets']
 packages = find_packages(exclude=[
     'database_storage',
     'database_storage.*',
 ])
-
 
 def get_reqs(name):
     req_file = Path('.')/'requirements'/(name+'.txt')
@@ -89,6 +69,5 @@ extras_require = {
 
 extras_require['all'] = extras_require['dash'] +\
                         extras_require['docs']
-
 
 run_setup(packages, install_requires, extras_require)
