@@ -66,7 +66,7 @@ class MainWindow:
         self.config_new.update(self.config_default)
 
 
-        self.csvHeaderMapping_path = self.projectPath/ 'database_storage' / 'database'/ 'csvHeader.yaml'
+        self.csvHeaderMapping_path = self.projectPath/ 'nestor' / 'ui'/ 'csvHeader.yaml'
         self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path)
 
         print(self.csvHeaderOriginal)
