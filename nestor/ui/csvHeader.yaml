@@ -1,0 +1,35 @@
+issue:
+  description_problem: 'Description of Problem'
+  description_solution: 'Description of Solution'
+  description_cause: 'Description of Cause'
+  description_effect: 'Description of Observed Symptoms (Effects)'
+  machine_down: 'Machine Up/Down'
+  necessary_part: 'Necessary Part'
+  part_in_process: 'Part in Process'
+  cost: 'Maintenance Cost'
+  id: 'MWO ID Number'
+
+  date_machine_down: 'Machine Down Time-stamp'
+  date_workorder_start : 'Work Order Start Time-stamp'
+  date_maintenance_technician_arrive: 'Maintenance Technician Arrives Time-stamp'
+  date_solution_found: 'Problem Found Time-stamp'
+  date_part_ordered: 'Part(s) Ordered Time-stamp'
+  date_part_received: 'Part(s) Received Time-stamp'
+  date_solution_solve: 'Problem Solved Time-stamp'
+  date_machine_up: 'Machine Up Time-stamp'
+  date_workorder_completion : 'Work Order Completion Time-stamp'
+
+
+technician:
+  name: 'Maintenance Technician'
+  skills: 'Skill(s)'
+  crafts: 'Craft(s)'
+
+operator:
+  name: 'Operator'
+
+machine:
+  name: 'Machine Name'
+  manufacturer: 'Machine Manufacturer'
+  locasion: 'Machine Location'
+  type: 'Machine Type'

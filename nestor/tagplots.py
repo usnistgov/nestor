@@ -152,13 +152,6 @@ class TagPlot:
                 .tolist()
         )
 
-        # set allowed machine options here.
-        # machs = [
-        #     "A34",
-        #     "B19",
-        #     "A14",
-        # ]
-        # mach_mask = self.df[mach].str.contains('A\d|B\d', na=False)
         machs = (
             self.df[mach]
                 .value_counts()
@@ -180,14 +173,6 @@ class TagPlot:
         self.weights = ['cosine', 'count']
         self.edge_thres = range(1, 91, 10)
 
-        # global table that gets filtered in other plots
-        # self.table = hv.Table(self.df[[
-        #     'mach',
-        #     'date_received',
-        #     'issue',
-        #     'info',
-        #     'tech',
-        # ]])
         self.table = hv.Table(self.df)
 
     def filter_type_name(self, obj_type, obj_name):

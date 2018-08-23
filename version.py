@@ -32,7 +32,7 @@ def get_version():
             if version.endswith('-dirty'):
                 raise RuntimeError('The working tree is dirty')
             print(version)
-            version = '.post'.join(version.split('-')[:2])
+            version = '.r'.join(version.split('-')[:2])
 
     else:
         # Extract the version from the PKG-INFO file.

@@ -9,21 +9,26 @@ import holoviews as hv
 from tornado.ioloop import IOLoop
 import sys
 from nestor.tagplots import TagPlot
+from nestor.ui import load_header_mapping
 
 
 def serve_bokeh_tags(hdfstore):
+    names = load_header_mapping()
+    tech = names['technician']['name']
+    mach = names['machine']['name']
 
-    tagplot = TagPlot(hdfstore)
+    tagplot = TagPlot(hdfstore, tech=tech, mach=mach)
 
     renderer = hv.renderer('bokeh').instance(mode='server')
 
+
     server = Server({
-        '/bars_tech': renderer.app(tagplot.hv_bars('technician-name').options(width=900)),
-        '/bars_mach': renderer.app(tagplot.hv_bars('machine-name').options(width=900)),
-        '/node_tech': renderer.app(tagplot.hv_nodelink('technician-name').options(width=600, height=600)),
-        '/node_mach': renderer.app(tagplot.hv_nodelink('machine-name').options(width=600, height=600)),
-        '/flow_tech': renderer.app(tagplot.hv_flow('technician-name').options(width=900, height=600)),
-        '/flow_mach': renderer.app(tagplot.hv_flow('machine-name').options(width=900, height=600)),
+        '/bars_tech': renderer.app(tagplot.hv_bars(tech).options(width=900)),
+        '/bars_mach': renderer.app(tagplot.hv_bars(mach).options(width=900)),
+        '/node_tech': renderer.app(tagplot.hv_nodelink(tech).options(width=600, height=600)),
+        '/node_mach': renderer.app(tagplot.hv_nodelink(mach).options(width=600, height=600)),
+        '/flow_tech': renderer.app(tagplot.hv_flow(tech).options(width=900, height=600)),
+        '/flow_mach': renderer.app(tagplot.hv_flow(mach).options(width=900, height=600)),
     }, port=5006, allow_websocket_origin=[
         "127.0.0.1:5000", 
         "localhost:5000", 
