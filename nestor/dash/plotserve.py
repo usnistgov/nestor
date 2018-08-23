@@ -13,14 +13,15 @@ from nestor.ui import load_header_mapping
 
 
 def serve_bokeh_tags(hdfstore):
-
-    tagplot = TagPlot(hdfstore)
-
-    renderer = hv.renderer('bokeh').instance(mode='server')
-
     names = load_header_mapping()
     tech = names['technician']['name']
     mach = names['machine']['name']
+
+    tagplot = TagPlot(hdfstore, tech=tech, mach=mach)
+
+    renderer = hv.renderer('bokeh').instance(mode='server')
+
+
     server = Server({
         '/bars_tech': renderer.app(tagplot.hv_bars(tech).options(width=900)),
         '/bars_mach': renderer.app(tagplot.hv_bars(mach).options(width=900)),
