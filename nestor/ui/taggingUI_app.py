@@ -7,11 +7,15 @@ import importlib
 neo4j_spec = importlib.util.find_spec("neo4j")
 simplecrypt_spec = importlib.util.find_spec("simplecrypt")
 
-dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
+#dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
+
+dbModule_exists = False
+
 
 
 if dbModule_exists:
-    from .dialogDatabaseConnection_app import  DialogDatabaseConnection
+    from .dialogDatabaseConnection_app import DialogDatabaseConnection
+    from database_storage.helper import resultToObservationDataframe
 
 
 from pathlib import Path
@@ -32,7 +36,7 @@ Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(script_dir/f
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
-    def __init__(self, iconPath=None, closeFunction=None, changeTag=None):
+    def __init__(self, iconPath=None, closeFunction=None):
 
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_taggingTool.__init__(self)
@@ -94,6 +98,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tokenExtractor_nGram = None
         self.tokenExtractor_1Gram = None
 
+        self.database = None
+
         self.clean_rawText_1Gram=None
 
         self.tag_df = None
@@ -107,6 +113,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.buttonGroup_1Gram_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
         self.tableWidget_1gram_TagContainer.__class__ = QTableWidget_token
         self.tableWidget_Ngram_TagContainer.__class__ = QTableWidget_token
+
+        row_color = QtGui.QColor(77, 255, 184)
+
+        self.tableWidget_1gram_TagContainer.userUpdate= set()
+        self.tableWidget_1gram_TagContainer.color = row_color
+        self.tableWidget_Ngram_TagContainer.userUpdate= set()
+        self.tableWidget_Ngram_TagContainer.color = row_color
+
         self.middleLayout_Ngram_Composition = CompositionNGramItem(self.verticalLayout_Ngram_CompositionDisplay)
         self.tabWidget.setCurrentIndex(0)
 
@@ -127,38 +141,144 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.buttonGroup_NGram_Classification.buttonClicked.connect(self.onClick_changeClassification)
 
-        self.pushButton_report_toDatabase.clicked.connect(self.onClick_exportToGraphDatabase)
-
-
 
         # Load up the terms of service class/window
         self.terms_of_use = TermsOfServiceDialog(iconPath=self.iconPath) # doesn't need a close button, just "x" out
         self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
 
-        self.tabWidget.currentChanged.connect(changeTag)
+        self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromCSV)
+
+        if dbModule_exists:
+
+            self.actionConnect.setEnabled(True)
+
+            self.actionConnect.triggered.connect(self.setMenu_DialogConnectToDatabase)
+            self.actionRun_Query.triggered.connect(self.setMenu_DialogRunQuery)
+
+            self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_1gramVocab)
+            self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_NgramVocab)
 
 
-    def onClick_exportToGraphDatabase(self):
+    def setMenu_AutoPopulate_FromCSV(self):
+        options = Qw.QFileDialog.Options()
+        fileName, _ = Qw.QFileDialog.getOpenFileName(self,
+                                                     self.objectName(), "Open NESTOR generated vocab File",
+                                                     "csv Files (*.csv)", options=options)
+
+        if fileName:
+
+            df = pd.read_csv(fileName)[["tokens","NE","alias"]].set_index("tokens")
+            print(df.head())
+
+            self.dataframe_1Gram.replace('', np.nan, inplace=True)
+
+            mask = self.dataframe_1Gram[["NE", "alias"]].isnull().all(axis=1)
+
+            df_tmp = self.dataframe_1Gram.loc[mask, :]
+            df_tmp.update(other=df, overwrite=False)
+
+            self.dataframe_1Gram.update(df_tmp, overwrite=False)
+            self.dataframe_1Gram.fillna('', inplace=True)
+
+            self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
+            self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
+
+
+    def setMenu_AutoPopulate_FromDatabase_NgramVocab(self):
+        if self.database is not None:
+
+            done, result = self.database.getTokenTagClassification()
+
+            if done:
+                df = resultToObservationDataframe(result).set_index("tokens")
+
+                self.dataframe_NGram.replace('', np.nan, inplace = True)
+
+                mask = self.dataframe_NGram[["NE","alias"]].isnull().all(axis=1)
+
+                df_tmp = self.dataframe_NGram.loc[mask,:]
+                df_tmp.update(other = df, overwrite = False)
+
+                self.dataframe_NGram.update(df_tmp, overwrite = False)
+                self.dataframe_NGram.fillna('', inplace=True)
+
+                self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_NGram)
+                self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
+                self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
+
+        else:
+            print("no connected to any database")
+
+    def setMenu_AutoPopulate_FromDatabase_1gramVocab(self):
+        if self.database is not None:
+
+            done, result = self.database.getTokenTagClassification()
+
+            if done:
+                df = resultToObservationDataframe(result).set_index("tokens")
+
+                self.dataframe_1Gram.replace('', np.nan, inplace = True)
+
+                mask = self.dataframe_1Gram[["NE", "alias"]].isnull().all(axis=1)
+
+                df_tmp = self.dataframe_1Gram.loc[mask, :]
+                df_tmp.update(other=df, overwrite=False)
+
+                self.dataframe_1Gram.update(df_tmp, overwrite=False)
+                self.dataframe_1Gram.fillna('', inplace=True)
+
+                self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
+                self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+                self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
+
+        else:
+            print("no connected to any database")
+
+    def setMenu_DialogConnectToDatabase(self):
+        self.menu_Database_connect = DialogDatabaseConnection(iconPath=self.iconPath)
+
+        self.menu_Database_connect.pushButton_DialogDatabaseConnection_Connect.clicked.connect(
+            self.onClick_DialogConnectToDatabase)
 
         rect = self.geometry()
         rect.setHeight(300)
         rect.setWidth(200)
-
-        self.dialog_DatabaseConnection = DialogDatabaseConnection(
-            original_df = self.dataframe_Original,
-            bin1g_df = self.tag_df,
-            binNg_df = self.relation_df,
-            vocab1g_df = self.dataframe_1Gram,
-            vocabNg_df =  self.dataframe_NGram,
-            csvHeaderMapping = self.config['csvheader_mapping'],
-            csvHeaderOriginal = self.csvHeaderOriginal,
-            iconPath=self.iconPath)
-
-        self.dialog_DatabaseConnection.setGeometry(rect)
-        self.dialog_DatabaseConnection.setWindowFlags(Qt.WindowStaysOnTopHint)
-        self.dialog_DatabaseConnection.show()
+        self.menu_Database_connect.setGeometry(rect)
+        self.menu_Database_connect.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.menu_Database_connect.show()
 
 
+    def onClick_DialogConnectToDatabase(self):
+        self.database = self.menu_Database_connect.get_database()
+
+        if self.database is not None:
+
+            print("connect to Database")
+            self.actionRun_Query.setEnabled(True)
+            self.actionOpen_Database.setEnabled(True)
+            self.menu_AutoPopulate_FromDatabase.setEnabled(True)
+        else:
+            print("not possible to connect")
+
+    def setMenu_DialogRunQuery(self):
+
+        if self.database is not None:
+            self.menu_Database_runQuery = DialogDatabaseRunQuery(
+                database=self.database,
+                original_df = self.dataframe_Original,
+                csvHeaderOriginal = self.csvHeaderOriginal,
+                csvHeaderMapping = self.config["csvheader_mapping"],
+                bin1g_df = self.tag_df,
+                binNg_df = self.relation_df,
+                vocab1g_df = self.dataframe_1Gram,
+                vocabNg_df = self.dataframe_NGram,
+                iconPath = self.iconPath)
+
+            self.menu_Database_runQuery.show()
+
+        else:
+            print("define the database first")
 
     def onClick_changeClassification(self, btn):
         new_clf = self.buttonDictionary_NGram.get(btn.text())
@@ -246,9 +366,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.pushButton_report_saveNewCsv.setEnabled(True)
         self.pushButton_report_saveBinnaryCsv.setEnabled(True)
-
-        # if dbModule_exists:
-        #     self.pushButton_report_toDatabase.setEnabled(True)
 
         Qw.QApplication.processEvents()
 
@@ -377,14 +494,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.dataframe_1Gram = self._set_dataframeItemValue(self.dataframe_1Gram, token, new_alias, new_clf, new_notes)
             self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)
 
+            self.tableWidget_1gram_TagContainer.userUpdate.add(self.dataframe_1Gram.index.get_loc(token))
+
             for btn in self.buttonGroup_1Gram_similarityPattern.buttons():
                 if btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
                     self.dataframe_1Gram = self._set_dataframeItemValue(self.dataframe_1Gram, btn.text(), new_alias, new_clf,
                                                                         new_notes)
+                    self.tableWidget_1gram_TagContainer.userUpdate.add(self.dataframe_1Gram.index.get_loc(btn.text()))
 
-                elif self.dataframe_1Gram.loc[btn.text()]['alias'] == alias:
+                elif self.dataframe_1Gram.loc[btn.text()]['alias']:
                     self.dataframe_1Gram = self._set_dataframeItemValue(self.dataframe_1Gram, btn.text(), '',
                                                                        '', '')
+
+                    self.tableWidget_1gram_TagContainer.userUpdate.add(self.dataframe_1Gram.index.get_loc(btn.text()))
+
 
             self.tableWidget_1gram_TagContainer.printDataframe_tableView()
 
@@ -401,6 +524,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
             token, classification, alias, notes = (str(i.text()) for i in items)
 
+            self.tableWidget_Ngram_TagContainer.userUpdate.add(self.dataframe_NGram.index.get_loc(token))
 
             new_alias = self.lineEdit_Ngram_AliasEditor.text()
             new_notes = self.textEdit_Ngram_NoteEditor.toPlainText()

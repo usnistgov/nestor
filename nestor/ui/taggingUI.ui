@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>EATT Knowledge:  TagTool</string>
+   <string>NIST: Nestor Tagging Tool</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -609,21 +609,21 @@
            <layout class="QGridLayout" name="gridLayout_report_general">
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_report_action">
-              <item row="6" column="0">
-               <spacer name="verticalSpacer_10">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_report_saveNewCsv">
+                <property name="text">
+                 <string>New file with columns [I,P,S,X,U]. Tags are comma-
+separated for readability. NA tags ommitted. 
+ It will be save in your csv folder as READABLE_TAGS</string>
                 </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Minimum</enum>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveTrack">
+                <property name="text">
+                 <string>UPDATE TAG EXTRACTION</string>
                 </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
+               </widget>
               </item>
               <item row="4" column="0">
                <spacer name="verticalSpacer_9">
@@ -641,52 +641,6 @@
                 </property>
                </spacer>
               </item>
-              <item row="7" column="0">
-               <widget class="QLabel" name="label_report_saveBinnary">
-                <property name="text">
-                 <string>New file with hierarchical columns [I,P,S,X,U]
-[&lt;tags in vocabulary&gt;]. (1) indicates presence 
-of a tag, (0) that it is missing. Much more efficient 
-computationally and for vizualization. . </string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>create a binary CSV</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveNewCsv">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>create new CSV</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_report_saveNewCsv">
-                <property name="text">
-                 <string>New file with columns [I,P,S,X,U]. Tags are comma-
-separated for readability. NA tags ommitted. 
- It will be save in your csv folder as READABLE_TAGS</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveTrack">
-                <property name="text">
-                 <string>UPDATE TAG EXTRACTION</string>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="0" colspan="3">
                <widget class="Line" name="line_6">
                 <property name="orientation">
@@ -701,10 +655,40 @@ separated for readability. NA tags ommitted.
                 </property>
                </widget>
               </item>
-              <item row="9" column="0">
-               <widget class="QLabel" name="label_report_toDatabase">
+              <item row="5" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveNewCsv">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
-                 <string>Add the data onto a database</string>
+                 <string>create new CSV</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <spacer name="verticalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Minimum</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="7" column="0">
+               <widget class="QLabel" name="label_report_saveBinnary">
+                <property name="text">
+                 <string>New binary file store (*.h5) with three keys: 
+
+ &quot;df&quot;: columns from original data with updated headers 
+ &quot;tags&quot;: binary occurrence matrix for each tag-document pair
+ &quot;rels&quot;: PI/SI-document pair occurrence matrix</string>
                 </property>
                </widget>
               </item>
@@ -724,13 +708,13 @@ separated for readability. NA tags ommitted.
                 </property>
                </spacer>
               </item>
-              <item row="9" column="1">
-               <widget class="QPushButton" name="pushButton_report_toDatabase">
+              <item row="7" column="1">
+               <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>Export to GraphDatabase</string>
+                 <string>create a HDFS (binary)</string>
                 </property>
                </widget>
               </item>
@@ -826,10 +810,54 @@ separated for readability. NA tags ommitted.
     </property>
     <addaction name="actionAbout_TagTool"/>
    </widget>
+   <widget class="QMenu" name="menuDatabase">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="title">
+     <string>Database</string>
+    </property>
+    <addaction name="actionConnect"/>
+    <addaction name="actionRun_Query"/>
+    <addaction name="actionOpen_Database"/>
+   </widget>
+   <widget class="QMenu" name="menuAuto_populate">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="title">
+     <string>Auto-populate</string>
+    </property>
+    <widget class="QMenu" name="menu_AutoPopulate_FromDatabase">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>From Database</string>
+     </property>
+     <addaction name="action_AutoPopulate_FromDatabase_1gramVocab"/>
+     <addaction name="action_AutoPopulate_FromDatabase_NgramVocab"/>
+    </widget>
+    <widget class="QMenu" name="menu_AutoPopulate_FromCSV">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>From CSV</string>
+     </property>
+     <addaction name="action_AutoPopulate_FromCSV_1gramVocab"/>
+     <addaction name="action_AutoPopulate_FromCSV_NgramVocab"/>
+    </widget>
+    <addaction name="menu_AutoPopulate_FromDatabase"/>
+    <addaction name="menu_AutoPopulate_FromCSV"/>
+    <addaction name="actionFrom_AutoPopulate_From1gramVocab"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuHelp"/>
+   <addaction name="menuDatabase"/>
+   <addaction name="menuAuto_populate"/>
    <addaction name="menuAbout"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_1Gram_Vocab">
@@ -887,11 +915,60 @@ separated for readability. NA tags ommitted.
     <string>about TagTool</string>
    </property>
   </action>
+  <action name="actionConnect">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionRun_Query">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Run Query</string>
+   </property>
+  </action>
+  <action name="actionOpen_Database">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open Database</string>
+   </property>
+  </action>
+  <action name="action_AutoPopulate_FromDatabase_1gramVocab">
+   <property name="text">
+    <string>1gram Vocab</string>
+   </property>
+  </action>
+  <action name="action_AutoPopulate_FromDatabase_NgramVocab">
+   <property name="text">
+    <string>Ngram Vocab</string>
+   </property>
+  </action>
+  <action name="actionFrom_AutoPopulate_From1gramVocab">
+   <property name="text">
+    <string>From 1gram Vocab</string>
+   </property>
+  </action>
+  <action name="action_AutoPopulate_FromCSV_1gramVocab">
+   <property name="text">
+    <string>1gram Vocab</string>
+   </property>
+  </action>
+  <action name="action_AutoPopulate_FromCSV_NgramVocab">
+   <property name="text">
+    <string>Ngram Vocab</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_1Gram_Classification"/>
   <buttongroup name="buttonGroup_NGram_Classification"/>
+  <buttongroup name="buttonGroup_1Gram_Classification"/>
  </buttongroups>
 </ui>

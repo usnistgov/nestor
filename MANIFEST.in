@@ -2,9 +2,10 @@ include *.md *.rst *.ui
 recursive-include nestor/datasets/*
 recursive-include source *
 recursive-include docs *
-include requirements.txt
+include requirements/*.txt
 include nestor/datasets/*.csv
-include nestor/ui/*.ui
+include nestor/ui/*
 include nestor/dash/templates/*.html
 include nestor/dash/templates/includes/*.html
 include nestor/dash/static/*
+include version.py

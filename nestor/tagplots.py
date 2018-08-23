@@ -142,25 +142,22 @@ class TagPlot:
         self.tag_df = pd.read_hdf(data_file, key='tags')
 
         # set allowed technician options here
-        # people = [
-        #     'nathan_maldonado',
-        #     'angie_henderson',
-        #     'margaret_hawkins_dds',
-        #     # "tommy_walter",
-        #     "gabrielle_davis",
-        #     "cristian_santos",
-        # ]
-        nplen = np.vectorize(len)
-        people = np.unique(self.df[tech].str.split(', ', expand=True).fillna('').values)
-        people = people[nplen(people) > 5]
+        people = (
+            self.df[tech]
+                .str.split(', ', expand=True)
+                .stack()
+                .dropna()
+                .value_counts()
+                .index[:20]  # top 20 occurring
+                .tolist()
+        )
 
-        # set allowed machine options here.
-        # machs = [
-        #     "A34",
-        #     "B19",
-        #     "A14",
-        # ]
-        machs = self.df[mach][self.df[mach].str.contains('A\d|B\d', na=False)].sort_values().unique()
+        machs = (
+            self.df[mach]
+                .value_counts()
+                .index[:20]
+                .tolist()
+        )
 
         # put it together with pretty names
         self.name_opt = {
@@ -176,14 +173,6 @@ class TagPlot:
         self.weights = ['cosine', 'count']
         self.edge_thres = range(1, 91, 10)
 
-        # global table that gets filtered in other plots
-        # self.table = hv.Table(self.df[[
-        #     'mach',
-        #     'date_received',
-        #     'issue',
-        #     'info',
-        #     'tech',
-        # ]])
         self.table = hv.Table(self.df)
 
     def filter_type_name(self, obj_type, obj_name):

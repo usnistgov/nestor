@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 import configparser
 from subprocess import Popen, PIPE
 from pathlib import Path
+from version import get_version
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -13,46 +14,28 @@ from pathlib import Path
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
 
-
-def get_version():
-    """
-    Returns project version as string from 'git describe' command.
-    """
-    pipe = Popen('git describe --tags --always', stdout=PIPE, shell=True)
-    version = pipe.stdout.read()
-    if version:
-        return version.decode('utf-8').lstrip('v').rstrip()
-    else:
-        return 'X.Y'
-
-print(get_version())
+VERSION = get_version()
 
 def run_setup(packages, install_requires, extras_require):
-    # populate the version_info dictionary with values stored in the version file
-    # print(packages)
     setup(
-        name = "Nestor",
-        version = get_version(),
+        name = "nist-nestor",
+        version = VERSION,
         author = "Thurston Sexton",
         author_email = "thurston.sexton@nist.gov",
         description = ("Quantifying tacit human knowledge for Smart Manufacturing Maintenance,\
                         for maintnenance-based investigatory analysis"),
         keywords = "nlp smart manufacturing maintenance tag app",
-        url = "https://github.com/usnistgov/nestor",
+        url = "https://github.com/usnistgov/nestor/",
         packages=packages,
         long_description=read('README.rst'),
         classifiers=[
-            "Development Status :: 2 - Pre-Alpha",
-            'Intended Audience :: Science/Research'
+            "Development Status :: 3 - Alpha",
+            'Intended Audience :: Science/Research',
             'Intended Audience :: Manufacturing',
             'Topic :: Scientific/Engineering :: Information Analysis',
             'Programming Language :: Python :: 3',
+            'License :: Public Domain'
         ],
-        # scripts=[
-        #     'scripts/nestor-gui',
-        #     'scripts/nestor-dash',
-        #     'scripts/nestor-serve',
-        # ],
         entry_points={
             'console_scripts': [
                 'nestor-gui = nestor.ui:main',
@@ -67,23 +50,10 @@ def run_setup(packages, install_requires, extras_require):
     )
 
 
-# CONFIG_FILE = 'setup.cfg'
-# config = configparser.ConfigParser()
-#
-# try:
-#     with open(CONFIG_FILE) as f:
-#         config.read_file(f)
-# except IOError:
-#     print("Could not open config file.")
-
-# packages = ['nestor',
-#             'nestor/_database_storage',
-#             'nestor/datasets']
 packages = find_packages(exclude=[
     'database_storage',
     'database_storage.*',
 ])
-
 
 def get_reqs(name):
     req_file = Path('.')/'requirements'/(name+'.txt')
@@ -99,6 +69,5 @@ extras_require = {
 
 extras_require['all'] = extras_require['dash'] +\
                         extras_require['docs']
-
 
 run_setup(packages, install_requires, extras_require)

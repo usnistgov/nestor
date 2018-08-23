@@ -18,6 +18,7 @@ def exception_handler(type_, value, traceback_):
         msg.exec_()
 
 
+
 def main():
     app = QApplication(sys.argv)
 
@@ -25,8 +26,8 @@ def main():
         QGroupBox { 
             border: 1px solid gray;
             border-radius: 9px;
-            margin-top: 0.5em;
             font-weight: bold;
+            margin-top: 0.5em;
         }
         QGroupBox::title {
             subcontrol-origin: margin;
@@ -37,9 +38,10 @@ def main():
 
     app.setStyleSheet(stylesheet)
     window = mainwindow.MainWindow()
-    sys.excepthook = exception_handler
+    #sys.excepthook = exception_handler
     sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
     main()
+

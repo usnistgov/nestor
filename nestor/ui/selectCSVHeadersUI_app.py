@@ -4,10 +4,19 @@ from pathlib import Path
 from PyQt5.QtCore import QCoreApplication, Qt, QSize
 from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
-
-import collections
-
+import yaml
+# import collections
 # from sympy.core.tests.test_arit import same_and_same_prec
+
+
+def load_header_mapping():
+    module_path = Path(__file__).parent
+    yaml_path = module_path/'csvHeader.yaml'
+    # with open(yaml_schema) as yml:
+    with open(yaml_path, 'r') as yamlfile:
+        config = yaml.load(yamlfile)
+    return config
+
 
 fname = 'selectCSVHeadersUI.ui'
 script_dir = Path(__file__).parent

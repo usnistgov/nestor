@@ -4,6 +4,8 @@ import chardet
 from pathlib import Path
 import PyQt5.QtWidgets as Qw
 
+import os
+
 import nestor.keyword as kex
 from collections import OrderedDict
 
@@ -18,6 +20,7 @@ from .taggingUI_app import MyTaggingToolWindow, TermsOfServiceDialog
 class MainWindow:
     def __init__(self):
         self.icnoPtah=None
+        self.projectPath = Path(__file__).parent.parent.parent
         self.yamlPath = Path.home()/'.nestor-tmp'
         print(self.yamlPath)
         self.yamlPath.mkdir(parents=True, exist_ok=True)
@@ -62,50 +65,9 @@ class MainWindow:
         self.config_default = self.openYAMLConfig_File(self.yamlPath_config, self.config_new)
         self.config_new.update(self.config_default)
 
-        self.csvHeaderMapping_path = self.yamlPath / "csvHeaderMapping.yaml"
-        self.csvHeaderOriginal = {
-            'issue':
-                {
-                    'description_problem': 'issue-description_problem',
-                    'description_solution': 'issue-description_solution',
-                    'description_cause': 'issue-description_cause',
-                    'description_effect': 'issue-description_effect',
-                    'machine_down': 'issue-machine_down',
-                    'necessary_part': 'issue-necessary_part',
-                    'part_in_process': 'issue-part_in_process',
-                    'cost': 'issue-cost',
-                    'id': 'issue-id',
 
-                    'date_machine_down': 'issue-date_machine_down',
-                    'date_workorder_start' : 'issue-date_workorder_start',
-                    'date_maintenance_technician_arrive': 'issue-date_maintenance_technician_arrive',
-                    'date_solution_found': 'issue-date_solution_found',
-                    'date_part_ordered': 'issue-date_part_ordered',
-                    'date_part_received': 'issue-date_part_received',
-                    'date_solution_solve': 'issue-date_solution_solve',
-                    'date_machine_up': 'issue-date_machine_up',
-                    'date_workorder_completion' : 'issue-date_workorder_completion',
-                },
-            'technician':
-                {
-                    'name': 'technician-name',
-                    'skills': 'technician-skills',
-                    'crafts': 'technician-crafts',
-                },
-            'operator':
-                {
-                    'name': 'operator-name'
-                },
-
-            'machine':
-                {
-                    'name': 'machine-name',
-                    'manufacturer': 'machine-manufacturer',
-                    'locasion': 'machine-locasion',
-                    'type': 'machine-type'
-                }
-            }
-        self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path, self.csvHeaderOriginal)
+        self.csvHeaderMapping_path = self.projectPath/ 'nestor' / 'ui'/ 'csvHeader.yaml'
+        self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path)
 
         self.tokenExtractor_1Gram = None
         self.tokenExtractor_nGram = None
@@ -120,13 +82,14 @@ class MainWindow:
         #instanciate windows
         self.window_OpenFiles = MyOpenFilesWindow(self.icnoPtah, self.close_otherWindow, self.openWindow_to_selectWindow)
         self.window_selectCSVHeader = MySelectCsvHeadersWindow(self.icnoPtah, self.close_otherWindow, self.selectWindow_to_taggingWindow)
-        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow, self.onClick_windowTaggingTool_selectTab)
+        self.window_taggingTool = MyTaggingToolWindow(self.icnoPtah, self.close_taggingUIWindow)
+
+        self.window_taggingTool.actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.onClick_windowTaggingTool_selectTab)
 
 
         #send the old config value to initialize the view
         self.window_OpenFiles.set_config(self.config_default)
         self.window_OpenFiles.show()
-
 
     def onClick_windowTaggingTool_selectTab(self, index):
         """when changing the tab in the taggingUI window (from the 1gram to the Ngram)
@@ -136,23 +99,14 @@ class MainWindow:
         Parameters
         ----------
         index :
-            
+
 
         Returns
         -------
 
         """
-
-        # if Ngramm
-        if index == 1:
-            # self.dataframe_nGram = self.tokenExtractor_nGram.generate_vocabulary_df(init = NEED THIS)
-            self.update_ngram_from_1gram(init=self.dataframe_NGram)
-            self.window_taggingTool._set_dataframes(dataframe_NGram=self.dataframe_NGram)
-        # elif index == 2:
-        #     df = self.window_taggingTool.dataframe_completeness
-        #     self.window_taggingTool.completenessPlot._set_dataframe(df)
-        #     self.window_taggingTool.completenessPlot.plot_it()
-
+        self.update_ngram_from_1gram(init=self.dataframe_NGram)
+        self.window_taggingTool._set_dataframes(dataframe_NGram=self.dataframe_NGram)
 
     def openWindow_to_selectWindow(self):
         """When click on the save button in the OpenFiles Window

@@ -36,4 +36,5 @@ dist
 =======
 !nestor/datasets/**
 !database_storage/database/DatabaseSchema.yaml
+!nestor/ui/csvHeader.yaml
 >>>>>>> master
