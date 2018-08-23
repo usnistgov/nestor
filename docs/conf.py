@@ -29,7 +29,8 @@ from subprocess import Popen, PIPE
 
 
 # The full version, including alpha/beta/rc tags.
-release = get_version()
+version = get_version()
+release = version
 
 
 # -- General configuration ---------------------------------------------------
