@@ -18,6 +18,7 @@ def exception_handler(type_, value, traceback_):
         msg.exec_()
 
 
+
 def main():
     app = QApplication(sys.argv)
 
