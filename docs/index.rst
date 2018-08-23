@@ -5,21 +5,20 @@
 
 
 
+..toctree::
+   :hidden:
 
-
+   self
+   
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Table of Contents
 
    readme.rst
    getting_started.rst
    examples.rst
    source/nestor.rst
-
-
-
 
 
 

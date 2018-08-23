@@ -1,13 +1,13 @@
 .. _readme:
 
 
-============
 Introduction
 ============
 
+.. mdinclude:: ../README.md
 
-.. include:: ../README.rst
 
+Further reading: :cite:`sexton2017hybrid,sharp2017toward`
 
 
 .. bibliography:: biblio.bib

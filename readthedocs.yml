@@ -11,8 +11,6 @@ python:
   setup_py_install: true
   pip_install: true
   extra_requirements:
-    - gui
-    - tree
-    - plot
+    - dash
     - docs
 
