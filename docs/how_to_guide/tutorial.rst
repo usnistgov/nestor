@@ -121,6 +121,10 @@ into detail on the “1 Gram Token” tab.
 
 |image17|
 
+- The list of currently classified words are highlighted in a different color.
+
+|image171|
+
 
 .. _sec:Ngram:
 
@@ -139,15 +143,21 @@ into detail on the “N Gram Token” tab.
 |image18|
 
 -  When a user selects the N Gram Token tab, the window below is
-   presented:
+   presented. Initially all the n-gram Named Entity classes are empty.
 
 |image19|
 
--  The user is presented with the Composition of the 2 gram, which are
-   composed of two 1 gram tokens. Each 1 gram is presented, with the
-   classification (“type”) and the synonyms (the other words that were
-   linked with the Similar Pattern subwindow in the above section). In
-   this example, “oil” is an “unknown (U)” classification and has no
+-  If the menu option for "Auto-populate" -> "From 1gram Vocab" is chosen,
+   the user is then presented with the Composition of the 2 gram, which are
+   composed of two 1 gram tokens.
+
+|image191|
+|image192|
+
+-  Each 1 gram is presented, with the classification (“type”) and the
+   synonyms (the other words that were linked with the Similar Pattern
+   subwindow in the above section).
+   In this example, “oil” is an “unknown (U)” classification and has no
    other synonyms at this point; “leak” is a “problem (P)” and has no
    other synonyms at this point.
 
@@ -199,9 +209,9 @@ begin using the report tab.
 
    -  **Tag PPV**: This is the Tag `Positive Predictive Value (PPV) <https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values>`__.
 
-   -  **Complete Docs**: This is the number of MWOs that have all of the tokens completely tagged. In this example, 548 MWOs are completely tagged out of a possible 5485, which is 9.99%. 
+   -  **Complete Docs**: This is the number of MWOs that have all of the tokens completely tagged. In this example, 178 MWOs are completely tagged out of a possible 5485, which is 3.25%.
 
-   -  **Empty Docs**: This is the number of MWOs that have zero tokens tagged. In this example, 953 MWOs have no tokens tagged out of a possible 5485, which is 17.37%. 
+   -  **Empty Docs**: This is the number of MWOs that have zero tokens tagged. In this example, 1738 MWOs have no tokens tagged out of a possible 5485, which is 31.69%.
 
 |image25|
 
@@ -212,16 +222,11 @@ begin using the report tab.
 
 |image26|
 
--  The “create a binary CSV” button will create 2 new .csv files. Each
-   file will contain the work order number (starting with 0), and is
-   ordered identically to the .csv file that was originally loaded. Two
-   new files are created: binary_tags and binary_relations.
+-  The “create a HDFS (binary)” button will create a .h5 file.
 
 |image27|
 
--  **binary_tags**: The left most column contains the work order number, while the headers contain all 1 gram tags. A “0” is placed when the work order does not contain the tag in the header and a “1” is placed when the tag in the header is contained in the work order.
-
--  **binary_relations**: The left most column contains the work order number, while the headers contain Problem-Item and Solution-Item tag combinations. A “0” is placed when the work order does not contain the tag in the header and a “1” is placed when the tag in the header is contained in the work order.
+-  **More description about h5**:
 
 
 
@@ -239,8 +244,11 @@ begin using the report tab.
 .. |image15| image:: images/Graphics44_v3.png
 .. |image16| image:: images/Graphics45_v3.png
 .. |image17| image:: images/Graphics46_v3.png
+.. |image171| image:: images/Graphics46_v3_2.png
 .. |image18| image:: images/Graphics47_v3.png
 .. |image19| image:: images/Graphics48_v3.png
+.. |image191| image:: images/Graphics48_v3_2.png
+.. |image192| image:: images/Graphics48_v3_3.png
 .. |image20| image:: images/Graphics49_v3.png
 .. |image21| image:: images/Graphics50_v3.png
 .. |image22| image:: images/Graphics51_v3.png
