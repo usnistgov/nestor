@@ -9,11 +9,6 @@ NIST: Nestor Tagging Toolkit
 Nestor is a toolkit for using Natural Language Processing (NLP) with efficient
 user-interaction to perform structured data extraction with minimal annotation time-cost.
 
-.. toctree::
-   :hidden:
-
-   self
-
 
 .. toctree::
    :maxdepth: 2
