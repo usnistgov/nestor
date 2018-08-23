@@ -5,11 +5,11 @@
 
 
 
-..toctree::
+.. toctree::
    :hidden:
 
    self
-   
+
 
 .. toctree::
    :maxdepth: 2
