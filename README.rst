@@ -1,6 +1,4 @@
 
-Introduction
-============
 
 
 Purpose
@@ -12,7 +10,7 @@ application is to give understanding to data sets that previously were
 too unstructured or filled with jargon to analyze. The current build is
 in very early alpha, so please be patient in using this application. If
 you have any questions, please do not hesitate to contact us (see
-:ref:`who-are-we`. )
+`Who are we?`_. )
 
 
 
@@ -36,10 +34,7 @@ Features
 
 What’s Inside?
 ~~~~~~~~~~~~~~
-NOTE: this repository is under construction, and tutorial .ipynb
-documents are still being written. Documentation is currently
-code-internal only, however, dedicated documentation hosted through
-sphynx/readthedocs.io is underway.
+Documentation is contained in the `/docs` subdirectory, and are hosted as webpages and `PDF <https://media.readthedocs.org/pdf/nestor/latest/nestor.pdf>`_ available at `readthedocs.io <https://nestor.readthedocs.io/en/latest/>`_ . 
 
 Current:
 
@@ -58,13 +53,11 @@ Planned/underway:
 Pre-requisites
 --------------
 This package was built as compatible with Anaconda python distribution.
-See our `requirements file <./requirements.txt>`__ for a complete
+See our `requirements file <../requirements.txt>`_ for a complete
 list of major dependencies.
 
 ADD LIST
 
-
-.. _who-are-we:
 
 Who are we?
 -----------
@@ -76,8 +69,8 @@ Division at NIST.
 Points of Contact
 ~~~~~~~~~~~~~~~~~
 
--  `Michael Brundage <https://www.nist.gov/people/michael-p-brundage>`__    Principal Investigator
--  `Thurston Sexton <https://github.com/tbsexton>`__                        Technical Lead
+-  `Michael Brundage <https://www.nist.gov/people/michael-p-brundage>`_    Principal Investigator
+-  `Thurston Sexton <https://github.com/tbsexton>`_                        Nestor Technical Lead
 
 
 Contributors:
@@ -85,8 +78,8 @@ Contributors:
 
 :Thurston Sexton:               @tbsexton
 :Sascha Moccozet:               @saschaMoccozet
-:Madhusudanan Navinchandran:    @msngit
 :Michael Brundage:              @MichaelPBrundage
+:Madhusudanan Navinchandran:    @msngit
 :Emily Hastings:                @emhastings
 :Lela Bones:                    @lelatbones
 

@@ -1,13 +1,21 @@
 .. _examples:
 
-
-Showcase
+Examples
 ========
 
 
+Showcase
+--------
+
+Key features of the ``nestor`` toolkit, illustrated.
+
+*in progress*
+
 
 Case Studies
-============
+------------
+
+Longer-form, more complete examples of analysis completed for specific datasets.
 
 .. toctree::
    :maxdepth: 1
