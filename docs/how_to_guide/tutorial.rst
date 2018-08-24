@@ -121,7 +121,8 @@ into detail on the “1 Gram Token” tab.
 
 |image17|
 
-- The list of currently classified words are highlighted in a different color.
+- The list of currently classified words for this session are
+  highlighted in a different color.
 
 |image171|
 
@@ -222,11 +223,14 @@ begin using the report tab.
 
 |image26|
 
--  The “create a HDFS (binary)” button will create a .h5 file.
+-  The “create a HDFS (binary)” button will create a .h5 file. This file
+   will be utilized later on to visualise the data on the Nestor Dashboard.
+   It stores the tagged data with three keys - the original data with
+   updated headers, an occurrence matrix for tags versus documents, and an
+   occurrence matrix for Problem-Items - Solution-Items versus documents.
 
 |image27|
 
--  **More description about h5**:
 
 
 

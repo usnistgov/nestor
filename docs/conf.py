@@ -19,6 +19,11 @@ sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../nestor'))
 from version import get_version
 
+# At top on conf.py (with other import statements)
+# import recommonmark
+# from recommonmark.transform import AutoStructify
+# from recommonmark.parser import CommonMarkParser
+
 # -- Project information -----------------------------------------------------
 
 project = 'nestor'
@@ -82,9 +87,9 @@ templates_path = ['_templates']
 ## The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 
-# source_parsers = {
-#     '.md': 'recommonmark.parser.CommonMarkParser',
-# }
+# # source_parsers = {
+#     '.md': CommonMarkParser,
+# # }
 source_suffix = ['.rst', '.md']
 # source_suffix = '.rst'
 
@@ -204,3 +209,11 @@ texinfo_documents = [
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+# # At the bottom of conf.py
+# def setup(app):
+#     app.add_config_value('recommonmark_config', {
+#             'url_resolver': lambda url: github_doc_root + url,
+#             'auto_toc_tree_section': 'Contents',
+#             }, True)
+#     app.add_transform(AutoStructify)
