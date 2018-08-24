@@ -41,6 +41,7 @@ Starting the Dashboard Server
 
 Uploading Data Files
 --------------------
+**NB**: For the current version of the dashboard, visualization is limited to datasets containing "Machine Name" and "Maintenance Technician" entries. **Ensure these have been labeled for export in the tagging tool!**
 
 1. To immediately start visualizing your data, you need to upload a
    **.csv** or **.h5** file that was output from the NIST Nestor Tagging Tool.

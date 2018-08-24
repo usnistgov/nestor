@@ -34,13 +34,12 @@ Start the Application
 
 |image9|
 
-6. Select the column(s) that you would like to “tag.” In this example,
+6. Select the column(s) containing natural-language descriptions, which you would like to “tag.” In this example,
    the column is “OriginalShorttext.” 
 
 |image10|
 
-7. (OPTIONAL - COMING SOON) There is also a drop-down to say what the column likely represents - this is for the graph based
-   representation of the tags - COMING SOON! The choice made in this example is "issue-description_problem". Hit “Next”.
+7. (OPTIONAL) There is also a drop-down to say what the column likely represents - this is for later analyses and future storage in a graph database. The choice made in this example is "Description of Problem". Hit “Next”.
 
 |image101|
 
@@ -225,8 +224,8 @@ begin using the report tab.
 
 -  The “create a HDFS (binary)” button will create a .h5 file. This file
    will be utilized later on to visualise the data on the Nestor Dashboard.
-   It stores the tagged data with three keys - the original data with
-   updated headers, an occurrence matrix for tags versus documents, and an
+   It stores the tagged data with three keys - the original data ( **only columns with
+   updated headers! ** ), an occurrence matrix for tags versus documents, and an
    occurrence matrix for Problem-Items - Solution-Items versus documents.
 
 |image27|
