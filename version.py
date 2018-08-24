@@ -30,7 +30,10 @@ def get_version():
         # PEP 440 compatibility
         if '-' in version:
             if version.endswith('-dirty'):
-                raise RuntimeError('The working tree is dirty')
+                # raise RuntimeError('The working tree is dirty')
+                version = version[:-len('-dirty')]  # ignore it
+                import warnings
+                warnings.warn('The working tree is dirty!')
             print(version)
             version = '.r'.join(version.split('-')[:2])
 
