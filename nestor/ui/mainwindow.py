@@ -4,14 +4,8 @@ import chardet
 from pathlib import Path
 import PyQt5.QtWidgets as Qw
 
-import os
 
 import nestor.keyword as kex
-from collections import OrderedDict
-
-# from .. import keyword as kex
-
-# from .helper_objects import *
 from .openFilesUI_app import MyOpenFilesWindow
 from .selectCSVHeadersUI_app import MySelectCsvHeadersWindow
 from .taggingUI_app import MyTaggingToolWindow, TermsOfServiceDialog
@@ -66,7 +60,7 @@ class MainWindow:
         self.config_new.update(self.config_default)
 
 
-        self.csvHeaderMapping_path = self.projectPath/ 'nestor' / 'ui'/ 'csvHeader.yaml'
+        self.csvHeaderMapping_path = self.projectPath/ 'nestor' / 'store_data'/ 'csvHeader.yaml'
         self.csvHeaderOriginal = self.openYAMLConfig_File(self.csvHeaderMapping_path)
 
         self.tokenExtractor_1Gram = None

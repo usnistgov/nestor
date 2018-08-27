@@ -33,7 +33,7 @@ Description:
     However, the hierarchy followed the rules created in this file
 """
 
-from database_storage.helper import standardizeString
+from nestor.store_data.helper import standardizeString
 
 class Tag:
     """

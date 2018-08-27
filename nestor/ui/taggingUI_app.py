@@ -1,22 +1,18 @@
-
-
-from .helper_objects import CompositionNGramItem, MyMplCanvas, QButtonGroup_similarityPattern, QTableWidget_token
-import nestor.keyword as kex
-
 import importlib
+
+import nestor.keyword as kex
+from .helper_objects import CompositionNGramItem, MyMplCanvas, QButtonGroup_similarityPattern, QTableWidget_token
+
 neo4j_spec = importlib.util.find_spec("neo4j")
 simplecrypt_spec = importlib.util.find_spec("simplecrypt")
 
-#dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
-
-dbModule_exists = False
-
+dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
+#dbModule_exists = False
 
 
 if dbModule_exists:
-    from .dialogDatabaseConnection_app import DialogDatabaseConnection
-    from database_storage.helper import resultToObservationDataframe
-
+    from nestor.ui.menu_app import DialogDatabaseConnection
+    from nestor.ui.menu_app import DialogDatabaseRunQuery
 
 from pathlib import Path
 import pandas as pd
@@ -150,14 +146,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         if dbModule_exists:
 
-            self.actionConnect.setEnabled(True)
-
             self.actionConnect.triggered.connect(self.setMenu_DialogConnectToDatabase)
             self.actionRun_Query.triggered.connect(self.setMenu_DialogRunQuery)
 
             self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_1gramVocab)
             self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_NgramVocab)
 
+        else:
+
+            self.menuDatabase.setEnabled(False)
 
     def setMenu_AutoPopulate_FromCSV(self):
         options = Qw.QFileDialog.Options()

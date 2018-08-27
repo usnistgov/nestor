@@ -1,6 +1,4 @@
 from pathlib import Path
-import os
-import sys
 
 from PyQt5 import uic, QtGui
 from PyQt5.QtCore import Qt

@@ -1,16 +1,13 @@
-from simplecrypt import encrypt, decrypt
-import neo4j
-import webbrowser
 from pathlib import Path
 
-
-from database_storage.database.database import DatabaseNeo4J
-from database_storage import main as cypherQuery
-from  database_storage.helper import openYAMLFile
-
-from PyQt5.QtCore import Qt
-from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
+import neo4j
+from PyQt5 import QtGui, uic
+from simplecrypt import encrypt, decrypt
+
+from nestor.store_data import integration as cypherQuery
+from nestor.store_data.database import DatabaseNeo4J
+from  nestor.store_data.helper import openYAMLFile
 
 sheetColor = {
     "blue": "color: rgb(27, 143, 255);",

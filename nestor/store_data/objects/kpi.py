@@ -17,11 +17,9 @@ THE IDEA OF THIS KPI OBJECT IS STILL IN PROCESS, LOTS OF THE IDEA MIGHT CHANGE I
 
 
 
-from database_storage.objects.issue import *
-from database_storage.objects.machine import *
-from database_storage.objects.human import *
-from database_storage.objects.tag import *
-from database_storage.helper import updateDict
+from store_data.objects import human
+from store_data.objects import issue
+from store_data.objects import machine
 
 
 class Equation:

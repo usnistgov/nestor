@@ -1,12 +1,10 @@
 
-import sys
 from pathlib import Path
-from PyQt5.QtCore import QCoreApplication, Qt, QSize
+from PyQt5.QtCore import Qt
 from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
 import yaml
-# import collections
-# from sympy.core.tests.test_arit import same_and_same_prec
+
 
 
 def load_header_mapping():

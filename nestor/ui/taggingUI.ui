@@ -812,7 +812,7 @@ separated for readability. NA tags ommitted.
    </widget>
    <widget class="QMenu" name="menuDatabase">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>Database</string>
@@ -916,8 +916,11 @@ separated for readability. NA tags ommitted.
    </property>
   </action>
   <action name="actionConnect">
-   <property name="enabled">
+   <property name="checkable">
     <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Connect</string>
@@ -968,7 +971,7 @@ separated for readability. NA tags ommitted.
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_NGram_Classification"/>
   <buttongroup name="buttonGroup_1Gram_Classification"/>
+  <buttongroup name="buttonGroup_NGram_Classification"/>
  </buttongroups>
 </ui>
