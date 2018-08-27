@@ -27,7 +27,7 @@ def run_setup(packages, install_requires, extras_require):
         keywords = "nlp smart manufacturing maintenance tag app",
         url = "https://github.com/usnistgov/nestor/",
         packages=packages,
-        long_description=read('README.rst'),
+        long_description=read('README.md'),
         classifiers=[
             "Development Status :: 3 - Alpha",
             'Intended Audience :: Science/Research',

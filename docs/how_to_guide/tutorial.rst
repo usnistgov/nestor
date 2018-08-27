@@ -43,12 +43,19 @@ Start the Application
 |image91|
 
 6. Select the column(s) that you would like to “tag.” In this example,
-   the column is “OriginalShorttext.” 
+   the column is “OriginalShorttext.”
 
 |image10|
 
-7. (OPTIONAL) There is also a drop-down to say what the column likely represents - this is for the graph based
-   representation of the tags - COMING SOON! The choice made in this example is "issue-description_problem". Hit “Next”.
+7. There is also a drop-down to say what the column likely represents -
+   this is for later analyses and future storage in a graph database. These categories
+   in the drop-down come from `prior studies<https://www.nist.gov/publications/developing-maintenance-key-performance-indicators-maintenance-work-order-data>`__ on Maintenance Key Performance Indicators (KPIs).
+   These categories are used as the headers in the *.h5* binary files used to store the tagged data (`See the Report section <#sec:Report>`__).
+   A subset of these categories, *Machine Name* and *Maintenance Technician*, are used for the `Nestor Dashboard <dash-demonstration.rst>`__.
+
+   These categories will be used for constructing a graph database (COMING SOON!)
+
+   The “OriginalShorttext” in this example matches "Description of Problem". Hit “Next”.
 
 |image101|
 
@@ -56,6 +63,8 @@ Start the Application
 
 |image11|
 
+
+.. _sec:1gram:
 1 Gram Token tab
 ----------------
 
@@ -129,8 +138,9 @@ into detail on the “1 Gram Token” tab.
 
 |image17|
 
-- The list of currently classified words for this session are
-  highlighted in a different color.
+- For each new session, regardless of whether using earlier tagged 1-gram and
+  N-gram files, each new word that is classified will be highlighted in a
+  different color.
 
 |image171|
 
@@ -157,7 +167,7 @@ into detail on the “N Gram Token” tab.
 |image19|
 
 -  If the menu option for "Auto-populate" -> "From 1gram Vocab" is chosen,
-   the user is then presented with the Composition of the 2 gram, which are
+   the user is then presented with the "Composition" of the 2 gram, which are
    composed of two 1 gram tokens.
 
 |image191|
@@ -165,7 +175,7 @@ into detail on the “N Gram Token” tab.
 
 -  Each 1 gram is presented, with the classification (“type”) and the
    synonyms (the other words that were linked with the Similar Pattern
-   subwindow in the above section).
+   subwindow in the `1 Gram Token tab section <#sec:1gram>`__).
    In this example, “oil” is an “unknown (U)” classification and has no
    other synonyms at this point; “leak” is a “problem (P)” and has no
    other synonyms at this point.
@@ -195,6 +205,8 @@ into detail on the “N Gram Token” tab.
 
 -  **Stop-word**: This is 2 gram stop-word. This will be pre-populated when a “solution” 1 gram is paired with a “problem” ‘ gram. The user can decide if any other 2 grams are not useful.
 
+
+.. _sec:Report:
 Report tab
 ----------------------------------
 
@@ -233,8 +245,8 @@ begin using the report tab.
 
 -  The “create a HDFS (binary)” button will create a .h5 file. This file
    will be utilized later on to visualise the data on the Nestor Dashboard.
-   It stores the tagged data with three keys - the original data with
-   updated headers, an occurrence matrix for tags versus documents, and an
+   It stores the tagged data with three keys - the original data ( **only columns with
+   updated headers! ** ), an occurrence matrix for tags versus documents, and an
    occurrence matrix for Problem-Items - Solution-Items versus documents.
 
 |image27|

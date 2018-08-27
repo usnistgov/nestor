@@ -41,6 +41,7 @@ Starting the Dashboard Server
 
 Uploading Data Files
 --------------------
+**Note**: For the current version of the dashboard, visualization is limited to datasets containing "Machine Name" and "Maintenance Technician" entries. **Ensure these have been labeled for export in the tagging tool!**
 
 1. To immediately start visualizing your data, you need to upload a
    **.csv** or **.h5** file that was output from the NIST Nestor Tagging Tool.
@@ -69,7 +70,7 @@ Viewing Visualizations on Nestor Dashboard
 |imagenestordash|
 
 2. **Bar Chart**: This helps to quickly visualize the relative counts of various factors.
-   For example, in this dataset, the various *Solutions*(S), *Problems*(P) and *Items*(I)
+   For example, in this dataset, the various *Solutions* (S), *Problems* (P) and *Items* (I)
    can be seen for *Machines*. It is seen here that for the machine *B2*, *replaced* is
    the most frequent solution and *alarm* is the most frequent problem. Similarly,
    *turret* is the major item of concern.
