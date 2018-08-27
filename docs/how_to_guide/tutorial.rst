@@ -34,11 +34,11 @@ Start the Application
 
 |image9|
 
-  If you are continuing from a previous session of tagging using Nestor,
-  load up the 1-gram and the N-gram files. Usually, they are automatically
-  loaded up using the same file-path as the .csv file. If the file-path has
-  changed, ensure that the correct 1-gram and N-gram files are selected using
-  the **Open** button.
+If you are continuing from a previous session of tagging using Nestor,
+load up the 1-gram and the N-gram files. Usually, they are automatically
+loaded up using the same file-path as the .csv file. If the file-path has
+changed, ensure that the correct 1-gram and N-gram files are selected using
+the **Open** button.
 
 |image91|
 
@@ -49,9 +49,9 @@ Start the Application
 
 7. There is also a drop-down to say what the column likely represents -
    this is for later analyses and future storage in a graph database. These categories
-   in the drop-down come from `prior studies<https://www.nist.gov/publications/developing-maintenance-key-performance-indicators-maintenance-work-order-data>`__ on Maintenance Key Performance Indicators (KPIs).
-   These categories are used as the headers in the *.h5* binary files used to store the tagged data (`See the Report section <#sec:Report>`__).
-   A subset of these categories, *Machine Name* and *Maintenance Technician*, are used for the `Nestor Dashboard <dash-demonstration.rst>`__.
+   in the drop-down come from `prior studies <https://www.nist.gov/publications/developing-maintenance-key-performance-indicators-maintenance-work-order-data>`__ on Maintenance Key Performance Indicators (KPIs).
+   These categories are used as the headers in the *.h5* binary files used to store the tagged data (See the Section: `Report tab`_).
+   A subset of these categories, *Machine Name* and *Maintenance Technician*, are used for the Nestor Dashboard.
 
    These categories will be used for constructing a graph database (COMING SOON!)
 
@@ -64,7 +64,7 @@ Start the Application
 |image11|
 
 
-.. _sec:1gram:
+
 1 Gram Token tab
 ----------------
 
@@ -79,7 +79,7 @@ into detail on the “1 Gram Token” tab.
 
    -  **NE**: This is a “Named Entity.” This column will track the
       classifications of the tokens, which will be explained in more
-      detail later in the `Named Entity Classification Step <#sec:Classify>`__.
+      detail later in the `Classification Section`_ .
 
    -  **alias**: This column tracks any aliases for tokens as made by the
       tool. These represent your new “tags."
@@ -109,7 +109,7 @@ into detail on the “1 Gram Token” tab.
 
 |image15|
 
-.. _sec:Classify:
+.. _Classification Section: 
 
 -  This field is where the user can classify the “token.” The
    classifications provided are:
@@ -126,7 +126,7 @@ into detail on the “1 Gram Token” tab.
 
    -  **Ambiguous (Unknown)**: Words that are unknown without more
       context. An example is “oil” as this can be an item or a solution.
-      This is further described in the `N Gram Token tab section <#sec:Ngram>`__
+      This is further described in the Section: `N Gram Token tab`_
 
    -  **Stop-word**: A word that does not matter for analysis. For
       example, “see” or “according” are stop-words.
@@ -145,7 +145,7 @@ into detail on the “1 Gram Token” tab.
 |image171|
 
 
-.. _sec:Ngram:
+
 
 N Gram Token tab
 ----------------
@@ -175,7 +175,7 @@ into detail on the “N Gram Token” tab.
 
 -  Each 1 gram is presented, with the classification (“type”) and the
    synonyms (the other words that were linked with the Similar Pattern
-   subwindow in the `1 Gram Token tab section <#sec:1gram>`__).
+   subwindow in the Section: `1 Gram Token tab`_).
    In this example, “oil” is an “unknown (U)” classification and has no
    other synonyms at this point; “leak” is a “problem (P)” and has no
    other synonyms at this point.
@@ -206,7 +206,7 @@ into detail on the “N Gram Token” tab.
 -  **Stop-word**: This is 2 gram stop-word. This will be pre-populated when a “solution” 1 gram is paired with a “problem” ‘ gram. The user can decide if any other 2 grams are not useful.
 
 
-.. _sec:Report:
+
 Report tab
 ----------------------------------
 
@@ -245,8 +245,8 @@ begin using the report tab.
 
 -  The “create a HDFS (binary)” button will create a .h5 file. This file
    will be utilized later on to visualise the data on the Nestor Dashboard.
-   It stores the tagged data with three keys - the original data ( **only columns with
-   updated headers! ** ), an occurrence matrix for tags versus documents, and an
+   It stores the tagged data with three keys - the original data **(only columns with
+   updated headers!)**, an occurrence matrix for tags versus documents, and an
    occurrence matrix for Problem-Items - Solution-Items versus documents.
 
 |image27|
