@@ -34,12 +34,20 @@ Start the Application
 
 |image9|
 
+  If you are continuing from a previous session of tagging using Nestor,
+  load up the 1-gram and the N-gram files. Usually, they are automatically
+  loaded up using the same file-path as the .csv file. If the file-path has
+  changed, ensure that the correct 1-gram and N-gram files are selected using
+  the **Open** button.
+
+|image91|
+
 6. Select the column(s) that you would like to “tag.” In this example,
    the column is “OriginalShorttext.” 
 
 |image10|
 
-7. (OPTIONAL - COMING SOON) There is also a drop-down to say what the column likely represents - this is for the graph based
+7. (OPTIONAL) There is also a drop-down to say what the column likely represents - this is for the graph based
    representation of the tags - COMING SOON! The choice made in this example is "issue-description_problem". Hit “Next”.
 
 |image101|
@@ -239,6 +247,7 @@ begin using the report tab.
 .. |image7| image:: images/Graphics35_v3.png
 .. |image8| image:: images/Graphics36_v3.png
 .. |image9| image:: images/Graphics37_v3.png
+.. |image91| image:: images/Graphics37_v3_2.png
 .. |image10| image:: images/Graphics38_v3.png
 .. |image101| image:: images/Graphics38_v3_2.png
 .. |image11| image:: images/Graphics40_v3.png
