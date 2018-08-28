@@ -23,7 +23,7 @@ Start the Application
 |image6|
 
 4. Open your .csv file with your MWOs. Included in the application, is a
-   publicly available dataset. We will use this file (excavators.csv) as
+   publicly available dataset. We will use this file (excavators.csv located in .\nestor\datasets) as
    the example.
 
 |image7|
@@ -42,17 +42,18 @@ the **Open** button.
 
 |image91|
 
-6. Select the column(s) that you would like to “tag.” In this example,
+6. Select the column(s) that you would like to “tag.” Check the check box. In this example,
    the column is “OriginalShorttext.”
 
 |image10|
 
 .. _Dropdown Categories:
+
 7. There is also a drop-down to say what the column likely represents -
    this is for later analyses and future storage in a graph database. These categories
    in the drop-down come from `prior studies <https://www.nist.gov/publications/developing-maintenance-key-performance-indicators-maintenance-work-order-data>`__ on Maintenance Key Performance Indicators (KPIs).
    These categories are used as the headers in the *.h5* binary files used to store the tagged data (See the Section: `Report tab`_).
-   A subset of these categories, *Machine Name* and *Maintenance Technician*, are used for the Nestor Dashboard.
+   A subset of these categories, *Machine Name* and *Maintenance Technician*, are used for the Nestor Dashboard. **Please note, the columns that are selected as headers do not need to be "checked" if these columns are not going to be tagged.** 
 
    These categories will be used for constructing a graph database (**COMING SOON!**)
 
@@ -145,7 +146,17 @@ into detail on the “1 Gram Token” tab.
 
 |image171|
 
+- The “Update” button will update the interface with the user's selections. 
 
+- The "Save" button will save the vocab files to a .csv file
+
+|image172|
+
+- The “Slider” will update the amount of similar terms that are displayed. As the slider moves right, more terms will display in "Similar Pattern". 
+
+|image173|
+
+- For our example using "replace" from above, select all words that are similar, select "Solution", and then hit "Update". 
 
 
 N Gram Token tab
@@ -178,8 +189,7 @@ into detail on the “N Gram Token” tab.
    synonyms (the other words that were linked with the Similar Pattern
    subwindow in the Section: `1 Gram Token tab`_).
    In this example, “oil” is an “unknown (U)” classification and has no
-   other synonyms at this point; “leak” is a “problem (P)” and has no
-   other synonyms at this point.
+   other synonyms at this point; “leak” is a “problem (P)” and has synonyms: leak, leaking, leaks, leaky. 
 
 |image20|
 
@@ -247,7 +257,7 @@ begin using the report tab.
 -  The “create a HDFS (binary)” button will create a .h5 file. This file
    will be utilized later on to visualise the data on the Nestor Dashboard.
    It stores the tagged data with three keys - the original data (only columns with
-   **updated headers** - as discussed in the `Dropdown Categories`_ step.), an occurrence matrix for tags versus documents, and an
+   **updated headers** - as discussed in the step: `Dropdown Categories`_.), an occurrence matrix for tags versus documents, and an
    occurrence matrix for Problem-Items - Solution-Items versus documents.
 
 |image27|
@@ -271,6 +281,8 @@ begin using the report tab.
 .. |image16| image:: images/Graphics45_v3.png
 .. |image17| image:: images/Graphics46_v3.png
 .. |image171| image:: images/Graphics46_v3_2.png
+.. |image172| image:: images/Graphics46_v3_1.png
+.. |image173| image:: images/nestor_thresholds.png
 .. |image18| image:: images/Graphics47_v3.png
 .. |image19| image:: images/Graphics48_v3.png
 .. |image191| image:: images/Graphics48_v3_2.png
