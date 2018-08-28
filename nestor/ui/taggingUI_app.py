@@ -13,6 +13,7 @@ dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
 if dbModule_exists:
     from nestor.ui.menu_app import DialogDatabaseConnection
     from nestor.ui.menu_app import DialogDatabaseRunQuery
+    from nestor.store_data.helper import resultToObservationDataframe
 
 from pathlib import Path
 import pandas as pd
@@ -145,15 +146,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromCSV)
 
         if dbModule_exists:
-
             self.actionConnect.triggered.connect(self.setMenu_DialogConnectToDatabase)
-            self.actionRun_Query.triggered.connect(self.setMenu_DialogRunQuery)
-
-            self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_1gramVocab)
-            self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_NgramVocab)
-
         else:
-
             self.menuDatabase.setEnabled(False)
 
     def setMenu_AutoPopulate_FromCSV(self):
@@ -214,7 +208,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             if done:
                 df = resultToObservationDataframe(result).set_index("tokens")
-
                 self.dataframe_1Gram.replace('', np.nan, inplace = True)
 
                 mask = self.dataframe_1Gram[["NE", "alias"]].isnull().all(axis=1)
@@ -253,8 +246,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             print("connect to Database")
             self.actionRun_Query.setEnabled(True)
+            self.actionRun_Query.triggered.connect(self.setMenu_DialogRunQuery)
+
             self.actionOpen_Database.setEnabled(True)
+            self.actionOpen_Database.triggered.connect(self.database.open_browser)
+
             self.menu_AutoPopulate_FromDatabase.setEnabled(True)
+            self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_1gramVocab)
+            self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_NgramVocab)
+
+
         else:
             print("not possible to connect")
 

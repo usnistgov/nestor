@@ -27,10 +27,6 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
         Ui_MainWindow_DatabaseConnection.__init__(self)
         self.setupUi(self)
 
-        #ici tu fait le reverse !!!
-
-        # self.set_csvHeader(csvHeaderMapping, csvHeaderOriginal)
-
         self.database = None
 
         if iconPath:
@@ -41,6 +37,12 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
 
         self.lineEdit_DialogDatabaseConnection_ConnectInfo.setStyleSheet(sheetColor['blue'])
+
+        self.lineEdit_DialogDatabaseConnection_OpenSchema.setText(str(script_dir.parent / "store_data" / "DatabaseSchema.yaml"))
+        self.lineEdit_DialogDatabaseConnection_ServerName.setText("localhost")
+        self.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText("7687")
+        self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText("7474")
+
 
     def get_input(self):
         return  self.lineEdit_DialogDatabaseConnection_Username.text(), \
@@ -53,17 +55,17 @@ class DialogDatabaseConnection(Qw.QDialog, Ui_MainWindow_DatabaseConnection):
 
     def get_database(self):
 
-        username, password, schema_path, server, serverPort, browserPort = self.get_input()
-        uri = f'bolt://{server}:{serverPort}'
-
+        username, password, schema_path, server, portBolt, portUi = self.get_input()
 
         try:
             schema = openYAMLFile(schema_path)
 
             database = DatabaseNeo4J(user = username,
-                                 password=decrypt('password', password).decode('utf8'),
-                                 uri=uri,
-                                 schema=schema)
+                                     password=decrypt('password', password).decode('utf8'),
+                                     server = server,
+                                     portBolt= portBolt,
+                                     portUi = portUi,
+                                     schema=schema)
 
             self.lineEdit_DialogDatabaseConnection_ConnectInfo.setText(
                 f'Connection created')

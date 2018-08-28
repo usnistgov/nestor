@@ -16,6 +16,7 @@ Description:
 """
 from tqdm import tqdm
 from neo4j.v1 import GraphDatabase
+import webbrowser
 
 
 class DatabaseNeo4J(object):
@@ -31,9 +32,12 @@ class DatabaseNeo4J(object):
 
     """
 
-    def __init__(self, uri, user, password, schema=None):
+    def __init__(self, server = "localhost", portBolt = "7687", portUi = "7474", user ="neo4j", password = "neo4j", schema=None):
         self.schema=schema
-        self._driver = GraphDatabase.driver(uri, auth=(user, password))
+        self.uri = "bolt:" + server+ ":" + portBolt
+        self.url = server + ":" + portUi
+
+        self._driver = GraphDatabase.driver(self.uri, auth=(user, password))
 
     def close(self):
         """
@@ -197,3 +201,20 @@ class DatabaseNeo4J(object):
         return nodeProperties
 
 
+    def getTokenTagClassification(self):
+
+       return self.runQuery(f'MATCH (tag:TAG)\
+                        UNWIND tag.synonyms as token\
+                        RETURN token AS tokens, tag.keyword AS alias,\
+                        CASE\
+                            WHEN "PROBLEM" in labels(tag) THEN "P"\
+                            WHEN "ITEM" in labels(tag) THEN "I"\
+                            WHEN "SOLUTION" in labels(tag) THEN "S"\
+                            WHEN "UNKNOWN" in labels(tag) THEN "U"\
+                            WHEN "SOLUTION_ITEM" in labels(tag) THEN "S I"\
+                            WHEN "PROBLEM_ITEM" in labels(tag) THEN "P I"\
+                            ELSE ""\
+                        END AS NE')
+
+    def open_browser(self):
+        webbrowser.open(self.url, new=1)
