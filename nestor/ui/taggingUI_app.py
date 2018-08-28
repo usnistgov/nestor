@@ -384,10 +384,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #TODO add this stuff to the original csv data
         if self.tag_readable is None:
             self.onClick_saveTrack()
-        fname = Path('.')/'READABLE_TAGS.csv'
-        print("Saving a Readable csv with tagged documents. ", str(fname))
-        self.dataframe_Original.join(self.tag_readable).to_csv(fname)
-        print('DONE!')
+
+        print(self.tag_readable)
+
+        fname, _ = Qw.QFileDialog.getSaveFileName(self, 'Save File')
+        if fname is not "":
+            if fname[-4:] != '.csv':
+                fname += '.csv'
+
+            print("Saving a Readable csv with tagged documents. ", str(fname))
+            self.dataframe_Original.join(self.tag_readable, lsuffix="_pre").to_csv(fname)
+            print('DONE!')
 
     def onClick_saveTagsHDFS(self):
         """generate a new csv with the document and the tag occurences (0 if not 1 if )
@@ -406,21 +413,23 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.onClick_saveTrack()
         # fname = Path('.')
         fname, _ = Qw.QFileDialog.getSaveFileName(self, 'Save File')
-        if fname[-3:] != '.h5':
-            fname += '.h5'
-        # print(self.dataframe_Original.shape, self.tag_df.shape, self.relation_df.shape)
 
-        print(f"Saving {fname} as HDF5...")
+        if fname is not "":
+            if fname[-3:] != '.h5':
+                fname += '.h5'
+            # print(self.dataframe_Original.shape, self.tag_df.shape, self.relation_df.shape)
 
-        col_map = self.config['csvheader_mapping']
-        save_df = self.dataframe_Original[list(col_map.keys())]
-        save_df = save_df.rename(columns=col_map)
-        save_df.to_hdf(fname, key='df')
+            print(f"Saving {fname} as HDF5...")
 
-        self.tag_df.to_hdf(fname, key='tags')
-        self.relation_df.to_hdf(fname, key='rels')
-        print('DONE')
-        # TODO add fname to config.yml as pre-loaded "update tag extraction"
+            col_map = self.config['csvheader_mapping']
+            save_df = self.dataframe_Original[list(col_map.keys())]
+            save_df = save_df.rename(columns=col_map)
+            save_df.to_hdf(fname, key='df')
+
+            self.tag_df.to_hdf(fname, key='tags')
+            self.relation_df.to_hdf(fname, key='rels')
+            print('DONE')
+            # TODO add fname to config.yml as pre-loaded "update tag extraction"
 
     def onSelectedItem_table1Gram(self):
         """action when we select an item from the 1Gram table view
