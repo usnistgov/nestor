@@ -168,7 +168,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if fileName:
 
             df = pd.read_csv(fileName)[["tokens","NE","alias"]].set_index("tokens")
-            print(df.head())
 
             self.dataframe_1Gram.replace('', np.nan, inplace=True)
 
@@ -208,7 +207,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_NGram)
 
         else:
-            print("no connected to any database")
+            print("NOT CONNECTED --> you need to connect to a database before")
 
     def setMenu_AutoPopulate_FromDatabase_1gramVocab(self):
         if self.database is not None:
@@ -233,7 +232,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_1Gram)
 
         else:
-            print("no connected to any database")
+            print("NOT CONNECTED --> you need to connect to a database before")
 
     def setMenu_DialogConnectToDatabase(self):
         self.menu_Database_connect = DialogDatabaseConnection(iconPath=self.iconPath)
@@ -254,12 +253,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         if self.database is not None:
 
-            print("connect to Database")
+            print("CONNECTION --> Database connected")
             self.actionRun_Query.setEnabled(True)
             self.actionOpen_Database.setEnabled(True)
             self.menu_AutoPopulate_FromDatabase.setEnabled(True)
         else:
-            print("not possible to connect")
+            self.database = None
+            print("NOT CONNECTED --> we did not connect to your database")
 
     def setMenu_DialogRunQuery(self):
 
@@ -278,7 +278,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.menu_Database_runQuery.show()
 
         else:
-            print("define the database first")
+            print("NOT CONNECTED --> you need to connect to a database before")
 
     def onClick_changeClassification(self, btn):
         new_clf = self.buttonDictionary_NGram.get(btn.text())
@@ -318,9 +318,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Qw.QApplication.processEvents()
 
 
-        print("progress saving; calculating the extracted tags and statistics...")
+        print("SAVE IN PROCESS --> calculating the extracted tags and statistics...")
         # do 1-grams
-        print('\n ONE GRAMS...')
+        print('ONE GRAMS...')
         tags_df = kex.tag_extractor(self.tokenExtractor_1Gram,
                                          self.clean_rawText,
                                          vocab_df=self.dataframe_1Gram)
@@ -328,7 +328,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         window_DialogWait.setProgress(30)
         Qw.QApplication.processEvents()
         # do 2-grams
-        print('\n TWO GRAMS...')
+        print('TWO GRAMS...')
         tags2_df = kex.tag_extractor(self.tokenExtractor_nGram,
                                           self.clean_rawText_1Gram,
                                           vocab_df=self.dataframe_NGram[self.dataframe_NGram.alias.notna()])
@@ -369,6 +369,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         Qw.QApplication.processEvents()
 
+        print("SAVE --> your information has been saved, you can now extract your result in CSV or HDF5")
+
     def onClick_saveNewCsv(self):
         """generate a new csv with the original csv and the generated token for the document
         :return:
@@ -385,16 +387,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if self.tag_readable is None:
             self.onClick_saveTrack()
 
-        print(self.tag_readable)
-
         fname, _ = Qw.QFileDialog.getSaveFileName(self, 'Save File')
         if fname is not "":
             if fname[-4:] != '.csv':
                 fname += '.csv'
 
-            print("Saving a Readable csv with tagged documents. ", str(fname))
             self.dataframe_Original.join(self.tag_readable, lsuffix="_pre").to_csv(fname)
-            print('DONE!')
+            print('SAVE --> readable csv with tagged documents saved at: ', str(fname))
 
     def onClick_saveTagsHDFS(self):
         """generate a new csv with the document and the tag occurences (0 if not 1 if )
@@ -417,9 +416,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if fname is not "":
             if fname[-3:] != '.h5':
                 fname += '.h5'
-            # print(self.dataframe_Original.shape, self.tag_df.shape, self.relation_df.shape)
 
-            print(f"Saving {fname} as HDF5...")
 
             col_map = self.config['csvheader_mapping']
             save_df = self.dataframe_Original[list(col_map.keys())]
@@ -428,7 +425,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             self.tag_df.to_hdf(fname, key='tags')
             self.relation_df.to_hdf(fname, key='rels')
-            print('DONE')
+            print('SAVE --> HDF5 document containing:'
+                  '\n\t- the original document (with updated header)'
+                  '\n\t- the binary matrices of Tag'
+                  '\n\t- the binary matrices of combined Tag')
             # TODO add fname to config.yml as pre-loaded "update tag extraction"
 
     def onSelectedItem_table1Gram(self):
@@ -617,8 +617,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         if dataframe_Original is not None:
             self.dataframe_Original= dataframe_Original
-        # print('NEW TEST ALERT')
-        # print(dataframe_1Gram)
         if dataframe_1Gram is not None:
             self.dataframe_1Gram=dataframe_1Gram
             self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_1Gram)

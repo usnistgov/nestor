@@ -22,7 +22,6 @@ class MainWindow:
         self.icnoPtah=None
         self.projectPath = Path(__file__).parent.parent.parent
         self.yamlPath = Path.home()/'.nestor-tmp'
-        print(self.yamlPath)
         self.yamlPath.mkdir(parents=True, exist_ok=True)
         self.yamlPath_config = self.yamlPath/"ui-config.yaml"
         self.config_new = {
@@ -132,7 +131,8 @@ class MainWindow:
                 self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'])
                 self.window_taggingTool._set_dataframes(dataframe_Original=self.dataframe_Original)
             except UnicodeDecodeError:
-                print("Searching the good encoding")
+                print("WAIT --> your file are not an UTF8 file, we are searching the good encoding")
+                print("(you might want to open it and save it as UTF8 for the next time, it is way faster))")
                 encoding = chardet.detect(open(self.config_new['file']['filePath_OriginalCSV']['path'], 'rb').read())['encoding']
                 self.dataframe_Original = pd.read_csv(self.config_new['file']['filePath_OriginalCSV']['path'], encoding=encoding)
 
@@ -227,7 +227,7 @@ class MainWindow:
         self.window_taggingTool._set_tokenExtractor(tokenExtractor_nGram=self.tokenExtractor_nGram)
         self.window_taggingTool._set_cleanRawText(clean_rawText_1Gram=self.clean_rawText_1Gram)
 
-        print('Updated Ngram definitions from latest 1-gram vocabulary!')
+        #print('Done --> Updated Ngram classification from 1-gram vocabulary!')
 
 
     def openYAMLConfig_File(self, yaml_path, dict=None):
@@ -248,12 +248,12 @@ class MainWindow:
         if yaml_path.is_file():
             with open(yaml_path, 'r') as yamlfile:
                 config = yaml.load(yamlfile)
-                print("yaml file open")
+                print("OPEN --> YAML file at: ", yaml_path)
         else:
             config = dict
             with open(yaml_path, 'w') as yamlfile:
                 pyaml.dump(config, yamlfile)
-                print("yaml file created")
+                print("CREATE --> YAML file at: ", yaml_path)
         return config
 
 
@@ -274,7 +274,7 @@ class MainWindow:
         """
         with open(yaml_path, 'w') as yamlfile:
             pyaml.dump(dict, yamlfile)
-            print("yaml file save")
+            print("SAVE --> YAML file at: ", yaml_path)
 
 
     def close_taggingUIWindow(self, event):
@@ -296,15 +296,15 @@ class MainWindow:
 
         self.saveYAMLConfig_File(self.yamlPath_config, self.config_new)
         if choice == Qw.QMessageBox.Save:
-            print("save and close")
+            print("SAVE AND CLOSE --> vocab 1gram and Ngram, as well as the config file")
             self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram, self.config_new['file']['filePath_1GrammCSV']['path'])
             self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram, self.config_new['file']['filePath_nGrammCSV']['path'])
 
         elif choice == Qw.QMessageBox.Cancel:
-            print("It's ok if you miss clicked we got your back!!!")
+            print("NOTHING --> config file saved (in case)")
             event.ignore()
         else:
-            print("close without saving")
+            print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
             pass
 
 
