@@ -51,8 +51,7 @@ Uploading Data Files
 
 |imageuploadpage|
 
-   After the upload is complete, the Dashboard shows the list of currently
-   uploaded files.
+After the upload is complete, the Dashboard shows the list of currently uploaded files.
 
 |imageuploadedfiles|
 
@@ -77,50 +76,40 @@ Viewing Visualizations on Nestor Dashboard
 
 |imagebarmachine|
 
-   To derive insights about other machines, click on the drop-down on the right side.
+To derive insights about other machines, click on the drop-down on the right side.
 
 |imagebarmachinedropdown|
 
-   Also, you can vary the amount of data being displayed by changing the *n_thres* slider.
+Also, you can vary the amount of data being displayed by changing the *n_thres* slider.
 
 |imagebarmachinethresh|
 
-   Instead of viewing all Solutions, Problems and Items in a *sorted* manner, it is also
-   possible to group them individually.
+Instead of viewing all Solutions, Problems and Items in a *sorted* manner, it is also possible to group them individually.
 
 |imagebarmachinegrouped|
 
-   It is also possible to view the bar chart for various technicians instead of machines
-   by using the dropdown.
+It is also possible to view the bar chart for various technicians instead of machines by using the dropdown.
 
 |imagebartechs|
 
-   The raw data that these visualizations derive from, are also available.
+The raw data that these visualizations derive from, are also available.
 
 |imagebardataframe|
 
-3. **Node-Link Diagram**: The second type of visualization is the Node-Link diagram.
-   It helps show the connections and the strength of the connections between various
-   items, problems and solutions, as a Graph.
+3. **Node-Link Diagram**: The second type of visualization is the Node-Link diagram. It helps show the connections and the strength of the connections between various items, problems and solutions, as a Graph.
 
 |imagenodelink|
 
-  As with the other visualizations, it is easy to switch between Technicians, Machines,
-  and control the thresholds for visualization. There are values that can be controlled
-  for both the nodes themselves and the strengths of the links between them.
+As with the other visualizations, it is easy to switch between Technicians, Machines, and control the thresholds for visualization. There are values that can be controlled for both the nodes themselves and the strengths of the links between them.
 
 |imagenodelinkthresholds|
 
 
-4. **Flow Diagram**: The Sankey Flow Diagram is another kind of visualization that helps to
-  see the category-wise connections. Simultaneously, it is also possible to see the
-  severity of the category itself, such as a solution action or the item involved. The strength
-  of the relations are proportional to the width of the line connecting the entities at either
-  end.
+4. **Flow Diagram**: The Sankey Flow Diagram is another kind of visualization that helps to see the category-wise connections. Simultaneously, it is also possible to see the severity of the category itself, such as a solution action or the item involved. The strength of the relations are proportional to the width of the line connecting the entities at either end.
 
 |imageflowdiagrammachine|
 
-  The weighting methods for the flow diagram can be varied between *cosine* and *count* based weights.
+The weighting methods for the flow diagram can be varied between *cosine* and *count* based weights.
 
 |imageflowdiagramweights|
 

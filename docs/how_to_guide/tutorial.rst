@@ -47,13 +47,14 @@ the **Open** button.
 
 |image10|
 
+.. _Dropdown Categories:
 7. There is also a drop-down to say what the column likely represents -
    this is for later analyses and future storage in a graph database. These categories
    in the drop-down come from `prior studies <https://www.nist.gov/publications/developing-maintenance-key-performance-indicators-maintenance-work-order-data>`__ on Maintenance Key Performance Indicators (KPIs).
    These categories are used as the headers in the *.h5* binary files used to store the tagged data (See the Section: `Report tab`_).
    A subset of these categories, *Machine Name* and *Maintenance Technician*, are used for the Nestor Dashboard.
 
-   These categories will be used for constructing a graph database (COMING SOON!)
+   These categories will be used for constructing a graph database (**COMING SOON!**)
 
    The “OriginalShorttext” in this example matches "Description of Problem". Hit “Next”.
 
@@ -79,7 +80,7 @@ into detail on the “1 Gram Token” tab.
 
    -  **NE**: This is a “Named Entity.” This column will track the
       classifications of the tokens, which will be explained in more
-      detail later in the `Classification Section`_ .
+      detail later in the `Classification Section`_.
 
    -  **alias**: This column tracks any aliases for tokens as made by the
       tool. These represent your new “tags."
@@ -168,7 +169,7 @@ into detail on the “N Gram Token” tab.
 
 -  If the menu option for "Auto-populate" -> "From 1gram Vocab" is chosen,
    the user is then presented with the "Composition" of the 2 gram, which are
-   composed of two 1 gram tokens.
+   composed of two 1 gram tokens. The other options are currently under development (**COMING SOON!**).
 
 |image191|
 |image192|
@@ -245,8 +246,8 @@ begin using the report tab.
 
 -  The “create a HDFS (binary)” button will create a .h5 file. This file
    will be utilized later on to visualise the data on the Nestor Dashboard.
-   It stores the tagged data with three keys - the original data **(only columns with
-   updated headers!)**, an occurrence matrix for tags versus documents, and an
+   It stores the tagged data with three keys - the original data (only columns with
+   **updated headers** - as discussed in the `Dropdown Categories`_ step.), an occurrence matrix for tags versus documents, and an
    occurrence matrix for Problem-Items - Solution-Items versus documents.
 
 |image27|
