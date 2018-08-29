@@ -22,7 +22,7 @@ Start the Application
 
 |image6|
 
-4. Open your .csv file with your MWOs. Included in the application, is a
+4. Open your .csv file with your MWOs. Please note, the file must be UTF-8 encoding. Included in the application, is a
    publicly available dataset. We will use this file (excavators.csv located in .\nestor\datasets) as
    the example.
 
