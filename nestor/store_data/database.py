@@ -61,7 +61,7 @@ class DatabaseNeo4J(object):
                 result = session.write_transaction(self._execute_code, query)
             return 1, result
         except:
-            print("cannot run the query")
+            print("ERROR --> cannot run the queries")
             return 0, None
 
     def runQueries(self, queries):
@@ -75,7 +75,8 @@ class DatabaseNeo4J(object):
             done, result = self.runQuery(query)
 
             if not done:
-                print("ERROR on Maintenance Work Order \tOn query\n", query, "\n\n")
+                print("ERROR --> on Maintenance Work Order"
+                      "\n Query: ", query, "\n cannot be executed \n")
         return 1
 
     def deleteData(self):

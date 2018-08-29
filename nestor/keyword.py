@@ -488,8 +488,6 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
 
     _ = NE_dict.pop('', None)
 
-    print('found bug! \t', _)
-
     NE_sub = sorted(NE_dict, key=len, reverse=True)
     # print(NE_sub)
     # print(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')

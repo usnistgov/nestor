@@ -20,6 +20,7 @@ def exception_handler(type_, value, traceback_):
 
 
 def main():
+
     app = QApplication(sys.argv)
 
     stylesheet = """
@@ -38,10 +39,17 @@ def main():
 
     app.setStyleSheet(stylesheet)
     window = mainwindow.MainWindow()
-    #sys.excepthook = exception_handler
+    sys.excepthook = exception_handler
     sys.exit(app.exec_())
 
 
+
 if __name__ == "__main__":
+    print("==================================================================")
+    print("Welcome to NESTOR, a tagging tool created by the KEA gteam at NIST")
+    print("It allows you to nicely tag your human writed Maintenance Data in ")
+    print("order to make it computable by a machine and easily readable by you")
+    print("==================================================================")
+
     main()
 

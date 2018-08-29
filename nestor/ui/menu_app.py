@@ -181,7 +181,7 @@ class DialogDatabaseRunQuery(Qw.QDialog, Ui_MainWindow_DialogDatabaseRunQuery):
                 originalDataframe=df_original,
                 propertyToHeader_dict=self.csv_header
             ))
-            print("\nDONE -----> Data from Original CSV Work Order stored !!")
+            print("DONE -----> Data from Original CSV Work Order stored !!")
 
         self.progressBar_DialogDatabaseRunQuery_RunQueries.setValue(30)
         Qw.QApplication.processEvents()
@@ -290,9 +290,9 @@ class DialogDatabaseRunQuery(Qw.QDialog, Ui_MainWindow_DialogDatabaseRunQuery):
             self.database.deleteData()
             self.lineEdit_DialogDatabaseRunQuery_Info.setText(
             f'All your data have been removed!!')
-            print('We delete your data.')
+            print('DONE --> your data have been removed from you database')
         else:
-            print('We are NOT going to remove your data.')
+            print('We do NOT remove your data.')
 
 
 # Now the ToS dialog .ui file
