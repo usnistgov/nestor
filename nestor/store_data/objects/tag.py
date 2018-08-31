@@ -79,7 +79,7 @@ class Tag:
         if isinstance(synonyms, str):
             self.synonyms = [standardizeString(synonyms).lower()]
         elif isinstance(synonyms, list):
-            self.synonyms = [standardizeString(s).lower() for s in synonyms]
+            self.synonyms = [standardizeString(str(s)).lower() for s in synonyms]
         else:
             self.synonyms = None
 

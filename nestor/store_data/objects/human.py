@@ -200,7 +200,7 @@ class Technician(Human):
         if isinstance(skills, str):
             self.skills = [standardizeString(skills).lower()]
         elif isinstance(skills, list):
-            self.skills = [standardizeString(s).lower() for s in skills]
+            self.skills = [standardizeString(str(s)).lower() for s in skills]
         else:
             self.skills = None
 
@@ -211,7 +211,7 @@ class Technician(Human):
         if isinstance(crafts, str):
             self.crafts = [standardizeString(crafts).lower()]
         elif isinstance(crafts, list):
-            self.crafts = [standardizeString(c).lower() for c in crafts]
+            self.crafts = [standardizeString(str(c)).lower() for c in crafts]
         else:
             self.crafts = None
 

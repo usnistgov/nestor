@@ -840,7 +840,7 @@ separated for readability. NA tags ommitted.
     </widget>
     <widget class="QMenu" name="menu_AutoPopulate_FromCSV">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="title">
       <string>From CSV</string>
