@@ -247,14 +247,14 @@ begin using the report tab.
 
 |image25|
 
--  The “create new CSV” button will create an .csv with the original
+-  The “create new CSV” button will open a save window. A .csv file will be created with the original
    dataset and 7 new columns (“I”,“P”,”PI”, “S”,“SI”,“U”, and “X”) ,
    which contain the new tags from each category. Please note that “X”
    contains any stop words.
 
 |image26|
 
--  The “create a HDFS (binary)” button will create a .h5 file. This file
+-  The “create a HDFS (binary)” button will open a save window and create a .h5 file. This file
    will be utilized later on to visualise the data on the Nestor Dashboard.
    It stores the tagged data with three keys - the original data (only columns with
    **updated headers** - as discussed in the step: `Dropdown Categories`_.), an occurrence matrix for tags versus documents, and an

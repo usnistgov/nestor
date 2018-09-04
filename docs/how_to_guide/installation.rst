@@ -17,7 +17,7 @@ This will do a cloud install to your python installation directory.
 
 2. Type in ``pip install nist-nestor`` and wait for the install to complete. This installs the Graphical User Interface (GUI) for the Nestor Tagging Tool.
 
-3. (Optional Step) Type in ``pip install nist-nestor[dash]`` to also install the Nestor Dashboard.
+3. (Optional Step) Type in ``pip install nist-nestor[dash]`` to also install the Nestor Dashboard (Under Development!).
 
 Install using local archive
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,9 +37,9 @@ This will be a local install downloaded from a `recent source code release on Gi
 
 4. Navigate to the folder where the files have been extracted to (the folder will have the file setup.py in it).
 
-5. Install **nestor** using the command ``pip install .``
+5. Install **nestor** using the command ``pip install .`` (please note the "." is part of the command)
 
-6. (Optional Step) Type in ``pip install .[dash]`` to install the Nestor Dashboard.
+6. (Optional Step) Type in ``pip install .[dash]`` to install the Nestor Dashboard (Under Development!).
 
 
 How to automatically build documentation (Optional)
