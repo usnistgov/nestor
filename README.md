@@ -52,7 +52,7 @@ Planned/underway:
 ### Pre-requisites
 
 This package was built as compatible with Anaconda python distribution.
-See our [default requirements file](requirements/default.txt) for a complete list of major dependencies, along with the requirements to run our [experimental dashboard](requirements/dash.txt) or to [compile our documentation locally](requirements/docs.txt)
+See our [default requirements file](https://github.com/usnistgov/nestor/blob/master/requirements/defaults.txt) for a complete list of major dependencies, along with the requirements to run our [experimental dashboard](https://github.com/usnistgov/nestor/blob/master/requirements/dash.txt) or to [compile our documentation locally](https://github.com/usnistgov/nestor/blob/master/requirements/docs.txt)
 
 
 ## Who are we?
