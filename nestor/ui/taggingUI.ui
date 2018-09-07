@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>702</width>
-    <height>749</height>
+    <width>672</width>
+    <height>681</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -275,7 +275,7 @@
             <item row="2" column="0">
              <widget class="QProgressBar" name="progressBar_1gram_TagComplete">
               <property name="value">
-               <number>24</number>
+               <number>0</number>
               </property>
              </widget>
             </item>
@@ -352,7 +352,7 @@
             <item row="2" column="0" alignment="Qt::AlignBottom">
              <widget class="QProgressBar" name="progressBar_Ngram_TagComplete">
               <property name="value">
-               <number>24</number>
+               <number>0</number>
               </property>
              </widget>
             </item>
@@ -765,13 +765,13 @@ separated for readability. NA tags ommitted.
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>702</width>
+     <width>672</width>
      <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>File</string>
@@ -779,25 +779,24 @@ separated for readability. NA tags ommitted.
     <property name="toolTipsVisible">
      <bool>false</bool>
     </property>
-    <addaction name="actionOpen_new_csv"/>
-    <addaction name="actionOpen_1Gram_Vocab"/>
-    <addaction name="actionOpen_NGram_Vocab"/>
+    <addaction name="actionNew_Project"/>
+    <addaction name="actionLoad_Project"/>
+    <addaction name="actionSave_Project"/>
+    <addaction name="actionProject_Settings"/>
     <addaction name="separator"/>
-    <addaction name="actionSave_All"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionThreshold"/>
-    <addaction name="actionDev_Mode"/>
+    <addaction name="actionMap_CSV"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>Help</string>
@@ -830,7 +829,7 @@ separated for readability. NA tags ommitted.
     </property>
     <widget class="QMenu" name="menu_AutoPopulate_FromDatabase">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="title">
       <string>From Database</string>
@@ -871,6 +870,9 @@ separated for readability. NA tags ommitted.
    </property>
   </action>
   <action name="actionOpen_new_csv">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>open new csv</string>
    </property>
@@ -881,6 +883,9 @@ separated for readability. NA tags ommitted.
    </property>
   </action>
   <action name="actionThreshold">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Threshold</string>
    </property>
@@ -927,16 +932,22 @@ separated for readability. NA tags ommitted.
    </property>
   </action>
   <action name="actionRun_Query">
-   <property name="enabled">
+   <property name="checkable">
     <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Run Query</string>
    </property>
   </action>
   <action name="actionOpen_Database">
-   <property name="enabled">
+   <property name="checkable">
     <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Open Database</string>
@@ -965,6 +976,71 @@ separated for readability. NA tags ommitted.
   <action name="action_AutoPopulate_FromCSV_NgramVocab">
    <property name="text">
     <string>Ngram Vocab</string>
+   </property>
+  </action>
+  <action name="actionProject_CreateNew">
+   <property name="text">
+    <string>Create new</string>
+   </property>
+  </action>
+  <action name="actionProject_LoadExisting">
+   <property name="text">
+    <string>Load existing</string>
+   </property>
+  </action>
+  <action name="actionNew_Project">
+   <property name="text">
+    <string>New Project</string>
+   </property>
+  </action>
+  <action name="actionLoad_Project">
+   <property name="text">
+    <string>Load Project</string>
+   </property>
+  </action>
+  <action name="actionSave_Project">
+   <property name="text">
+    <string>Save Project</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>settings</string>
+   </property>
+  </action>
+  <action name="actionSettings_2">
+   <property name="text">
+    <string>settings</string>
+   </property>
+  </action>
+  <action name="actionSettings_3">
+   <property name="text">
+    <string>settings</string>
+   </property>
+  </action>
+  <action name="actionSome">
+   <property name="text">
+    <string>project Settings</string>
+   </property>
+  </action>
+  <action name="actionSettings_Project">
+   <property name="text">
+    <string>settings Project</string>
+   </property>
+  </action>
+  <action name="actionProject_Settings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionCSV_header">
+   <property name="text">
+    <string>CSV header</string>
+   </property>
+  </action>
+  <action name="actionMap_CSV">
+   <property name="text">
+    <string>Map CSV </string>
    </property>
   </action>
  </widget>

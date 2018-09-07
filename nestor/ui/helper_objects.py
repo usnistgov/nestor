@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+
 class QTableWidget_token(Qw.QTableWidget):
 
     def __init__(self):
@@ -410,3 +411,18 @@ class MyMplCanvas(FigureCanvas):
         # except (KeyError, TypeError):
         #     Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
 
+
+
+    #
+    #     self.dataframe_Original= dataframe_Original
+    # if dataframe_1Gram is not None:
+    #     self.dataframe_vocab1Gram=dataframe_1Gram
+    #     self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
+    #     self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+    #     self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
+    #
+    # if dataframe_NGram is not None:
+    #     self.dataframe_vocabNGram=dataframe_NGram
+    #     self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
+    #     self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
+    #     self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)

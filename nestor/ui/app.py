@@ -1,9 +1,11 @@
-from nestor.ui import mainwindow
+from nestor.ui.taggingUI_app import MyTaggingToolWindow, openYAMLConfig_File
+
 
 from PyQt5.QtWidgets import QApplication, QMessageBox, qApp
 from PyQt5 import QtCore
 import sys
 import traceback
+from pathlib import Path
 
 
 def exception_handler(type_, value, traceback_):
@@ -36,9 +38,19 @@ def main():
             padding: 0 3px 0 3px;
         }
         """
+    projectsPath = Path.home() / '.nestor-tmp'
+    projectsPath.mkdir(parents=True, exist_ok=True)
+
+
+    nestorPath = Path(__file__).parent.parent
+    databaseToCsv_mapping = openYAMLConfig_File(
+        yaml_path= nestorPath / 'store_data' / 'csvHeader.yaml'
+    )
+
 
     app.setStyleSheet(stylesheet)
-    window = mainwindow.MainWindow()
+    window = MyTaggingToolWindow(projectPath = projectsPath,
+                                 databaseToCsv_mapping = databaseToCsv_mapping)
     # sys.excepthook = exception_handler
     sys.exit(app.exec_())
 
