@@ -20,23 +20,18 @@ from nestor.ui.meta_windows import *
 neo4j_spec = importlib.util.find_spec("neo4j")
 simplecrypt_spec = importlib.util.find_spec("simplecrypt")
 
-#dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
-dbModule_exists = False
+dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
+#dbModule_exists = False
 
-if dbModule_exists:
-    from nestor.ui.menu_app import DialogDatabaseConnection
-    from nestor.ui.menu_app import DialogDatabaseRunQuery
-    from nestor.store_data.helper import resultToObservationDataframe
-
-
-
+#if dbModule_exists:
+    #from nestor.ui.menu_app import DialogDatabaseConnection
+    #from nestor.ui.menu_app import DialogDatabaseRunQuery
+    #from nestor.store_data.helper import resultToObservationDataframe
 
 
 fname = 'taggingUI.ui'
 script_dir = Path(__file__).parent
 Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(script_dir/fname)
-
-
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def __init__(self, projectsPath, databaseToCsv_mapping=None, iconPath=None):

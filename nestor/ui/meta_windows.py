@@ -267,6 +267,7 @@ class DialogMenu_csvHeaderMapping(Qw.QDialog, Ui_MainWindow_csvHeader):
 
         return listBoxChecked, map
 
+
 fname_dbconnect = 'dialogmenu_databaseconnect.ui'
 qtDesignerFile_dbconnect = script_dir / fname_dbconnect
 Ui_MainWindow_dbconnect, QtBaseClass_dbconnect = uic.loadUiType(qtDesignerFile_dbconnect)
@@ -287,9 +288,10 @@ class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
         self.lineEdit_DialogDatabaseConnection_Username.setText(configDatabase.get("username",""))
         self.lineEdit_DialogDatabaseConnection_OpenSchema.setText(configDatabase.get("schema",""))
         self.lineEdit_DialogDatabaseConnection_ServerName.setText(configDatabase.get("server",""))
-        self.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText(configDatabase.get("serverport",""))
-        self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText(configDatabase.get("browserport",""))
+        self.lineEdit_DialogDatabaseConnection_ServerPortNumber.setText(str(configDatabase.get("serverport","")))
+        self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.setText(str(configDatabase.get("browserport","")))
 
+        self.pushButton_DialogDatabaseConnection_OpenSchema.clicked.connect(self.onclick_openSchema)
         self.buttonBox_DialogDatabaseConnection.rejected.connect(self.close)
 
         self.show()
@@ -305,6 +307,15 @@ class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
                self.lineEdit_DialogDatabaseConnection_ServerPortNumber.text(), \
                self.lineEdit_DialogDatabaseConnection_BrowserPortNumber.text(), \
                self.lineEdit_DialogDatabaseConnection_Password.text()
+
+    def onclick_openSchema(self):
+
+        options = Qw.QFileDialog.Options()
+        fileName, _ = Qw.QFileDialog.getOpenFileName(self, None, "Open database Header file",
+                                                     "YAML File (*.yaml)", options=options)
+        if fileName:
+            self.lineEdit_DialogDatabaseConnection_OpenSchema.setText(fileName)
+
 
             # fname3 = 'dialogWait.ui'
 # Ui_MainWindow_DialogWait, QtBaseClass_DialogWait = uic.loadUiType(script_dir/fname3)
