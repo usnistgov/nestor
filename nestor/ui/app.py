@@ -47,9 +47,8 @@ def main():
         yaml_path= nestorPath / 'store_data' / 'csvHeader.yaml'
     )
 
-
     app.setStyleSheet(stylesheet)
-    window = MyTaggingToolWindow(projectPath = projectsPath,
+    window = MyTaggingToolWindow(projectsPath= projectsPath,
                                  databaseToCsv_mapping = databaseToCsv_mapping)
     # sys.excepthook = exception_handler
     sys.exit(app.exec_())

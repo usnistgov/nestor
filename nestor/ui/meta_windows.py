@@ -87,8 +87,8 @@ class DialogMenu_loadProject(Qw.QDialog, Ui_MainWindow_loadproject):
         return the needed data
         :return:
         """
-        return self.generalConfig.get(self.comboBox_LoadProject_ProjectName.currentText())
-
+        yaml_path = self.projectPath / self.comboBox_LoadProject_ProjectName.currentText() /'config.yaml'
+        return openYAMLConfig_File(yaml_path)
 
     def set_values(self):
         """
@@ -180,6 +180,9 @@ class DialogMenu_csvHeaderMapping(Qw.QDialog, Ui_MainWindow_csvHeader):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_csvHeader.__init__(self)
         self.setupUi(self)
+
+
+        #print(mappingContent)
 
         self.mappingContent = mappingContent
         self.csvHeaderContent = csvHeaderContent

@@ -39,22 +39,23 @@ Ui_MainWindow_taggingTool, QtBaseClass_taggingTool = uic.loadUiType(script_dir/f
 
 class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
-    def __init__(self, projectPath, databaseToCsv_mapping=None, iconPath=None):
+    def __init__(self, projectsPath, databaseToCsv_mapping=None, iconPath=None):
 
         Qw.QMainWindow.__init__(self)
         Ui_MainWindow_taggingTool.__init__(self)
 
         """
-        Creation  values
+        Instantiate  values
         """
-        self.projectPath = projectPath
+        self.projectsPath = projectsPath
+
         self.iconPath = iconPath
         if self.iconPath:
             self.setWindowIcon(QtGui.QIcon(self.iconPath))
 
-        self.existingProject =[folder.name for folder in projectPath.iterdir() if folder.is_dir()]
+        self.existingProject =[folder.name for folder in projectsPath.iterdir() if folder.is_dir()]
 
-        self.default_config = {
+        self.config_default = {
             'settings': {
                 'numberTokens': 1000,
                 'alreadyChecked_threshold': 99,
@@ -64,7 +65,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'database':{}
 
         }
-        self.config = self.default_config.copy()
+        self.config = self.config_default.copy()
 
         self.databaseToCsv_mapping = databaseToCsv_mapping
 
@@ -122,22 +123,25 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         Default values
         """
-        self.dataframe_Original=None
+
+        self.dataframe_Original = None
         self.dataframe_vocab1Gram = None
         self.dataframe_vocabNGram = None
 
-        #self.tokenExtractor_nGram =kex.TokenExtractor(ngram_range=(2, 2))
-        #self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
-
         self.database = None
 
-        self.clean_rawText_1Gram=None
+        # self.tokenExtractor_nGram =kex.TokenExtractor(ngram_range=(2, 2))
+        # self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
+
+        self.clean_rawText_1Gram = None
 
         self.tag_df = None
         self.relation_df = None
         self.tag_readable = None
 
         self.dataframe_completeness=None
+
+
 
         """
         Create the interaction on the MenuItems
@@ -165,24 +169,32 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         dialogMenu_newProject = DialogMenu_newProject(self.iconPath)
 
         def onclick_ok():
-            self.config = self.default_config.copy()
-            name, author, description, vocab1g, vocabNg, pathCSV = dialogMenu_newProject.get_data()
+            self.config = self.config_default.copy()
+            name, author, description, vocab1g, vocabNg, pathCSV_old = dialogMenu_newProject.get_data()
 
-            if name and pathCSV:
+            if name and pathCSV_old:
                 if name not in self.existingProject:
                     dialogMenu_newProject.close()
+
+                    #create the projectfolder
+                    pathCSV_new = self.projectsPath / name
+                    pathCSV_new.mkdir(parents=True, exist_ok=True)
 
                     self.set_config(name = name,
                                     author=author,
                                     description=description,
                                     vocab1g=vocab1g,
                                     vocabNg=vocabNg,
-                                    pathCSV=pathCSV)
+                                    pathCSV=str(pathCSV_new / "original.csv"))
 
-                    self.dataframe_Original = openDataframe(self.config['pathCSV'])
+                    # open the dataframe and save is as utf8 on the project localisation
+                    dataframe_tmp = openDataframe(pathCSV_old)
+                    dataframe_tmp.to_csv(self.config["pathCSV"],encoding='utf-8-sig')
+
+                    #open the dataframe on the project folder
+                    self.dataframe_Original = openDataframe(self.config["pathCSV"])
 
                     self.setMenu_mapCsvHeader()
-                    #TODO self.setMenu_mapCsvHeader() did not update his infotmation
 
 
         dialogMenu_newProject.buttonBox__NewProject.accepted.connect(onclick_ok)
@@ -193,15 +205,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
 
-        dialogMenu_loadProject = DialogMenu_loadProject(self.iconPath, self.projectPath, self.existingProject)
+        dialogMenu_loadProject = DialogMenu_loadProject(self.iconPath, self.projectsPath, self.existingProject)
 
         def onclick_ok():
-            self.config = self.default_config.copy()
-            configtmp = dialogMenu_loadProject.get_data()
-            if configtmp:
-                self.config = configtmp
-
+            self.config = dialogMenu_loadProject.get_data()
             dialogMenu_loadProject.close()
+
             self.dataframe_Original = openDataframe(self.config['pathCSV'])
         dialogMenu_loadProject.buttonBox_LoadProject.accepted.connect(onclick_ok)
 
@@ -216,8 +225,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if projectName:
 
             self.existingProject.append(projectName)
-            folderPath = self.projectPath/ projectName
+            folderPath = self.projectsPath / projectName
             folderPath.mkdir(parents=True, exist_ok=True)
+            
             #TODO save dataframe in folderPath
 
             saveYAMLConfig_File(folderPath/ "config.yaml", self.config)
