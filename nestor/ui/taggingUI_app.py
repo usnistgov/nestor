@@ -1,5 +1,6 @@
 import importlib
 from pathlib import Path
+
 import pandas as pd
 import numpy as np
 import fuzzywuzzy.process as zz
@@ -23,8 +24,10 @@ simplecrypt_spec = importlib.util.find_spec("simplecrypt")
 dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
 #dbModule_exists = False
 
-#if dbModule_exists:
-    #from nestor.ui.menu_app import DialogDatabaseConnection
+if dbModule_exists:
+    from nestor.store_data.database import DatabaseNeo4J
+    import neo4j
+
     #from nestor.ui.menu_app import DialogDatabaseRunQuery
     #from nestor.store_data.helper import resultToObservationDataframe
 
@@ -57,7 +60,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 'showCkeckBox_threshold': 50
             },
             'csvinfo': {},
-            'database':{}
+            'database': {
+                'schema' : str(script_dir.parent / 'store_data' / 'DatabaseSchema.yaml')
+            }
 
         }
         self.config = self.config_default.copy()
@@ -146,8 +151,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionProject_Settings.triggered.connect(self.setMenu_settings)
         self.actionSave_Project.triggered.connect(self.setMenu_projectSave)
         self.actionMap_CSV.triggered.connect(self.setMenu_mapCsvHeader)
-        self.actionConnect.triggered.connect(self.seetMenu_databaseConnect)
 
+        self.actionConnect.triggered.connect(self.setMenu_databaseConnect)
+        self.actionRun_Query.triggered.connect(self.setMenu_databaseRunQuery)
 
         self.dialogTOU = DialogMenu_TermsOfUse()
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
@@ -207,8 +213,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             dialogMenu_loadProject.close()
 
             self.dataframe_Original = openDataframe(self.config['pathCSV'])
+            print(self.dataframe_Original)
         dialogMenu_loadProject.buttonBox_LoadProject.accepted.connect(onclick_ok)
-
 
     def setMenu_projectSave(self):
         """
@@ -227,39 +233,67 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             saveYAMLConfig_File(folderPath/ "config.yaml", self.config)
 
-
-    def seetMenu_databaseConnect(self):
-        self.menu_Database_connect = DialogMenu_DatabaseConnect(iconPath=self.iconPath,
+    def setMenu_databaseConnect(self):
+        dialogMenu_databaseConnect = DialogMenu_DatabaseConnect(iconPath=self.iconPath,
                                                                 configDatabase = self.config.get('database',{})
                                                                 )
 
         def onclick_ok():
-            username, schema, server, serverport, browserport, password = self.menu_Database_connect.get_data()
+            username, schema, server, serverport, browserport, password = dialogMenu_databaseConnect.get_data()
 
-            self.set_config(username=username,
-                            schema=schema,
-                            server=server,
-                            serverport=serverport,
-                            browserport=browserport)
+            try:
+                self.set_config(username=username,
+                                schema=schema,
+                                server=server,
+                                serverport=serverport,
+                                browserport=browserport
+                                )
 
-            self.menu_Database_connect.close()
+                self.database = DatabaseNeo4J(user=username,
+                                         password=password,
+                                         server=server,
+                                         portBolt=serverport,
+                                         portUi=browserport,
+                                         schema=schema)
 
-            print(self.config)
+                dialogMenu_databaseConnect.close()
+
+            except neo4j.exceptions.AuthError:
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(255, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(255, 0, 0);")
+            except (neo4j.exceptions.AddressError, neo4j.exceptions.ServiceUnavailable):
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet("color: rgb(255, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet("color: rgb(255, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(255, 255, 255);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(255, 255, 255);")
+            except FileNotFoundError:
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_OpenSchema.setStyleSheet("color: rgb(255, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet("color: rgb(255, 255, 255);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet("color: rgb(255, 255, 255);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(255, 255, 255);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(255, 255, 255);")
 
 
+        dialogMenu_databaseConnect.buttonBox_DialogDatabaseConnection.accepted.connect(onclick_ok)
 
-        self.menu_Database_connect.buttonBox_DialogDatabaseConnection.accepted.connect(onclick_ok)
-        #
-        # self.menu_Database_connect.pushButton_DialogDatabaseConnection_Connect.clicked.connect(
-        #     self.onClick_DialogConnectToDatabase)
-        #
-        # rect = self.geometry()
-        # rect.setHeight(300)
-        # rect.setWidth(200)
-        # self.menu_Database_connect.setGeometry(rect)
-        # self.menu_Database_connect.setWindowFlags(Qt.WindowStaysOnTopHint)
-        # self.menu_Database_connect.show()
+    def setMenu_databaseRunQuery(self):
 
+        dialogMenu_databaseRunQuery = DialogMenu_DatabaseRunQueries(iconPath = self.iconPath,
+                                                                    database = self.database,
+                                                                    dataframe_Original = self.dataframe_Original,
+                                                                    dataframe_vocab1Gram= self.dataframe_vocab1Gram,
+                                                                    dataframe_vocabNGram= self.dataframe_vocabNGram,
+                                                                    bin1g_df=None,
+                                                                    binNg_df=None,
+                                                                    csvHeaderMapping= self.config['csvinfo'].get('mapping',{}),
+                                                                    databaseToCsv_mapping= self.databaseToCsv_mapping
+                                                                    )
+
+        def onclick_ok():
+            dialogMenu_databaseRunQuery.runQueries()
+            dialogMenu_databaseRunQuery.close()
+
+        dialogMenu_databaseRunQuery.button_DialogDatabaseRunQuery.accepted.connect(onclick_ok)
 
     def setMenu_settings(self):
         """
@@ -281,7 +315,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         dialogMenu_settings.buttonBox_Setup.accepted.connect(onclick_ok)
 
-
     def setMenu_mapCsvHeader(self):
         """
         When select the NLP collumn and mapping the csv to the database
@@ -293,6 +326,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             for key2, value2 in value1.items():
                 databaseToCsv_list.append(value2)
 
+        #TODO AttributeError: 'NoneType' object has no attribute 'columns'
         dialogMenu_csvHeaderMapping = DialogMenu_csvHeaderMapping(csvHeaderContent= list(self.dataframe_Original.columns.values),
                                                                   mappingContent= databaseToCsv_list,
                                                                   configCsvHeader = self.config['csvinfo'].get('nlpheader', []),
@@ -303,9 +337,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             dialogMenu_csvHeaderMapping.close()
 
         dialogMenu_csvHeaderMapping.buttonBox_csvHeaderMapping.accepted.connect(onclick_ok)
-
-
-
 
     def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, pathCSV=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
@@ -404,6 +435,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # else:
         #     self.menuDatabase.setEnabled(False)
 
+
+
     def setMenu_AutoPopulate_FromCSV(self):
         options = Qw.QFileDialog.Options()
         fileName, _ = Qw.QFileDialog.getOpenFileName(self,
@@ -477,27 +510,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         else:
             print("NOT CONNECTED --> you need to connect to a database before")
-
-    def onClick_DialogConnectToDatabase(self):
-        self.database = self.menu_Database_connect.get_database()
-
-        if self.database is not None:
-
-            print("CONNECTION --> Database connected")
-            self.actionRun_Query.setEnabled(True)
-            self.actionRun_Query.triggered.connect(self.setMenu_DialogRunQuery)
-
-            self.actionOpen_Database.setEnabled(True)
-            self.actionOpen_Database.triggered.connect(self.database.open_browser)
-
-            self.menu_AutoPopulate_FromDatabase.setEnabled(True)
-            self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_1gramVocab)
-            self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_AutoPopulate_FromDatabase_NgramVocab)
-
-
-        else:
-            self.database = None
-            print("NOT CONNECTED --> we did not connect to your database")
 
     def setMenu_DialogRunQuery(self):
 

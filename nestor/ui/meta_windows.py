@@ -2,6 +2,8 @@ from pathlib import Path
 from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
 
+from nestor.store_data import integration as cypherQuery
+
 import pyaml, yaml
 
 #from nestor.ui.taggingUI_app import openYAMLConfig_File
@@ -54,7 +56,6 @@ class DialogMenu_newProject(Qw.QDialog, Ui_MainWindow_newproject):
                                                      "CSV File (*.csv)", options=options)
         if fileName:
             self.lineEdit_NewProject_LoadCSV.setText(fileName)
-
 
 
 fname_loadproject = 'dialogmenu_loadproject.ui'
@@ -167,7 +168,7 @@ class DialogMenu_TermsOfUse(Qw.QDialog, Ui_MainWindow_tou):
             self.setWindowIcon(QtGui.QIcon(iconPath))
 
 
-fname_csvHeader = 'dialogMenu_csvheadermapping.ui'
+fname_csvHeader = 'dialogmenu_csvheadermapping.ui'
 qtDesignerFile_csvHeader = script_dir / fname_csvHeader
 Ui_MainWindow_csvHeader, QtBaseClass_csvHeader = uic.loadUiType(qtDesignerFile_csvHeader)
 
@@ -318,6 +319,104 @@ class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
 
 
             # fname3 = 'dialogWait.ui'
+
+
+fname_dbrunquery = 'dialogmenu_databaserunqueries.ui'
+qtDesignerFile_dbrunquery = script_dir / fname_dbrunquery
+Ui_MainWindow_dbrunquery, QtBaseClass_dbrunquery = uic.loadUiType(qtDesignerFile_dbrunquery)
+
+class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
+    """
+    class used to print the Term of Use
+    """
+
+    def __init__(self, iconPath=None, database=None, dataframe_Original=None, dataframe_vocab1Gram=None,
+                 dataframe_vocabNGram= None, bin1g_df=None, binNg_df=None,
+                 csvHeaderMapping=None, databaseToCsv_mapping=None):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_dbrunquery.__init__(self)
+        self.setupUi(self)
+
+        self.database = database
+        self.dataframe_Original = dataframe_Original
+        self.dataframe_vocab1Gram = dataframe_vocab1Gram
+        self.dataframe_vocabNGram = dataframe_vocabNGram
+        self.bin1g_df = bin1g_df
+        self.binNg_df = binNg_df
+
+        if iconPath:
+            self.setWindowIcon(QtGui.QIcon(iconPath))
+
+        # change the csvHeaderOriginal to match with the given csv header
+        for key1, value1 in databaseToCsv_mapping.items():
+            for key2, value2 in value1.items():
+                for keyO, valueO in csvHeaderMapping.items():
+                    if valueO == value2:
+                        databaseToCsv_mapping[key1][key2] = keyO
+
+        self.csv_header = databaseToCsv_mapping
+        print(self.csv_header)
+
+        self.button_DialogDatabaseRunQuery.rejected.connect(self.close)
+
+        self.show()
+
+    def runQueries(self):
+
+        self.database.dropConstraints()
+        self.database.dropIndexes()
+        self.database.createIndexes()
+        self.database.createConstraints()
+
+        df_original = self.original_df.fillna("")
+
+        if self.checkBox_DialogDatabaseRunQuery_OriginalData.isChecked():
+            self.database.runQueries(cypherQuery.cypherCreate_historicalMaintenanceWorkOrder(
+                schema=self.database.schema,
+                originalDataframe=df_original,
+                propertyToHeader_dict=self.csv_header
+            ))
+            print("DONE -----> Data from Original CSV Work Order stored !!")
+
+        if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked():
+            self.database.runQueries(cypherQuery.cypherCreate_tag(
+                schema=self.database.schema,
+                dataframe=self.bin1g_df,
+                vocab1g=self.vocab1g_df,
+                vocabNg=self.vocabNg_df
+            ))
+            print("\nDONE -----> Data from Tag1g Stored!!")
+
+        if self.checkBox_DialogDatabaseRunQuery_TagNg.isChecked():
+            self.database.runQueries(cypherQuery.cypherCreate_tag(
+                schema=self.database.schema,
+                dataframe=self.binNg_df,
+                vocab1g=self.vocab1g_df,
+                vocabNg=self.vocabNg_df
+            ))
+            print("\nDONE ----->  Data from TagNg stored !!")
+
+        if self.checkBox_DialogDatabaseRunQuery_1gToNg.isChecked():
+            self.database.runQueries(cypherQuery.cypherLink_Ngram1gram(
+                schema=self.database.schema
+            ))
+            print("\nDONE ----->  TagNg --> Tag1g link created !!")
+
+        if self.checkBox_DialogDatabaseRunQuery_IssueToItem.isChecked():
+            self.database.runQueries(cypherQuery.cypherLink_itemIssue(
+                schema=self.database.schema
+            ))
+            print("\nDONE ----->  item -> issue link upated !!")
+
+        if self.checkBox_DialogDatabaseRunQuery_ItemToItem.isChecked():
+            # self.database.runQueries(cypherQuery.cypherCreate_itemsTree(
+            #     schema=self.database.schema
+            # ))
+            print("DONE ----->  Item hierarchy created !!")
+
+        self.close()
+
+
 # Ui_MainWindow_DialogWait, QtBaseClass_DialogWait = uic.loadUiType(script_dir/fname3)
 # class DialogWait(Qw.QDialog, Ui_MainWindow_DialogWait):
 #
