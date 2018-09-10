@@ -217,5 +217,3 @@ class DatabaseNeo4J(object):
                             ELSE ""\
                         END AS NE')
 
-    def open_browser(self):
-        webbrowser.open(self.url, new=1)

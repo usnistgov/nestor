@@ -10,6 +10,7 @@ import PyQt5.QtWidgets as Qw
 
 import pyaml, yaml
 import chardet
+import webbrowser
 
 
 import nestor.keyword as kex
@@ -29,7 +30,7 @@ if dbModule_exists:
     import neo4j
 
     #from nestor.ui.menu_app import DialogDatabaseRunQuery
-    #from nestor.store_data.helper import resultToObservationDataframe
+    from nestor.store_data.helper import resultToObservationDataframe
 
 
 fname = 'taggingUI.ui'
@@ -154,16 +155,22 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.actionConnect.triggered.connect(self.setMenu_databaseConnect)
         self.actionRun_Query.triggered.connect(self.setMenu_databaseRunQuery)
+        self.actionOpen_Database.triggered.connect(self.setMenu_databaseOpenBrowser)
+
+        # self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_1gVocab)
+        # self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_NgVocab)
+        # self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_1gVocab)
+        # self.action_AutoPopulate_FromCSV_NgramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_NgVocab)
+        # self.﻿actionFrom_AutoPopulate_From1gramVocab.triggered.connect()
 
         self.dialogTOU = DialogMenu_TermsOfUse()
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
 
         self.show()
 
-
     def setMenu_projectNew(self):
         """
-        When click on the New Project meni
+        When click on the New Project menu
         :return:
         """
 
@@ -234,6 +241,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             saveYAMLConfig_File(folderPath/ "config.yaml", self.config)
 
     def setMenu_databaseConnect(self):
+        """
+        when click on the connect to database menu
+        :return:
+        """
         dialogMenu_databaseConnect = DialogMenu_DatabaseConnect(iconPath=self.iconPath,
                                                                 configDatabase = self.config.get('database',{})
                                                                 )
@@ -277,6 +288,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         dialogMenu_databaseConnect.buttonBox_DialogDatabaseConnection.accepted.connect(onclick_ok)
 
     def setMenu_databaseRunQuery(self):
+        """
+        When click on the run Query menu
+        :return:
+        """
 
         dialogMenu_databaseRunQuery = DialogMenu_DatabaseRunQueries(iconPath = self.iconPath,
                                                                     database = self.database,
@@ -294,6 +309,102 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             dialogMenu_databaseRunQuery.close()
 
         dialogMenu_databaseRunQuery.button_DialogDatabaseRunQuery.accepted.connect(onclick_ok)
+
+    def setMenu_databaseOpenBrowser(self):
+        """
+        When click on open browser
+        :return:
+        """
+        webbrowser.open(self.database.url, new=1)
+
+    # def setMenu_autopopulateFromDatabase_1gVocab(self):
+    #
+    #     done, result = self.database.getTokenTagClassification()
+    #
+    #     if done:
+    #         df = resultToObservationDataframe(result).set_index("tokens")
+    #         self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
+    #
+    #         mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
+    #
+    #         df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
+    #         df_tmp.update(other=df, overwrite=False)
+    #
+    #         self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
+    #         self.dataframe_vocab1Gram.fillna('', inplace=True)
+    #
+    #         self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
+    #         self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+    #         self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
+    #
+    # def setMenu_autopopulateFromDatabase_NgVocab(self):
+    #
+    #     done, result = self.database.getTokenTagClassification()
+    #
+    #     if done:
+    #         df = resultToObservationDataframe(result).set_index("tokens")
+    #
+    #         self.dataframe_vocabNGram.replace('', np.nan, inplace=True)
+    #
+    #         mask = self.dataframe_vocabNGram[["NE", "alias"]].isnull().all(axis=1)
+    #
+    #         df_tmp = self.dataframe_vocabNGram.loc[mask, :]
+    #         df_tmp.update(other=df, overwrite=False)
+    #
+    #         self.dataframe_vocabNGram.update(df_tmp, overwrite=False)
+    #         self.dataframe_vocabNGram.fillna('', inplace=True)
+    #
+    #         self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
+    #         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
+    #         self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
+    #
+    # def setMenu_autopopulateFromCSV_1gVocab(self):
+    #     options = Qw.QFileDialog.Options()
+    #     fileName, _ = Qw.QFileDialog.getOpenFileName(self,
+    #                                                  self.objectName(), "Open NESTOR generated vocab File",
+    #                                                  "csv Files (*.csv)", options=options)
+    #
+    #     if fileName:
+    #
+    #         df = pd.read_csv(fileName)[["tokens","NE","alias"]].set_index("tokens")
+    #
+    #         self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
+    #
+    #         mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
+    #
+    #         df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
+    #         df_tmp.update(other=df, overwrite=False)
+    #
+    #         self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
+    #         self.dataframe_vocab1Gram.fillna('', inplace=True)
+    #
+    #         self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
+    #         self.tableWidget_1gram_TagContainer.printDataframe_tableView()
+    #         self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
+    #
+    #
+    # def setMenu_autopopulateFromCSV_NgVocab(self):
+    #     options = Qw.QFileDialog.Options()
+    #     fileName, _ = Qw.QFileDialog.getOpenFileName(self,
+    #                                                  self.objectName(), "Open NESTOR generated vocab File",
+    #                                                  "csv Files (*.csv)", options=options)
+    #
+    #     if fileName:
+    #         df = pd.read_csv(fileName)[["tokens", "NE", "alias"]].set_index("tokens")
+    #
+    #         self.dataframe_vocabNGram.replace('', np.nan, inplace=True)
+    #
+    #         mask = self.dataframe_vocabNGram[["NE", "alias"]].isnull().all(axis=1)
+    #
+    #         df_tmp = self.dataframe_vocabNGram.loc[mask, :]
+    #         df_tmp.update(other=df, overwrite=False)
+    #
+    #         self.dataframe_vocabNGram.update(df_tmp, overwrite=False)
+    #         self.dataframe_vocabNGram.fillna('', inplace=True)
+    #
+    #         self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
+    #         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
+    #         self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
 
     def setMenu_settings(self):
         """
@@ -435,100 +546,18 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # else:
         #     self.menuDatabase.setEnabled(False)
 
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
 
-
-    def setMenu_AutoPopulate_FromCSV(self):
-        options = Qw.QFileDialog.Options()
-        fileName, _ = Qw.QFileDialog.getOpenFileName(self,
-                                                     self.objectName(), "Open NESTOR generated vocab File",
-                                                     "csv Files (*.csv)", options=options)
-
-        if fileName:
-
-            df = pd.read_csv(fileName)[["tokens","NE","alias"]].set_index("tokens")
-
-            self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
-
-            mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
-
-            df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
-            df_tmp.update(other=df, overwrite=False)
-
-            self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
-            self.dataframe_vocab1Gram.fillna('', inplace=True)
-
-            self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
-            self.tableWidget_1gram_TagContainer.printDataframe_tableView()
-            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
-
-
-    def setMenu_AutoPopulate_FromDatabase_NgramVocab(self):
-        if self.database is not None:
-
-            done, result = self.database.getTokenTagClassification()
-
-            if done:
-                df = resultToObservationDataframe(result).set_index("tokens")
-
-                self.dataframe_vocabNGram.replace('', np.nan, inplace = True)
-
-                mask = self.dataframe_vocabNGram[["NE", "alias"]].isnull().all(axis=1)
-
-                df_tmp = self.dataframe_vocabNGram.loc[mask, :]
-                df_tmp.update(other = df, overwrite = False)
-
-                self.dataframe_vocabNGram.update(df_tmp, overwrite = False)
-                self.dataframe_vocabNGram.fillna('', inplace=True)
-
-                self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
-                self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
-                self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
-
-        else:
-            print("NOT CONNECTED --> you need to connect to a database before")
-
-    def setMenu_AutoPopulate_FromDatabase_1gramVocab(self):
-        if self.database is not None:
-
-            done, result = self.database.getTokenTagClassification()
-
-            if done:
-                df = resultToObservationDataframe(result).set_index("tokens")
-                self.dataframe_vocab1Gram.replace('', np.nan, inplace = True)
-
-                mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
-
-                df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
-                df_tmp.update(other=df, overwrite=False)
-
-                self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
-                self.dataframe_vocab1Gram.fillna('', inplace=True)
-
-                self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
-                self.tableWidget_1gram_TagContainer.printDataframe_tableView()
-                self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
-
-        else:
-            print("NOT CONNECTED --> you need to connect to a database before")
-
-    def setMenu_DialogRunQuery(self):
-
-        if self.database is not None:
-            self.menu_Database_runQuery = DialogDatabaseRunQuery(
-                database=self.database,
-                original_df = self.dataframe_Original,
-                csvHeaderOriginal = self.csvHeaderOriginal,
-                csvHeaderMapping = self.config["csvheader_mapping"],
-                bin1g_df = self.tag_df,
-                binNg_df = self.relation_df,
-                vocab1g_df = self.dataframe_vocab1Gram,
-                vocabNg_df = self.dataframe_vocabNGram,
-                iconPath = self.iconPath)
-
-            self.menu_Database_runQuery.show()
-
-        else:
-            print("NOT CONNECTED --> you need to connect to a database before")
 
     def onClick_changeClassification(self, btn):
         new_clf = self.buttonDictionary_NGram.get(btn.text())
