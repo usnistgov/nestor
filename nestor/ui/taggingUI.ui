@@ -773,7 +773,7 @@ separated for readability. NA tags ommitted.
      <bool>false</bool>
     </property>
     <addaction name="actionNew_Project"/>
-    <addaction name="actionLoad_Project"/>
+    <addaction name="actionOpen_Project"/>
     <addaction name="actionSave_Project"/>
     <addaction name="actionProject_Settings"/>
     <addaction name="separator"/>
@@ -986,9 +986,9 @@ separated for readability. NA tags ommitted.
     <string>New Project</string>
    </property>
   </action>
-  <action name="actionLoad_Project">
+  <action name="actionOpen_Project">
    <property name="text">
-    <string>Load Project</string>
+    <string>Open Project</string>
    </property>
   </action>
   <action name="actionSave_Project">

@@ -52,7 +52,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if self.iconPath:
             self.setWindowIcon(QtGui.QIcon(self.iconPath))
 
-        self.existingProject =[folder.name for folder in projectsPath.iterdir() if folder.is_dir()]
+        self.existingProject =set([folder.name for folder in projectsPath.iterdir() if folder.is_dir()])
 
         self.config_default = {
             'settings': {
@@ -77,6 +77,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.setupUi(self)
         self.setGeometry(20, 20, 648, 705)
 
+        self.changeColor = {
+            'default': 'background-color: None;',
+            'wrongInput' : 'background-color: rgb(255, 51, 0);',
+            'updateToken' : 'background-color: rgb(0, 179, 89);'
+        }
+
         #not connected to any database
         self.actionRun_Query.setEnabled(False)
         self.actionOpen_Database.setEnabled(False)
@@ -87,6 +93,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionProject_Settings.setEnabled(False)
         self.actionMap_CSV.setEnabled(False)
         self.menuAuto_populate.setEnabled(False)
+        self.actionConnect.setEnabled(False)
+
 
 
         """"""
@@ -159,7 +167,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Create the interaction on the MenuItems
         """
         self.actionNew_Project.triggered.connect(self.setMenu_projectNew)
-        self.actionLoad_Project.triggered.connect(self.setMenu_projectLoad)
+        self.actionOpen_Project.triggered.connect(self.setMenu_projectOpen)
         self.actionProject_Settings.triggered.connect(self.setMenu_settings)
         self.actionSave_Project.triggered.connect(self.setMenu_projectSave)
         self.actionMap_CSV.triggered.connect(self.setMenu_mapCsvHeader)
@@ -176,6 +184,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.dialogTOU = DialogMenu_TermsOfUse()
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
+
+
+        """
+        Set the shortcut
+        """
+        Qw.QShortcut(QtGui.QKeySequence("Ctrl+N"), self).activated.connect(self.setMenu_projectNew)
+        self.actionNew_Project.setText(self.actionNew_Project.text() + "\tCtrl+N")
+        Qw.QShortcut(QtGui.QKeySequence("Ctrl+S"), self).activated.connect(self.setMenu_projectSave)
+        self.actionSave_Project.setText(self.actionSave_Project.text() + "\tCtrl+S")
+        Qw.QShortcut(QtGui.QKeySequence("Ctrl+O"), self).activated.connect(self.setMenu_projectOpen)
+        self.actionOpen_Project.setText(self.actionOpen_Project.text() + "\tCtrl+O")
+        Qw.QShortcut(QtGui.QKeySequence("Ctrl+D"), self).activated.connect(self.setMenu_databaseConnect)
+        self.actionConnect.setText(self.actionConnect.text() + "\tCtrl+D")
 
         self.show()
 
@@ -195,26 +216,33 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             name, author, description, vocab1g, vocabNg, pathCSV_old = dialogMenu_newProject.get_data()
 
             if name and pathCSV_old:
+                dialogMenu_newProject.lineEdit_NewProject_ProjectName.setStyleSheet(self.changeColor['default'])
+                dialogMenu_newProject.lineEdit_NewProject_LoadCSV.setStyleSheet(self.changeColor['default'])
                 if name not in self.existingProject:
+                    dialogMenu_newProject.lineEdit_NewProject_ProjectName.setStyleSheet(self.changeColor['default'])
                     dialogMenu_newProject.close()
+
+                    pathCSV_old = Path(pathCSV_old)
 
                     #create the projectfolder
                     pathCSV_new = self.projectsPath / name
                     pathCSV_new.mkdir(parents=True, exist_ok=True)
+
+                    self.existingProject.add(name)
 
                     self.set_config(name = name,
                                     author=author,
                                     description=description,
                                     vocab1g=vocab1g,
                                     vocabNg=vocabNg,
-                                    pathCSV=str(pathCSV_new / "original.csv"))
+                                    original=pathCSV_old.name)
 
                     # open the dataframe and save is as utf8 on the project localisation
                     dataframe_tmp = openDataframe(pathCSV_old)
-                    dataframe_tmp.to_csv(self.config["pathCSV"],encoding='utf-8-sig')
+                    dataframe_tmp.to_csv(pathCSV_new/self.config['original'],encoding='utf-8-sig')
 
                     #open the dataframe on the project folder
-                    self.dataframe_Original = openDataframe(self.config["pathCSV"])
+                    self.dataframe_Original = openDataframe(pathCSV_new/self.config['original'])
 
                     self.setMenu_mapCsvHeader()
 
@@ -222,32 +250,65 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                     self.actionProject_Settings.setEnabled(True)
                     self.actionMap_CSV.setEnabled(True)
                     self.menuAuto_populate.setEnabled(True)
+                    self.actionConnect.setEnabled(True)
+                else:
+                    dialogMenu_newProject.lineEdit_NewProject_ProjectName.setStyleSheet(self.changeColor['wrongInput'])
 
+            else:
+                dialogMenu_newProject.lineEdit_NewProject_ProjectName.setStyleSheet(self.changeColor['wrongInput'])
+                dialogMenu_newProject.lineEdit_NewProject_LoadCSV.setStyleSheet(self.changeColor['wrongInput'])
 
         dialogMenu_newProject.buttonBox__NewProject.accepted.connect(onclick_ok)
 
-    def setMenu_projectLoad(self):
+    def setMenu_projectOpen(self):
         """
         When click on the Load Project menu
         :return:
         """
 
-        dialogMenu_loadProject = DialogMenu_loadProject(self.iconPath, self.projectsPath, self.existingProject)
+        dialogMenu_openProject = DialogMenu_openProject(self.iconPath, self.projectsPath, self.existingProject)
         self.setEnabled(False)
-        dialogMenu_loadProject.closeEvent = self.close_Dialog
+        dialogMenu_openProject.closeEvent = self.close_Dialog
 
         def onclick_ok():
-            self.config = dialogMenu_loadProject.get_data()
-            dialogMenu_loadProject.close()
+            if dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText():
+                self.config = dialogMenu_openProject.get_data()
+                dialogMenu_openProject.close()
 
-            self.dataframe_Original = openDataframe(self.config['pathCSV'])
+                self.dataframe_Original = openDataframe(self.projectsPath/self.config['name']/ self.config['original'])
 
-            self.actionSave_Project.setEnabled(True)
-            self.actionProject_Settings.setEnabled(True)
-            self.actionMap_CSV.setEnabled(True)
-            self.menuAuto_populate.setEnabled(True)
+                self.actionSave_Project.setEnabled(True)
+                self.actionProject_Settings.setEnabled(True)
+                self.actionMap_CSV.setEnabled(True)
+                self.menuAuto_populate.setEnabled(True)
+                self.actionConnect.setEnabled(True)
 
-        dialogMenu_loadProject.buttonBox_LoadProject.accepted.connect(onclick_ok)
+
+        def onclick_remove():
+            choice = Qw.QMessageBox.question(self, 'Remove Project',
+                                             'Do you really want to remove the project?',
+                                             Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
+
+            if choice == Qw.QMessageBox.Yes:
+                def remove_folderContent(folder):
+                    for file in folder.iterdir():
+                        if file.is_file():
+                            file.unlink()
+                        elif file.is_dir:
+                            remove_folderContent(file)
+                    folder.rmdir()
+
+                remove_folderContent(self.projectsPath / dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
+                self.existingProject.remove(dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
+                dialogMenu_openProject.comboBox_OpenProject_ProjectName.clear()
+                dialogMenu_openProject.comboBox_OpenProject_ProjectName.addItems(self.existingProject)
+
+            else:
+                print("NOTHING --> We did not remove your project")
+
+
+        dialogMenu_openProject.pushButton_OpenProject_ProjectRemove.clicked.connect(onclick_remove)
+        dialogMenu_openProject.buttonBox_OpenProject.accepted.connect(onclick_ok)
 
     def setMenu_projectSave(self):
         """
@@ -264,7 +325,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             
             #TODO save dataframe in folderPath
 
-            saveYAMLConfig_File(folderPath/ "config.yaml", self.config)
 
     def setMenu_databaseConnect(self):
         """
@@ -302,19 +362,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.menu_AutoPopulate_FromDatabase.setEnabled(True)
 
             except neo4j.exceptions.AuthError:
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(255, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(255, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet(self.changeColor['wrongInput'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet(self.changeColor['wrongInput'])
             except (neo4j.exceptions.AddressError, neo4j.exceptions.ServiceUnavailable):
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet("color: rgb(255, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet("color: rgb(255, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(0, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(0, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet(self.changeColor['wrongInput'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet(self.changeColor['wrongInput'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet(self.changeColor['default'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet(self.changeColor['default'])
             except FileNotFoundError:
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_OpenSchema.setStyleSheet("color: rgb(255, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet("color: rgb(0, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet("color: rgb(0, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(0, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(0, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_OpenSchema.setStyleSheet(self.changeColor['wrongInput'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet(self.changeColor['wrongInput'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet(self.changeColor['default'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet(self.changeColor['default'])
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet(self.changeColor['default'])
 
 
         dialogMenu_databaseConnect.buttonBox_DialogDatabaseConnection.accepted.connect(onclick_ok)
@@ -480,20 +540,44 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         When click on the Settings menu
         """
 
-        dialogMenu_settings = DialogMenu_settings(self.iconPath, self.config.get('settings'),
-                                                  "; ".join(self.config['csvinfo'].get('untracked_token', ""))
+        dialogMenu_settings = DialogMenu_settings(name = self.config.get('name',''),
+                                                  author = self.config.get('author',''),
+                                                  description = self.config.get('description',''),
+                                                  vocab1g = self.config.get('vocab1g',''),
+                                                  vocabNg = self.config.get('vocabNg',''),
+                                                  configSettings = self.config.get('settings'),
+                                                  untracked = "; ".join(self.config['csvinfo'].get('untracked_token', "")),
+                                                  iconPath=self.iconPath
                                                   )
         self.setEnabled(False)
         dialogMenu_settings.closeEvent = self.close_Dialog
 
         def onclick_ok():
-            numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, untrackedTokenList = dialogMenu_settings.get_data()
-            self.set_config(numberTokens=numberTokens,
-                            alreadyChecked_threshold=alreadyChecked_threshold,
-                            showCkeckBox_threshold=showCkeckBox_threshold,
-                            untrackedTokenList=untrackedTokenList)
-            dialogMenu_settings.close()
-            print(self.config)
+            name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, untrackedTokenList = dialogMenu_settings.get_data()
+
+            if name:
+                dialogMenu_settings.lineEdit_Settings_ProjectName.setStyleSheet(self.changeColor['default'])
+                oldPath = self.projectsPath / self.config.get('name')
+                oldPath.rename(self.projectsPath / name)
+                #TODO same as above but for the vocabfile name
+
+                self.existingProject.remove(self.config['name'])
+                self.existingProject.add(name)
+                print(self.existingProject)
+
+
+                self.set_config(name=name,
+                                author= author,
+                                description= description,
+                                vocab1g=vocab1g,
+                                vocabNg=vocabNg,
+                                numberTokens=numberTokens,
+                                alreadyChecked_threshold=alreadyChecked_threshold,
+                                showCkeckBox_threshold=showCkeckBox_threshold,
+                                untrackedTokenList=untrackedTokenList)
+                dialogMenu_settings.close()
+            else:
+                dialogMenu_settings.lineEdit_Settings_ProjectName.setStyleSheet(self.changeColor['wrongInput'])
 
         dialogMenu_settings.buttonBox_Setup.accepted.connect(onclick_ok)
 
@@ -518,14 +602,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         dialogMenu_csvHeaderMapping.closeEvent = self.close_Dialog
 
         def onclick_ok():
-            self.config["csvinfo"]["nlpheader"], self.config["csvinfo"]["mapping"] = dialogMenu_csvHeaderMapping.get_data()
+            nlpHeader, csvMapping = dialogMenu_csvHeaderMapping.get_data()
+            self.set_config(nlpHeader=nlpHeader, csvMapping=csvMapping)
             dialogMenu_csvHeaderMapping.close()
 
         dialogMenu_csvHeaderMapping.buttonBox_csvHeaderMapping.accepted.connect(onclick_ok)
 
-    def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, pathCSV=None,
+    def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
-                   username = None, schema = None, server = None, serverport = None, browserport = None):
+                   username = None, schema = None, server = None, serverport = None, browserport = None,
+                   nlpHeader = None, csvMapping=None):
         """
         When changing an information that needs to be saved in the config file
         It Reload all the printing and stuff
@@ -534,7 +620,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :param description:
         :param vocab1g:
         :param vocabNg:
-        :param pathCSV:
+        :param original:
         :param numberTokens:
         :param alreadyChecked_threshold:
         :param showCkeckBox_threshold:
@@ -551,8 +637,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.config["vocab1g"] = vocab1g
         if vocabNg:
             self.config["vocabNg"] = vocabNg
-        if pathCSV:
-            self.config["pathCSV"] = pathCSV
+        if original:
+            self.config["original"] = original
 
         if numberTokens:
             self.config['settings']["numberTokens"] = numberTokens
@@ -560,8 +646,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.config['settings']["alreadyChecked_threshold"] = alreadyChecked_threshold
         if showCkeckBox_threshold:
             self.config['settings']["showCkeckBox_threshold"] = showCkeckBox_threshold
+
         if untrackedTokenList:
             self.config['csvinfo']["untracked_token"] = untrackedTokenList
+        if nlpHeader:
+            self.config['csvinfo']["nlpheader"] = nlpHeader
+        if csvMapping:
+            self.config['csvinfo']["mapping"] = csvMapping
 
         if username:
             self.config['database']["username"] =username
@@ -574,8 +665,41 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         if browserport:
             self.config['database']["browserport"] =browserport
 
+        saveYAMLConfig_File(self.projectsPath / self.config.get('name') / "config.yaml", self.config)
 
-        #TODO update all the print view and stuff
+
+    def close_Dialog(self, event):
+        """
+        When a window is closed (x, cancel, ok)
+        :param event:
+        :return:
+        """
+        self.setEnabled(True)
+
+    # def closeEvent(self, event):
+    #     """
+    #     Trigger when the user close the Tagging Tool Window
+    #     :param event:
+    #     :return:
+    #     """
+    #     choice = Qw.QMessageBox.question(self, 'Shut it Down',
+    #                                      'Do you want to save your changes before closing?',
+    #                                      Qw.QMessageBox.Save | Qw.QMessageBox.Close | Qw.QMessageBox.Cancel)
+    #
+    #     if choice == Qw.QMessageBox.Save:
+    #         print("SAVE AND CLOSE --> vocab 1gram and Ngram, as well as the config file")
+    #         # self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram,
+    #         #                                            self.config_new['file']['filePath_1GrammCSV']['path'])
+    #         # self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram,
+    #         #                                            self.config_new['file']['filePath_nGrammCSV']['path'])
+    #     elif choice == Qw.QMessageBox.Cancel:
+    #         print("NOTHING --> config file saved (in case)")
+    #         event.ignore()
+    #     else:
+    #         print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
+    #         pass
+
+    #TODO update all the print view and stuff
 
         # self.buttonGroup_1Gram_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
         # self.tableWidget_1gram_TagContainer.__class__ = QTableWidget_token
@@ -1128,28 +1252,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.onClick_updateButton_1Gram()
             elif self.tabWidget.currentIndex() ==1:
                 self.onClick_updateButton_NGram()
-
-
-    def closeEvent(self, event):
-        """trigger when we close the window
-
-        Parameters
-        ----------
-        event :
-            return:
-
-        Returns
-        -------
-
-        """
-        #self.closeFunction(event)
-
-        pass
-
-    def close_Dialog(self):
-        print("oulala")
-        self.setEnabled(True)
-
 
 
 def openYAMLConfig_File(yaml_path, dict={}):

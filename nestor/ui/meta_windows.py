@@ -60,29 +60,29 @@ class DialogMenu_newProject(Qw.QDialog, Ui_MainWindow_newproject):
             self.lineEdit_NewProject_LoadCSV.setText(fileName)
 
 
-fname_loadproject = 'dialogmenu_loadproject.ui'
-qtDesignerFile_loadproject = script_dir / fname_loadproject
-Ui_MainWindow_loadproject, QtBaseClass_loadproject = uic.loadUiType(qtDesignerFile_loadproject)
+fname_openproject = 'dialogmenu_openproject.ui'
+qtDesignerFile_openproject = script_dir / fname_openproject
+Ui_MainWindow_openproject, QtBaseClass_openproject = uic.loadUiType(qtDesignerFile_openproject)
 
-class DialogMenu_loadProject(Qw.QDialog, Ui_MainWindow_loadproject):
+class DialogMenu_openProject(Qw.QDialog, Ui_MainWindow_openproject):
     """
     Class use to load an existing project
     """
     def __init__(self, iconPath=None, projectPath=None, existingProject=None):
         Qw.QDialog.__init__(self)
-        Ui_MainWindow_loadproject.__init__(self)
+        Ui_MainWindow_openproject.__init__(self)
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         self.projectPath = projectPath
-        self.comboBox_LoadProject_ProjectName.addItems(existingProject)
+        self.comboBox_OpenProject_ProjectName.addItems(existingProject)
         self.set_values()
 
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
 
-        self.buttonBox_LoadProject.rejected.connect(self.close)
-        self.comboBox_LoadProject_ProjectName.currentTextChanged.connect(self.set_values)
+        self.buttonBox_OpenProject.rejected.connect(self.close)
+        self.comboBox_OpenProject_ProjectName.currentTextChanged.connect(self.set_values)
 
         self.show()
 
@@ -91,7 +91,7 @@ class DialogMenu_loadProject(Qw.QDialog, Ui_MainWindow_loadproject):
         return the needed data
         :return:
         """
-        yaml_path = self.projectPath / self.comboBox_LoadProject_ProjectName.currentText() /'config.yaml'
+        yaml_path = self.projectPath / self.comboBox_OpenProject_ProjectName.currentText() /'config.yaml'
         return openYAMLConfig_File(yaml_path)
 
     def set_values(self):
@@ -99,12 +99,13 @@ class DialogMenu_loadProject(Qw.QDialog, Ui_MainWindow_loadproject):
         set the data when selecting a project in the combobox
         :return:
         """
-        currentProject = self.comboBox_LoadProject_ProjectName.currentText()
+        currentProject = self.comboBox_OpenProject_ProjectName.currentText()
 
-        tmpConf = openYAMLConfig_File( self.projectPath / currentProject / "config.yaml")
-
-        self.lineEdit_LoadProject_ProjectAuthor.setText(tmpConf.get('author',''))
-        self.textEdit_LoadProject_ProjectDescription.setText(tmpConf.get('description',''))
+        if currentProject:
+            tmpConf = openYAMLConfig_File( self.projectPath / currentProject / "config.yaml")
+            self.lineEdit_OpenProject_CSVName.setText(tmpConf.get('original',''))
+            self.lineEdit_OpenProject_ProjectAuthor.setText(tmpConf.get('author',''))
+            self.textEdit_OpenProject_ProjectDescription.setText(tmpConf.get('description',''))
 
 
 fname_settings = 'dialogmenu_settings.ui'
@@ -115,7 +116,8 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
     """
     Class used to change the settings
     """
-    def __init__(self, iconPath=None, configSettings = None, untracked= ""):
+    def __init__(self, iconPath=None, name=None, author=None, description=None, vocab1g=None, vocabNg=None,
+                 configSettings = None, untracked= ""):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_settings.__init__(self)
         self.setupUi(self)
@@ -124,6 +126,12 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         self.lineEdit_Setup_NumberToken.setInputMask("9999")
         self.lineEdit_Setup_TokenChecked.setInputMask("99")
         self.lineEdit_Setup_TokenShow.setInputMask("99")
+
+        self.lineEdit_Settings_ProjectName.setText(name)
+        self.lineEdit_Settings_ProjectAuthor.setText(author)
+        self.textEdit_Settings_ProjectDescription.setPlainText(description)
+        self.lineEdit_Settings_Project1gVocabName.setText(vocab1g)
+        self.lineEdit_Settings_ProjectNgVocabName.setText(vocabNg)
 
         if configSettings:
             self.lineEdit_Setup_NumberToken.setText(str(configSettings.get('numberTokens','1000')))
@@ -148,10 +156,16 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         Return the needed data
         :return:
         """
-        return  int(self.lineEdit_Setup_NumberToken.text()),\
-                int(self.lineEdit_Setup_TokenChecked.text()),\
-                int(self.lineEdit_Setup_TokenShow.text()), \
-                [word.lstrip() for word in self.textEdit_Setup_UntrackedToken.toPlainText().split(";")]
+
+        return  self.lineEdit_Settings_ProjectName.text(),\
+                self.lineEdit_Settings_ProjectAuthor.text(),\
+                self.textEdit_Settings_ProjectDescription.toPlainText(), \
+                self.lineEdit_Settings_Project1gVocabName.text(), \
+                self.lineEdit_Settings_ProjectNgVocabName.text(),\
+                [int(self.lineEdit_Setup_NumberToken.text()) if self.lineEdit_Setup_NumberToken.text() else 1000],\
+                [int(self.lineEdit_Setup_TokenChecked.text()) if self.lineEdit_Setup_TokenChecked.text() else 99],\
+                [int(self.lineEdit_Setup_TokenShow.text()) if self.lineEdit_Setup_TokenShow.text() else 50], \
+                [word.lstrip() for word in self.textEdit_Setup_UntrackedToken.toPlainText().split(";") if self.textEdit_Setup_UntrackedToken.toPlainText()]
 
 
 fname_tou = 'termsOfUse.ui'
