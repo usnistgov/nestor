@@ -1,6 +1,7 @@
 from pathlib import Path
 from PyQt5 import QtGui, uic
 import PyQt5.QtWidgets as Qw
+from PyQt5.QtCore import Qt
 
 from nestor.store_data import integration as cypherQuery
 
@@ -24,6 +25,7 @@ class DialogMenu_newProject(Qw.QDialog, Ui_MainWindow_newproject):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_newproject.__init__(self)
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
@@ -70,6 +72,7 @@ class DialogMenu_loadProject(Qw.QDialog, Ui_MainWindow_loadproject):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_loadproject.__init__(self)
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         self.projectPath = projectPath
         self.comboBox_LoadProject_ProjectName.addItems(existingProject)
@@ -116,6 +119,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_settings.__init__(self)
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         self.lineEdit_Setup_NumberToken.setInputMask("9999")
         self.lineEdit_Setup_TokenChecked.setInputMask("99")
@@ -163,6 +167,7 @@ class DialogMenu_TermsOfUse(Qw.QDialog, Ui_MainWindow_tou):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_tou.__init__(self)
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
@@ -181,9 +186,8 @@ class DialogMenu_csvHeaderMapping(Qw.QDialog, Ui_MainWindow_csvHeader):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_csvHeader.__init__(self)
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
-
-        #print(mappingContent)
 
         self.mappingContent = mappingContent
         self.csvHeaderContent = csvHeaderContent
@@ -282,6 +286,7 @@ class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_dbconnect.__init__(self)
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
@@ -336,6 +341,7 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_dbrunquery.__init__(self)
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         self.database = database
         self.dataframe_Original = dataframe_Original

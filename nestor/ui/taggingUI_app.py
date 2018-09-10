@@ -77,6 +77,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.setupUi(self)
         self.setGeometry(20, 20, 648, 705)
 
+        #not connected to any database
+        self.actionRun_Query.setEnabled(False)
+        self.actionOpen_Database.setEnabled(False)
+        self.menu_AutoPopulate_FromDatabase.setEnabled(False)
+
+        # no project are created
+        self.actionSave_Project.setEnabled(False)
+        self.actionProject_Settings.setEnabled(False)
+        self.actionMap_CSV.setEnabled(False)
+        self.menuAuto_populate.setEnabled(False)
+
 
         """"""
 
@@ -161,7 +172,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_NgVocab)
         # self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_1gVocab)
         # self.action_AutoPopulate_FromCSV_NgramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_NgVocab)
-        # self.﻿actionFrom_AutoPopulate_From1gramVocab.triggered.connect()
+        # self.﻿actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.setMenu_autopopulateNgramFrom1gram)
 
         self.dialogTOU = DialogMenu_TermsOfUse()
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
@@ -175,6 +186,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
 
         dialogMenu_newProject = DialogMenu_newProject(self.iconPath)
+        self.setEnabled(False)
+        dialogMenu_newProject.closeEvent = self.close_Dialog
+
 
         def onclick_ok():
             self.config = self.config_default.copy()
@@ -204,6 +218,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                     self.setMenu_mapCsvHeader()
 
+                    self.actionSave_Project.setEnabled(True)
+                    self.actionProject_Settings.setEnabled(True)
+                    self.actionMap_CSV.setEnabled(True)
+                    self.menuAuto_populate.setEnabled(True)
+
 
         dialogMenu_newProject.buttonBox__NewProject.accepted.connect(onclick_ok)
 
@@ -214,13 +233,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
 
         dialogMenu_loadProject = DialogMenu_loadProject(self.iconPath, self.projectsPath, self.existingProject)
+        self.setEnabled(False)
+        dialogMenu_loadProject.closeEvent = self.close_Dialog
 
         def onclick_ok():
             self.config = dialogMenu_loadProject.get_data()
             dialogMenu_loadProject.close()
 
             self.dataframe_Original = openDataframe(self.config['pathCSV'])
-            print(self.dataframe_Original)
+
+            self.actionSave_Project.setEnabled(True)
+            self.actionProject_Settings.setEnabled(True)
+            self.actionMap_CSV.setEnabled(True)
+            self.menuAuto_populate.setEnabled(True)
+
         dialogMenu_loadProject.buttonBox_LoadProject.accepted.connect(onclick_ok)
 
     def setMenu_projectSave(self):
@@ -248,6 +274,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         dialogMenu_databaseConnect = DialogMenu_DatabaseConnect(iconPath=self.iconPath,
                                                                 configDatabase = self.config.get('database',{})
                                                                 )
+        self.setEnabled(False)
+        dialogMenu_databaseConnect.closeEvent = self.close_Dialog
 
         def onclick_ok():
             username, schema, server, serverport, browserport, password = dialogMenu_databaseConnect.get_data()
@@ -269,20 +297,24 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                 dialogMenu_databaseConnect.close()
 
+                self.actionRun_Query.setEnabled(True)
+                self.actionOpen_Database.setEnabled(True)
+                self.menu_AutoPopulate_FromDatabase.setEnabled(True)
+
             except neo4j.exceptions.AuthError:
                 dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(255, 0, 0);")
                 dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(255, 0, 0);")
             except (neo4j.exceptions.AddressError, neo4j.exceptions.ServiceUnavailable):
                 dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet("color: rgb(255, 0, 0);")
                 dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet("color: rgb(255, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(255, 255, 255);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(255, 255, 255);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(0, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(0, 0, 0);")
             except FileNotFoundError:
                 dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_OpenSchema.setStyleSheet("color: rgb(255, 0, 0);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet("color: rgb(255, 255, 255);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet("color: rgb(255, 255, 255);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(255, 255, 255);")
-                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(255, 255, 255);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerPortNumber.setStyleSheet("color: rgb(0, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_ServerName.setStyleSheet("color: rgb(0, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet("color: rgb(0, 0, 0);")
+                dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Password.setStyleSheet("color: rgb(0, 0, 0);")
 
 
         dialogMenu_databaseConnect.buttonBox_DialogDatabaseConnection.accepted.connect(onclick_ok)
@@ -303,6 +335,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                                     csvHeaderMapping= self.config['csvinfo'].get('mapping',{}),
                                                                     databaseToCsv_mapping= self.databaseToCsv_mapping
                                                                     )
+        self.setEnabled(False)
+        dialogMenu_databaseRunQuery.closeEvent = self.close_Dialog
 
         def onclick_ok():
             dialogMenu_databaseRunQuery.runQueries()
@@ -405,6 +439,41 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
     #         self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
     #         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
     #         self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
+    #
+    #
+    # def setMenu_autopopulateNgramFrom1gram(self, filename=None, init=None):
+    #     """update the Bgram dataframe from the new 1gram input
+    #
+    #     Parameters
+    #     ----------
+    #     filename :
+    #         param init: (Default value = None)
+    #     init :
+    #          (Default value = None)
+    #
+    #     Returns
+    #     -------
+    #
+    #     """
+    #
+    #     self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
+    #     self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
+    #     list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
+    #
+    #     # create the n gram dataframe
+    #
+    #     self.dataframe_NGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=filename, init=init)
+    #
+    #     NE_types = self.config_default['NE_info']['NE_types']
+    #     NE_map_rules = self.config_default['NE_info']['NE_map']
+    #     self.dataframe_NGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_NGram, NE_types, NE_map_rules)
+    #
+    #     self.window_taggingTool._set_tokenExtractor(tokenExtractor_nGram=self.tokenExtractor_nGram)
+    #     self.window_taggingTool._set_cleanRawText(clean_rawText_1Gram=self.clean_rawText_1Gram)
+    #
+    #     #print('Done --> Updated Ngram classification from 1-gram vocabulary!')
+    #
+
 
     def setMenu_settings(self):
         """
@@ -414,6 +483,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         dialogMenu_settings = DialogMenu_settings(self.iconPath, self.config.get('settings'),
                                                   "; ".join(self.config['csvinfo'].get('untracked_token', ""))
                                                   )
+        self.setEnabled(False)
+        dialogMenu_settings.closeEvent = self.close_Dialog
 
         def onclick_ok():
             numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, untrackedTokenList = dialogMenu_settings.get_data()
@@ -442,6 +513,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                                   mappingContent= databaseToCsv_list,
                                                                   configCsvHeader = self.config['csvinfo'].get('nlpheader', []),
                                                                   configMapping = self.config['csvinfo'].get('mapping', {}))
+
+        self.setEnabled(False)
+        dialogMenu_csvHeaderMapping.closeEvent = self.close_Dialog
 
         def onclick_ok():
             self.config["csvinfo"]["nlpheader"], self.config["csvinfo"]["mapping"] = dialogMenu_csvHeaderMapping.get_data()
@@ -1072,6 +1146,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         pass
 
+    def close_Dialog(self):
+        print("oulala")
+        self.setEnabled(True)
+
 
 
 def openYAMLConfig_File(yaml_path, dict={}):
@@ -1150,4 +1228,6 @@ def openDataframe(path):
         print("(you might want to open it and save it as UTF8 for the next time, it is way faster))")
         encoding = chardet.detect(open(path, 'rb').read())['encoding']
         return pd.read_csv(path, encoding=encoding)
+
+
 

@@ -263,13 +263,6 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" alignment="Qt::AlignHCenter">
-               <widget class="QPushButton" name="pushButton_1gram_SaveTableView">
-                <property name="text">
-                 <string>Save</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </item>
             <item row="2" column="0">
