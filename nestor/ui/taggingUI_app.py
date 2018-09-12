@@ -211,6 +211,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.horizontalSlider_1gram_FindingThreshold.sliderMoved.connect(self.onMoveSlider_similarPattern)
         self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onMoveSlider_similarPattern)
 
+        self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_Update1GramVocab)
+
         self.dialogTOU = DialogMenu_TermsOfUse()
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
 
@@ -350,9 +352,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.dataframe_vocabNGram.to_csv(vocabNgPath, encoding='utf-8-sig')
 
             self.existingProject.add(projectName)
-
-            
-
 
     def setMenu_databaseConnect(self):
         """
@@ -728,6 +727,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         self.buttonGroup_similarityPattern.textAlreadySelected = set()
+        self.buttonGroup_similarityPattern.textToUncheck = set()
         self.buttonGroup_similarityPattern.create_checkBoxs(dataframe=self.dataframe_vocab1Gram,
                                                             token=token,
                                                             autoCheck_value=self.config['settings'].get('alreadyChecked_threshold', 50),
@@ -774,20 +774,15 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             if widget is not None:
                 widget.deleteLater()
 
-
-
-
         xPos = 0
         yType = 0
         yValue = 1
 
         for tok1g in token.split(" "):
 
-            #self.dataframe_vocab1Gram.index[self.dataframe_vocab1Gram['alias'] == True].tolist()
-
             for type, value in self.dataframe_vocab1Gram.loc[tok1g][:-1].iteritems():
                 labelType = Qw.QLabel()
-                labelType.setText(str(type))
+                labelType.setText(str(type)+":")
                 labelType.setObjectName("labelNGramComposition" + str(type))
                 self.gridLayout_Ngram_NGramComposedof.addWidget(labelType, xPos, yType)
 
@@ -797,6 +792,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.gridLayout_Ngram_NGramComposedof.addWidget(labelValue, xPos, yValue)
 
                 xPos += 1
+
+            labelAlias = Qw.QLabel()
+            labelAlias.setText('alias :')
+            labelAlias.setObjectName("labelNGramComposition" + 'alias')
+            self.gridLayout_Ngram_NGramComposedof.addWidget(labelAlias, xPos, yType)
+
+            similarityList = "\n".join(self.dataframe_vocab1Gram.index[self.dataframe_vocab1Gram['alias'] == tok1g].tolist())
+
+            labelValueSimilarity = Qw.QLabel()
+            labelValueSimilarity.setText(similarityList)
+            labelValueSimilarity.setObjectName("labelNGramComposition" + 'aliasValue')
+            self.gridLayout_Ngram_NGramComposedof.addWidget(labelValueSimilarity, xPos, yValue)
+
+            xPos += 1
 
             separator = Qw.QFrame()
             separator.setFrameShape(Qw.QFrame.HLine)
@@ -809,7 +818,29 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         verticalSpacer = Qw.QSpacerItem(20, 40, Qw.QSizePolicy.Minimum, Qw.QSizePolicy.Expanding)
         self.gridLayout_Ngram_NGramComposedof.addItem(verticalSpacer)
 
+    def onClick_Update1GramVocab(self):
+        """
+        update the dataframe when update the 1Gram
+        :return:
+        """
+        for btn in self.buttonGroup_similarityPattern.buttons():
+            if btn.isChecked():
+                new_alias = self.buttonDictionary_1Gram.get(self.buttonGroup_1Gram_Classification.checkedButton().text(), '')
 
+                self.dataframe_vocab1Gram.at[btn.text(), 'alias'] =  self.lineEdit_1gram_AliasEditor.text()
+                self.dataframe_vocab1Gram.at[btn.text(), 'notes'] = self.textEdit_1gram_NoteEditor.toPlainText()
+                self.dataframe_vocab1Gram.at[btn.text(), 'NE'] = new_alias
+
+        # remove the information for the token that WAS the same but the user did not want it to be the same anymore
+        for textToUncheck in self.buttonGroup_similarityPattern.textToUncheck:
+            self.dataframe_vocab1Gram.at[textToUncheck, 'alias'] = ""
+            self.dataframe_vocab1Gram.at[textToUncheck, 'notes'] = ""
+            self.dataframe_vocab1Gram.at[textToUncheck, 'NE'] = ""
+
+
+        self.printDataframe_Tableview(dataframe= self.dataframe_vocab1Gram,tableview=self.tableWidget_1gram_TagContainer)
+
+        self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
 
     def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
@@ -1228,7 +1259,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             new_alias = self.lineEdit_1gram_AliasEditor.text()
             new_notes = self.textEdit_1gram_NoteEditor.toPlainText()
-            new_clf = self.buttonDictionary_1Gram.get(self.buttonGroup_1Gram_Classification.checkedButton().text(), pd.np.nan)
             self.dataframe_vocab1Gram = self._set_dataframeItemValue(self.dataframe_vocab1Gram, token, new_alias, new_clf, new_notes)
             self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
 
@@ -1433,9 +1463,9 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         self.layout = layout
         self.spacer = None
         self.textAlreadySelected = set()
+        self.textToUncheck = set()
 
         self.buttonClicked.connect(self.set_textSelected)
-
 
     def set_textSelected(self, button):
         """
@@ -1447,8 +1477,8 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             self.textAlreadySelected.add(button.text())
         else:
             self.textAlreadySelected.remove(button.text())
-
-        print(self.textAlreadySelected)
+            print(button.text())
+            self.textToUncheck.add(button.text())
 
     def create_checkBoxs(self, dataframe, token, autoCheck_value= 99, checkBox_show= 50):
         """create and print the checkboxes
@@ -1469,8 +1499,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         -------
 
         """
-
-
         self.clean_checkboxes()
 
         #get the similar tokne on the dataframe
@@ -1490,40 +1518,17 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             if alias is '':
                 if score >= autoCheck_value:
                     btn.setChecked(True)
+                    self.textAlreadySelected.add(token)
             else:
                 if dataframe.loc[btn.text(), 'alias'] == alias:
                     btn.setChecked(True)
+                    self.textAlreadySelected.add(token)
 
             if token in self.textAlreadySelected:
                 btn.setChecked(True)
 
         self.spacer = Qw.QSpacerItem(20, 40, Qw.QSizePolicy.Minimum, Qw.QSizePolicy.Expanding)
         self.layout.addSpacerItem(self.spacer)
-
-    # def set_checkBoxes_rechecked(self, token_list, btn_checked):
-    #     """check the button that was send in the btn_checked
-    #
-    #     Parameters
-    #     ----------
-    #     token_list :
-    #         param btn_checked:
-    #     btn_checked :
-    #
-    #
-    #     Returns
-    #     -------
-    #
-    #     """
-    #     self.clean_checkboxes()
-    #     for token, score in token_list:
-    #         btn = Qw.QCheckBox(token)
-    #         if token in btn_checked:
-    #             btn.toggle()
-    #         self.addButton(btn)
-    #         self.layout.addWidget(btn)
-    #
-    #     self.spacer = Qw.QSpacerItem(20, 40, Qw.QSizePolicy.Minimum, Qw.QSizePolicy.Expanding)
-    #     self.layout.addSpacerItem(self.spacer)
 
     def clean_checkboxes(self):
         """remove all from the layout
