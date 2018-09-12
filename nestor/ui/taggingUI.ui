@@ -328,13 +328,6 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <layout class="QVBoxLayout" name="verticalLayout_Ngram_CompositionDisplay">
-              <property name="sizeConstraint">
-               <enum>QLayout::SetMaximumSize</enum>
-              </property>
-             </layout>
-            </item>
             <item row="0" column="1" alignment="Qt::AlignHCenter">
              <widget class="QLabel" name="label_Ngram_CompositionDescription">
               <property name="text">
@@ -557,6 +550,9 @@
               </item>
              </layout>
             </item>
+            <item row="1" column="1">
+             <layout class="QGridLayout" name="gridLayout_Ngram_NGramComposedof"/>
+            </item>
            </layout>
           </item>
          </layout>
@@ -772,11 +768,21 @@ separated for readability. NA tags ommitted.
     <property name="toolTipsVisible">
      <bool>false</bool>
     </property>
+    <widget class="QMenu" name="menuExport">
+     <property name="title">
+      <string>Export</string>
+     </property>
+     <addaction name="actionTo_Zip"/>
+     <addaction name="actionTo_Tar"/>
+    </widget>
     <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionSave_Project"/>
     <addaction name="actionProject_Settings"/>
     <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="menuExport"/>
+    <addaction name="actionImport"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="enabled">
@@ -1034,6 +1040,21 @@ separated for readability. NA tags ommitted.
   <action name="actionMap_CSV">
    <property name="text">
     <string>Map CSV </string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="actionTo_Zip">
+   <property name="text">
+    <string>To Zip</string>
+   </property>
+  </action>
+  <action name="actionTo_Tar">
+   <property name="text">
+    <string>To Tar</string>
    </property>
   </action>
  </widget>
