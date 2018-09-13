@@ -731,7 +731,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.buttonGroup_similarityPattern.create_checkBoxs(dataframe=self.dataframe_vocab1Gram,
                                                             token=token,
                                                             autoCheck_value=self.config['settings'].get('alreadyChecked_threshold', 50),
-                                                            checkBox_show = int(self.config['settings'].get('showCkeckBox_threshold', 50)))
+                                                            checkBox_show = self.horizontalSlider_1gram_FindingThreshold.value())
 
     def onMoveSlider_similarPattern(self):
         """
@@ -823,24 +823,38 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         update the dataframe when update the 1Gram
         :return:
         """
-        for btn in self.buttonGroup_similarityPattern.buttons():
-            if btn.isChecked():
-                new_alias = self.buttonDictionary_1Gram.get(self.buttonGroup_1Gram_Classification.checkedButton().text(), '')
-
-                self.dataframe_vocab1Gram.at[btn.text(), 'alias'] =  self.lineEdit_1gram_AliasEditor.text()
-                self.dataframe_vocab1Gram.at[btn.text(), 'notes'] = self.textEdit_1gram_NoteEditor.toPlainText()
-                self.dataframe_vocab1Gram.at[btn.text(), 'NE'] = new_alias
-
-        # remove the information for the token that WAS the same but the user did not want it to be the same anymore
-        for textToUncheck in self.buttonGroup_similarityPattern.textToUncheck:
-            self.dataframe_vocab1Gram.at[textToUncheck, 'alias'] = ""
-            self.dataframe_vocab1Gram.at[textToUncheck, 'notes'] = ""
-            self.dataframe_vocab1Gram.at[textToUncheck, 'NE'] = ""
+        try:
+            items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
+            token, classification, alias, notes = (str(i.text()) for i in items)
 
 
-        self.printDataframe_Tableview(dataframe= self.dataframe_vocab1Gram,tableview=self.tableWidget_1gram_TagContainer)
+            for btn in self.buttonGroup_similarityPattern.buttons():
+                if btn.isChecked():
+                    new_alias = self.buttonDictionary_1Gram.get(self.buttonGroup_1Gram_Classification.checkedButton().text(), '')
 
-        self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
+                    self.dataframe_vocab1Gram.at[btn.text(), 'alias'] =  self.lineEdit_1gram_AliasEditor.text()
+                    self.dataframe_vocab1Gram.at[btn.text(), 'notes'] = self.textEdit_1gram_NoteEditor.toPlainText()
+                    self.dataframe_vocab1Gram.at[btn.text(), 'NE'] = new_alias
+
+            # remove the information for the token that WAS the same but the user did not want it to be the same anymore
+            # only if they had the same alias
+            for textToUncheck in self.buttonGroup_similarityPattern.textToUncheck:
+                if self.dataframe_vocab1Gram.at[textToUncheck,"alias"] == alias:
+                    self.dataframe_vocab1Gram.at[textToUncheck, 'alias'] = ""
+                    self.dataframe_vocab1Gram.at[textToUncheck, 'notes'] = ""
+                    self.dataframe_vocab1Gram.at[textToUncheck, 'NE'] = ""
+
+
+            self.printDataframe_Tableview(dataframe= self.dataframe_vocab1Gram,tableview=self.tableWidget_1gram_TagContainer)
+            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
+
+            self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
+
+        except (IndexError, ValueError):
+            Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
+
+    def onClick_UpdateNGramVocab(self):
+        pass
 
     def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
@@ -908,7 +922,22 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
 
+
         self.existingProject.add(self.config.get('name',""))
+
+        #reset all the value to default
+        self.dataframe_vocab1Gram = None
+        self.dataframe_vocabNGram = None
+        self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
+        self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
+        self.clean_rawText_1Gram = None
+        self.tag_df = None
+        self.relation_df = None
+        self.tag_readable = None
+
+        self.dataframe_completeness=None
+
+        #self.config = self.config_default.copy()
 
         #Open dataframs
         self.dataframe_Original = openDataframe(self.projectsPath / self.config['name'] / self.config['original'])
@@ -927,7 +956,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.extract_NgVocab(vocabNgPath)
 
         self.printDataframe_Tableview(self.dataframe_vocab1Gram, self.tableWidget_1gram_TagContainer)
+        self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
         self.printDataframe_Tableview(self.dataframe_vocabNGram, self.tableWidget_Ngram_TagContainer)
+        self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
 
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
 
@@ -973,6 +1004,61 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         NE_map_rules = self.config['classification'].get('mapping')
         self.dataframe_vocabNGram = kex.ngram_automatch(self.dataframe_vocab1Gram, self.dataframe_vocabNGram, NE_types, NE_map_rules)
 
+    def update_progress_bar(self, progressBar, dataframe):
+        """set the value of the progress bar based on the dataframe score
+
+        Parameters
+        ----------
+        progressBar :
+
+        dataframe :
+
+
+        Returns
+        -------
+
+        """
+        scores = dataframe['score']
+        matched = scores[dataframe['NE'] != '']
+        completed_pct = matched.sum() / scores.sum()
+        progressBar.setValue(100 * completed_pct)
+
+    def setAliasFromNgramButton(self, button):
+        """
+        When check a radio button on the Ngram button group, change the alias dependent on the classification
+        :param button:
+        :return:
+        """
+        if button == self.classificationDictionary_NGram.get("I"):
+            alias = '_'.join(self.lineEdit_Ngram_AliasEditor.text().split(" "))
+            self.lineEdit_Ngram_AliasEditor.setText(alias)
+        else:
+            alias = ' '.join(self.lineEdit_Ngram_AliasEditor.text().split("_"))
+            self.lineEdit_Ngram_AliasEditor.setText(alias)
+
+    def keyPressEvent(self, event):
+        """listenr on the keyboard
+
+        Parameters
+        ----------
+        e :
+            return:
+        event :
+
+
+        Returns
+        -------
+
+        """
+
+        if event.key() == Qt.Key_Return:
+            if self.tabWidget.currentIndex() == 0:
+                self.onClick_Update1GramVocab()
+            elif self.tabWidget.currentIndex() ==1:
+                self.onClick_UpdateNGramVocab()
+
+
+
     def close_Dialog(self, event):
         """
         When a window is closed (x, cancel, ok)
@@ -1004,18 +1090,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
     #         print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
     #         pass
 
-    def setAliasFromNgramButton(self, button):
-        """
-        When check a radio button on the Ngram button group, change the alias dependent on the classification
-        :param button:
-        :return:
-        """
-        if button == self.classificationDictionary_NGram.get("I"):
-            alias = '_'.join(self.lineEdit_Ngram_AliasEditor.text().split(" "))
-            self.lineEdit_Ngram_AliasEditor.setText(alias)
-        else:
-            alias = ' '.join(self.lineEdit_Ngram_AliasEditor.text().split("_"))
-            self.lineEdit_Ngram_AliasEditor.setText(alias)
 
 
     #TODO update all the print view and stuff
@@ -1333,48 +1407,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         except IndexError:
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
-    def update_progress_bar(self, progressBar, dataframe):
-        """set the value of the progress bar based on the dataframe score
-
-        Parameters
-        ----------
-        progressBar :
-            
-        dataframe :
-            
-
-        Returns
-        -------
-
-        """
-        scores = dataframe['score']
-        matched = scores[dataframe['NE'] != '']
-        #TODO THURSTON which one?
-        #completed_pct = pd.np.log(matched+1).sum()/pd.np.log(self.scores+1).sum()
-        completed_pct = matched.sum()/scores.sum()
-        progressBar.setValue(100*completed_pct)
-
-
-    def keyPressEvent(self, event):
-        """listenr on the keyboard
-
-        Parameters
-        ----------
-        e :
-            return:
-        event :
-            
-
-        Returns
-        -------
-
-        """
-
-        if event.key() == Qt.Key_Return:
-            if self.tabWidget.currentIndex() == 0:
-                self.onClick_updateButton_1Gram()
-            elif self.tabWidget.currentIndex() ==1:
-                self.onClick_updateButton_NGram()
 
 
 def openYAMLConfig_File(yaml_path, dict={}):
@@ -1475,9 +1507,10 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         """
         if button.isChecked():
             self.textAlreadySelected.add(button.text())
+            if button.text() in self.textToUncheck:
+                self.textToUncheck.remove(button.text())
         else:
             self.textAlreadySelected.remove(button.text())
-            print(button.text())
             self.textToUncheck.add(button.text())
 
     def create_checkBoxs(self, dataframe, token, autoCheck_value= 99, checkBox_show= 50):
