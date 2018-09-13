@@ -683,7 +683,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             self.whenProjectOpen()
 
-    def printDataframe_Tableview(self, dataframe, tableview):
+    def printDataframe_TableviewProgressBar(self, dataframe, tableview, progressBar):
         """
         print the given dataframe onto the given tableview
         :param dataframe:
@@ -709,6 +709,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         tableview.resizeRowsToContents()
         tableview.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
         tableview.setSelectionBehavior(Qw.QTableWidget.SelectRows)
+
+        self.update_progress_bar(progressBar, dataframe)
 
     def onSelect_tableViewItems1gramVocab(self):
         """
@@ -845,7 +847,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                     self.dataframe_vocab1Gram.at[textToUncheck, 'NE'] = ""
 
 
-            self.printDataframe_Tableview(dataframe= self.dataframe_vocab1Gram,tableview=self.tableWidget_1gram_TagContainer)
+            self.printDataframe_TableviewProgressBar(dataframe= self.dataframe_vocab1Gram,
+                                                     tableview=self.tableWidget_1gram_TagContainer,
+                                                     progressBar=self.progressBar_1gram_TagComplete)
             self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
 
             self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
@@ -854,7 +858,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
     def onClick_UpdateNGramVocab(self):
-        pass
+
+
+        self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                 tableview=self.tableWidget_Ngram_TagContainer,
+                                                 progressBar=self.progressBar_Ngram_TagComplete)
 
     def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
@@ -955,10 +963,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.extract_1gVocab(vocab1gPath)
             self.extract_NgVocab(vocabNgPath)
 
-        self.printDataframe_Tableview(self.dataframe_vocab1Gram, self.tableWidget_1gram_TagContainer)
-        self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
-        self.printDataframe_Tableview(self.dataframe_vocabNGram, self.tableWidget_Ngram_TagContainer)
-        self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
+        self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocab1Gram,
+                                                 tableview=self.tableWidget_1gram_TagContainer,
+                                                 progressBar=self.progressBar_1gram_TagComplete)
+        self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                 tableview=self.tableWidget_Ngram_TagContainer,
+                                                 progressBar=self.progressBar_Ngram_TagComplete)
 
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
 
