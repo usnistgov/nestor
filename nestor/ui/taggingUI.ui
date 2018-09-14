@@ -640,7 +640,7 @@ separated for readability. NA tags ommitted.
               <item row="5" column="1">
                <widget class="QPushButton" name="pushButton_report_saveNewCsv">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>create new CSV</string>
@@ -691,9 +691,9 @@ separated for readability. NA tags ommitted.
                </spacer>
               </item>
               <item row="7" column="1">
-               <widget class="QPushButton" name="pushButton_report_saveBinnaryCsv">
+               <widget class="QPushButton" name="pushButton_report_saveH5">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>create a HDFS (binary)</string>

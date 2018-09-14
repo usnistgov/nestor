@@ -1,22 +1,21 @@
 import importlib
-from pathlib import Path
 
 import pandas as pd
 import numpy as np
 import fuzzywuzzy.process as zz
 import shutil
-from PyQt5.QtCore import Qt
-from PyQt5 import QtGui, uic
-import PyQt5.QtWidgets as Qw
 
-import pyaml, yaml
+
 import chardet
 import webbrowser
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 import nestor.keyword as kex
-from .helper_objects import CompositionNGramItem, MyMplCanvas,  QTableWidget_token
-
 from nestor.ui.meta_windows import *
 
 
@@ -87,6 +86,29 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         """
+        Default values
+         """
+        self.dataframe_Original = None
+        self.dataframe_vocab1Gram = None
+        self.dataframe_vocabNGram = None
+
+        self.dataframe_completeness = None
+
+        self.database = None
+
+        self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
+        self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
+
+        self.clean_rawText_1Gram = None
+
+        self.tag_df = None
+        self.relation_df = None
+        self.tag_readable = None
+
+        self.dataframe_completeness = None
+
+
+        """
         UI objects
         """
         self.setupUi(self)
@@ -111,6 +133,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionConnect.setEnabled(False)
         self.menuExport.setEnabled(False)
 
+        #no tag extracted
+        self.pushButton_report_saveNewCsv.setEnabled(False)
+        self.pushButton_report_saveH5.setEnabled(False)
+
+
+        self.completenessPlot = MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self.dataframe_completeness)
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
 
         """"""
@@ -155,29 +183,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'not yet classified': ''
         }
 
-
-        """
-        Default values
-        """
-
-        self.dataframe_Original = None
-        self.dataframe_vocab1Gram = None
-        self.dataframe_vocabNGram = None
-
-        self.database = None
-
-        self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
-        self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
-
-        self.clean_rawText_1Gram = None
-
-        self.tag_df = None
-        self.relation_df = None
-        self.tag_readable = None
-
-        self.dataframe_completeness=None
-
         self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
+
 
 
         """
@@ -210,8 +217,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.buttonGroup_NGram_Classification.buttonClicked.connect(self.setAliasFromNgramButton)
         self.horizontalSlider_1gram_FindingThreshold.sliderMoved.connect(self.onMoveSlider_similarPattern)
         self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onMoveSlider_similarPattern)
-
         self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_Update1GramVocab)
+        self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_UpdateNGramVocab)
+
+        self.pushButton_report_saveTrack.clicked.connect(self.onClick_saveTrack)
+        self.pushButton_report_saveNewCsv.clicked.connect(self.onClick_saveNewCsv)
+        self.pushButton_report_saveH5.clicked.connect(self.onClick_saveTagsHDFS)
 
         self.dialogTOU = DialogMenu_TermsOfUse()
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
@@ -304,26 +315,27 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         def onclick_remove():
-            choice = Qw.QMessageBox.question(self, 'Remove Project',
-                                             'Do you really want to remove the project?',
-                                             Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
+            if dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText() != "":
+                choice = Qw.QMessageBox.question(self, 'Remove Project',
+                                                 'Do you really want to remove the project?',
+                                                 Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
 
-            if choice == Qw.QMessageBox.Yes:
-                def remove_folderContent(folder):
-                    for file in folder.iterdir():
-                        if file.is_file():
-                            file.unlink()
-                        elif file.is_dir:
-                            remove_folderContent(file)
-                    folder.rmdir()
+                if choice == Qw.QMessageBox.Yes:
+                    def remove_folderContent(folder):
+                        for file in folder.iterdir():
+                            if file.is_file():
+                                file.unlink()
+                            elif file.is_dir:
+                                remove_folderContent(file)
+                        folder.rmdir()
 
-                remove_folderContent(self.projectsPath / dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
-                self.existingProject.remove(dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
-                dialogMenu_openProject.comboBox_OpenProject_ProjectName.clear()
-                dialogMenu_openProject.comboBox_OpenProject_ProjectName.addItems(self.existingProject)
+                    remove_folderContent(self.projectsPath / dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
+                    self.existingProject.remove(dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
+                    dialogMenu_openProject.comboBox_OpenProject_ProjectName.clear()
+                    dialogMenu_openProject.comboBox_OpenProject_ProjectName.addItems(self.existingProject)
 
-            else:
-                print("NOTHING --> We did not remove your project")
+                else:
+                    print("NOTHING --> We did not remove your project")
 
         dialogMenu_openProject.pushButton_OpenProject_ProjectRemove.clicked.connect(onclick_remove)
         dialogMenu_openProject.buttonBox_OpenProject.accepted.connect(onclick_ok)
@@ -850,7 +862,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.printDataframe_TableviewProgressBar(dataframe= self.dataframe_vocab1Gram,
                                                      tableview=self.tableWidget_1gram_TagContainer,
                                                      progressBar=self.progressBar_1gram_TagComplete)
-            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
 
             self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
 
@@ -859,10 +870,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def onClick_UpdateNGramVocab(self):
 
+        items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
+        token, classification, alias, notes = (str(i.text()) for i in items)
+
+        self.dataframe_vocabNGram.at[token, 'alias'] = self.lineEdit_Ngram_AliasEditor.text()
+        self.dataframe_vocabNGram.at[token, 'notes'] = self.textEdit_Ngram_NoteEditor.toPlainText()
+        self.dataframe_vocabNGram.at[token, 'NE'] = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(), '')
+
+        if self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(), '') == "I":
+            self.dataframe_vocabNGram.at[token, 'alias'] = "_".join(self.lineEdit_Ngram_AliasEditor.text().split(" "))
 
         self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
                                                  tableview=self.tableWidget_Ngram_TagContainer,
                                                  progressBar=self.progressBar_Ngram_TagComplete)
+        self.tableWidget_Ngram_TagContainer.selectRow(self.tableWidget_Ngram_TagContainer.currentRow() + 1)
 
     def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
@@ -955,12 +976,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         vocname = str(self.config.get('vocabNg')) + '.csv'
         vocabNgPath = self.projectsPath / self.config.get('name') / vocname
 
-        if vocab1gPath.exists() and vocabNgPath.exists():
-            self.dataframe_vocab1Gram = openDataframe(vocab1gPath).fillna("").set_index("tokens")
-            self.dataframe_vocabNGram = openDataframe(vocabNgPath).fillna("").set_index("tokens")
 
+        # if we open a project, init the new dataframe with the one in the vocab
+        if vocab1gPath.exists():
+            self.extract_1gVocab(vocab1gPath, openDataframe(vocab1gPath).fillna("").set_index("tokens"))
+        #if new project, just create the dataframe
         else:
             self.extract_1gVocab(vocab1gPath)
+
+        if vocabNgPath.exists():
+            self.extract_NgVocab(vocabNgPath, openDataframe(vocabNgPath).fillna("").set_index("tokens"))
+        else:
             self.extract_NgVocab(vocabNgPath)
 
         self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocab1Gram,
@@ -980,7 +1006,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionConnect.setEnabled(True)
         self.menuExport.setEnabled(True)
 
-    def extract_1gVocab(self, vocab1gPath):
+        self.pushButton_report_saveNewCsv.setEnabled(False)
+        self.pushButton_report_saveH5.setEnabled(False)
+
+    def extract_1gVocab(self, vocab1gPath= None,  init=None):
         """
         create the 1Gvocab from the original dataframe
         :return:
@@ -993,11 +1022,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         list_tokenExtracted = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)
 
-        self.dataframe_vocab1Gram = kex.generate_vocabulary_df(self.tokenExtractor_1Gram, filename=vocab1gPath, init=self.dataframe_vocab1Gram)
+        self.dataframe_vocab1Gram = kex.generate_vocabulary_df(self.tokenExtractor_1Gram, filename=vocab1gPath, init=init)
 
         self.dataframe_vocab1Gram.to_csv(vocab1gPath, encoding='utf-8-sig')
 
-    def extract_NgVocab(self, vocabNgPath):
+    def extract_NgVocab(self, vocabNgPath=None, init=None):
         """
         Create the Ngram Vocab from the 1G vocab and the original dataframe
         :return:
@@ -1008,7 +1037,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         # create the n gram dataframe
 
-        self.dataframe_vocabNGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=vocabNgPath, init=self.dataframe_vocabNGram)
+        self.dataframe_vocabNGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=vocabNgPath, init=init)
 
         NE_types = self.config['classification'].get("type")
         NE_map_rules = self.config['classification'].get('mapping')
@@ -1066,8 +1095,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.onClick_Update1GramVocab()
             elif self.tabWidget.currentIndex() ==1:
                 self.onClick_UpdateNGramVocab()
-
-
 
     def close_Dialog(self, event):
         """
@@ -1147,31 +1174,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # else:
         #     self.menuDatabase.setEnabled(False)
 
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-#########################################################################################################
-
-
-    def onClick_changeClassification(self, btn):
-        new_clf = self.buttonDictionary_NGram.get(btn.text())
-        items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
-        tokens, classification, alias, notes = (str(i.text()) for i in items)
-
-        if not alias:
-            if new_clf in ['I','S','P']:
-                labels = tokens.split(' ')  # the ngram component 1-gram parts
-                #self.lineEdit_Ngram_AliasEditor.setStyleSheet("QLineEdit{background: red;}")
-
-                self.lineEdit_Ngram_AliasEditor.setText("_".join(labels))
-
     def onClick_saveTrack(self):
         """save the current completness of the token in a dataframe
         :return:
@@ -1183,20 +1185,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         -------
 
         """
-
-        #block any action on the main window
-
-        # get the main wondow possition
-        rect = self.geometry()
-        rect.setHeight(70)
-        rect.setWidth(200)
-
-        window_DialogWait = DialogWait(iconPath=self.iconPath)
-        window_DialogWait.setGeometry(rect)
-        # block the Dialog_wait in front of all other windows
-        window_DialogWait.show()
-        Qw.QApplication.processEvents()
-
+        #
+        # # block any action on the main window
+        #
+        # # get the main wondow possition
+        # rect = self.geometry()
+        # rect.setHeight(70)
+        # rect.setWidth(200)
+        #
+        # window_DialogWait = DialogWait(iconPath=self.iconPath)
+        # window_DialogWait.setGeometry(rect)
+        # # block the Dialog_wait in front of all other windows
+        # window_DialogWait.show()
+        # Qw.QApplication.processEvents()
 
         print("SAVE IN PROCESS --> calculating the extracted tags and statistics...")
         # do 1-grams
@@ -1205,49 +1206,49 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                     self.clean_rawText,
                                     vocab_df=self.dataframe_vocab1Gram)
         # self.tags_read = kex._get_readable_tag_df(self.tags_df)
-        window_DialogWait.setProgress(30)
-        Qw.QApplication.processEvents()
+        #window_DialogWait.setProgress(30)
+        #Qw.QApplication.processEvents()
         # do 2-grams
         print('TWO GRAMS...')
         tags2_df = kex.tag_extractor(self.tokenExtractor_nGram,
                                      self.clean_rawText_1Gram,
                                      vocab_df=self.dataframe_vocabNGram[self.dataframe_vocabNGram.alias.notna()])
 
-        window_DialogWait.setProgress(60)
-        Qw.QApplication.processEvents()
+        #window_DialogWait.setProgress(60)
+        #Qw.QApplication.processEvents()
         # merge 1 and 2-grams.
-        tag_df = tags_df.join(tags2_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
-        self.tag_readable = kex._get_readable_tag_df(tag_df)
+        self.tag_df = tags_df.join(tags2_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
+        self.tag_readable = kex._get_readable_tag_df(self.tag_df)
 
-        self.relation_df = tag_df.loc[:, ['P I', 'S I']]
-        self.tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U', 'NA']]
+        self.relation_df = self.tag_df.loc[:, ['P I', 'S I']]
+        self.tag_df = self.tag_df.loc[:, ['I', 'P', 'S', 'U', 'NA']]
         # tag_readable.head(10)
 
         # do statistics
         tag_pct, tag_comp, tag_empt = kex.get_tag_completeness(self.tag_df)
 
         self.label_report_tagCompleteness.setText(f'Tag PPV: {tag_pct.mean():.2%} +/- {tag_pct.std():.2%}')
-        self.label_report_completeDocs.setText(f'Complete Docs: {tag_comp} of {len(self.tag_df)}, or {tag_comp/len(tag_df):.2%}')
-        self.label_report_emptyDocs.setText(f'Empty Docs: {tag_empt} of {len(self.tag_df)}, or {tag_empt/len(self.tag_df):.2%}')
+        self.label_report_completeDocs.setText(
+            f'Complete Docs: {tag_comp} of {len(self.tag_df)}, or {tag_comp/len(self.tag_df):.2%}')
+        self.label_report_emptyDocs.setText(
+            f'Empty Docs: {tag_empt} of {len(self.tag_df)}, or {tag_empt/len(self.tag_df):.2%}')
 
-        window_DialogWait.setProgress(90)
-        Qw.QApplication.processEvents()
+        #window_DialogWait.setProgress(90)
+        #Qw.QApplication.processEvents()
         self.completenessPlot._set_dataframe(tag_pct)
-        nbins = int(np.percentile(tag_df.sum(axis=1), 90))
+        nbins = int(np.percentile(self.tag_df.sum(axis=1), 90))
         print(f'Docs have at most {nbins} tokens (90th percentile)')
         self.completenessPlot.plot_it(nbins)
 
         self.dataframe_completeness = tag_pct
-        # return tag_readable, tag_df
-        window_DialogWait.setProgress(99)
-        Qw.QApplication.processEvents()
-        window_DialogWait.close()
-
+        #window_DialogWait.setProgress(99)
+        #Qw.QApplication.processEvents()
+        #window_DialogWait.close()
 
         self.pushButton_report_saveNewCsv.setEnabled(True)
-        self.pushButton_report_saveBinnaryCsv.setEnabled(True)
+        self.pushButton_report_saveH5.setEnabled(True)
 
-        Qw.QApplication.processEvents()
+        #Qw.QApplication.processEvents()
 
         print("SAVE --> your information has been saved, you can now extract your result in CSV or HDF5")
 
@@ -1262,8 +1263,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         -------
 
         """
-        # tag_readable, tag_df = self.onClick_saveTrack()
-        #TODO add this stuff to the original csv data
         if self.tag_readable is None:
             self.onClick_saveTrack()
 
@@ -1286,19 +1285,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         -------
 
         """
-        # tag_readable, tag_df = self.onClick_saveTrack()
 
         if self.tag_df is None:
             self.onClick_saveTrack()
-        # fname = Path('.')
         fname, _ = Qw.QFileDialog.getSaveFileName(self, 'Save File')
 
         if fname is not "":
             if fname[-3:] != '.h5':
                 fname += '.h5'
 
-
-            col_map = self.config['csvheader_mapping']
+            col_map = self.config['csvinfo'].get('mapping', {})
             save_df = self.dataframe_Original[list(col_map.keys())]
             save_df = save_df.rename(columns=col_map)
             save_df.to_hdf(fname, key='df')
@@ -1309,114 +1305,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                   '\n\t- the original document (with updated header)'
                   '\n\t- the binary matrices of Tag'
                   '\n\t- the binary matrices of combined Tag')
-            # TODO add fname to config.yml as pre-loaded "update tag extraction"
-
-    def onSelectedItem_tableNGram(self):
-        """action when we select an item from the NGram table view
-        :return:
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
-        tokens, classification, alias, notes = (str(i.text()) for i in items)
-
-        self.middleLayout_Ngram_Composition.printView(self.dataframe_vocab1Gram, tokens)
-
-        if not alias:
-            if classification in ['P','S','I']:
-                labels = tokens.split(' ')
-                alias = '_'.join(labels)
-
-        self._set_editorValue_NGram(alias, tokens, notes, classification)
-
-
-    def onClick_updateButton_1Gram(self):
-        """Triggers with update button. Saves user annotation to the dataframe"""
-        try:
-            items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
-            token, classification, alias, notes = (str(i.text()) for i in items)
-
-            new_alias = self.lineEdit_1gram_AliasEditor.text()
-            new_notes = self.textEdit_1gram_NoteEditor.toPlainText()
-            self.dataframe_vocab1Gram = self._set_dataframeItemValue(self.dataframe_vocab1Gram, token, new_alias, new_clf, new_notes)
-            self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
-
-            self.tableWidget_1gram_TagContainer.userUpdate.add(self.dataframe_vocab1Gram.index.get_loc(token))
-
-            for btn in self.buttonGroup_1Gram_similarityPattern.buttons():
-                if btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
-                    self.dataframe_vocab1Gram = self._set_dataframeItemValue(self.dataframe_vocab1Gram, btn.text(), new_alias, new_clf,
-                                                                             new_notes)
-                    self.tableWidget_1gram_TagContainer.userUpdate.add(self.dataframe_vocab1Gram.index.get_loc(btn.text()))
-
-                elif self.dataframe_vocab1Gram.loc[btn.text()]['alias']:
-                    self.dataframe_vocab1Gram = self._set_dataframeItemValue(self.dataframe_vocab1Gram, btn.text(), '',
-                                                                       '', '')
-
-                    self.tableWidget_1gram_TagContainer.userUpdate.add(self.dataframe_vocab1Gram.index.get_loc(btn.text()))
-
-
-            self.tableWidget_1gram_TagContainer.printDataframe_tableView()
-
-            self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
-            self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
-
-
-        except (IndexError, ValueError):
-            Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
-
-    def onClick_updateButton_NGram(self):
-        """Triggers with update button. Saves user annotation to the dataframe"""
-        try :
-            items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
-            token, classification, alias, notes = (str(i.text()) for i in items)
-
-            self.tableWidget_Ngram_TagContainer.userUpdate.add(self.dataframe_vocabNGram.index.get_loc(token))
-
-            new_alias = self.lineEdit_Ngram_AliasEditor.text()
-            new_notes = self.textEdit_Ngram_NoteEditor.toPlainText()
-            new_clf = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(),
-                                                      pd.np.nan)
-
-            self.dataframe_vocabNGram = self._set_dataframeItemValue(self.dataframe_vocabNGram, token, new_alias, new_clf, new_notes)
-            self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
-
-            self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
-            self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
-            self.tableWidget_Ngram_TagContainer.selectRow(self.tableWidget_Ngram_TagContainer.currentRow() + 1)
-
-        except (IndexError, ValueError):
-            Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
-        pass
-
-    def onSliderMoved_similarityPattern(self):
-        """when the slider change, print the good groupboxes
-        :return:
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        btn_checked = []
-        for btn in self.buttonGroup_1Gram_similarityPattern.checkedButtons():
-            btn_checked.append(btn.text())
-
-        try:
-            token = self.tableWidget_1gram_TagContainer.selectedItems()[0].text()
-            matches = self._get_similarityMatches(token)
-            self.buttonGroup_1Gram_similarityPattern.set_checkBoxes_rechecked(matches, btn_checked)
-
-        except IndexError:
-            Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
-
 
 
 def openYAMLConfig_File(yaml_path, dict={}):
@@ -1589,3 +1477,81 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             self.layout.removeWidget(btn)
             btn.deleteLater()
         self.layout.removeItem(self.spacer)
+
+
+
+class MyMplCanvas(FigureCanvas):
+    """the canvas used to print the plot in the right layout of the kpi UI
+    All the characteristic in common for all the plot should be in this class
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+
+    def __init__(self, layout=None, parent_layout=None, dataframe=None, width=4, height=3, dpi=100):
+        self._set_dataframe(dataframe)
+        self.layout = layout
+
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
+
+        FigureCanvas.__init__(self, self.fig)
+        self.setParent(parent_layout)
+        self.layout.addWidget(self, 0,0,1,1)
+
+        # self.plot_it()
+
+        FigureCanvas.setSizePolicy(self,Qw.QSizePolicy.Expanding, Qw.QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+    def _set_dataframe(self, dataframe):
+        """set the dataframe
+
+        Parameters
+        ----------
+        dataframe :
+            return:
+
+        Returns
+        -------
+
+        """
+        self.dataframe=dataframe
+
+    def plot_it(self, nbins=10):
+        """print the plot here we have the original plot
+        :return:
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
+        self.axes.clear()
+        if self.dataframe is not None:
+            # with sns.axes_style('ticks') as style, \
+            #         sns.plotting_context('poster') as context:
+            sns.distplot(self.dataframe.dropna(),
+                         bins=nbins,
+                         kde_kws={'cut': 0},
+                         hist_kws={'align': 'mid'},
+                         kde=True,
+                         ax=self.axes,
+                         color='xkcd:slate')
+            self.axes.set_xlim(0.1, 1.0)
+            self.axes.set_xlabel('fraction of MWO tokens getting tagged')
+            self.axes.set_title('Distribution over MWO\'s')
+            sns.despine(ax=self.axes, left=True, trim=True)
+            self.axes.get_yaxis().set_visible(False)
+
+        plt.show()
+        self.draw()
+        self.resize_event()
+
+        self.draw()

@@ -2,10 +2,7 @@ from PyQt5.QtCore import Qt
 import PyQt5.QtWidgets as Qw
 import PyQt5.QtGui as Qg
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 
 
@@ -333,81 +330,6 @@ class CompositionNGramItem:
 
 
 
-class MyMplCanvas(FigureCanvas):
-    """the canvas used to print the plot in the right layout of the kpi UI
-    All the characteristic in common for all the plot should be in this class
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
-
-    def __init__(self, layout=None, parent_layout=None, dataframe=None, width=4, height=3, dpi=100):
-        self._set_dataframe(dataframe)
-        self.layout = layout
-
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
-
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent_layout)
-        self.layout.addWidget(self, 0,0,1,1)
-
-        # self.plot_it()
-
-        FigureCanvas.setSizePolicy(self,Qw.QSizePolicy.Expanding, Qw.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-    def _set_dataframe(self, dataframe):
-        """set the dataframe
-
-        Parameters
-        ----------
-        dataframe :
-            return:
-
-        Returns
-        -------
-
-        """
-        self.dataframe=dataframe
-
-    def plot_it(self, nbins=10):
-        """print the plot here we have the original plot
-        :return:
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-        """
-        self.axes.clear()
-        if self.dataframe is not None:
-            # with sns.axes_style('ticks') as style, \
-            #         sns.plotting_context('poster') as context:
-            sns.distplot(self.dataframe.dropna(),
-                         bins=nbins,
-                         kde_kws={'cut': 0},
-                         hist_kws={'align': 'mid'},
-                         kde=True,
-                         ax=self.axes,
-                         color='xkcd:slate')
-            self.axes.set_xlim(0.1, 1.0)
-            self.axes.set_xlabel('fraction of MWO tokens getting tagged')
-            self.axes.set_title('Distribution over MWO\'s')
-            sns.despine(ax=self.axes, left=True, trim=True)
-            self.axes.get_yaxis().set_visible(False)
-
-        plt.show()
-        self.draw()
-        self.resize_event()
-
-        self.draw()
         # except (KeyError, TypeError):
         #     Qw.QMessageBox.about(self, 'cannot plot', "One of the axes you have selected is not in your database")
 
