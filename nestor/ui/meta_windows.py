@@ -350,7 +350,7 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
     """
 
     def __init__(self, iconPath=None, database=None, dataframe_Original=None, dataframe_vocab1Gram=None,
-                 dataframe_vocabNGram= None, bin1g_df=None, binNg_df=None,
+                 dataframe_vocabNGram= None, bin1g_df=None, binNg_df=None, vocab1g_df=None, vocabNg_df=None,
                  csvHeaderMapping=None, databaseToCsv_mapping=None):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_dbrunquery.__init__(self)
@@ -363,6 +363,8 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
         self.dataframe_vocabNGram = dataframe_vocabNGram
         self.bin1g_df = bin1g_df
         self.binNg_df = binNg_df
+        self.vocab1g_df = vocab1g_df
+        self.vocabNg_df = vocabNg_df
 
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
@@ -375,9 +377,17 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
                         databaseToCsv_mapping[key1][key2] = keyO
 
         self.csv_header = databaseToCsv_mapping
-        print(self.csv_header)
 
         self.button_DialogDatabaseRunQuery.rejected.connect(self.close)
+
+        self.checkBox_DialogDatabaseRunQuery_OriginalData.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseRunQuery_Tag1g.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseRunQuery_TagNg.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseRunQuery_1gToNg.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseRunQuery_IssueToItem.clicked.connect(self.check_checkBoxGroup)
+        self.checkBox_DialogDatabaseRunQuery_ItemToItem.clicked.connect(self.check_checkBoxGroup)
+
+        self.check_checkBoxGroup()
 
         self.show()
 
@@ -388,7 +398,7 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
         self.database.createIndexes()
         self.database.createConstraints()
 
-        df_original = self.original_df.fillna("")
+        df_original = self.dataframe_Original.fillna("")
 
         if self.checkBox_DialogDatabaseRunQuery_OriginalData.isChecked():
             self.database.runQueries(cypherQuery.cypherCreate_historicalMaintenanceWorkOrder(
@@ -435,6 +445,69 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
             print("DONE ----->  Item hierarchy created !!")
 
         self.close()
+
+    def onClick_removeData(self):
+        """
+        remove all the data from the database
+        :return:
+        """
+        dialog_sure = Qw.QMessageBox.question(self, 'Dalate Data', "Are you sure you want to remove your data??",
+                                           Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
+        if dialog_sure == Qw.QMessageBox.Yes:
+            self.database.deleteData()
+            self.lineEdit_DialogDatabaseRunQuery_Info.setText(
+            f'All your data have been removed!!')
+            print('DONE --> your data have been removed from you database')
+        else:
+            print('We do NOT remove your data.')
+
+    def check_checkBoxGroup(self):
+        """
+        Make available the different checkbox from one to another
+        :return:
+        """
+
+        if self.database is not None and self.dataframe_Original is not None and self.csv_header is not None:
+            self.checkBox_DialogDatabaseRunQuery_OriginalData.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseRunQuery_OriginalData.setEnabled(False)
+            self.checkBox_DialogDatabaseRunQuery_OriginalData.setChecked(False)
+
+        if self.checkBox_DialogDatabaseRunQuery_OriginalData.isChecked() and self.dataframe_vocab1Gram is not None and self.dataframe_vocabNGram is not None:
+            if self.bin1g_df is not None:
+                self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(False)
+                self.checkBox_DialogDatabaseRunQuery_Tag1g.setChecked(False)
+
+            if self.binNg_df is not None:
+                self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(False)
+                self.checkBox_DialogDatabaseRunQuery_TagNg.setChecked(False)
+        else:
+            self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(False)
+            self.checkBox_DialogDatabaseRunQuery_Tag1g.setChecked(False)
+            self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(False)
+            self.checkBox_DialogDatabaseRunQuery_TagNg.setChecked(False)
+
+        if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked() and self.checkBox_DialogDatabaseRunQuery_TagNg.isChecked():
+            self.checkBox_DialogDatabaseRunQuery_1gToNg.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseRunQuery_1gToNg.setEnabled(False)
+            self.checkBox_DialogDatabaseRunQuery_1gToNg.setChecked(False)
+
+        if self.checkBox_DialogDatabaseRunQuery_1gToNg.isChecked():
+            self.checkBox_DialogDatabaseRunQuery_IssueToItem.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseRunQuery_IssueToItem.setEnabled(False)
+            self.checkBox_DialogDatabaseRunQuery_IssueToItem.setChecked(False)
+
+        if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked():
+            self.checkBox_DialogDatabaseRunQuery_ItemToItem.setEnabled(True)
+        else:
+            self.checkBox_DialogDatabaseRunQuery_ItemToItem.setEnabled(False)
+            self.checkBox_DialogDatabaseRunQuery_ItemToItem.setChecked(False)
 
 
 # Ui_MainWindow_DialogWait, QtBaseClass_DialogWait = uic.loadUiType(script_dir/fname3)

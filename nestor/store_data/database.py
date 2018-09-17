@@ -85,7 +85,7 @@ class DatabaseNeo4J(object):
         :return: 1 if it works
         """
         with self._driver.session() as session:
-            session.write_transaction(self._execute_code, "MATCH(n) OPTIONAL MATCH(n) - [r] - () DELETE n, r")
+            session.write_transaction(self._execute_code, "MATCH(n) OPTIONAL MATCH (n)-[r]-() DELETE n, r")
         return 1
 
     def createIndexes(self):
@@ -93,6 +93,7 @@ class DatabaseNeo4J(object):
         Create the indexs on the database for the properties often asked
         :return: 1 if it works
         """
+
         self.runQuery(f'CREATE INDEX ON {self.schema["issue"]["label"]["issue"]}({self.schema["issue"]["properties"]["description_problem"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["human"]["label"]["human"]}({self.schema["human"]["properties"]["name"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["machine"]["label"]["machine"]}({self.schema["machine"]["properties"]["name"]})')

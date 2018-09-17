@@ -383,6 +383,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         def onclick_ok():
             username, schema, server, serverport, browserport, password = dialogMenu_databaseConnect.get_data()
 
+            schematmp = openYAMLConfig_File(Path(schema))
             try:
                 self.set_config(username=username,
                                 schema=schema,
@@ -396,7 +397,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                          server=server,
                                          portBolt=serverport,
                                          portUi=browserport,
-                                         schema=schema)
+                                         schema=schematmp)
 
                 dialogMenu_databaseConnect.close()
 
@@ -433,11 +434,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                                     dataframe_Original = self.dataframe_Original,
                                                                     dataframe_vocab1Gram= self.dataframe_vocab1Gram,
                                                                     dataframe_vocabNGram= self.dataframe_vocabNGram,
-                                                                    bin1g_df=None,
-                                                                    binNg_df=None,
+                                                                    bin1g_df=self.tag_df,
+                                                                    binNg_df=self.relation_df,
+                                                                    vocab1g_df=self.dataframe_vocab1Gram,
+                                                                    vocabNg_df= self.dataframe_vocabNGram,
                                                                     csvHeaderMapping= self.config['csvinfo'].get('mapping',{}),
                                                                     databaseToCsv_mapping= self.databaseToCsv_mapping
                                                                     )
+
         self.setEnabled(False)
         dialogMenu_databaseRunQuery.closeEvent = self.close_Dialog
 
@@ -1201,6 +1205,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         print("SAVE --> your information has been saved, you can now extract your result in CSV or HDF5")
 
+        self.database
+
     def onClick_saveNewCsv(self):
         """generate a new csv with the original csv and the generated token for the document
         :return:
@@ -1254,6 +1260,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                   '\n\t- the original document (with updated header)'
                   '\n\t- the binary matrices of Tag'
                   '\n\t- the binary matrices of combined Tag')
+
 
 
 def openYAMLConfig_File(yaml_path, dict={}):
