@@ -1054,7 +1054,7 @@ separated for readability. NA tags ommitted.
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_1Gram_Classification"/>
   <buttongroup name="buttonGroup_NGram_Classification"/>
+  <buttongroup name="buttonGroup_1Gram_Classification"/>
  </buttongroups>
 </ui>

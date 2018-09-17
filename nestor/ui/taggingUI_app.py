@@ -100,6 +100,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
 
         self.clean_rawText_1Gram = None
+        self.clean_rawText = None
 
         self.tag_df = None
         self.relation_df = None
@@ -126,6 +127,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.menu_AutoPopulate_FromDatabase.setEnabled(False)
 
         # no project are created
+        #self.tabWidget.setEnabled(False)
         self.actionSave_Project.setEnabled(False)
         self.actionProject_Settings.setEnabled(False)
         self.actionMap_CSV.setEnabled(False)
@@ -204,7 +206,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_NgVocab)
         self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_1gVocab)
         self.action_AutoPopulate_FromCSV_NgramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_NgVocab)
-        # self.﻿actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.setMenu_autopopulateNgramFrom1gram)
+        self.actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.setMenu_autopopulateNgramFrom1gram)
 
         self.actionTo_Zip.triggered.connect(self.setMenu_ExportZip)
         self.actionTo_Tar.triggered.connect(self.setMenu_ExportTar)
@@ -227,6 +229,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dialogTOU = DialogMenu_TermsOfUse()
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
 
+        self.tabWidget.currentChanged.connect(self.onChange_tableView)
 
         """
         Set the shortcut 
@@ -516,8 +519,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                      tableview = self.tableWidget_1gram_TagContainer,
                                                      progressBar = self.progressBar_1gram_TagComplete)
 
-
     def setMenu_autopopulateFromCSV_NgVocab(self):
+
         options = Qw.QFileDialog.Options()
         fileName, _ = Qw.QFileDialog.getOpenFileName(self,
                                                      self.objectName(), "Open NESTOR generated vocab File",
@@ -540,26 +543,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                      tableview=self.tableWidget_Ngram_TagContainer,
                                                      progressBar=self.progressBar_Ngram_TagComplete)
 
+    def setMenu_autopopulateNgramFrom1gram(self):
 
-    # def setMenu_autopopulateNgramFrom1gram(self, filename=None, init=None):
-    #
-    #     self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
-    #     self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
-    #     list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
-    #
-    #     # create the n gram dataframe
-    #
-    #     self.dataframe_NGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=filename, init=init)
-    #
-    #     NE_types = self.config_default['NE_info']['NE_types']
-    #     NE_map_rules = self.config_default['NE_info']['NE_map']
-    #     self.dataframe_NGram = kex.ngram_automatch(self.dataframe_1Gram, self.dataframe_NGram, NE_types, NE_map_rules)
-    #
-    #     self.window_taggingTool._set_tokenExtractor(tokenExtractor_nGram=self.tokenExtractor_nGram)
-    #     self.window_taggingTool._set_cleanRawText(clean_rawText_1Gram=self.clean_rawText_1Gram)
-    #
-    #     #print('Done --> Updated Ngram classification from 1-gram vocabulary!')
-    #
+        self.extract_NgVocab(init= self.dataframe_vocabNGram)
+
+        self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                 tableview=self.tableWidget_Ngram_TagContainer,
+                                                 progressBar=self.progressBar_Ngram_TagComplete)
+
+        print('Done --> Updated Ngram classification from 1-gram vocabulary!')
+
 
     def setMenu_settings(self):
         """
@@ -682,7 +675,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.config=openYAMLConfig_File(folder/'config.yaml')
 
             self.whenProjectOpen()
-work on add
+
     def printDataframe_TableviewProgressBar(self, dataframe, tableview, progressBar):
         """
         print the given dataframe onto the given tableview
@@ -932,6 +925,20 @@ work on add
 
         saveYAMLConfig_File(self.projectsPath / self.config.get('name') / "config.yaml", self.config)
 
+    def onChange_tableView(self, tabindex):
+        #1gramtab
+        if tabindex == 0:
+            pass
+
+        #ngramtab
+        elif tabindex == 1:
+            self.extract_NgVocab(init=self.dataframe_vocabNGram)
+
+        #reporttab
+        elif tabindex == 2:
+            pass
+
+
     def whenProjectOpen(self):
         """
         This function will execute all the changes when you create / open / import a new project
@@ -973,9 +980,9 @@ work on add
             self.extract_1gVocab(vocab1gPath)
 
         if vocabNgPath.exists():
-            self.extract_NgVocab(vocabNgPath, openDataframe(vocabNgPath).fillna("").set_index("tokens"))
+            self.extract_NgVocab(init =openDataframe(vocabNgPath).fillna("").set_index("tokens"))
         else:
-            self.extract_NgVocab(vocabNgPath)
+            self.extract_NgVocab(vocabNgPath =vocabNgPath)
 
         self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocab1Gram,
                                                  tableview=self.tableWidget_1gram_TagContainer,
@@ -1115,52 +1122,6 @@ work on add
     #         print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
     #         pass
 
-
-
-    #TODO update all the print view and stuff
-
-        # self.buttonGroup_1Gram_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
-        # self.tableWidget_1gram_TagContainer.__class__ = QTableWidget_token
-        # self.tableWidget_Ngram_TagContainer.__class__ = QTableWidget_token
-        #
-        # row_color = QtGui.QColor(77, 255, 184)
-        #
-        # self.tableWidget_1gram_TagContainer.userUpdate= set()
-        # self.tableWidget_1gram_TagContainer.color = row_color
-        # self.tableWidget_Ngram_TagContainer.userUpdate= set()
-        # self.tableWidget_Ngram_TagContainer.color = row_color
-        #
-        # self.middleLayout_Ngram_Composition = CompositionNGramItem(self.verticalLayout_Ngram_CompositionDisplay)
-        # self.tabWidget.setCurrentIndex(0)
-        #
-        # self.tableWidget_1gram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_table1Gram)
-        # self.tableWidget_Ngram_TagContainer.itemSelectionChanged.connect(self.onSelectedItem_tableNGram)
-        # self.horizontalSlider_1gram_FindingThreshold.sliderMoved.connect(self.onSliderMoved_similarityPattern)
-        # self.horizontalSlider_1gram_FindingThreshold.sliderReleased.connect(self.onSliderMoved_similarityPattern)
-        # self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_1Gram)
-        # self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_updateButton_NGram)
-        # self.pushButton_1gram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_vocab1Gram, self.config['file']['filePath_1GrammCSV']['path']))
-        # self.pushButton_Ngram_SaveTableView.clicked.connect(lambda: self.onClick_saveButton(self.dataframe_vocabNGram, self.config['file']['filePath_nGrammCSV']['path']))
-        #
-        # self.pushButton_report_saveTrack.clicked.connect(self.onClick_saveTrack)
-        # self.pushButton_report_saveNewCsv.clicked.connect(self.onClick_saveNewCsv)
-        # self.pushButton_report_saveBinnaryCsv.clicked.connect(self.onClick_saveTagsHDFS)
-        #
-        # self.completenessPlot= MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self. dataframe_completeness)
-        #
-        # self.buttonGroup_NGram_Classification.buttonClicked.connect(self.onClick_changeClassification)
-        #
-        #
-        # # Load up the terms of service class/window
-        # self.terms_of_use = TermsOfServiceDialog(iconPath=self.iconPath) # doesn't need a close button, just "x" out
-        # self.actionAbout_TagTool.triggered.connect(self.terms_of_use.show)  # in the `about` menu>about TagTool
-        #
-        # self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_AutoPopulate_FromCSV)
-        #
-        # if dbModule_exists:
-        #     self.actionConnect.triggered.connect(self.setMenu_DialogConnectToDatabase)
-        # else:
-        #     self.menuDatabase.setEnabled(False)
 
     def onClick_saveTrack(self):
         """save the current completness of the token in a dataframe
