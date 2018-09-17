@@ -202,8 +202,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         # self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_1gVocab)
         # self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_NgVocab)
-        # self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_1gVocab)
-        # self.action_AutoPopulate_FromCSV_NgramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_NgVocab)
+        self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_1gVocab)
+        self.action_AutoPopulate_FromCSV_NgramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_NgVocab)
         # self.﻿actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.setMenu_autopopulateNgramFrom1gram)
 
         self.actionTo_Zip.triggered.connect(self.setMenu_ExportZip)
@@ -254,6 +254,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         def onclick_ok():
+            self.config = None
             self.config = self.config_default.copy()
             name, author, description, vocab1g, vocabNg, pathCSV_old = dialogMenu_newProject.get_data()
 
@@ -491,69 +492,56 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
     #         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
     #         self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
     #
-    # def setMenu_autopopulateFromCSV_1gVocab(self):
-    #     options = Qw.QFileDialog.Options()
-    #     fileName, _ = Qw.QFileDialog.getOpenFileName(self,
-    #                                                  self.objectName(), "Open NESTOR generated vocab File",
-    #                                                  "csv Files (*.csv)", options=options)
-    #
-    #     if fileName:
-    #
-    #         df = pd.read_csv(fileName)[["tokens","NE","alias"]].set_index("tokens")
-    #
-    #         self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
-    #
-    #         mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
-    #
-    #         df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
-    #         df_tmp.update(other=df, overwrite=False)
-    #
-    #         self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
-    #         self.dataframe_vocab1Gram.fillna('', inplace=True)
-    #
-    #         self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
-    #         self.tableWidget_1gram_TagContainer.printDataframe_tableView()
-    #         self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
-    #
-    #
-    # def setMenu_autopopulateFromCSV_NgVocab(self):
-    #     options = Qw.QFileDialog.Options()
-    #     fileName, _ = Qw.QFileDialog.getOpenFileName(self,
-    #                                                  self.objectName(), "Open NESTOR generated vocab File",
-    #                                                  "csv Files (*.csv)", options=options)
-    #
-    #     if fileName:
-    #         df = pd.read_csv(fileName)[["tokens", "NE", "alias"]].set_index("tokens")
-    #
-    #         self.dataframe_vocabNGram.replace('', np.nan, inplace=True)
-    #
-    #         mask = self.dataframe_vocabNGram[["NE", "alias"]].isnull().all(axis=1)
-    #
-    #         df_tmp = self.dataframe_vocabNGram.loc[mask, :]
-    #         df_tmp.update(other=df, overwrite=False)
-    #
-    #         self.dataframe_vocabNGram.update(df_tmp, overwrite=False)
-    #         self.dataframe_vocabNGram.fillna('', inplace=True)
-    #
-    #         self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
-    #         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
-    #         self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
-    #
-    #
+    def setMenu_autopopulateFromCSV_1gVocab(self):
+        options = Qw.QFileDialog.Options()
+        fileName, _ = Qw.QFileDialog.getOpenFileName(self,
+                                                     self.objectName(), "Open NESTOR generated vocab File",
+                                                     "csv Files (*.csv)", options=options)
+
+        if fileName:
+
+            df = pd.read_csv(fileName)[["tokens","NE","alias"]].set_index("tokens")
+
+            self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
+
+            mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
+
+            df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
+            df_tmp.update(other=df, overwrite=False)
+
+            self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
+            self.dataframe_vocab1Gram.fillna('', inplace=True)
+
+            self.printDataframe_TableviewProgressBar(dataframe =self.dataframe_vocab1Gram,
+                                                     tableview = self.tableWidget_1gram_TagContainer,
+                                                     progressBar = self.progressBar_1gram_TagComplete)
+
+
+    def setMenu_autopopulateFromCSV_NgVocab(self):
+        options = Qw.QFileDialog.Options()
+        fileName, _ = Qw.QFileDialog.getOpenFileName(self,
+                                                     self.objectName(), "Open NESTOR generated vocab File",
+                                                     "csv Files (*.csv)", options=options)
+
+        if fileName:
+            df = pd.read_csv(fileName)[["tokens", "NE", "alias"]].set_index("tokens")
+
+            self.dataframe_vocabNGram.replace('', np.nan, inplace=True)
+
+            mask = self.dataframe_vocabNGram[["NE", "alias"]].isnull().all(axis=1)
+
+            df_tmp = self.dataframe_vocabNGram.loc[mask, :]
+            df_tmp.update(other=df, overwrite=False)
+
+            self.dataframe_vocabNGram.update(df_tmp, overwrite=False)
+            self.dataframe_vocabNGram.fillna('', inplace=True)
+
+            self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                     tableview=self.tableWidget_Ngram_TagContainer,
+                                                     progressBar=self.progressBar_Ngram_TagComplete)
+
+
     # def setMenu_autopopulateNgramFrom1gram(self, filename=None, init=None):
-    #     """update the Bgram dataframe from the new 1gram input
-    #
-    #     Parameters
-    #     ----------
-    #     filename :
-    #         param init: (Default value = None)
-    #     init :
-    #          (Default value = None)
-    #
-    #     Returns
-    #     -------
-    #
-    #     """
     #
     #     self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_1Gram)
     #     self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
@@ -694,7 +682,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.config=openYAMLConfig_File(folder/'config.yaml')
 
             self.whenProjectOpen()
-
+work on add
     def printDataframe_TableviewProgressBar(self, dataframe, tableview, progressBar):
         """
         print the given dataframe onto the given tableview
@@ -1356,9 +1344,6 @@ def saveYAMLConfig_File(yaml_path, dict):
         pyaml.dump(dict, yamlfile)
         print("SAVE --> YAML file at: ", yaml_path)
 
-
-
-
 def openDataframe(path):
     """set the dataframe for the window
 
@@ -1383,7 +1368,6 @@ def openDataframe(path):
         print("(you might want to open it and save it as UTF8 for the next time, it is way faster))")
         encoding = chardet.detect(open(path, 'rb').read())['encoding']
         return pd.read_csv(path, encoding=encoding)
-
 
 
 class QButtonGroup_similarityPattern(Qw.QButtonGroup):
@@ -1477,7 +1461,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             self.layout.removeWidget(btn)
             btn.deleteLater()
         self.layout.removeItem(self.spacer)
-
 
 
 class MyMplCanvas(FigureCanvas):
