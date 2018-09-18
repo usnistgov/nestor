@@ -747,7 +747,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         When a given item is selected on the Ngram TableView
         :return:
         """
-
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
         token, classification, alias, notes = (str(i.text()) for i in items)
 
@@ -774,16 +773,19 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 widget.deleteLater()
 
         xPos = 0
-        yType = 0
+        yLabel = 0
         yValue = 1
 
         for tok1g in token.split(" "):
 
-            for type, value in self.dataframe_vocab1Gram.loc[tok1g][:-1].iteritems():
-                labelType = Qw.QLabel()
-                labelType.setText(str(type)+":")
-                labelType.setObjectName("labelNGramComposition" + str(type))
-                self.gridLayout_Ngram_NGramComposedof.addWidget(labelType, xPos, yType)
+            # creat the NE, alias, notes
+
+            firstToken = self.dataframe_vocab1Gram.loc[self.dataframe_vocab1Gram['alias'] == tok1g].iloc[0]
+            for label, value in firstToken[:-1].iteritems():
+                labelLabel = Qw.QLabel()
+                labelLabel.setText(str(label)+":")
+                labelLabel.setObjectName("labelNGramComposition" + str(label))
+                self.gridLayout_Ngram_NGramComposedof.addWidget(labelLabel, xPos, yLabel)
 
                 labelValue = Qw.QLabel()
                 labelValue.setText(str(value))
@@ -792,10 +794,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                 xPos += 1
 
-            labelAlias = Qw.QLabel()
-            labelAlias.setText('alias :')
-            labelAlias.setObjectName("labelNGramComposition" + 'alias')
-            self.gridLayout_Ngram_NGramComposedof.addWidget(labelAlias, xPos, yType)
+            #creat the token list
+            labelLabel = Qw.QLabel()
+            labelLabel.setText('tokens :')
+            labelLabel.setObjectName("labelNGramComposition" + 'alias')
+            self.gridLayout_Ngram_NGramComposedof.addWidget(labelLabel, xPos, yLabel)
 
             similarityList = "\n".join(self.dataframe_vocab1Gram.index[self.dataframe_vocab1Gram['alias'] == tok1g].tolist())
 
@@ -810,7 +813,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             separator.setFrameShape(Qw.QFrame.HLine)
             separator.setFrameShadow(Qw.QFrame.Sunken)
             separator.setObjectName("separator" + tok1g)
-            self.gridLayout_Ngram_NGramComposedof.addWidget(separator, xPos, yType)
+            self.gridLayout_Ngram_NGramComposedof.addWidget(separator, xPos, yLabel)
 
             xPos += 1
 

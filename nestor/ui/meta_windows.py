@@ -379,6 +379,7 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
         self.csv_header = databaseToCsv_mapping
 
         self.button_DialogDatabaseRunQuery.rejected.connect(self.close)
+        self.pushButton_DialogDatabaseRunQuery_RemoveData.clicked.connect(self.onClick_removeData)
 
         self.checkBox_DialogDatabaseRunQuery_OriginalData.clicked.connect(self.check_checkBoxGroup)
         self.checkBox_DialogDatabaseRunQuery_Tag1g.clicked.connect(self.check_checkBoxGroup)
@@ -455,8 +456,6 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
                                            Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
         if dialog_sure == Qw.QMessageBox.Yes:
             self.database.deleteData()
-            self.lineEdit_DialogDatabaseRunQuery_Info.setText(
-            f'All your data have been removed!!')
             print('DONE --> your data have been removed from you database')
         else:
             print('We do NOT remove your data.')
