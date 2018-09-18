@@ -109,36 +109,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dataframe_completeness = None
 
 
+
         """
         UI objects
         """
         self.setupUi(self)
         self.setGeometry(20, 20, 648, 705)
 
+        self.enableFeature(existDatabase=False, existProject=False, existTagExtracted=False)
+
         self.changeColor = {
             'default': 'background-color: None;',
             'wrongInput' : 'background-color: rgb(255, 51, 0);',
             'updateToken' : 'background-color: rgb(0, 179, 89);'
         }
-
-        #not connected to any database
-        self.actionRun_Query.setEnabled(False)
-        self.actionOpen_Database.setEnabled(False)
-        self.menu_AutoPopulate_FromDatabase.setEnabled(False)
-
-        # no project are created
-        #self.tabWidget.setEnabled(False)
-        self.actionSave_Project.setEnabled(False)
-        self.actionProject_Settings.setEnabled(False)
-        self.actionMap_CSV.setEnabled(False)
-        self.menuAuto_populate.setEnabled(False)
-        self.actionConnect.setEnabled(False)
-        self.menuExport.setEnabled(False)
-
-        #no tag extracted
-        self.pushButton_report_saveNewCsv.setEnabled(False)
-        self.pushButton_report_saveH5.setEnabled(False)
-
 
         self.completenessPlot = MyMplCanvas(self.gridLayout_report_progressPlot, self.tabWidget, self.dataframe_completeness)
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
@@ -401,9 +385,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                 dialogMenu_databaseConnect.close()
 
-                self.actionRun_Query.setEnabled(True)
-                self.actionOpen_Database.setEnabled(True)
-                self.menu_AutoPopulate_FromDatabase.setEnabled(True)
+                self.enableFeature(existDatabase=True)
 
             except neo4j.exceptions.AuthError:
                 dialogMenu_databaseConnect.lineEdit_DialogDatabaseConnection_Username.setStyleSheet(self.changeColor['wrongInput'])
@@ -938,6 +920,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         saveYAMLConfig_File(self.projectsPath / self.config.get('name') / "config.yaml", self.config)
 
     def onChange_tableView(self, tabindex):
+        """
+        when changing the tab
+        :param tabindex:
+        :return:
+        """
         #1gramtab
         if tabindex == 0:
             pass
@@ -1015,15 +1002,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
 
         # make menu available
-        self.actionSave_Project.setEnabled(True)
-        self.actionProject_Settings.setEnabled(True)
-        self.actionMap_CSV.setEnabled(True)
-        self.menuAuto_populate.setEnabled(True)
-        self.actionConnect.setEnabled(True)
-        self.menuExport.setEnabled(True)
-
-        self.pushButton_report_saveNewCsv.setEnabled(False)
-        self.pushButton_report_saveH5.setEnabled(False)
+        self.enableFeature(existProject=True, existTagExtracted=False)
 
     def extract_1gVocab(self, vocab1gPath= None,  init=None):
         """
@@ -1121,31 +1100,26 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         self.setEnabled(True)
 
-    # def closeEvent(self, event):
-    #     """
-    #     Trigger when the user close the Tagging Tool Window
-    #     :param event:
-    #     :return:
-    #     """
-    #     choice = Qw.QMessageBox.question(self, 'Shut it Down',
-    #                                      'Do you want to save your changes before closing?',
-    #                                      Qw.QMessageBox.Save | Qw.QMessageBox.Close | Qw.QMessageBox.Cancel)
-    #
-    #     if choice == Qw.QMessageBox.Save:
-    #         print("SAVE AND CLOSE --> vocab 1gram and Ngram, as well as the config file")
-    #         self.database.close()
-    #         # self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram,
-    #         #                                            self.config_new['file']['filePath_1GrammCSV']['path'])
-    #         # self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram,
-    #         #                                            self.config_new['file']['filePath_nGrammCSV']['path'])
-    #     elif choice == Qw.QMessageBox.Cancel:
-    #         print("NOTHING --> config file saved (in case)")
-    #         event.ignore()
-    #     else:
-    #         print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
-    #         self.database.close()
-    #
+    def closeEvent(self, event):
+        """
+        Trigger when the user close the Tagging Tool Window
+        :param event:
+        :return:
+        """
+        choice = Qw.QMessageBox.question(self, 'Shut it Down',
+                                         'Do you want to save your changes before closing?',
+                                         Qw.QMessageBox.Save | Qw.QMessageBox.Close | Qw.QMessageBox.Cancel)
 
+        if choice == Qw.QMessageBox.Save:
+            print("SAVE AND CLOSE --> vocab 1gram and Ngram, as well as the config file")
+            self.database.close()
+            self.setMenu_projectSave()
+        elif choice == Qw.QMessageBox.Cancel:
+            print("NOTHING --> config file saved (in case)")
+            event.ignore()
+        else:
+            print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
+            self.database.close()
 
     def onClick_saveTrack(self):
         """save the current completness of the token in a dataframe
@@ -1218,14 +1192,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #Qw.QApplication.processEvents()
         #window_DialogWait.close()
 
-        self.pushButton_report_saveNewCsv.setEnabled(True)
-        self.pushButton_report_saveH5.setEnabled(True)
 
         #Qw.QApplication.processEvents()
 
+        self.enableFeature(existTagExtracted=True)
         print("SAVE --> your information has been saved, you can now extract your result in CSV or HDF5")
-
-        self.database
 
     def onClick_saveNewCsv(self):
         """generate a new csv with the original csv and the generated token for the document
@@ -1281,7 +1252,47 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                   '\n\t- the binary matrices of Tag'
                   '\n\t- the binary matrices of combined Tag')
 
+    def enableFeature(self, existProject = None, existDatabase = None, existTagExtracted=None):
+        #database exists
+        if existDatabase is not None:
+            if existDatabase is True:
+                self.actionRun_Query.setEnabled(True)
+                self.actionOpen_Database.setEnabled(True)
+                self.menu_AutoPopulate_FromDatabase.setEnabled(True)
+            elif existDatabase is False:
+                self.actionRun_Query.setEnabled(False)
+                self.actionOpen_Database.setEnabled(False)
+                self.menu_AutoPopulate_FromDatabase.setEnabled(False)
 
+        #if project exists
+        if existProject is not None:
+            if existProject is True:
+                self.actionSave_Project.setEnabled(True)
+                self.actionProject_Settings.setEnabled(True)
+                self.actionMap_CSV.setEnabled(True)
+                self.menuAuto_populate.setEnabled(True)
+                self.menuExport.setEnabled(True)
+                self.pushButton_report_saveTrack.setEnabled(True)
+                self.tabWidget.setEnabled(True)
+                self.menuDatabase.setEnabled(True)
+            elif existProject is False:
+                self.actionSave_Project.setEnabled(False)
+                self.actionProject_Settings.setEnabled(False)
+                self.actionMap_CSV.setEnabled(False)
+                self.menuAuto_populate.setEnabled(False)
+                self.menuExport.setEnabled(False)
+                self.pushButton_report_saveTrack.setEnabled(False)
+                self.tabWidget.setEnabled(False)
+                self.menuDatabase.setEnabled(False)
+
+        #if tag has been extracted
+        if existTagExtracted is not None:
+            if existTagExtracted is True:
+                self.pushButton_report_saveNewCsv.setEnabled(True)
+                self.pushButton_report_saveH5.setEnabled(True)
+            elif existTagExtracted is False:
+                self.pushButton_report_saveNewCsv.setEnabled(False)
+                self.pushButton_report_saveH5.setEnabled(False)
 
 def openYAMLConfig_File(yaml_path, dict={}):
     """open a Yaml file based on the given path
