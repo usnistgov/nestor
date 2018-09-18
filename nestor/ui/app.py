@@ -46,6 +46,9 @@ def main():
     databaseToCsv_mapping = openYAMLConfig_File(
         yaml_path= nestorPath / 'store_data' / 'csvHeader.yaml'
     )
+    print(databaseToCsv_mapping)
+    print(nestorPath / 'store_data' / 'csvHeader.yaml')
+
 
     app.setStyleSheet(stylesheet)
     window = MyTaggingToolWindow(projectsPath= projectsPath,

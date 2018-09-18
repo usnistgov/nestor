@@ -162,9 +162,9 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
                 self.textEdit_Settings_ProjectDescription.toPlainText(), \
                 self.lineEdit_Settings_Project1gVocabName.text(), \
                 self.lineEdit_Settings_ProjectNgVocabName.text(),\
-                [int(self.lineEdit_Setup_NumberToken.text()) if self.lineEdit_Setup_NumberToken.text() else 1000],\
-                [int(self.lineEdit_Setup_TokenChecked.text()) if self.lineEdit_Setup_TokenChecked.text() else 99],\
-                [int(self.lineEdit_Setup_TokenShow.text()) if self.lineEdit_Setup_TokenShow.text() else 50], \
+                int(self.lineEdit_Setup_NumberToken.text()) if self.lineEdit_Setup_NumberToken.text() else 1000,\
+                int(self.lineEdit_Setup_TokenChecked.text()) if self.lineEdit_Setup_TokenChecked.text() else 99,\
+                int(self.lineEdit_Setup_TokenShow.text()) if self.lineEdit_Setup_TokenShow.text() else 50, \
                 [word.lstrip() for word in self.textEdit_Setup_UntrackedToken.toPlainText().split(";") if self.textEdit_Setup_UntrackedToken.toPlainText()]
 
 

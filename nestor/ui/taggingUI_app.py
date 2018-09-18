@@ -202,8 +202,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionRun_Query.triggered.connect(self.setMenu_databaseRunQuery)
         self.actionOpen_Database.triggered.connect(self.setMenu_databaseOpenBrowser)
 
-        # self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_1gVocab)
-        # self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_NgVocab)
+        self.action_AutoPopulate_FromDatabase_1gramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_1gVocab)
+        self.action_AutoPopulate_FromDatabase_NgramVocab.triggered.connect(self.setMenu_autopopulateFromDatabase_NgVocab)
         self.action_AutoPopulate_FromCSV_1gramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_1gVocab)
         self.action_AutoPopulate_FromCSV_NgramVocab.triggered.connect(self.setMenu_autopopulateFromCSV_NgVocab)
         self.actionFrom_AutoPopulate_From1gramVocab.triggered.connect(self.setMenu_autopopulateNgramFrom1gram)
@@ -439,7 +439,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                                     vocab1g_df=self.dataframe_vocab1Gram,
                                                                     vocabNg_df= self.dataframe_vocabNGram,
                                                                     csvHeaderMapping= self.config['csvinfo'].get('mapping',{}),
-                                                                    databaseToCsv_mapping= self.databaseToCsv_mapping
+                                                                    databaseToCsv_mapping= self.databaseToCsv_mapping.copy()
                                                                     )
 
         self.setEnabled(False)
@@ -458,47 +458,47 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         webbrowser.open(self.database.url, new=1)
 
-    # def setMenu_autopopulateFromDatabase_1gVocab(self):
-    #
-    #     done, result = self.database.getTokenTagClassification()
-    #
-    #     if done:
-    #         df = resultToObservationDataframe(result).set_index("tokens")
-    #         self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
-    #
-    #         mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
-    #
-    #         df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
-    #         df_tmp.update(other=df, overwrite=False)
-    #
-    #         self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
-    #         self.dataframe_vocab1Gram.fillna('', inplace=True)
-    #
-    #         self.tableWidget_1gram_TagContainer.set_dataframe(self.dataframe_vocab1Gram)
-    #         self.tableWidget_1gram_TagContainer.printDataframe_tableView()
-    #         self.update_progress_bar(self.progressBar_1gram_TagComplete, self.dataframe_vocab1Gram)
-    #
-    # def setMenu_autopopulateFromDatabase_NgVocab(self):
-    #
-    #     done, result = self.database.getTokenTagClassification()
-    #
-    #     if done:
-    #         df = resultToObservationDataframe(result).set_index("tokens")
-    #
-    #         self.dataframe_vocabNGram.replace('', np.nan, inplace=True)
-    #
-    #         mask = self.dataframe_vocabNGram[["NE", "alias"]].isnull().all(axis=1)
-    #
-    #         df_tmp = self.dataframe_vocabNGram.loc[mask, :]
-    #         df_tmp.update(other=df, overwrite=False)
-    #
-    #         self.dataframe_vocabNGram.update(df_tmp, overwrite=False)
-    #         self.dataframe_vocabNGram.fillna('', inplace=True)
-    #
-    #         self.tableWidget_Ngram_TagContainer.set_dataframe(self.dataframe_vocabNGram)
-    #         self.tableWidget_Ngram_TagContainer.printDataframe_tableView()
-    #         self.update_progress_bar(self.progressBar_Ngram_TagComplete, self.dataframe_vocabNGram)
-    #
+    def setMenu_autopopulateFromDatabase_1gVocab(self):
+
+        done, result = self.database.getTokenTagClassification()
+
+        if done:
+            df = resultToObservationDataframe(result).set_index("tokens")
+            self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
+
+            mask = self.dataframe_vocab1Gram[["NE", "alias"]].isnull().all(axis=1)
+
+            df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
+            df_tmp.update(other=df, overwrite=False)
+
+            self.dataframe_vocab1Gram.update(df_tmp, overwrite=False)
+            self.dataframe_vocab1Gram.fillna('', inplace=True)
+
+            self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocab1Gram,
+                                                     tableview= self.tableWidget_1gram_TagContainer,
+                                                     progressBar=self.progressBar_1gram_TagComplete)
+
+    def setMenu_autopopulateFromDatabase_NgVocab(self):
+
+        done, result = self.database.getTokenTagClassification()
+
+        if done:
+            df = resultToObservationDataframe(result).set_index("tokens")
+
+            self.dataframe_vocabNGram.replace('', np.nan, inplace=True)
+
+            mask = self.dataframe_vocabNGram[["NE", "alias"]].isnull().all(axis=1)
+
+            df_tmp = self.dataframe_vocabNGram.loc[mask, :]
+            df_tmp.update(other=df, overwrite=False)
+
+            self.dataframe_vocabNGram.update(df_tmp, overwrite=False)
+            self.dataframe_vocabNGram.fillna('', inplace=True)
+
+            self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                     tableview=self.tableWidget_Ngram_TagContainer,
+                                                     progressBar=self.progressBar_Ngram_TagComplete)
+
     def setMenu_autopopulateFromCSV_1gVocab(self):
         options = Qw.QFileDialog.Options()
         fileName, _ = Qw.QFileDialog.getOpenFileName(self,
@@ -556,7 +556,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                  progressBar=self.progressBar_Ngram_TagComplete)
 
         print('Done --> Updated Ngram classification from 1-gram vocabulary!')
-
 
     def setMenu_settings(self):
         """
@@ -627,10 +626,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         def onclick_ok():
             nlpHeader, csvMapping = self.dialogMenu_csvHeaderMapping.get_data()
-            self.set_config(nlpHeader=nlpHeader, csvMapping=csvMapping)
-            self.dialogMenu_csvHeaderMapping.close()
+            if nlpHeader:
+                self.set_config(nlpHeader=nlpHeader, csvMapping=csvMapping)
+                self.dialogMenu_csvHeaderMapping.close()
 
-            self.whenProjectOpen()
+                self.whenProjectOpen()
 
         self.dialogMenu_csvHeaderMapping.buttonBox_csvHeaderMapping.accepted.connect(onclick_ok)
 
@@ -687,27 +687,32 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :param tableview:
         :return:
         """
-        temp_df = dataframe.reset_index()
-        nbrows, nbcols = temp_df.shape
-        tableview.setColumnCount(nbcols - 1)  # ignore score column
-        tableview.setRowCount(min([nbrows, self.config['settings'].get('numberTokens', 1000)]))
-        for i in range(tableview.rowCount()):
-            for j in range(nbcols - 1):  # ignore score column
-                tableview.setItem(i, j, Qw.QTableWidgetItem(str(temp_df.iat[i, j])))
-        try:
-            for index in tableview.userUpdate:
-                if index < 1000:
-                    tableview.item(index, 0).setBackground(Qg.QColor(77, 255, 184))
+        if dataframe is not None:
+            temp_df = dataframe.reset_index()
+            nbrows, nbcols = temp_df.shape
+            tableview.setColumnCount(nbcols - 1)  # ignore score column
+            print([nbrows, self.config['settings'].get('numberTokens', 1000)])
+            tableview.setRowCount(min([nbrows, self.config['settings'].get('numberTokens', 1000)]))
+            for i in range(tableview.rowCount()):
+                for j in range(nbcols - 1):  # ignore score column
+                    tableview.setItem(i, j, Qw.QTableWidgetItem(str(temp_df.iat[i, j])))
+            try:
+                for index in tableview.userUpdate:
+                    if index < 1000:
+                        tableview.item(index, 0).setBackground(Qg.QColor(77, 255, 184))
 
-        except AttributeError:
-            pass
+            except AttributeError:
+                pass
 
-        tableview.resizeColumnsToContents()
-        tableview.resizeRowsToContents()
-        tableview.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
-        tableview.setSelectionBehavior(Qw.QTableWidget.SelectRows)
+            tableview.resizeColumnsToContents()
+            tableview.resizeRowsToContents()
+            tableview.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
+            tableview.setSelectionBehavior(Qw.QTableWidget.SelectRows)
 
-        self.update_progress_bar(progressBar, dataframe)
+            self.update_progress_bar(progressBar, dataframe)
+        else:
+            tableview.clearSpans()
+            progressBar.setValue(0)
 
     def onSelect_tableViewItems1gramVocab(self):
         """
@@ -945,7 +950,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         elif tabindex == 2:
             pass
 
-
     def whenProjectOpen(self):
         """
         This function will execute all the changes when you create / open / import a new project
@@ -957,16 +961,26 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.existingProject.add(self.config.get('name',""))
 
         #reset all the value to default
+        self.dataframe_Original = None
         self.dataframe_vocab1Gram = None
         self.dataframe_vocabNGram = None
+        self.dataframe_completeness = None
         self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
         self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
         self.clean_rawText_1Gram = None
+        self.clean_rawText = None
         self.tag_df = None
         self.relation_df = None
         self.tag_readable = None
-
+        self.dataframe_completeness = None
         self.dataframe_completeness=None
+
+        self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocab1Gram,
+                                                 tableview=self.tableWidget_1gram_TagContainer,
+                                                 progressBar=self.progressBar_1gram_TagComplete)
+        self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                 tableview=self.tableWidget_Ngram_TagContainer,
+                                                 progressBar=self.progressBar_Ngram_TagComplete)
 
         #self.config = self.config_default.copy()
 
@@ -1018,6 +1032,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         columns = self.config['csvinfo'].get('nlpheader', 0)
         special_replace = self.config['csvinfo'].get('untracked_token', None)
+        print(special_replace)
         nlp_selector = kex.NLPSelect(columns=columns, special_replace=special_replace)
 
         self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # might not need to set it as self
@@ -1118,6 +1133,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
     #
     #     if choice == Qw.QMessageBox.Save:
     #         print("SAVE AND CLOSE --> vocab 1gram and Ngram, as well as the config file")
+    #         self.database.close()
     #         # self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_1Gram,
     #         #                                            self.config_new['file']['filePath_1GrammCSV']['path'])
     #         # self.window_taggingTool.onClick_saveButton(self.window_taggingTool.dataframe_NGram,
@@ -1127,7 +1143,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
     #         event.ignore()
     #     else:
     #         print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
-    #         pass
+    #         self.database.close()
+    #
 
 
     def onClick_saveTrack(self):
