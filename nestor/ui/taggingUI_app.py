@@ -531,7 +531,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def setMenu_autopopulateNgramFrom1gram(self):
 
-        self.extract_NgVocab(init= self.dataframe_vocabNGram)
+        NE_types = self.config['classification'].get("type")
+        NE_map_rules = self.config['classification'].get('mapping')
+        self.dataframe_vocabNGram = kex.ngram_automatch(self.dataframe_vocab1Gram, self.dataframe_vocabNGram, NE_types, NE_map_rules)
 
         self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
                                                  tableview=self.tableWidget_Ngram_TagContainer,
@@ -938,6 +940,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         #ngramtab
         elif tabindex == 1:
             self.extract_NgVocab(init=self.dataframe_vocabNGram)
+            self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                     tableview=self.tableWidget_Ngram_TagContainer,
+                                                     progressBar=self.progressBar_Ngram_TagComplete)
 
         #reporttab
         elif tabindex == 2:
@@ -1041,10 +1046,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.dataframe_vocabNGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=vocabNgPath, init=init)
 
-        NE_types = self.config['classification'].get("type")
-        NE_map_rules = self.config['classification'].get('mapping')
-        self.dataframe_vocabNGram = kex.ngram_automatch(self.dataframe_vocab1Gram, self.dataframe_vocabNGram, NE_types, NE_map_rules)
-
     def update_progress_bar(self, progressBar, dataframe):
         """set the value of the progress bar based on the dataframe score
 
@@ -1118,14 +1119,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         if choice == Qw.QMessageBox.Save:
             print("SAVE AND CLOSE --> vocab 1gram and Ngram, as well as the config file")
-            self.database.close()
+            if self.database:
+                self.database.close()
             self.setMenu_projectSave()
         elif choice == Qw.QMessageBox.Cancel:
             print("NOTHING --> config file saved (in case)")
             event.ignore()
         else:
             print("CLOSE NESTOR --> we save your config file so it is easier to open it next time")
-            self.database.close()
+            if self.database:
+                self.database.close()
 
     def onClick_saveTrack(self):
         """save the current completness of the token in a dataframe
