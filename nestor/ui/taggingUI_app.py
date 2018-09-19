@@ -766,8 +766,14 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         for tok1g in token.split(" "):
 
             # creat the NE, alias, notes
-
-            firstToken = self.dataframe_vocab1Gram.loc[self.dataframe_vocab1Gram['alias'] == tok1g].iloc[0]
+            try:
+                firstToken = self.dataframe_vocab1Gram.loc[self.dataframe_vocab1Gram['alias'] == tok1g].iloc[0]
+            except IndexError:
+                firstToken = pd.Series({"NE": "",
+                       "alias" : "",
+                       "note": "",
+                       "score": ""
+                       })
             for label, value in firstToken[:-1].iteritems():
                 labelLabel = Qw.QLabel()
                 labelLabel.setText(str(label)+":")
