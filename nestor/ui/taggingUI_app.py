@@ -237,8 +237,46 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Qw.QShortcut(QtGui.QKeySequence("Ctrl+D"), self).activated.connect(self.setMenu_databaseConnect)
         self.actionConnect.setText(self.actionConnect.text() + "\tCtrl+D")
 
+
+        """
+        Research Mode
+        """
+        self.actionResearch_NewProject.triggered.connect(self.setMenu_researchProject_new)
+
+
         self.show()
 
+    def setMenu_researchProject_new(self):
+        """
+        create a new Research project
+        :return:
+        """
+        dialogMenu_newResearchProject = DialogMenu_ResearchWindow(self.iconPath)
+        self.setEnabled(False)
+        dialogMenu_newResearchProject.closeEvent = self.close_Dialog
+        rect = self.geometry()
+        rect.setHeight(300)
+        rect.setWidth(200)
+        dialogMenu_newResearchProject.setGeometry(rect)
+
+        dialogMenu_newResearchProject.comboBox_ResearchWindows_projectName.addItems(["excavator_data"])
+
+        def onclick_ok():
+            saveType, name, author, description = dialogMenu_newResearchProject.get_data()
+            print(saveType)
+
+            if saveType:
+                dialogMenu_newResearchProject.label_ResearchWindows_saveVocab.setStyleSheet(self.changeColor['default'])
+
+                self.__class__ = MyTaggingToolWindow_research
+                self.__init__(savetype=saveType, name=name, author=author, description=description)
+
+                dialogMenu_newResearchProject.close()
+
+            else:
+                dialogMenu_newResearchProject.label_ResearchWindows_saveVocab.setStyleSheet(self.changeColor['wrongInput'])
+
+        dialogMenu_newResearchProject.buttonBox_ResearchWindows.accepted.connect(onclick_ok)
 
     def setMenu_projectNew(self):
         """
@@ -1440,6 +1478,57 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             elif existTagExtracted is False:
                 self.pushButton_report_saveNewCsv.setEnabled(False)
                 self.pushButton_report_saveH5.setEnabled(False)
+
+
+
+class MyTaggingToolWindow_research(MyTaggingToolWindow):
+    def __init__(self, savetype,  name, author=None, description=None):
+
+        # TODO not able to creat more than 1 per computeur because the name is the same this need to change
+        # TODO WHEN LEAVE, cannot save yaml file after setups config because the folder did not exists
+        if name == "excavator_data":
+            vocab1g = "vocab1g"
+            vocabNg = "vocabNg"
+            original = "excavators.csv"
+            nlpHeader = ["OriginalShorttext"]
+            csvMapping = {
+                'BscStartDate' : 'Work Order Start Time-stamp',
+                'Asset' : 'Machine Name',
+                'OriginalShorttext' : 'Description of Problem'
+            }
+
+
+        self.set_config(name = name,
+                        author = author,
+                        description = description,
+                        vocab1g=vocab1g,
+                        vocabNg=vocabNg,
+                        original=original,
+                        nlpHeader=nlpHeader,
+                        csvMapping=csvMapping,
+                        research_savetype=savetype)
+
+        print(self.config)
+
+
+
+    def set_config(self , name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
+                   numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
+                   username = None, schema = None, server = None, serverport = None, browserport = None,
+                   nlpHeader = None, csvMapping=None,
+                   research_savetype = None):
+
+        if research_savetype is not None:
+            self.config["research"] = research_savetype
+            
+        MyTaggingToolWindow.set_config(self, name=name, author=author, description=description, vocab1g=vocab1g, vocabNg=vocabNg, original=original,
+                   numberTokens=numberTokens, alreadyChecked_threshold=alreadyChecked_threshold, showCkeckBox_threshold=showCkeckBox_threshold, untrackedTokenList=untrackedTokenList,
+                   username = username, schema = schema, server = server, serverport = serverport, browserport = browserport,
+                   nlpHeader = nlpHeader, csvMapping=csvMapping)
+
+
+
+
 
 
 def openYAMLConfig_File(yaml_path, dict={}):

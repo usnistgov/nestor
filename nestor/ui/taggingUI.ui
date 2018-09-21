@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>672</width>
-    <height>657</height>
+    <height>681</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -845,10 +845,17 @@ separated for readability. NA tags ommitted.
     <addaction name="menu_AutoPopulate_FromCSV"/>
     <addaction name="actionFrom_AutoPopulate_From1gramVocab"/>
    </widget>
+   <widget class="QMenu" name="menuResearchMode">
+    <property name="title">
+     <string>ResearchMode</string>
+    </property>
+    <addaction name="actionResearch_NewProject"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuDatabase"/>
    <addaction name="menuAuto_populate"/>
+   <addaction name="menuResearchMode"/>
    <addaction name="menuAbout"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -1059,6 +1066,9 @@ separated for readability. NA tags ommitted.
   <action name="actionResearch_NewProject">
    <property name="text">
     <string>New Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

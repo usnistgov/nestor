@@ -564,6 +564,48 @@ class DialogWait(Qw.QDialog, Ui_MainWindow_dialogWait):
 
 
 
+fname_researchWindow = 'dialogmenu_researchwindow.ui'
+qtDesignerFile_researchWindow = script_dir / fname_researchWindow
+Ui_MainWindow_researchWindow, QtBaseClass_researchWindow = uic.loadUiType(qtDesignerFile_researchWindow)
+
+class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
+
+    def __init__(self, iconPath=None):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_researchWindow.__init__(self)
+        self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        if iconPath:
+            self.setWindowIcon(QtGui.QIcon(iconPath))
+
+        self.buttonBox_ResearchWindows.rejected.connect(self.close)
+
+        self.show()
+
+    def get_data(self):
+        """
+        return a list that represen the list to add in the configfile
+        it needs a mapping based on the objectName properties of the button to the value you want to add in the configfile
+        :return:
+        """
+        saveType = []
+        for btn in self.buttonGroup_ResearchWindows_recordType.buttons():
+            if btn.isChecked():
+                if btn.objectName() == "checkBox_ResearchWindows_saveVocab_percentage":
+                    saveType.append('percentage')
+                if btn.objectName() == "checkBox_ResearchWindows_saveVocab_time":
+                    saveType.append('time')
+                if btn.objectName() == "checkBox_ResearchWindows_saveVocab_nbtoken":
+                    saveType.append('numbertoken')
+
+        return saveType, \
+               self.comboBox_ResearchWindows_projectName.currentText(), \
+               self.lineEdit_ResearchWindows_projectAuthor.text(), \
+               self.textEdit_ResearchWindows_projectDescription.toPlainText()
+
+
+
 
 def openYAMLConfig_File(yaml_path, dict={}):
     """open a Yaml file based on the given path
