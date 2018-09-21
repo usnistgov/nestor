@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>672</width>
-    <height>681</height>
+    <height>657</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -742,6 +742,7 @@ separated for readability. NA tags ommitted.
     </item>
    </layout>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -811,6 +812,7 @@ separated for readability. NA tags ommitted.
     <addaction name="actionConnect"/>
     <addaction name="actionRun_Query"/>
     <addaction name="actionOpen_Database"/>
+    <addaction name="actionDisconnect"/>
    </widget>
    <widget class="QMenu" name="menuAuto_populate">
     <property name="enabled">
@@ -850,7 +852,6 @@ separated for readability. NA tags ommitted.
    <addaction name="menuAbout"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_1Gram_Vocab">
    <property name="text">
     <string>open 1Gram Vocab</string>
@@ -1050,11 +1051,21 @@ separated for readability. NA tags ommitted.
     <string>To Tar</string>
    </property>
   </action>
+  <action name="actionDisconnect">
+   <property name="text">
+    <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionResearch_NewProject">
+   <property name="text">
+    <string>New Project</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_NGram_Classification"/>
   <buttongroup name="buttonGroup_1Gram_Classification"/>
+  <buttongroup name="buttonGroup_NGram_Classification"/>
  </buttongroups>
 </ui>

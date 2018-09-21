@@ -168,7 +168,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
                 [word.lstrip() for word in self.textEdit_Setup_UntrackedToken.toPlainText().split(";") if self.textEdit_Setup_UntrackedToken.toPlainText()]
 
 
-fname_tou = 'termsOfUse.ui'
+fname_tou = 'dialogmenu_termsofuse.ui'
 qtDesignerFile_tou = script_dir/fname_tou
 Ui_MainWindow_tou, QtBaseClass_tou = uic.loadUiType(qtDesignerFile_tou)
 
@@ -337,7 +337,7 @@ class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
             self.lineEdit_DialogDatabaseConnection_OpenSchema.setText(fileName)
 
 
-            # fname3 = 'dialogWait.ui'
+            # fname3 = 'dialog_wait.ui'
 
 
 fname_dbrunquery = 'dialogmenu_databaserunqueries.ui'
@@ -366,17 +366,21 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
         self.vocab1g_df = vocab1g_df
         self.vocabNg_df = vocabNg_df
 
+        self.iconPath = iconPath
         if iconPath:
             self.setWindowIcon(QtGui.QIcon(iconPath))
 
-        # change the csvHeaderOriginal to match with the given csv header
-        for key1, value1 in databaseToCsv_mapping.items():
-            for key2, value2 in value1.items():
-                for keyO, valueO in csvHeaderMapping.items():
-                    if valueO == value2:
-                        databaseToCsv_mapping[key1][key2] = keyO
+        if csvHeaderMapping :
+            # change the csvHeaderOriginal to match with the given csv header
+            for key1, value1 in databaseToCsv_mapping.items():
+                for key2, value2 in value1.items():
+                    for keyO, valueO in csvHeaderMapping.items():
+                        if valueO == value2:
+                            databaseToCsv_mapping[key1][key2] = keyO
 
-        self.csv_header = databaseToCsv_mapping
+            self.csv_header = databaseToCsv_mapping
+        else:
+            self.csv_header = None
 
         self.button_DialogDatabaseRunQuery.rejected.connect(self.close)
         self.pushButton_DialogDatabaseRunQuery_RemoveData.clicked.connect(self.onClick_removeData)
@@ -394,6 +398,19 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
 
     def runQueries(self):
 
+        self.setEnabled(False)
+
+
+        window_DialogWait = DialogWait(iconPath=self.iconPath)
+        rect = self.geometry()
+        rect.setHeight(300)
+        rect.setWidth(200)
+        window_DialogWait.setGeometry(rect)
+
+        window_DialogWait.show()
+        window_DialogWait.setProgress(0)
+
+
         self.database.dropConstraints()
         self.database.dropIndexes()
         self.database.createIndexes()
@@ -409,6 +426,8 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
             ))
             print("DONE -----> Data from Original CSV Work Order stored !!")
 
+        window_DialogWait.setProgress(30)
+
         if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked():
             self.database.runQueries(cypherQuery.cypherCreate_tag(
                 schema=self.database.schema,
@@ -417,6 +436,7 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
                 vocabNg=self.vocabNg_df
             ))
             print("\nDONE -----> Data from Tag1g Stored!!")
+        window_DialogWait.setProgress(60)
 
         if self.checkBox_DialogDatabaseRunQuery_TagNg.isChecked():
             self.database.runQueries(cypherQuery.cypherCreate_tag(
@@ -426,6 +446,7 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
                 vocabNg=self.vocabNg_df
             ))
             print("\nDONE ----->  Data from TagNg stored !!")
+        window_DialogWait.setProgress(90)
 
         if self.checkBox_DialogDatabaseRunQuery_1gToNg.isChecked():
             self.database.runQueries(cypherQuery.cypherLink_Ngram1gram(
@@ -444,7 +465,9 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
             #     schema=self.database.schema
             # ))
             print("DONE ----->  Item hierarchy created !!")
-
+        window_DialogWait.setProgress(99)
+        window_DialogWait.close()
+        self.setEnabled(True)
         self.close()
 
     def onClick_removeData(self):
@@ -466,64 +489,79 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
         :return:
         """
 
-        if self.database is not None and self.dataframe_Original is not None and self.csv_header is not None:
-            self.checkBox_DialogDatabaseRunQuery_OriginalData.setEnabled(True)
-        else:
-            self.checkBox_DialogDatabaseRunQuery_OriginalData.setEnabled(False)
-            self.checkBox_DialogDatabaseRunQuery_OriginalData.setChecked(False)
+        if self.csv_header:
 
-        if self.checkBox_DialogDatabaseRunQuery_OriginalData.isChecked() and self.dataframe_vocab1Gram is not None and self.dataframe_vocabNGram is not None:
-            if self.bin1g_df is not None:
-                self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(True)
+            if self.database is not None and self.dataframe_Original is not None and self.csv_header is not None:
+                self.checkBox_DialogDatabaseRunQuery_OriginalData.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseRunQuery_OriginalData.setEnabled(False)
+                self.checkBox_DialogDatabaseRunQuery_OriginalData.setChecked(False)
+
+            if self.checkBox_DialogDatabaseRunQuery_OriginalData.isChecked() and self.dataframe_vocab1Gram is not None and self.dataframe_vocabNGram is not None:
+                if self.bin1g_df is not None:
+                    self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(True)
+                else:
+                    self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(False)
+                    self.checkBox_DialogDatabaseRunQuery_Tag1g.setChecked(False)
+
+                if self.binNg_df is not None:
+                    self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(True)
+                else:
+                    self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(False)
+                    self.checkBox_DialogDatabaseRunQuery_TagNg.setChecked(False)
             else:
                 self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(False)
                 self.checkBox_DialogDatabaseRunQuery_Tag1g.setChecked(False)
-
-            if self.binNg_df is not None:
-                self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(True)
-            else:
                 self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(False)
                 self.checkBox_DialogDatabaseRunQuery_TagNg.setChecked(False)
+
+            if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked() and self.checkBox_DialogDatabaseRunQuery_TagNg.isChecked():
+                self.checkBox_DialogDatabaseRunQuery_1gToNg.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseRunQuery_1gToNg.setEnabled(False)
+                self.checkBox_DialogDatabaseRunQuery_1gToNg.setChecked(False)
+
+            if self.checkBox_DialogDatabaseRunQuery_1gToNg.isChecked():
+                self.checkBox_DialogDatabaseRunQuery_IssueToItem.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseRunQuery_IssueToItem.setEnabled(False)
+                self.checkBox_DialogDatabaseRunQuery_IssueToItem.setChecked(False)
+
+            if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked():
+                self.checkBox_DialogDatabaseRunQuery_ItemToItem.setEnabled(True)
+            else:
+                self.checkBox_DialogDatabaseRunQuery_ItemToItem.setEnabled(False)
+                self.checkBox_DialogDatabaseRunQuery_ItemToItem.setChecked(False)
         else:
+            self.checkBox_DialogDatabaseRunQuery_OriginalData.setEnabled(False)
             self.checkBox_DialogDatabaseRunQuery_Tag1g.setEnabled(False)
-            self.checkBox_DialogDatabaseRunQuery_Tag1g.setChecked(False)
             self.checkBox_DialogDatabaseRunQuery_TagNg.setEnabled(False)
-            self.checkBox_DialogDatabaseRunQuery_TagNg.setChecked(False)
-
-        if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked() and self.checkBox_DialogDatabaseRunQuery_TagNg.isChecked():
-            self.checkBox_DialogDatabaseRunQuery_1gToNg.setEnabled(True)
-        else:
             self.checkBox_DialogDatabaseRunQuery_1gToNg.setEnabled(False)
-            self.checkBox_DialogDatabaseRunQuery_1gToNg.setChecked(False)
-
-        if self.checkBox_DialogDatabaseRunQuery_1gToNg.isChecked():
-            self.checkBox_DialogDatabaseRunQuery_IssueToItem.setEnabled(True)
-        else:
             self.checkBox_DialogDatabaseRunQuery_IssueToItem.setEnabled(False)
-            self.checkBox_DialogDatabaseRunQuery_IssueToItem.setChecked(False)
-
-        if self.checkBox_DialogDatabaseRunQuery_Tag1g.isChecked():
-            self.checkBox_DialogDatabaseRunQuery_ItemToItem.setEnabled(True)
-        else:
             self.checkBox_DialogDatabaseRunQuery_ItemToItem.setEnabled(False)
-            self.checkBox_DialogDatabaseRunQuery_ItemToItem.setChecked(False)
 
 
-# Ui_MainWindow_DialogWait, QtBaseClass_DialogWait = uic.loadUiType(script_dir/fname3)
-# class DialogWait(Qw.QDialog, Ui_MainWindow_DialogWait):
-#
-#     def __init__(self, iconPath=None):
-#         Qw.QDialog.__init__(self)
-#         Ui_MainWindow_DialogWait.__init__(self)
-#         self.setupUi(self)
-#         self.progressBar_DialogWait.setValue(0)
-#         self.setWindowFlags(Qt.WindowStaysOnTopHint)
-#
-#         if iconPath:
-#             self.setWindowIcon(QtGui.QIcon(iconPath))
-#
-#     def setProgress(self, value):
-#         self.progressBar_DialogWait.setValue(value)
+
+fname_dialogWait = 'dialog_wait.ui'
+qtDesignerFile_dialogWait = script_dir / fname_dialogWait
+Ui_MainWindow_dialogWait, QtBaseClass_dialogWait = uic.loadUiType(qtDesignerFile_dialogWait)
+
+class DialogWait(Qw.QDialog, Ui_MainWindow_dialogWait):
+
+    def __init__(self, iconPath=None):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_dialogWait.__init__(self)
+        self.setupUi(self)
+        self.progressBar_DialogWait.setValue(0)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        if iconPath:
+            self.setWindowIcon(QtGui.QIcon(iconPath))
+
+    def setProgress(self, value):
+        self.progressBar_DialogWait.setValue(value)
+        Qw.QApplication.processEvents()
+
 
 
 
