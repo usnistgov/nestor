@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>700</height>
+    <height>745</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>500</width>
-    <height>700</height>
+    <height>1000</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -22,8 +22,14 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="1" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
+     <item row="1" column="0" rowspan="2">
       <widget class="QTextBrowser" name="textBrowser_ResearchWindows_description">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>300</height>
+        </size>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -41,7 +47,28 @@ p, li { white-space: pre-wrap; }
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_ResearchWindows_description">
+       <property name="text">
+        <string>Welcome to the Research Mode of NESTOR TaggingTool</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_ResearchWindows_saveVocab">
+       <property name="text">
+        <string>At which time do you want to record *</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="2" column="1">
         <widget class="QTextEdit" name="textEdit_ResearchWindows_projectDescription"/>
@@ -95,56 +122,61 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_ResearchWindows_description">
-       <property name="text">
-        <string>Welcome to the Research Mode of NESTOR TaggingTool</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QCheckBox" name="checkBox_ResearchWindows_saveVocab_time">
-       <property name="text">
-        <string>time spend</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup_ResearchWindows_recordType</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_ResearchWindows_saveVocab">
-       <property name="text">
-        <string>At which time do you want to record *</string>
-       </property>
-      </widget>
-     </item>
      <item row="4" column="0">
-      <widget class="QCheckBox" name="checkBox_ResearchWindows_saveVocab_percentage">
-       <property name="text">
-        <string>percentage </string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup_ResearchWindows_recordType</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QCheckBox" name="checkBox_ResearchWindows_saveVocab_nbtoken">
-       <property name="text">
-        <string>number of token</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup_ResearchWindows_recordType</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="checkBox_ResearchWindows_saveVocab_nbUpdate">
+         <property name="text">
+          <string>number of update</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">buttonGroup_ResearchWindows_recordType</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="checkBox_ResearchWindows_saveVocab_percentage">
+         <property name="text">
+          <string>percentage </string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">buttonGroup_ResearchWindows_recordType</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkBox_ResearchWindows_saveVocab_time">
+         <property name="text">
+          <string>time spend</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">buttonGroup_ResearchWindows_recordType</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="checkBox_ResearchWindows_saveVocab_nbtoken">
+         <property name="text">
+          <string>number of token</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">buttonGroup_ResearchWindows_recordType</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEdit_ResearchWindows_saveVocab_percentage"/>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEdit_ResearchWindows_saveVocab_time"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineEdit_ResearchWindows_saveVocab_nbtoken"/>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEdit_ResearchWindows_saveVocab_nbUpdate"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

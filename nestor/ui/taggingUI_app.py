@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import fuzzywuzzy.process as zz
 import shutil
+import time
 
 
 import chardet
@@ -242,6 +243,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Research Mode
         """
         self.actionResearch_NewProject.triggered.connect(self.setMenu_researchProject_new)
+        self.actionPause.setEnabled(False)
 
 
         self.show()
@@ -261,15 +263,22 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         dialogMenu_newResearchProject.comboBox_ResearchWindows_projectName.addItems(["excavator_data"])
 
+        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_percentage.setText("0,1,2,3,10,20,30,40,50,60")
+        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_time.setText("0,5,10,20,30,40,50,60")
+        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_nbtoken.setText("0,10,20,50,100,200,300,400,500,1000")
+        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_nbUpdate.setText("0,10,20,50,100,200,300,400,500,1000")
+
+
         def onclick_ok():
-            saveType, name, author, description = dialogMenu_newResearchProject.get_data()
-            print(saveType)
+            saveType, name, author, description, saveTime, savePercentage, saveNumberToken, saveNumberUpdate = dialogMenu_newResearchProject.get_data()
 
             if saveType:
                 dialogMenu_newResearchProject.label_ResearchWindows_saveVocab.setStyleSheet(self.changeColor['default'])
 
                 self.__class__ = MyTaggingToolWindow_research
-                self.__init__(savetype=saveType, name=name, author=author, description=description)
+                self.__init__(savetype=saveType, name=name, author=author, description=description,
+                              #saveTime=saveTime, savePercentage=savePercentage, saveNumberToken=saveNumberToken, saveNumberUpdate=saveNumberUpdate
+                              )
 
                 dialogMenu_newResearchProject.close()
 
@@ -1480,12 +1489,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.pushButton_report_saveH5.setEnabled(False)
 
 
-
 class MyTaggingToolWindow_research(MyTaggingToolWindow):
-    def __init__(self, savetype,  name, author=None, description=None):
+    def __init__(self, savetype,  name, author=None, description=None,
+                 #saveTime=None, savePercentage=None, saveNumberToken=None, saveNumberUpdate=None
+                 ):
+
+        # saveTime = sorted(saveTime, key=int)
+        # savePercentage = sorted(savePercentage, key=int)
+        # saveNumberToken = sorted(saveNumberToken, key=int)
+        # saveNumberUpdate = sorted(saveNumberUpdate, key=int)
+
+
+
 
         # TODO not able to creat more than 1 per computeur because the name is the same this need to change
-        # TODO WHEN LEAVE, cannot save yaml file after setups config because the folder did not exists
         if name == "excavator_data":
             vocab1g = "vocab1g"
             vocabNg = "vocabNg"
@@ -1497,6 +1514,25 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
                 'OriginalShorttext' : 'Description of Problem'
             }
 
+            lacasion = Path(__file__).parent.parent / 'datasets' / 'excavators-cleaned.csv'
+
+        # if the project already exists, make a second one with a new name
+        nameTmp = str(name)
+        numTmp = 1
+        while nameTmp in self.existingProject:
+            nameTmp = name + str(numTmp)
+            numTmp +=1
+        name = str(nameTmp)
+
+
+        #Set up new project
+        pathCSV_new = self.projectsPath / name
+        pathCSV_new.mkdir(parents=True, exist_ok=True)
+
+        dataframe_tmp = openDataframe(lacasion)
+        dataframe_tmp.to_csv(pathCSV_new / original, encoding='utf-8-sig')
+
+        self.dataframe_Original = dataframe_tmp
 
         self.set_config(name = name,
                         author = author,
@@ -1508,26 +1544,251 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
                         csvMapping=csvMapping,
                         research_savetype=savetype)
 
-        print(self.config)
+        self.whenProjectOpen()
 
 
+        # setup folder for research
 
-    def set_config(self , name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
+        self.saveTime = [0,1,3,5,10,20,30,40,50,60]
+        self.savePercentage = [0,1,3,5,10,20,30,40,50,60,70,80,90,100]
+        self.saveNumberToken = [0,10,30,50,100,200,300,400,500,600,700,800,900,1000]
+        self.saveNumberUpdate = [0,10,30,50,100,200,300,400,500,600,700,800,900,1000]
+
+        if "time" in savetype:
+            #create the folder
+            self.path_saveTime = pathCSV_new / "time"
+            self.path_saveTime.mkdir(parents=True, exist_ok=True)
+
+            # Transform the time to be interval instead of moment
+            previous = 0
+            self.saveTimeInterval = []
+            for t in self.saveTime:
+                self.saveTimeInterval.append(t - previous)
+                previous = t
+            self.timeToRemove = 0
+
+            self.start_time = time.time()
+
+        else:
+            self.path_saveTime = None
+
+        if "percentage" in savetype:
+            # create the folder
+            self.path_savePercentage = pathCSV_new / "percentage"
+            self.path_savePercentage.mkdir(parents=True, exist_ok=True)
+
+            #create the list for the different vocab
+            self.savePercentage1gram = list(self.savePercentage)
+            self.savePercentageNgram = list(self.savePercentage)
+
+        else:
+            self.path_savePercentage = None
+
+        if "numbertoken" in savetype:
+            # create the folder
+            self.path_saveNumberToken = pathCSV_new / "numberToken"
+            self.path_saveNumberToken.mkdir(parents=True, exist_ok=True)
+
+            #create the list for the different vocab
+            self.saveNumberToken1gram = list(self.saveNumberToken)
+            self.saveNumberTokenNgram = list(self.saveNumberToken)
+
+            self.saveNumberToken_whenUpdate()
+        else:
+            self.path_saveNumberToken = None
+
+        if "numberupdate" in savetype:
+            # create the folder
+            self.path_saveNumberUpdate = pathCSV_new / "numberUpdate"
+            self.path_saveNumberUpdate.mkdir(parents=True, exist_ok=True)
+
+            # create the list for the different vocab
+            self.saveNumberUpdate1gram = list(self.saveNumberUpdate)
+            self.saveNumberUpdateNgram = list(self.saveNumberUpdate)
+            self.numberUpdate1gram_count = 0
+            self.numberUpdateNgram_count = 0
+
+        else:
+            self.path_saveNumberUpdate = None
+
+        self.onClick_UpdateToSaveVocab()
+
+        self.menu_AutoPopulate_FromDatabase.setEnabled(False)
+        self.menu_AutoPopulate_FromCSV.setEnabled(False)
+        self.actionNew_Project.setEnabled(False)
+        self.actionOpen_Project.setEnabled(False)
+        self.actionImport.setEnabled(False)
+        self.actionProject_Settings.setEnabled(False)
+        self.menuEdit.setEnabled(False)
+        self.actionPause.setEnabled(True)
+
+        self.pushButton_1gram_UpdateTokenProperty.clicked.connect(self.onClick_UpdateToSaveVocab)
+        self.pushButton_Ngram_UpdateTokenProperty.clicked.connect(self.onClick_UpdateToSaveVocab)
+
+        self.actionPause.triggered.connect(self.stopTime)
+
+
+    def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
                    username = None, schema = None, server = None, serverport = None, browserport = None,
                    nlpHeader = None, csvMapping=None,
-                   research_savetype = None):
+                   research_savetype = None, saveTime = None, savePercentage = None, saveNumberToken = None, saveNumberUpdate=None):
 
         if research_savetype is not None:
             self.config["research"] = research_savetype
-            
+        if saveTime is not None:
+            self.config["save"]["time"] = saveTime
+        if savePercentage is not None:
+            self.config["save"]["percentage"] = savePercentage
+        if saveNumberToken is not None:
+            self.config["save"]["time"] = saveNumberToken
+        if saveNumberUpdate is not None:
+            self.config["save"]["time"] = saveNumberUpdate
+
         MyTaggingToolWindow.set_config(self, name=name, author=author, description=description, vocab1g=vocab1g, vocabNg=vocabNg, original=original,
                    numberTokens=numberTokens, alreadyChecked_threshold=alreadyChecked_threshold, showCkeckBox_threshold=showCkeckBox_threshold, untrackedTokenList=untrackedTokenList,
                    username = username, schema = schema, server = server, serverport = serverport, browserport = browserport,
                    nlpHeader = nlpHeader, csvMapping=csvMapping)
 
+    def saveTime_whenUpdate(self):
+        """
+        save the vocab file based on the Time at every X interval
+        :return:
+        """
+        howLong = ((time.time() - self.start_time) - self.timeToRemove) /60
+
+        if howLong >= self.saveTimeInterval[0]:
+            thistime = self.saveTime.pop(0)
+            self.saveTimeInterval.pop(0)
+            self.start_time = time.time()
+            self.timeToRemove = 0
+
+            vocabname = f'{thistime}_{self.config.get("vocab1g")}.csv'
+            self.dataframe_vocab1Gram.to_csv(self.path_saveTime / vocabname, encoding='utf-8-sig')
+            vocabname = f'{thistime}_{self.config.get("vocabNg")}.csv'
+            self.dataframe_vocabNGram.to_csv(self.path_saveTime/ vocabname, encoding='utf-8-sig')
+
+    def savePercentage_whenUpdate(self):
+        """
+        save the vocab file based on the Percentage at every X interval
+        :return:
+        """
+        percent1g = self.progressBar_1gram_TagComplete.value()
+        percentNg = self.progressBar_Ngram_TagComplete.value()
+
+        if percent1g >= self.savePercentage1gram[0]:
+            thisPercent = self.savePercentage1gram.pop(0)
+
+            vocabname = f'{thisPercent}_{self.config.get("vocab1g")}.csv'
+            self.dataframe_vocab1Gram.to_csv(self.path_savePercentage / vocabname, encoding='utf-8-sig')
+
+        if percentNg >= self.savePercentageNgram[0]:
+            thisPercent = self.savePercentageNgram.pop(0)
+
+            vocabname = f'{thisPercent}_{self.config.get("vocabNg")}.csv'
+            self.dataframe_vocabNGram.to_csv(self.path_savePercentage/ vocabname, encoding='utf-8-sig')
+
+    def saveNumberToken_whenUpdate(self):
+        """
+        save the vocab file based on the Percentage at every X interval
+        :return:
+        """
+        self.dataframe_vocab1Gram.replace('', np.nan, inplace=True)
+        nbToken1g = int(self.dataframe_vocab1Gram[["NE"]].notnull().sum())
+        self.dataframe_vocab1Gram.fillna('', inplace=True)
+
+        self.dataframe_vocabNGram.replace('', np.nan, inplace=True)
+        nbTokenNg = int(self.dataframe_vocabNGram[["alias"]].notnull().sum())
+        self.dataframe_vocabNGram.fillna('', inplace=True)
+
+        if nbToken1g >= self.saveNumberToken1gram[0]:
+            thisNbToken= self.saveNumberToken1gram.pop(0)
+
+            vocabname = f'{thisNbToken}_{self.config.get("vocab1g")}.csv'
+            self.dataframe_vocab1Gram.to_csv(self.path_saveNumberToken / vocabname, encoding='utf-8-sig')
+
+        if nbTokenNg >= self.saveNumberTokenNgram[0]:
+            thisNbToken= self.saveNumberTokenNgram.pop(0)
+
+            vocabname = f'{thisNbToken}_{self.config.get("vocabNg")}.csv'
+            self.dataframe_vocabNGram.to_csv(self.path_saveNumberToken / vocabname, encoding='utf-8-sig')
+
+    def saveNumberUpdate_whenUpdate(self):
+        """
+        save the vocab file based on the Percentage at every X interval
+        :return:
+        """
+        if self.tabWidget.currentIndex() == 0:
+            self.numberUpdate1gram_count += 1
+
+        if self.numberUpdate1gram_count >= self.saveNumberUpdate1gram[0]:
+            thisNbUpdate = self.saveNumberUpdate1gram.pop(0)
+            vocabname = f'{thisNbUpdate}_{self.config.get("vocab1g")}.csv'
+            self.dataframe_vocab1Gram.to_csv(self.path_saveNumberUpdate / vocabname, encoding='utf-8-sig')
+
+        if self.tabWidget.currentIndex() == 1:
+            self.numberUpdateNgram_count += 1
+        if self.numberUpdateNgram_count >= self.saveNumberUpdateNgram[0]:
+            thisNbUpdate = self.saveNumberUpdateNgram.pop(0)
+            vocabname = f'{thisNbUpdate}_{self.config.get("vocabNg")}.csv'
+            self.dataframe_vocabNGram.to_csv(self.path_saveNumberUpdate / vocabname, encoding='utf-8-sig')
 
 
+    def onClick_UpdateToSaveVocab(self):
+        """
+        When click on update, save based on the need
+        :return:
+        """
+        # No need to call the super function, because this action is automaticaly executed
+        # the parent function is executed first
+
+        # TODO here enter is only execiting this one
+        if self.path_saveTime is not None:
+            self.saveTime_whenUpdate()
+
+        if self.path_savePercentage is not None:
+            self.savePercentage_whenUpdate()
+
+        if self.path_saveNumberToken is not None:
+            self.saveNumberToken_whenUpdate()
+
+        if self.path_saveNumberUpdate is not None:
+            self.saveNumberUpdate_whenUpdate()
+
+    def keyPressEvent(self, event):
+        """listenr on the keyboard
+
+        Parameters
+        ----------
+        e :
+            return:
+        event :
+
+
+        Returns
+        -------
+
+        """
+
+        if event.key() == Qt.Key_Return:
+            if self.tabWidget.currentIndex() == 0:
+                self.onClick_Update1GramVocab()
+                self.onClick_UpdateToSaveVocab()
+            elif self.tabWidget.currentIndex() ==1:
+                self.onClick_UpdateNGramVocab()
+                self.onClick_UpdateToSaveVocab()
+        if event.key() == Qt.Key_Backspace:
+            self.stopTime()
+
+    def stopTime(self):
+        """
+        stop the time
+        :return:
+        """
+        thisTime = time.time()
+        choice = Qw.QMessageBox.question(self, 'Pause the app', 'App in pause', Qw.QMessageBox.Ok)
+
+        self.timeToRemove = self.timeToRemove + (time.time() - thisTime)
 
 
 

@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
-    <height>681</height>
+    <width>721</width>
+    <height>724</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>NIST: Nestor Tagging Tool</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="T">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout_general">
@@ -748,7 +748,7 @@ separated for readability. NA tags ommitted.
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>672</width>
+     <width>721</width>
      <height>22</height>
     </rect>
    </property>
@@ -850,6 +850,7 @@ separated for readability. NA tags ommitted.
      <string>ResearchMode</string>
     </property>
     <addaction name="actionResearch_NewProject"/>
+    <addaction name="actionPause"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1069,6 +1070,11 @@ separated for readability. NA tags ommitted.
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="text">
+    <string>Pause</string>
    </property>
   </action>
  </widget>

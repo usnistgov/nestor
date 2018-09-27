@@ -589,20 +589,36 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
         it needs a mapping based on the objectName properties of the button to the value you want to add in the configfile
         :return:
         """
+        saveTime = None
+        savePercentage = None
+        numberToken = None
+        numberUpdate = None
+
         saveType = []
         for btn in self.buttonGroup_ResearchWindows_recordType.buttons():
             if btn.isChecked():
                 if btn.objectName() == "checkBox_ResearchWindows_saveVocab_percentage":
                     saveType.append('percentage')
+                    saveTime = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_percentage.text().split(",")]
                 if btn.objectName() == "checkBox_ResearchWindows_saveVocab_time":
                     saveType.append('time')
+                    savePercentage = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_time.text().split(",")]
                 if btn.objectName() == "checkBox_ResearchWindows_saveVocab_nbtoken":
                     saveType.append('numbertoken')
+                    numberToken = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_nbtoken.text().split(",")]
+                if btn.objectName() == "checkBox_ResearchWindows_saveVocab_nbUpdate":
+                    saveType.append('numberupdate')
+                    numberUpdate = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_nbUpdate.text().split(",")]
+
 
         return saveType, \
                self.comboBox_ResearchWindows_projectName.currentText(), \
                self.lineEdit_ResearchWindows_projectAuthor.text(), \
-               self.textEdit_ResearchWindows_projectDescription.toPlainText()
+               self.textEdit_ResearchWindows_projectDescription.toPlainText(), \
+               saveTime, \
+               savePercentage, \
+               numberToken, \
+               numberUpdate
 
 
 
