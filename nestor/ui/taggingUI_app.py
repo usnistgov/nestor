@@ -272,18 +272,20 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         def onclick_ok():
             saveType, name, author, description, saveTime, savePercentage, saveNumberToken, saveNumberUpdate = dialogMenu_newResearchProject.get_data()
 
-            if saveType:
+            if saveType and author:
                 dialogMenu_newResearchProject.label_ResearchWindows_saveVocab.setStyleSheet(self.changeColor['default'])
+                dialogMenu_newResearchProject.lineEdit_ResearchWindows_projectAuthor.setStyleSheet(self.changeColor['default'])
 
                 self.__class__ = MyTaggingToolWindow_research
                 self.__init__(savetype=saveType, name=name, author=author, description=description,
-                              #saveTime=saveTime, savePercentage=savePercentage, saveNumberToken=saveNumberToken, saveNumberUpdate=saveNumberUpdate
+                              saveTime=saveTime, savePercentage=savePercentage, saveNumberToken=saveNumberToken, saveNumberUpdate=saveNumberUpdate
                               )
 
                 dialogMenu_newResearchProject.close()
 
             else:
                 dialogMenu_newResearchProject.label_ResearchWindows_saveVocab.setStyleSheet(self.changeColor['wrongInput'])
+                dialogMenu_newResearchProject.lineEdit_ResearchWindows_projectAuthor.setStyleSheet(self.changeColor['wrongInput'])
 
         dialogMenu_newResearchProject.buttonBox_ResearchWindows.accepted.connect(onclick_ok)
 
@@ -709,7 +711,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                 untrackedTokenList=untrackedTokenList)
                 dialogMenu_settings.close()
 
-                self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
+                #self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
                 self.setMenu_projectSave()
             else:
                 dialogMenu_settings.lineEdit_Settings_ProjectName.setStyleSheet(self.changeColor['wrongInput'])
@@ -1491,16 +1493,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 class MyTaggingToolWindow_research(MyTaggingToolWindow):
     def __init__(self, savetype,  name, author=None, description=None,
-                 #saveTime=None, savePercentage=None, saveNumberToken=None, saveNumberUpdate=None
+                 saveTime=None, savePercentage=None, saveNumberToken=None, saveNumberUpdate=None
                  ):
-
-        # saveTime = sorted(saveTime, key=int)
-        # savePercentage = sorted(savePercentage, key=int)
-        # saveNumberToken = sorted(saveNumberToken, key=int)
-        # saveNumberUpdate = sorted(saveNumberUpdate, key=int)
-
-
-
 
         # TODO not able to creat more than 1 per computeur because the name is the same this need to change
         if name == "excavator_data":
@@ -1549,12 +1543,10 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
 
         # setup folder for research
 
-        self.saveTime = [0,1,3,5,10,20,30,40,50,60]
-        self.savePercentage = [0,1,3,5,10,20,30,40,50,60,70,80,90,100]
-        self.saveNumberToken = [0,10,30,50,100,200,300,400,500,600,700,800,900,1000]
-        self.saveNumberUpdate = [0,10,30,50,100,200,300,400,500,600,700,800,900,1000]
 
-        if "time" in savetype:
+        if "time" in savetype and saveTime:
+            self.saveTime = sorted(saveTime, key=int)
+
             #create the folder
             self.path_saveTime = pathCSV_new / "time"
             self.path_saveTime.mkdir(parents=True, exist_ok=True)
@@ -1569,44 +1561,55 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
 
             self.start_time = time.time()
 
+
         else:
             self.path_saveTime = None
 
-        if "percentage" in savetype:
+        if "percentage" in savetype and savePercentage:
+            savePercentage = sorted(savePercentage, key=int)
+
             # create the folder
             self.path_savePercentage = pathCSV_new / "percentage"
             self.path_savePercentage.mkdir(parents=True, exist_ok=True)
 
             #create the list for the different vocab
-            self.savePercentage1gram = list(self.savePercentage)
-            self.savePercentageNgram = list(self.savePercentage)
+            self.savePercentage1gram = list(savePercentage)
+            self.savePercentageNgram = list(savePercentage)
+
 
         else:
             self.path_savePercentage = None
 
-        if "numbertoken" in savetype:
+        if "numbertoken" in savetype and saveNumberToken:
+            saveNumberToken = sorted(saveNumberToken, key=int)
+
             # create the folder
             self.path_saveNumberToken = pathCSV_new / "numberToken"
             self.path_saveNumberToken.mkdir(parents=True, exist_ok=True)
 
             #create the list for the different vocab
-            self.saveNumberToken1gram = list(self.saveNumberToken)
-            self.saveNumberTokenNgram = list(self.saveNumberToken)
+            self.saveNumberToken1gram = list(saveNumberToken)
+            self.saveNumberTokenNgram = list(saveNumberToken)
+
 
             self.saveNumberToken_whenUpdate()
         else:
             self.path_saveNumberToken = None
 
-        if "numberupdate" in savetype:
+        if "numberupdate" in savetype and saveNumberUpdate:
+            saveNumberUpdate = sorted(saveNumberUpdate, key=int)
+
             # create the folder
             self.path_saveNumberUpdate = pathCSV_new / "numberUpdate"
             self.path_saveNumberUpdate.mkdir(parents=True, exist_ok=True)
 
             # create the list for the different vocab
-            self.saveNumberUpdate1gram = list(self.saveNumberUpdate)
-            self.saveNumberUpdateNgram = list(self.saveNumberUpdate)
+            self.saveNumberUpdate1gram = list(saveNumberUpdate)
+            self.saveNumberUpdateNgram = list(saveNumberUpdate)
             self.numberUpdate1gram_count = 0
             self.numberUpdateNgram_count = 0
+
+
 
         else:
             self.path_saveNumberUpdate = None
@@ -1656,6 +1659,8 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         :return:
         """
         howLong = ((time.time() - self.start_time) - self.timeToRemove) /60
+
+        print(howLong)
 
         if howLong >= self.saveTimeInterval[0]:
             thistime = self.saveTime.pop(0)

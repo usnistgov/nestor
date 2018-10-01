@@ -581,6 +581,12 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
 
         self.buttonBox_ResearchWindows.rejected.connect(self.close)
 
+        self.setEnabledSaveList()
+        self.checkBox_ResearchWindows_saveVocab_percentage.clicked.connect(self.setEnabledSaveList)
+        self.checkBox_ResearchWindows_saveVocab_time.clicked.connect(self.setEnabledSaveList)
+        self.checkBox_ResearchWindows_saveVocab_nbtoken.clicked.connect(self.setEnabledSaveList)
+        self.checkBox_ResearchWindows_saveVocab_nbUpdate.clicked.connect(self.setEnabledSaveList)
+
         self.show()
 
     def get_data(self):
@@ -589,10 +595,10 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
         it needs a mapping based on the objectName properties of the button to the value you want to add in the configfile
         :return:
         """
-        saveTime = None
-        savePercentage = None
-        numberToken = None
-        numberUpdate = None
+        saveTime = []
+        savePercentage = []
+        numberToken = []
+        numberUpdate = []
 
         saveType = []
         for btn in self.buttonGroup_ResearchWindows_recordType.buttons():
@@ -619,6 +625,32 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
                savePercentage, \
                numberToken, \
                numberUpdate
+
+
+    def setEnabledSaveList(self):
+        """
+        setEnabled True or False the list based on the checkbox
+        :return:
+        """
+        if self.checkBox_ResearchWindows_saveVocab_percentage.isChecked():
+            self.lineEdit_ResearchWindows_saveVocab_percentage.setEnabled(True)
+        else:
+            self.lineEdit_ResearchWindows_saveVocab_percentage.setEnabled(False)
+
+        if self.checkBox_ResearchWindows_saveVocab_time.isChecked():
+            self.lineEdit_ResearchWindows_saveVocab_time.setEnabled(True)
+        else:
+            self.lineEdit_ResearchWindows_saveVocab_time.setEnabled(False)
+
+        if self.checkBox_ResearchWindows_saveVocab_nbtoken.isChecked():
+            self.lineEdit_ResearchWindows_saveVocab_nbtoken.setEnabled(True)
+        else:
+            self.lineEdit_ResearchWindows_saveVocab_nbtoken.setEnabled(False)
+
+        if self.checkBox_ResearchWindows_saveVocab_nbUpdate.isChecked():
+            self.lineEdit_ResearchWindows_saveVocab_nbUpdate.setEnabled(True)
+        else:
+            self.lineEdit_ResearchWindows_saveVocab_nbUpdate.setEnabled(False)
 
 
 

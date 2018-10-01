@@ -102,7 +102,7 @@ p, li { white-space: pre-wrap; }
        <item row="1" column="0">
         <widget class="QLabel" name="label_ResearchWindows_projectAuthor">
          <property name="text">
-          <string>Author</string>
+          <string>Author *</string>
          </property>
         </widget>
        </item>
