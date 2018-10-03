@@ -263,8 +263,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         dialogMenu_newResearchProject.comboBox_ResearchWindows_projectName.addItems(["excavator_data"])
 
-        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_percentage.setText("0,1,2,3,10,20,30,40,50,60")
-        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_time.setText("0,5,10,20,30,40,50,60")
+        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_percentage.setText("0,5,10,20,30,40,50,60")
+        dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_time.setText("0,1,2,3,4,5,10,20,30,40,50,60")
         dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_nbtoken.setText("0,10,20,50,100,200,300,400,500,1000")
         dialogMenu_newResearchProject.lineEdit_ResearchWindows_saveVocab_nbUpdate.setText("0,10,20,50,100,200,300,400,500,1000")
 
@@ -371,27 +371,30 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         def onclick_remove():
-            if dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText() != "":
-                choice = Qw.QMessageBox.question(self, 'Remove Project',
-                                                 'Do you really want to remove the project?',
-                                                 Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
+            if dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText() != self.config.get("name", "None"):
+                if dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText() != "":
+                    choice = Qw.QMessageBox.question(self, 'Remove Project',
+                                                     'Do you really want to remove the project?',
+                                                     Qw.QMessageBox.Yes | Qw.QMessageBox.No, Qw.QMessageBox.No)
 
-                if choice == Qw.QMessageBox.Yes:
-                    def remove_folderContent(folder):
-                        for file in folder.iterdir():
-                            if file.is_file():
-                                file.unlink()
-                            elif file.is_dir:
-                                remove_folderContent(file)
-                        folder.rmdir()
+                    if choice == Qw.QMessageBox.Yes:
+                        def remove_folderContent(folder):
+                            for file in folder.iterdir():
+                                if file.is_file():
+                                    file.unlink()
+                                elif file.is_dir:
+                                    remove_folderContent(file)
+                            folder.rmdir()
 
-                    remove_folderContent(self.projectsPath / dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
-                    self.existingProject.remove(dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
-                    dialogMenu_openProject.comboBox_OpenProject_ProjectName.clear()
-                    dialogMenu_openProject.comboBox_OpenProject_ProjectName.addItems(self.existingProject)
+                        remove_folderContent(self.projectsPath / dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
+                        self.existingProject.remove(dialogMenu_openProject.comboBox_OpenProject_ProjectName.currentText())
+                        dialogMenu_openProject.comboBox_OpenProject_ProjectName.clear()
+                        dialogMenu_openProject.comboBox_OpenProject_ProjectName.addItems(self.existingProject)
 
+                    else:
+                        print("NOTHING --> We did not remove your project")
                 else:
-                    print("NOTHING --> We did not remove your project")
+                    print("NOT ALLOW --> You cannot delete your current project")
 
         dialogMenu_openProject.pushButton_OpenProject_ProjectRemove.clicked.connect(onclick_remove)
         dialogMenu_openProject.buttonBox_OpenProject.accepted.connect(onclick_ok)
@@ -685,6 +688,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         def onclick_ok():
+            self.existingProject.remove(self.config.get("name"))
             name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, untrackedTokenList = dialogMenu_settings.get_data()
 
             if name and name not in self.existingProject:
@@ -696,9 +700,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 oldPath.rename(self.projectsPath / name)
                 #TODO same as above but for the vocabfile name
 
-                self.existingProject.remove(self.config['name'])
                 self.existingProject.add(name)
 
+                print(self.config)
 
                 self.set_config(name=name,
                                 author= author,
@@ -708,8 +712,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                 numberTokens=numberTokens,
                                 alreadyChecked_threshold=alreadyChecked_threshold,
                                 showCkeckBox_threshold=showCkeckBox_threshold,
-                                untrackedTokenList=untrackedTokenList)
+                                untrackedTokenList=untrackedTokenList
+                                )
                 dialogMenu_settings.close()
+
+                print(self.config)
 
                 #self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
                 self.setMenu_projectSave()
@@ -746,7 +753,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         def onclick_ok():
             nlpHeader, csvMapping = self.dialogMenu_csvHeaderMapping.get_data()
             if nlpHeader:
-                print(csvMapping)
                 self.set_config(nlpHeader=nlpHeader, csvMapping=csvMapping)
                 self.dialogMenu_csvHeaderMapping.close()
 
@@ -853,7 +859,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         for t in self.tokenUpdate1g_vocab:
             if t <= self.config['settings'].get('numberTokens', 1000):
-                print(t)
                 self.tableWidget_1gram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_vocab'])
 
         for t in self.tokenUpdateNg_vocab:
@@ -1210,7 +1215,10 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         columns = self.config['csvinfo'].get('nlpheader', 0)
         special_replace = self.config['csvinfo'].get('untracked_token', None)
-        nlp_selector = kex.NLPSelect(columns=columns, special_replace=special_replace)
+        if special_replace:
+            nlp_selector = kex.NLPSelect(columns=columns, special_replace=special_replace)
+        else:
+            nlp_selector = kex.NLPSelect(columns=columns)
 
         self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # might not need to set it as self
 
@@ -1545,6 +1553,8 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
 
 
         if "time" in savetype and saveTime:
+            saveTime = [int(x) for x in saveTime]
+
             self.saveTime = sorted(saveTime, key=int)
 
             #create the folder
@@ -1566,6 +1576,8 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
             self.path_saveTime = None
 
         if "percentage" in savetype and savePercentage:
+            savePercentage = [int(x) for x in savePercentage]
+
             savePercentage = sorted(savePercentage, key=int)
 
             # create the folder
@@ -1581,6 +1593,8 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
             self.path_savePercentage = None
 
         if "numbertoken" in savetype and saveNumberToken:
+            saveNumberToken = [int(x) for x in saveNumberToken]
+
             saveNumberToken = sorted(saveNumberToken, key=int)
 
             # create the folder
@@ -1597,6 +1611,8 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
             self.path_saveNumberToken = None
 
         if "numberupdate" in savetype and saveNumberUpdate:
+            saveNumberUpdate = [int(x) for x in saveNumberUpdate]
+
             saveNumberUpdate = sorted(saveNumberUpdate, key=int)
 
             # create the folder
