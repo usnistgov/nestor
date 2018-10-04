@@ -605,10 +605,10 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
             if btn.isChecked():
                 if btn.objectName() == "checkBox_ResearchWindows_saveVocab_percentage":
                     saveType.append('percentage')
-                    saveTime = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_percentage.text().split(",")]
+                    savePercentage = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_percentage.text().split(",")]
                 if btn.objectName() == "checkBox_ResearchWindows_saveVocab_time":
                     saveType.append('time')
-                    savePercentage = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_time.text().split(",")]
+                    saveTime = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_time.text().split(",")]
                 if btn.objectName() == "checkBox_ResearchWindows_saveVocab_nbtoken":
                     saveType.append('numbertoken')
                     numberToken = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_nbtoken.text().split(",")]
@@ -616,6 +616,7 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
                     saveType.append('numberupdate')
                     numberUpdate = [x.lstrip() for x in self.lineEdit_ResearchWindows_saveVocab_nbUpdate.text().split(",")]
 
+        print(saveTime)
 
         return saveType, \
                self.comboBox_ResearchWindows_projectName.currentText(), \

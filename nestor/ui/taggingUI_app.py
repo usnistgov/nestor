@@ -271,7 +271,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         def onclick_ok():
             saveType, name, author, description, saveTime, savePercentage, saveNumberToken, saveNumberUpdate = dialogMenu_newResearchProject.get_data()
-
+            print(saveTime)
             if saveType and author:
                 dialogMenu_newResearchProject.label_ResearchWindows_saveVocab.setStyleSheet(self.changeColor['default'])
                 dialogMenu_newResearchProject.lineEdit_ResearchWindows_projectAuthor.setStyleSheet(self.changeColor['default'])
@@ -1507,7 +1507,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
     def __init__(self, savetype,  name, author=None, description=None,
                  saveTime=None, savePercentage=None, saveNumberToken=None, saveNumberUpdate=None
                  ):
-
         # TODO not able to creat more than 1 per computeur because the name is the same this need to change
         if name == "excavator_data":
             vocab1g = "vocab1g"
@@ -1557,6 +1556,7 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
 
 
         if "time" in savetype and saveTime:
+            print("yes")
             saveTime = [int(x) for x in saveTime]
 
             self.saveTime = sorted(saveTime, key=int)
