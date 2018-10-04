@@ -1,0 +1,87 @@
+issue:
+  label:
+    issue: ':ISSUE'
+  properties:
+    id : id
+    description_problem: description_of_problem
+    description_solution: description_of_solution
+    description_cause: description_of_cause
+    description_effect: description_of_effect
+    machine_down: machine_down
+    necessary_part: necessary_part
+    part_in_process: part_in_process
+    cost: cost
+
+    date_machine_down: date_machine_down
+    date_workorder_start : date_maintenanceworkorder_start
+    date_maintenance_technician_arrive: date_maintenance_technician_arrive
+    date_problem_found: date_problem_found
+    date_part_ordered: date_part_ordered
+    date_part_received: date_part_received
+    date_problem_solve: date_problem_solve
+    date_machine_up: date_machine_up
+    date_workorder_completion : date_maintenanceworkorder_completion
+
+
+human:
+  label:
+    human: ':HUMAN'
+    technician: ':TECHNICIAN'
+    operator: ':OPERATOR'
+  properties:
+    name: name
+    skills: skills
+    crafts: crafts
+
+machine:
+  label:
+    machine: ':MACHINE'
+    type: ':MACHINE_TYPE'
+  properties:
+    name: name
+    manufacturer: manufacturer
+    location: location
+    type: type
+
+tag:
+  label:
+    tag: ':TAG'
+    onegram: ':ONE_GRAM'
+    ngram: ':N_GRAM'
+    item: ':ITEM'
+    problem: ':PROBLEM'
+    solution: ':SOLUTION'
+    unknown: ':UNKNOWN'
+    problem_item: ':PROBLEM_ITEM'
+    solution_item: ':SOLUTION_ITEM'
+    other: ':OTHER'
+    na: ':NA'
+    stopword: ':STOP_WORD'
+  properties:
+    keyword: keyword
+    synonyms: synonyms
+    approved: approved
+
+edges:
+  issue-itemasproblem: ':PROBLEM'
+  issue-itemassolution: ':SOLUTION'
+  issue-item: ':CONTAINS'
+  issue-problem: ':CONTAINS'
+  issue-solution: ':CONTAINS'
+  issue-unknown: ':CONTAINS'
+  issue-problemitem: ':CONTAINS'
+  issue-solutionitem: ':CONTAINS'
+  issue-na: ':CONTAINS'
+  issue-stopword: ':CONTAINS'
+  issue-machine: ':COVERED'
+  issue-operator: ':REQUESTED_BY'
+  issue-technician: ':SOLVE_BY'
+  machine-machinetype: ':IS_A'
+  item-item: ':PARENT_OF'
+  problemitem-problem: ':COMPOSED_OF'
+  problemitem-item: ':COMPOSED_OF'
+  problemitem-unknown: ':COMPOSED_OF'
+  solutionitem-solution: ':COMPOSED_OF'
+  solutionitem-item: ':COMPOSED_OF'
+  solutionitem-unknown: ':COMPOSED_OF'
+

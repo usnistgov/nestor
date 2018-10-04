@@ -33,6 +33,6 @@ dist
 <<<<<<< HEAD
 =======
 !nestor/datasets/**
-!nestor/store_data/**.yaml
+!nestor/store_data/*.yaml
 !nestor/ui/csvHeader.yaml
 >>>>>>> master
