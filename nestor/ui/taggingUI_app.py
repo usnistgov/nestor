@@ -859,6 +859,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         for t in self.tokenUpdate1g_vocab:
             if t <= self.config['settings'].get('numberTokens', 1000):
+                print(t)
+                print(self.tableWidget_1gram_TagContainer.item(t, 0).text())
                 self.tableWidget_1gram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_vocab'])
 
         for t in self.tokenUpdateNg_vocab:
@@ -903,11 +905,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         When the slider on the buttom of the 1Gram is moved
         :return:
         """
-        self.buttonGroup_similarityPattern.create_checkBoxs(dataframe=self.dataframe_vocab1Gram,
+        try:
+            self.buttonGroup_similarityPattern.create_checkBoxs(dataframe=self.dataframe_vocab1Gram,
                                                             token=self.tableWidget_1gram_TagContainer.selectedItems()[0].text(),
                                                             autoCheck_value=self.config['settings'].get('alreadyChecked_threshold', 50),
                                                             checkBox_show= self.horizontalSlider_1gram_FindingThreshold.value())
-
+        except IndexError:
+            print("NOT POSSIBLE --> you need to select a token first")
     def onSelect_tableViewItemsNgramVocab(self):
         """
         When a given item is selected on the Ngram TableView
