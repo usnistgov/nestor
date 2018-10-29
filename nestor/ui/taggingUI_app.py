@@ -271,7 +271,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         def onclick_ok():
             saveType, name, author, description, saveTime, savePercentage, saveNumberToken, saveNumberUpdate = dialogMenu_newResearchProject.get_data()
-            print(saveTime)
+
             if saveType and author:
                 dialogMenu_newResearchProject.label_ResearchWindows_saveVocab.setStyleSheet(self.changeColor['default'])
                 dialogMenu_newResearchProject.lineEdit_ResearchWindows_projectAuthor.setStyleSheet(self.changeColor['default'])
@@ -702,7 +702,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                 self.existingProject.add(name)
 
-                print(self.config)
 
                 self.set_config(name=name,
                                 author= author,
@@ -716,7 +715,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                 )
                 dialogMenu_settings.close()
 
-                print(self.config)
 
                 #self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
                 self.setMenu_projectSave()
@@ -1556,7 +1554,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
 
 
         if "time" in savetype and saveTime:
-            print("yes")
             saveTime = [int(x) for x in saveTime]
 
             self.saveTime = sorted(saveTime, key=int)
