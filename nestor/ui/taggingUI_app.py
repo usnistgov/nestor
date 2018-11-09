@@ -7,6 +7,7 @@ import shutil
 import time
 import re
 import string
+import itertools
 
 
 import chardet
@@ -925,6 +926,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         token, classification, alias, notes = (str(i.text()) for i in items)
 
 
+        self.label_Ngram_CompositionDescription.setToolTip("test")
+
+        tokenlist = token.split(" ")
+
+        listTmp = list()
+        for ne in list(itertools.permutations(tokenlist, len(tokenlist))):
+            listTmp.append(f'((^| ){" ([^ ]* )*".join(ne)}($| ))')
+
+        tooltip = '\n'.join(self.clean_rawText_1Gram[self.clean_rawText_1Gram.str.contains('|'.join(listTmp), flags=re.IGNORECASE, regex=True )][:3].values)
+        self.label_Ngram_CompositionDescription.setToolTip(tooltip)
+
 
         if not alias:
             alias = token
@@ -1236,7 +1248,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             nlp_selector = kex.NLPSelect(columns=columns)
 
         self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # might not need to set it as self
-        print(self.clean_rawText)
 
         list_tokenExtracted = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)
 
@@ -1250,7 +1261,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_vocab1Gram)
-        print(self.clean_rawText_1Gram)
 
         list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
 
