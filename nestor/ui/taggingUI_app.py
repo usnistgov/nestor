@@ -5,6 +5,8 @@ import numpy as np
 import fuzzywuzzy.process as zz
 import shutil
 import time
+import re
+import string
 
 
 import chardet
@@ -21,6 +23,9 @@ import PyQt5.QtGui as Qg
 import nestor.keyword as kex
 from nestor.ui.meta_windows import *
 
+
+import warnings
+warnings.filterwarnings("ignore", 'This pattern has match groups')
 
 neo4j_spec = importlib.util.find_spec("neo4j")
 simplecrypt_spec = importlib.util.find_spec("simplecrypt")
@@ -179,7 +184,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'not yet classified': ''
         }
 
-        self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
+        self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern,
+                                                                            None,
+                                                                            None)
 
 
 
@@ -893,8 +900,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.buttonGroup_similarityPattern.textAlreadySelected = set()
         self.buttonGroup_similarityPattern.textToUncheck = set()
-        self.buttonGroup_similarityPattern.create_checkBoxs(dataframe=self.dataframe_vocab1Gram,
-                                                            token=token,
+        self.buttonGroup_similarityPattern.create_checkBoxs(token=token,
                                                             autoCheck_value=self.config['settings'].get('alreadyChecked_threshold', 50),
                                                             checkBox_show = self.horizontalSlider_1gram_FindingThreshold.value())
 
@@ -904,12 +910,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         try:
-            self.buttonGroup_similarityPattern.create_checkBoxs(dataframe=self.dataframe_vocab1Gram,
-                                                            token=self.tableWidget_1gram_TagContainer.selectedItems()[0].text(),
-                                                            autoCheck_value=self.config['settings'].get('alreadyChecked_threshold', 50),
-                                                            checkBox_show= self.horizontalSlider_1gram_FindingThreshold.value())
+            self.buttonGroup_similarityPattern.create_checkBoxs(token=self.tableWidget_1gram_TagContainer.selectedItems()[0].text(),
+                                                                autoCheck_value=self.config['settings'].get('alreadyChecked_threshold', 50),
+                                                                checkBox_show= self.horizontalSlider_1gram_FindingThreshold.value())
         except IndexError:
             print("NOT POSSIBLE --> you need to select a token first")
+
     def onSelect_tableViewItemsNgramVocab(self):
         """
         When a given item is selected on the Ngram TableView
@@ -1160,6 +1166,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tag_readable = None
         self.dataframe_completeness = None
         self.dataframe_completeness=None
+        self.buttonGroup_similarityPattern.clean_checkboxes()
+        self.buttonGroup_similarityPattern = None
 
         self.tokenUpdate1g_user = set()
         self.tokenUpdate1g_vocab = set()
@@ -1205,6 +1213,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                  tableview=self.tableWidget_Ngram_TagContainer,
                                                  progressBar=self.progressBar_Ngram_TagComplete)
 
+        self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(layout=self.verticalLayout_1gram_SimilarityPattern,
+                                                                            vocab = self.dataframe_vocab1Gram,
+                                                                            clean_rawText = self.clean_rawText)
+
+
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
 
         # make menu available
@@ -1223,6 +1236,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             nlp_selector = kex.NLPSelect(columns=columns)
 
         self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # might not need to set it as self
+        print(self.clean_rawText)
 
         list_tokenExtracted = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)
 
@@ -1236,6 +1250,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_vocab1Gram)
+        print(self.clean_rawText_1Gram)
 
         list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
 
@@ -1755,7 +1770,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
             vocabname = f'{thisNbUpdate}_{self.config.get("vocabNg")}.csv'
             self.dataframe_vocabNGram.to_csv(self.path_saveNumberUpdate / vocabname, encoding='utf-8-sig')
 
-
     def onClick_UpdateToSaveVocab(self):
         """
         When click on update, save based on the need
@@ -1890,10 +1904,12 @@ def openDataframe(path):
 
 
 class QButtonGroup_similarityPattern(Qw.QButtonGroup):
-    def __init__(self, layout):
+    def __init__(self, layout, vocab, clean_rawText):
         Qw.QButtonGroup.__init__(self)
         self.setExclusive(False)
         self.layout = layout
+        self.vocab = vocab
+        self.clean_rawText = clean_rawText
         self.spacer = None
         self.textAlreadySelected = set()
         self.textToUncheck = set()
@@ -1914,7 +1930,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             self.textAlreadySelected.remove(button.text())
             self.textToUncheck.add(button.text())
 
-    def create_checkBoxs(self, dataframe, token, autoCheck_value= 99, checkBox_show= 50):
+    def create_checkBoxs(self, token, autoCheck_value= 99, checkBox_show= 50):
         """create and print the checkboxes
         check it on condition
 
@@ -1924,7 +1940,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             param autoMatch_score:
         autoMatch_score :
 
-        dataframe :
+        PPPPPPPPPPPPPPPPPPPPPPPP :
 
         alias :
 
@@ -1935,16 +1951,22 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         """
         self.clean_checkboxes()
 
+
         #get the similar tokne on the dataframe
-        mask = dataframe.index.str[0] == token[0]
-        similar = zz.extractBests(token, dataframe.index[mask],
+        mask = self.vocab.index.str[0] == token[0]
+        similar = zz.extractBests(token, self.vocab.index[mask],
                                   limit=20)[:int( checkBox_show * 20 / 100)]
 
-        alias = dataframe.loc[token, 'alias']
+        alias = self.vocab.loc[token, 'alias']
 
         #for each one, create the checkbox
         for token, score in similar:
             btn = Qw.QCheckBox(token)
+
+
+            tooltip='\n'.join(self.clean_rawText[self.clean_rawText.str.contains(f'(^| ){token}($| )',flags=re.IGNORECASE, regex=True)][:3].values)
+            btn.setToolTip(tooltip)
+
             self.addButton(btn)
             self.layout.addWidget(btn)
 
@@ -1954,7 +1976,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
                     btn.setChecked(True)
                     self.textAlreadySelected.add(token)
             else:
-                if dataframe.loc[btn.text(), 'alias'] == alias:
+                if self.vocab.loc[btn.text(), 'alias'] == alias:
                     btn.setChecked(True)
                     self.textAlreadySelected.add(token)
 
