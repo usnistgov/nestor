@@ -66,6 +66,8 @@ class NLPSelect(Transformer):
 
         self.columns = columns
         self.special_replace = special_replace
+        self.together = None
+        self.clean_together = None
         # self.to_np = to_np
 
     def get_params(self, deep=True):
@@ -87,18 +89,24 @@ class NLPSelect(Transformer):
         else:
             nlp_cols = [self.columns]  # allow...duck-typing I guess? Don't remember.
 
-        raw_text = X.loc[:, nlp_cols].fillna('')  # fill nan's
-        # if len(nlp_cols) > 1:  # more than one column, concat them
-        raw_text = raw_text.add(' ').sum(axis=1).str[:-1]
-        raw_text = raw_text.str.lower()  # all lowercase
-        raw_text = raw_text.str.replace('\n', ' ')  # no hanging newlines
+        raw_text = (X
+                    .loc[:, nlp_cols]
+                    .fillna('')  # fill nan's
+                    .add(' ')
+                    .sum(axis=1) # if len(nlp_cols) > 1:  # more than one column, concat them
+                    .str[:-1])
+        self.together = raw_text
 
-        # No punctuation
-        raw_text = raw_text.str.replace('[{}]'.format(string.punctuation), ' ')
+        raw_text = (raw_text
+                    .str.lower()  # all lowercase
+                    .str.replace('\n', ' ')  # no hanging newlines
+                    .str.replace('[{}]'.format(string.punctuation), ' '))
+
         if self.special_replace is not None:
             rx = re.compile('|'.join(map(re.escape, self.special_replace)))
             # allow user-input special replacements.
             raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
+        self.clean_together = raw_text
         return raw_text
 
 
@@ -194,7 +202,7 @@ class TokenExtractor(TransformerMixin):
         return X_tf
 
     @property
-    def ranks_(self):
+    def  ranks_(self):
         """
         Retrieve the rank of each token, for sorting. Uses summed scoring over the
         TF-IDF for each token, so that: :math:`S_t = \\Sum_{\\text{MWO}}\\text{TF-IDF}_t`

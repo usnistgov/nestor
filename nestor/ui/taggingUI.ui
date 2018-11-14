@@ -20,7 +20,7 @@
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -1081,7 +1081,7 @@ separated for readability. NA tags ommitted.
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_1Gram_Classification"/>
   <buttongroup name="buttonGroup_NGram_Classification"/>
+  <buttongroup name="buttonGroup_1Gram_Classification"/>
  </buttongroups>
 </ui>

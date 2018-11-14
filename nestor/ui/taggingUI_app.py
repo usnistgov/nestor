@@ -108,6 +108,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tokenExtractor_1Gram = kex.TokenExtractor()  # sklearn-style TF-IDF calc
         self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
 
+        self.tfidf_ng = None
+        self.tfidf_1g = None
         self.clean_rawText_1Gram = None
         self.clean_rawText = None
 
@@ -185,9 +187,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'not yet classified': ''
         }
 
-        self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern,
-                                                                            None,
-                                                                            None)
+        self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
 
 
 
@@ -891,13 +891,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         items = self.tableWidget_1gram_TagContainer.selectedItems()  # selected row
         token, classification, alias, notes = (str(i.text()) for i in items)
 
+
         if alias:
             self.lineEdit_1gram_AliasEditor.setText(alias)
         else:
             self.lineEdit_1gram_AliasEditor.setText(token)
         self.textEdit_1gram_NoteEditor.setText(notes)
         self.classificationDictionary_1Gram.get(classification, self.radioButton_1gram_NotClassifiedEditor).setChecked(True)
-
 
         self.buttonGroup_similarityPattern.textAlreadySelected = set()
         self.buttonGroup_similarityPattern.textToUncheck = set()
@@ -925,18 +925,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
         token, classification, alias, notes = (str(i.text()) for i in items)
 
+        loc = self.tokenExtractor_nGram.ranks_[self.dataframe_vocabNGram.index.get_loc(token)]
+        mask = self.tfidf_ng[:, loc].todense() > 0
+        tooltip = str('\n'.join(self.together[mask.flatten().tolist()[0]].head(3).tolist()))
 
-        self.label_Ngram_CompositionDescription.setToolTip("test")
-
-        tokenlist = token.split(" ")
-
-        listTmp = list()
-        for ne in list(itertools.permutations(tokenlist, len(tokenlist))):
-            listTmp.append(f'((^| ){" ([^ ]* )*".join(ne)}($| ))')
-
-        tooltip = '\n'.join(self.clean_rawText_1Gram[self.clean_rawText_1Gram.str.contains('|'.join(listTmp), flags=re.IGNORECASE, regex=True )][:3].values)
         self.label_Ngram_CompositionDescription.setToolTip(tooltip)
-
 
         if not alias:
             alias = token
@@ -1173,6 +1166,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.tokenExtractor_nGram = kex.TokenExtractor(ngram_range=(2, 2))
         self.clean_rawText_1Gram = None
         self.clean_rawText = None
+        self.tfidf_ng = None
+        self.tfidf_1g = None
         self.tag_df = None
         self.relation_df = None
         self.tag_readable = None
@@ -1180,7 +1175,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.dataframe_completeness=None
         self.buttonGroup_similarityPattern.clean_checkboxes()
         self.buttonGroup_similarityPattern = None
-
         self.tokenUpdate1g_user = set()
         self.tokenUpdate1g_vocab = set()
         self.tokenUpdate1g_database = set()
@@ -1227,7 +1221,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(layout=self.verticalLayout_1gram_SimilarityPattern,
                                                                             vocab = self.dataframe_vocab1Gram,
-                                                                            clean_rawText = self.clean_rawText)
+                                                                            together = self.together,
+                                                                            tfidf = self.tfidf_1g,
+                                                                            tokenExtractor_1Gram=self.tokenExtractor_1Gram)
 
 
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
@@ -1248,9 +1244,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             nlp_selector = kex.NLPSelect(columns=columns)
 
         self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # might not need to set it as self
+        self.together = nlp_selector.together # acces the text before it is cleaned
 
-        list_tokenExtracted = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)
-
+        self.tfidf_1g = self.tokenExtractor_1Gram.fit_transform(self.clean_rawText)
         self.dataframe_vocab1Gram = kex.generate_vocabulary_df(self.tokenExtractor_1Gram, filename=vocab1gPath, init=init)
 
         self.dataframe_vocab1Gram.to_csv(vocab1gPath, encoding='utf-8-sig')
@@ -1262,7 +1258,16 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_vocab1Gram)
 
-        list_tokenExtracted = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
+        self.tfidf_ng = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
+        # print(list_tokenExtracted)
+        # print(type(list_tokenExtracted))
+        # print(list_tokenExtracted.shape)
+        tokenselectedLoc=1
+
+        # loc = self.tokenExtractor_1Gram.ranks_[tokenselectedLoc]
+        # mask = list_tokenExtracted[:,loc].todense()>0
+        # print(self.dataframe_Original[mask].iloc[:10][self.config['csv'].get('nlpheader',[])])
+
 
         # create the n gram dataframe
 
@@ -1914,12 +1919,14 @@ def openDataframe(path):
 
 
 class QButtonGroup_similarityPattern(Qw.QButtonGroup):
-    def __init__(self, layout, vocab, clean_rawText):
+    def __init__(self, layout, vocab=None, together=None, tfidf=None, tokenExtractor_1Gram=None):
         Qw.QButtonGroup.__init__(self)
         self.setExclusive(False)
         self.layout = layout
         self.vocab = vocab
-        self.clean_rawText = clean_rawText
+        self.together = together
+        self.tfidf = tfidf
+        self.tokenExtractor_1Gram = tokenExtractor_1Gram
         self.spacer = None
         self.textAlreadySelected = set()
         self.textToUncheck = set()
@@ -1961,7 +1968,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         """
         self.clean_checkboxes()
 
-
         #get the similar tokne on the dataframe
         mask = self.vocab.index.str[0] == token[0]
         similar = zz.extractBests(token, self.vocab.index[mask],
@@ -1969,12 +1975,15 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
 
         alias = self.vocab.loc[token, 'alias']
 
+
         #for each one, create the checkbox
         for token, score in similar:
             btn = Qw.QCheckBox(token)
 
-
-            tooltip='\n'.join(self.clean_rawText[self.clean_rawText.str.contains(f'(^| ){token}($| )',flags=re.IGNORECASE, regex=True)][:3].values)
+            loc = self.tokenExtractor_1Gram.ranks_[self.vocab.index.get_loc(token)]
+            print(loc)
+            mask = self.tfidf[:, loc].todense() > 0
+            tooltip = str('\n'.join(self.together[mask.flatten().tolist()[0]].head(3).tolist()))
             btn.setToolTip(tooltip)
 
             self.addButton(btn)
