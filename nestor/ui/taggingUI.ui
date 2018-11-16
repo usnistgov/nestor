@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>721</width>
-    <height>724</height>
+    <width>672</width>
+    <height>769</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,89 +24,18 @@
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
-          <string>1 Gram Token</string>
+          <string>Single word analysis</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="0">
            <layout class="QGridLayout" name="gridLayout_1gram_general">
-            <item row="2" column="1">
-             <widget class="QSlider" name="horizontalSlider_1gram_FindingThreshold">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <layout class="QVBoxLayout" name="verticalLayout_1gram_SimilarityPattern"/>
-            </item>
-            <item row="0" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
-             <widget class="QLabel" name="label_1gram_PatternFindingDescription">
-              <property name="text">
-               <string>Similar word from corpus</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
-             <widget class="QLabel" name="label_1gram_PropertyEditorDescription">
-              <property name="text">
-               <string>Tag current word</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_1gram_TableTagDescription">
-              <property name="text">
-               <string>Word Annotation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QTableWidget" name="tableWidget_1gram_TagContainer">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>1</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
-              </property>
-              <property name="tabKeyNavigation">
-               <bool>false</bool>
-              </property>
-              <property name="dragDropOverwriteMode">
-               <bool>false</bool>
-              </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::SingleSelection</enum>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <layout class="QGridLayout" name="gridLayout_1gram_ActionButton">
-              <item row="0" column="0" alignment="Qt::AlignHCenter">
-               <widget class="QPushButton" name="pushButton_1gram_UpdateTokenProperty">
-                <property name="text">
-                 <string>Update</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="0">
-             <widget class="QProgressBar" name="progressBar_1gram_TagComplete">
-              <property name="value">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="2">
              <layout class="QVBoxLayout" name="verticalLayout_1gram_PropertiesEditor">
               <item>
                <widget class="QLabel" name="label_1gram_AliasDescription">
+                <property name="toolTip">
+                 <string>Map all the selected word to the same meaning (tag)</string>
+                </property>
                 <property name="text">
                  <string>Preferred Alias</string>
                 </property>
@@ -187,6 +116,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioButton_1gram_UnknownEditor">
+                <property name="toolTip">
+                 <string>When a word can have 2 or more classification (you need more context)</string>
+                </property>
                 <property name="text">
                  <string>Ambiguous (Unknown)</string>
                 </property>
@@ -197,8 +129,11 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioButton_1gram_StopWordEditor">
+                <property name="toolTip">
+                 <string>a word that you think is IRELEVANTE on your corpus</string>
+                </property>
                 <property name="text">
-                 <string>Stop-word</string>
+                 <string>Irrelevant (Stop-word)</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_1Gram_Classification</string>
@@ -298,13 +233,107 @@
               </item>
              </layout>
             </item>
+            <item row="2" column="1">
+             <widget class="QSlider" name="horizontalSlider_1gram_FindingThreshold">
+              <property name="toolTip">
+               <string>Number of similar word you want to see</string>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <layout class="QVBoxLayout" name="verticalLayout_1gram_SimilarityPattern"/>
+            </item>
+            <item row="0" column="1" alignment="Qt::AlignLeft|Qt::AlignTop">
+             <widget class="QLabel" name="label_1gram_PatternFindingDescription">
+              <property name="text">
+               <string>Similar words from csv</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
+             <widget class="QLabel" name="label_1gram_PropertyEditorDescription">
+              <property name="text">
+               <string>Tag current word</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_1gram_TableTagDescription">
+              <property name="text">
+               <string>Word Annotation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QTableWidget" name="tableWidget_1gram_TagContainer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="sizeAdjustPolicy">
+               <enum>QAbstractScrollArea::AdjustToContents</enum>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="tabKeyNavigation">
+               <bool>false</bool>
+              </property>
+              <property name="dragDropOverwriteMode">
+               <bool>false</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <layout class="QGridLayout" name="gridLayout_1gram_ActionButton">
+              <item row="0" column="0" alignment="Qt::AlignHCenter">
+               <widget class="QPushButton" name="pushButton_1gram_UpdateTokenProperty">
+                <property name="text">
+                 <string>Next word</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <layout class="QGridLayout" name="gridLayout_3">
+              <item row="1" column="0">
+               <widget class="QProgressBar" name="progressBar_1gram_TagComplete">
+                <property name="value">
+                 <number>0</number>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Overall progress</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
            </layout>
           </item>
          </layout>
         </widget>
         <widget class="QWidget" name="tab_Ngram">
          <attribute name="title">
-          <string>N Gram Token</string>
+          <string>Multi word analysis</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_7">
           <item row="0" column="0">
@@ -361,19 +390,15 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0" alignment="Qt::AlignBottom">
-             <widget class="QProgressBar" name="progressBar_Ngram_TagComplete">
-              <property name="value">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="2">
              <layout class="QGridLayout" name="gridLayout_Ngram_ActionButton">
               <item row="0" column="0" alignment="Qt::AlignHCenter">
                <widget class="QPushButton" name="pushButton_Ngram_UpdateTokenProperty">
+                <property name="toolTip">
+                 <string>shortcut Enter key</string>
+                </property>
                 <property name="text">
-                 <string>Update</string>
+                 <string>Next word</string>
                 </property>
                </widget>
               </item>
@@ -383,6 +408,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_Ngram_PropertiesEditor">
               <item>
                <widget class="QLabel" name="label_Ngram_AliasDescription">
+                <property name="toolTip">
+                 <string>Change the name of the combination of word </string>
+                </property>
                 <property name="text">
                  <string>Preferred Alias</string>
                 </property>
@@ -490,6 +518,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioButton_Ngram_UnknownEditor">
+                <property name="toolTip">
+                 <string>When a word can have 2 or more classification (you need more context)</string>
+                </property>
                 <property name="text">
                  <string>Ambiguous (Unknown)</string>
                 </property>
@@ -500,8 +531,11 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioButton_Ngram_StopWordEditor">
+                <property name="toolTip">
+                 <string>a word that you think is IRELEVANTE on your corpus</string>
+                </property>
                 <property name="text">
-                 <string>Stop-word</string>
+                 <string>Irrelevant (Stop-word)</string>
                 </property>
                 <attribute name="buttonGroup">
                  <string notr="true">buttonGroup_NGram_Classification</string>
@@ -598,6 +632,24 @@
             <item row="1" column="1">
              <layout class="QGridLayout" name="gridLayout_Ngram_NGramComposedof"/>
             </item>
+            <item row="2" column="0">
+             <layout class="QGridLayout" name="gridLayout_6">
+              <item row="1" column="0">
+               <widget class="QProgressBar" name="progressBar_Ngram_TagComplete">
+                <property name="value">
+                 <number>0</number>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>Overall progress</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
            </layout>
           </item>
          </layout>
@@ -616,6 +668,9 @@
              <layout class="QGridLayout" name="gridLayout_report_docsInfo">
               <item row="4" column="0">
                <widget class="QLabel" name="label_report_emptyDocs">
+                <property name="toolTip">
+                 <string>This is the number of MWOs that have zero tokens tagged</string>
+                </property>
                 <property name="text">
                  <string>Empty Docs:</string>
                 </property>
@@ -623,6 +678,9 @@
               </item>
               <item row="3" column="0">
                <widget class="QLabel" name="label_report_completeDocs">
+                <property name="toolTip">
+                 <string>This is the number of MWOs that have all of the tokens completely tagged. </string>
+                </property>
                 <property name="text">
                  <string>Complete Docs: </string>
                 </property>
@@ -630,8 +688,14 @@
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="label_report_tagCompleteness">
+                <property name="toolTip">
+                 <string>This is the Tag Positive Predictive Value.</string>
+                </property>
                 <property name="text">
-                 <string>Tag PPV:</string>
+                 <string>&lt;a href=&quot;https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values&quot;&gt;Tag PPV&lt;/a&gt;:</string>
+                </property>
+                <property name="openExternalLinks">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -654,6 +718,9 @@ separated for readability. NA tags ommitted.
               </item>
               <item row="0" column="1">
                <widget class="QPushButton" name="pushButton_report_saveTrack">
+                <property name="toolTip">
+                 <string/>
+                </property>
                 <property name="text">
                  <string>UPDATE TAG EXTRACTION</string>
                 </property>
@@ -800,7 +867,7 @@ separated for readability. NA tags ommitted.
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>721</width>
+     <width>672</width>
      <height>22</height>
     </rect>
    </property>
@@ -816,7 +883,7 @@ separated for readability. NA tags ommitted.
     </property>
     <widget class="QMenu" name="menuExport">
      <property name="title">
-      <string>Export</string>
+      <string>Export Project</string>
      </property>
      <addaction name="actionTo_Zip"/>
      <addaction name="actionTo_Tar"/>
@@ -970,7 +1037,7 @@ separated for readability. NA tags ommitted.
   </action>
   <action name="actionAbout_TagTool">
    <property name="text">
-    <string>about TagTool</string>
+    <string>About Nestor</string>
    </property>
   </action>
   <action name="actionConnect">
@@ -1008,27 +1075,27 @@ separated for readability. NA tags ommitted.
   </action>
   <action name="action_AutoPopulate_FromDatabase_1gramVocab">
    <property name="text">
-    <string>1gram Vocab</string>
+    <string>Single Word vocabulary</string>
    </property>
   </action>
   <action name="action_AutoPopulate_FromDatabase_NgramVocab">
    <property name="text">
-    <string>Ngram Vocab</string>
+    <string>Multi-Word vocabulary</string>
    </property>
   </action>
   <action name="actionFrom_AutoPopulate_From1gramVocab">
    <property name="text">
-    <string>From 1gram Vocab</string>
+    <string>Multi-Word from Single Word vocabulary</string>
    </property>
   </action>
   <action name="action_AutoPopulate_FromCSV_1gramVocab">
    <property name="text">
-    <string>1gram Vocab</string>
+    <string>Single Word vocabulary</string>
    </property>
   </action>
   <action name="action_AutoPopulate_FromCSV_NgramVocab">
    <property name="text">
-    <string>Ngram Vocab</string>
+    <string>Multi-Word vocabulary</string>
    </property>
   </action>
   <action name="actionProject_CreateNew">
@@ -1093,12 +1160,12 @@ separated for readability. NA tags ommitted.
   </action>
   <action name="actionMap_CSV">
    <property name="text">
-    <string>Map CSV </string>
+    <string>Select columns for analysis</string>
    </property>
   </action>
   <action name="actionImport">
    <property name="text">
-    <string>Import</string>
+    <string>Import Project</string>
    </property>
   </action>
   <action name="actionTo_Zip">
@@ -1126,7 +1193,7 @@ separated for readability. NA tags ommitted.
   </action>
   <action name="actionPause">
    <property name="text">
-    <string>Pause</string>
+    <string>Pause Timer</string>
    </property>
   </action>
  </widget>

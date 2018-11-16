@@ -24,6 +24,9 @@
     <layout class="QGridLayout" name="gridLayout">
      <item row="5" column="0">
       <widget class="QPushButton" name="pushButton_NewProject_LoadCSV">
+       <property name="toolTip">
+        <string>open an UTF8 encoding CSV</string>
+       </property>
        <property name="text">
         <string>Load CSV*</string>
        </property>
@@ -39,7 +42,7 @@
      <item row="3" column="0">
       <widget class="QLabel" name="label_NewProject_Project1gVocabName">
        <property name="text">
-        <string>Vocab 1gram name</string>
+        <string>Vocab 1-gram filename</string>
        </property>
       </widget>
      </item>
@@ -52,8 +55,11 @@
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_NewProject_ProjectNgVocabName">
+       <property name="toolTip">
+        <string/>
+       </property>
        <property name="text">
-        <string>Vocab Ngram name</string>
+        <string>Vocab N-gram filename</string>
        </property>
       </widget>
      </item>
@@ -67,7 +73,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label_NewProject_ProjectName">
        <property name="text">
-        <string>Projet Name*</string>
+        <string>Project Name*</string>
        </property>
       </widget>
      </item>

@@ -129,7 +129,7 @@
        <item row="2" column="0">
         <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_OpenSchema">
          <property name="text">
-          <string>Open Schema</string>
+          <string>Load database schema</string>
          </property>
         </widget>
        </item>

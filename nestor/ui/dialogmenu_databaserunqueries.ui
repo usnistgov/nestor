@@ -46,7 +46,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Update Issue to Item Tag links ?</string>
+        <string>Link all word order data to respective Item tags?</string>
        </property>
        <attribute name="buttonGroup">
         <string notr="true">buttonGroup_DialogDatabaseRunQuery</string>
@@ -59,7 +59,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Store the NGram Tag data ?</string>
+        <string>Store the Multi-Word data that you have tagged ?</string>
        </property>
        <attribute name="buttonGroup">
         <string notr="true">buttonGroup_DialogDatabaseRunQuery</string>
@@ -85,7 +85,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Store the 1Gram Tag data ?</string>
+        <string>Store the Single Word data that you have tagged ?</string>
        </property>
        <attribute name="buttonGroup">
         <string notr="true">buttonGroup_DialogDatabaseRunQuery</string>
@@ -95,7 +95,7 @@
      <item row="5" column="0">
       <widget class="QCheckBox" name="checkBox_DialogDatabaseRunQuery_ItemToItem">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="text">
         <string>Link Item to Item hierarchy ?</string>
@@ -111,7 +111,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Link 1gram Tag to Ngram Tag ?</string>
+        <string>Link all Single Words to respective Mulit-Word ?</string>
        </property>
        <attribute name="buttonGroup">
         <string notr="true">buttonGroup_DialogDatabaseRunQuery</string>

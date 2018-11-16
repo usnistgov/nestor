@@ -1,13 +1,11 @@
 import importlib
+from PyQt5 import QtWidgets as Qw
 
 import pandas as pd
 import numpy as np
 import fuzzywuzzy.process as zz
 import shutil
 import time
-import re
-import string
-import itertools
 
 
 import chardet
@@ -19,6 +17,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import PyQt5.QtGui as Qg
+import PyQt5.QtWidgets as Qw
 
 
 import nestor.keyword as kex
@@ -55,6 +54,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         Instantiate  values
         """
+        self.helpTutorialLink = "https://nestor.readthedocs.io/en/latest/how_to_guide/tutorial.html"
+
+
         self.projectsPath = projectsPath
 
         self.iconPath = iconPath
@@ -161,7 +163,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Problem': 'P',
             'Solution': 'S',
             'Ambiguous (Unknown)': 'U',
-            'Stop-word': 'X',
+            'Irrelevant (Stop-word)': 'X',
             'not yet classified': ''
         }
 
@@ -181,7 +183,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             'Problem Item': 'P I',
             'Solution Item': 'S I',
             'Ambiguous (Unknown)': 'U',
-            'Stop-word': 'X',
+            'Irrelevant (Stop-word)': 'X',
             'Problem': 'P',
             'Solution': 'S',
             'not yet classified': ''
@@ -194,6 +196,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         Create the interaction on the MenuItems
         """
+        self.actionTutorial.triggered.connect(self.setMenu_helpTutorial)
+
         self.actionNew_Project.triggered.connect(self.setMenu_projectNew)
         self.actionOpen_Project.triggered.connect(self.setMenu_projectOpen)
         self.actionProject_Settings.triggered.connect(self.setMenu_settings)
@@ -233,6 +237,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionAbout_TagTool.triggered.connect(self.dialogTOU.show)
 
         self.tabWidget.currentChanged.connect(self.onChange_tableView)
+        self.tabWidget.setCurrentIndex(0)
 
         """
         Set the shortcut 
@@ -537,6 +542,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.database = None
         self.enableFeature(existDatabase=False)
 
+    def setMenu_helpTutorial(self):
+        """
+        When click on open browser
+        :return:
+        """
+        webbrowser.open(self.helpTutorialLink, new=1)
+
     def setMenu_autopopulateFromDatabase_1gVocab(self):
 
         done, result = self.database.getTokenTagClassification()
@@ -723,6 +735,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                 )
                 dialogMenu_settings.close()
 
+                self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
+                self.onMoveSlider_similarPattern()
+
+                #change the similarity
+
 
                 #self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
                 self.setMenu_projectSave()
@@ -821,13 +838,18 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         if dataframe is not None:
+
             temp_df = dataframe.reset_index()
+            temp_df.columns = ['Words', 'Classification', 'Tag', 'Note', 'score']
+
             nbrows, nbcols = temp_df.shape
+            nbrows = nbrows - 1
             tableview.setColumnCount(nbcols - 1)  # ignore score column
             tableview.setRowCount(min([nbrows, self.config['settings'].get('numberTokens', 1000)]))
             for i in range(tableview.rowCount()):
                 for j in range(nbcols - 1):  # ignore score column
                     tableview.setItem(i, j, Qw.QTableWidgetItem(str(temp_df.iat[i, j])))
+
             try:
                 for index in tableview.userUpdate:
                     if index < 1000:
@@ -836,7 +858,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             except AttributeError:
                 pass
 
-            tableview.resizeColumnsToContents()
             tableview.resizeRowsToContents()
             tableview.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
             tableview.setSelectionBehavior(Qw.QTableWidget.SelectRows)
@@ -865,7 +886,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         for t in self.tokenUpdate1g_vocab:
             if t <= self.config['settings'].get('numberTokens', 1000):
-                print(t)
                 print(self.tableWidget_1gram_TagContainer.item(t, 0).text())
                 self.tableWidget_1gram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_vocab'])
 
@@ -981,7 +1001,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
             #creat the token list
             labelLabel = Qw.QLabel()
-            labelLabel.setText('tokens :')
+            labelLabel.setText('Words :')
             labelLabel.setObjectName("labelNGramComposition" + 'alias')
             self.gridLayout_Ngram_NGramComposedof.addWidget(labelLabel, xPos, yLabel)
 
@@ -1037,7 +1057,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                     self.tokenUpdate1g_user.add(self.dataframe_vocab1Gram.index.get_loc(textToUncheck))
 
-
             self.printDataframe_TableviewProgressBar(dataframe= self.dataframe_vocab1Gram,
                                                      tableview=self.tableWidget_1gram_TagContainer,
                                                      progressBar=self.progressBar_1gram_TagComplete
@@ -1050,22 +1069,26 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def onClick_UpdateNGramVocab(self):
 
-        items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
-        token, classification, alias, notes = (str(i.text()) for i in items)
+        try:
 
-        self.tokenUpdateNg_user.add(self.dataframe_vocabNGram.index.get_loc(token))
+            items = self.tableWidget_Ngram_TagContainer.selectedItems()  # selected row
+            token, classification, alias, notes = (str(i.text()) for i in items)
 
-        self.dataframe_vocabNGram.at[token, 'alias'] = self.lineEdit_Ngram_AliasEditor.text()
-        self.dataframe_vocabNGram.at[token, 'notes'] = self.textEdit_Ngram_NoteEditor.toPlainText()
-        self.dataframe_vocabNGram.at[token, 'NE'] = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(), '')
+            self.tokenUpdateNg_user.add(self.dataframe_vocabNGram.index.get_loc(token))
 
-        if self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(), '') == "I":
-            self.dataframe_vocabNGram.at[token, 'alias'] = "_".join(self.lineEdit_Ngram_AliasEditor.text().split(" "))
+            self.dataframe_vocabNGram.at[token, 'alias'] = self.lineEdit_Ngram_AliasEditor.text()
+            self.dataframe_vocabNGram.at[token, 'notes'] = self.textEdit_Ngram_NoteEditor.toPlainText()
+            self.dataframe_vocabNGram.at[token, 'NE'] = self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(), '')
 
-        self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
-                                                 tableview=self.tableWidget_Ngram_TagContainer,
-                                                 progressBar=self.progressBar_Ngram_TagComplete)
-        self.tableWidget_Ngram_TagContainer.selectRow(self.tableWidget_Ngram_TagContainer.currentRow() + 1)
+            if self.buttonDictionary_NGram.get(self.buttonGroup_NGram_Classification.checkedButton().text(), '') == "I":
+                self.dataframe_vocabNGram.at[token, 'alias'] = "_".join(self.lineEdit_Ngram_AliasEditor.text().split(" "))
+
+            self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
+                                                     tableview=self.tableWidget_Ngram_TagContainer,
+                                                     progressBar=self.progressBar_Ngram_TagComplete)
+            self.tableWidget_Ngram_TagContainer.selectRow(self.tableWidget_Ngram_TagContainer.currentRow() + 1)
+        except (IndexError, ValueError):
+            Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
     def set_config(self, name=None, author=None, description=None, vocab1g=None, vocabNg=None, original=None,
                    numberTokens=None, alreadyChecked_threshold=None, showCkeckBox_threshold=None, untrackedTokenList=None,
@@ -1219,6 +1242,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                  tableview=self.tableWidget_Ngram_TagContainer,
                                                  progressBar=self.progressBar_Ngram_TagComplete)
 
+
         self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(layout=self.verticalLayout_1gram_SimilarityPattern,
                                                                             vocab = self.dataframe_vocab1Gram,
                                                                             together = self.together,
@@ -1259,17 +1283,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.clean_rawText_1Gram = kex.token_to_alias(self.clean_rawText, self.dataframe_vocab1Gram)
 
         self.tfidf_ng = self.tokenExtractor_nGram.fit_transform(self.clean_rawText_1Gram)
-        # print(list_tokenExtracted)
-        # print(type(list_tokenExtracted))
-        # print(list_tokenExtracted.shape)
-        tokenselectedLoc=1
-
-        # loc = self.tokenExtractor_1Gram.ranks_[tokenselectedLoc]
-        # mask = list_tokenExtracted[:,loc].todense()>0
-        # print(self.dataframe_Original[mask].iloc[:10][self.config['csv'].get('nlpheader',[])])
-
-
-        # create the n gram dataframe
 
         self.dataframe_vocabNGram = kex.generate_vocabulary_df(self.tokenExtractor_nGram, filename=vocabNgPath, init=init)
 
@@ -1410,7 +1423,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         # do statistics
         tag_pct, tag_comp, tag_empt = kex.get_tag_completeness(self.tag_df)
 
-        self.label_report_tagCompleteness.setText(f'Tag PPV: {tag_pct.mean():.2%} +/- {tag_pct.std():.2%}')
+        self.label_report_tagCompleteness.setText(f'<a href="https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values">Tag PPV</a>: {tag_pct.mean():.2%} +/- {tag_pct.std():.2%}')
         self.label_report_completeDocs.setText(
             f'Complete Docs: {tag_comp} of {len(self.tag_df)}, or {tag_comp/len(self.tag_df):.2%}')
         self.label_report_emptyDocs.setText(
@@ -1707,8 +1720,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         """
         howLong = ((time.time() - self.start_time) - self.timeToRemove) /60
 
-        print(howLong)
-
         if howLong >= self.saveTimeInterval[0]:
             thistime = self.saveTime.pop(0)
             self.saveTimeInterval.pop(0)
@@ -1981,7 +1992,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             btn = Qw.QCheckBox(token)
 
             loc = self.tokenExtractor_1Gram.ranks_[self.vocab.index.get_loc(token)]
-            print(loc)
             mask = self.tfidf[:, loc].todense() > 0
             tooltip = str('\n'.join(self.together[mask.flatten().tolist()[0]].head(3).tolist()))
             btn.setToolTip(tooltip)
