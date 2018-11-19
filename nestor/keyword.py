@@ -12,10 +12,11 @@ from itertools import product
 
 try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
     ipy_str = str(type(get_ipython()))
-    if 'zmqshell' in ipy_str:
-        print('')
+    print(ipy_str)
+    if 'zmqshell' in ipy_str.lower():
+        print('Using Notebook Progress-bars...')
         from tqdm import tqdm_notebook as tqdm
-    if 'terminal' in ipy_str:
+    if 'terminal' in ipy_str.lower():
         from tqdm import tqdm
 except:
 
