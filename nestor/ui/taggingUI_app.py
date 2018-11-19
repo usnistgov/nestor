@@ -125,8 +125,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         UI objects
         """
         self.setupUi(self)
-        self.setGeometry(20, 20, 648, 705)
+        # self.setGeometry(20, 20, 648, 705)
 
+        self.center()
         self.enableFeature(existDatabase=False, existProject=False, existTagExtracted=False)
 
         self.tokenUpdate1g_user = set()
@@ -260,6 +261,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
 
         self.show()
+
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = Qw.QApplication.desktop().screenNumber(Qw.QApplication.desktop().cursor().pos())
+        centerPoint = Qw.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
 
     def setMenu_researchProject_new(self):
         """
@@ -1063,7 +1071,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                      )
 
             self.tableWidget_1gram_TagContainer.selectRow(self.tableWidget_1gram_TagContainer.currentRow() + 1)
-
+            self.lineEdit_1gram_AliasEditor.setFocus()
         except (IndexError, ValueError):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 
@@ -1087,6 +1095,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                      tableview=self.tableWidget_Ngram_TagContainer,
                                                      progressBar=self.progressBar_Ngram_TagComplete)
             self.tableWidget_Ngram_TagContainer.selectRow(self.tableWidget_Ngram_TagContainer.currentRow() + 1)
+            self.lineEdit_Ngram_AliasEditor.setFocus()
         except (IndexError, ValueError):
             Qw.QMessageBox.about(self, 'Can\'t select', "You should select a row first")
 

@@ -56,11 +56,14 @@ def main():
 
 
 if __name__ == "__main__":
-    print("==================================================================")
-    print("Welcome to NESTOR, a tagging tool created by the KEA gteam at NIST")
-    print("It allows you to nicely tag your human writed Maintenance Data in ")
-    print("order to make it computable by a machine and easily readable by you")
-    print("==================================================================")
+    print(
+        "====================================================================\n",
+        " Welcome to NESTOR, a tagging tool created by the KEA team at NIST\n",
+        " It allows you to nicely tag your human-written Maintenance Data in \n",
+        " order to make it computable by a machine and easily readable by you\n",
+        "====================================================================\n"
+    )
+
 
     main()
 
