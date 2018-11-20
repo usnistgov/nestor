@@ -717,9 +717,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         def onclick_ok():
             self.existingProject.remove(self.config.get("name"))
-            name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, untrackedTokenList = dialogMenu_settings.get_data()
+            name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, special_replace = dialogMenu_settings.get_data()
 
             if name and name not in self.existingProject:
+
+                oldnumberToken = self.config["settings"].get("numberTokens", 1000)
+
+
                 Path(str(self.projectsPath / self.config.get("name") / self.config.get("vocab1g")) + ".csv").unlink()
                 Path(str(self.projectsPath / self.config.get("name") / self.config.get("vocabNg")) + ".csv").unlink()
 
@@ -739,17 +743,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                 numberTokens=numberTokens,
                                 alreadyChecked_threshold=alreadyChecked_threshold,
                                 showCkeckBox_threshold=showCkeckBox_threshold,
-                                untrackedTokenList=untrackedTokenList
+                                untrackedTokenList=special_replace
                                 )
                 dialogMenu_settings.close()
 
                 self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
                 self.onMoveSlider_similarPattern()
 
-                #change the similarity
+                if oldnumberToken != self.config["settings"].get("numberTokens",1000) or self.config["csvinfo"].get("untracked_token", None):
+                    self.setMenu_projectSave()
+                    self.whenProjectOpen()
 
-
-                #self.buttonGroup_similarityPattern = QButtonGroup_similarityPattern(self.verticalLayout_1gram_SimilarityPattern)
                 self.setMenu_projectSave()
             else:
                 dialogMenu_settings.lineEdit_Settings_ProjectName.setStyleSheet(self.changeColor['wrongInput'])
@@ -1185,7 +1189,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.config needs to be updated with the new project
         :return:
         """
-
+        self.set_config(schema=str(script_dir.parent / 'store_data' / 'DatabaseSchema.yaml'))
 
         self.existingProject.add(self.config.get('name',""))
 

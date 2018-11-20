@@ -156,6 +156,10 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         Return the needed data
         :return:
         """
+        special_replace = dict()
+        if self.textEdit_Setup_UntrackedToken.toPlainText():
+            for word in self.textEdit_Setup_UntrackedToken.toPlainText().split(";"):
+                special_replace[word] = ""
 
         return  self.lineEdit_Settings_ProjectName.text(),\
                 self.lineEdit_Settings_ProjectAuthor.text(),\
@@ -165,7 +169,8 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
                 int(self.lineEdit_Setup_NumberToken.text()) if self.lineEdit_Setup_NumberToken.text() else 1000,\
                 int(self.lineEdit_Setup_TokenChecked.text()) if self.lineEdit_Setup_TokenChecked.text() else 99,\
                 int(self.lineEdit_Setup_TokenShow.text()) if self.lineEdit_Setup_TokenShow.text() else 50, \
-                [word.lstrip() for word in self.textEdit_Setup_UntrackedToken.toPlainText().split(";") if self.textEdit_Setup_UntrackedToken.toPlainText()]
+                special_replace
+
 
 
 fname_tou = 'dialogmenu_termsofuse.ui'
