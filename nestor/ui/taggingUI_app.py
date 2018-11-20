@@ -1360,24 +1360,31 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             elif self.tabWidget.currentIndex() ==1:
                 self.onClick_UpdateNGramVocab()
 
+        ####### bad hack to move up and down checkboxes in pyqt #######
         if event.key() == Qt.Key_Up:
             if self.tabWidget.currentIndex() == 0:
+                list_len = len(self.buttonGroup_similarityPattern.buttons_list)
                 enum = None
                 for n,button in enumerate(self.buttonGroup_similarityPattern.buttons_list):
                     if button.hasFocus():
                         enum = n
-                if enum:
-                    self.buttonGroup_similarityPattern.buttons_list[enum - 1].setFocus()
+                if enum is not None:
+                    new_idx = (enum-1) % list_len
+                    # print(enum, new_idx)
+                    self.buttonGroup_similarityPattern.buttons_list[new_idx].setFocus()
 
         if event.key() == Qt.Key_Down:
             if self.tabWidget.currentIndex() == 0:
+                list_len = len(self.buttonGroup_similarityPattern.buttons_list)
                 enum = None
                 for n,button in enumerate(self.buttonGroup_similarityPattern.buttons_list):
                     if button.hasFocus():
                         enum = n
-                if enum:
-                    self.buttonGroup_similarityPattern.buttons_list[enum + 1].setFocus()
-
+                if enum is not None:
+                    new_idx = (enum+1) % list_len
+                    # print(enum, new_idx)
+                    self.buttonGroup_similarityPattern.buttons_list[new_idx].setFocus()
+        ###############################################################
 
     def close_Dialog(self, event):
         """
@@ -2026,7 +2033,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
                                   limit=20)[:int( checkBox_show * 20 / 100)]
 
         alias = self.vocab.loc[token, 'alias']
-
 
         #for each one, create the checkbox
         for token, score in similar:
