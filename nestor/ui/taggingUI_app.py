@@ -1,12 +1,10 @@
 import importlib
-from PyQt5 import QtWidgets as Qw
 
 import pandas as pd
 import numpy as np
 import fuzzywuzzy.process as zz
 import shutil
 import time
-
 
 import chardet
 import webbrowser
@@ -959,9 +957,17 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         loc = self.tokenExtractor_nGram.ranks_[self.dataframe_vocabNGram.index.get_loc(token)]
         mask = self.tfidf_ng[:, loc].todense() > 0
-        tooltip = str('\n'.join(self.together[mask.flatten().tolist()[0]].head(3).tolist()))
+        tooltip = str('<br><br>'.join(
+            self.together[(
+                mask
+                    .flatten()
+                    .tolist()[0]
+            )]
+                .head(3)
+                .tolist()
+        ))
 
-        self.label_Ngram_CompositionDescription.setToolTip(tooltip)
+        self.label_Ngram_CompositionDescription.setToolTip('<font>'+tooltip+'</font>')
 
         if not alias:
             alias = token
@@ -1982,8 +1988,6 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             param autoMatch_score:
         autoMatch_score :
 
-        PPPPPPPPPPPPPPPPPPPPPPPP :
-
         alias :
 
 
@@ -2007,8 +2011,17 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
 
             loc = self.tokenExtractor_1Gram.ranks_[self.vocab.index.get_loc(token)]
             mask = self.tfidf[:, loc].todense() > 0
-            tooltip = str('\n'.join(self.together[mask.flatten().tolist()[0]].head(3).tolist()))
-            btn.setToolTip(tooltip)
+            tooltip = str('<br><br> '.join(
+                self.together[(
+                    mask
+                        .flatten()
+                        .tolist()[0]
+                )]
+                    .head(3)
+                    .tolist()
+                )
+            )
+            btn.setToolTip('<font>'+tooltip+'</font>')
 
             self.addButton(btn)
             self.layout.addWidget(btn)

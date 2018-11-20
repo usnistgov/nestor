@@ -40,6 +40,16 @@ def main():
             padding: 0 3px 0 3px;
         }
         """
+        # """
+        # QToolTip {
+        #     background-color: black;
+        #     color: white;
+        #     border: black solid 1px
+        # }
+        # """
+
+
+
     projectsPath = Path.home() / '.nestor-tmp'
     projectsPath.mkdir(parents=True, exist_ok=True)
 
