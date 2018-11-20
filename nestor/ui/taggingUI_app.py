@@ -902,7 +902,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         for t in self.tokenUpdate1g_vocab:
             if t <= self.config['settings'].get('numberTokens', 1000):
-                print(self.tableWidget_1gram_TagContainer.item(t, 0).text())
                 self.tableWidget_1gram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_vocab'])
 
         for t in self.tokenUpdateNg_vocab:

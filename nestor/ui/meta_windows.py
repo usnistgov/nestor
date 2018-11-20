@@ -157,11 +157,19 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         Return the needed data
         :return:
         """
+        exclude = self.textEdit_Setup_UntrackedToken.toPlainText()
+        replace = self.textEdit_Setup_ReplaceToken.toPlainText()
         special_replace = dict()
-        if self.textEdit_Setup_UntrackedToken.toPlainText():
-            for word in self.textEdit_Setup_UntrackedToken.toPlainText().split(";"):
-                special_replace[word] = ""
-
+        if exclude:
+            exclude = exclude.split(',')
+            exlude = [i.lstrip() for i in exclude]
+            if not replace:
+                replace = len(exclude)*['']
+            else:
+                replace = replace.split(',')
+                replace = [i.lstrip() for i in replace]
+            special_replace = dict(zip(exclude, replace))
+        # print(special_replace)
         return  self.lineEdit_Settings_ProjectName.text(),\
                 self.lineEdit_Settings_ProjectAuthor.text(),\
                 self.textEdit_Settings_ProjectDescription.toPlainText(), \

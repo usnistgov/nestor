@@ -22,122 +22,20 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_Settings_ProjectDescription">
+     <item row="12" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Project Description</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_Settings_ProjectName">
-       <property name="text">
-        <string>Project Name *</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QLineEdit" name="lineEdit_Settings_ProjectNgVocabName"/>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_Settings_Project1gVocabName">
-       <property name="text">
-        <string>Vocab 1-gram filename</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_Settings_ProjectNgVocabName">
-       <property name="text">
-        <string>Vocab N-gram filename</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEdit_Settings_ProjectAuthor"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_Settings_ProjectAuthor">
-       <property name="text">
-        <string>Author</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1">
-      <widget class="QLineEdit" name="lineEdit_Setup_TokenShow">
-       <property name="inputMethodHints">
-        <set>Qt::ImhNone</set>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
-      <widget class="QTextEdit" name="textEdit_Setup_UntrackedToken">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>100</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QTextEdit" name="textEdit_Settings_ProjectDescription"/>
-     </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_Setup_UntrackedToken">
-       <property name="text">
-        <string>Exclude these words(separated by &quot;;&quot;)</string>
+        <string>* mandatory</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
       <widget class="QLineEdit" name="lineEdit_Settings_ProjectName"/>
      </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="label_Setup_TokenShow">
-       <property name="text">
-        <string>Threshold (%) for list of similar words</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="lineEdit_Settings_Project1gVocabName"/>
-     </item>
-     <item row="10" column="1">
-      <widget class="QDialogButtonBox" name="buttonBox_Setup">
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_Setup_NumberToken">
-       <property name="text">
-        <string>Number of words listed</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QLineEdit" name="lineEdit_Setup_NumberToken"/>
-     </item>
      <item row="7" column="1">
       <widget class="QLineEdit" name="lineEdit_Setup_TokenChecked">
        <property name="inputMethodHints">
         <set>Qt::ImhNone</set>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_Setup_TokenChecked">
-       <property name="text">
-        <string>Threshold similarity (%) default ticked words</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="Line" name="line">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
@@ -148,10 +46,143 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0">
-      <widget class="QLabel" name="label">
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="lineEdit_Settings_ProjectNgVocabName"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QTextEdit" name="textEdit_Settings_ProjectDescription"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="lineEdit_Settings_Project1gVocabName"/>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_Setup_TokenShow">
        <property name="text">
-        <string>* mandatory</string>
+        <string>Threshold (%) for list of similar words</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="lineEdit_Settings_ProjectAuthor"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_Settings_ProjectDescription">
+       <property name="text">
+        <string>Project Description</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_Settings_ProjectName">
+       <property name="text">
+        <string>Project Name *</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="lineEdit_Setup_NumberToken"/>
+     </item>
+     <item row="11" column="1">
+      <widget class="QTextEdit" name="textEdit_Setup_ReplaceToken">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>100</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_Settings_Project1gVocabName">
+       <property name="text">
+        <string>Vocab 1-gram filename</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="lineEdit_Setup_TokenShow">
+       <property name="inputMethodHints">
+        <set>Qt::ImhNone</set>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_Setup_NumberToken">
+       <property name="text">
+        <string>Number of words listed</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_Settings_ProjectAuthor">
+       <property name="text">
+        <string>Author</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="label_Setup_ReplaceToken">
+       <property name="text">
+        <string>Replace with these: (separated by &quot;,&quot;)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_Settings_ProjectNgVocabName">
+       <property name="text">
+        <string>Vocab N-gram filename</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="1">
+      <widget class="QDialogButtonBox" name="buttonBox_Setup">
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_Setup_TokenChecked">
+       <property name="text">
+        <string>Threshold similarity (%) default ticked words</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="label_Setup_UntrackedToken">
+       <property name="text">
+        <string>Exclude these words(separated by &quot;,&quot;)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QTextEdit" name="textEdit_Setup_UntrackedToken">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>100</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="Line" name="line_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
