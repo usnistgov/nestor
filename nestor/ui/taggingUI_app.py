@@ -251,6 +251,11 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Qw.QShortcut(Qg.QKeySequence("Ctrl+D"), self).activated.connect(self.setMenu_databaseConnect)
         self.actionConnect.setText(self.actionConnect.text() + "\tCtrl+D")
 
+        Qw.QShortcut(Qg.QKeySequence("Alt+1"), self).activated.connect(lambda : self.tabWidget.setCurrentIndex(0))
+        Qw.QShortcut(Qg.QKeySequence("Alt+2"), self).activated.connect(lambda : self.tabWidget.setCurrentIndex(1))
+        Qw.QShortcut(Qg.QKeySequence("Alt+3"), self).activated.connect(lambda : self.tabWidget.setCurrentIndex(2))
+
+
 
         """
         Research Mode
@@ -1385,6 +1390,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                     # print(enum, new_idx)
                     self.buttonGroup_similarityPattern.buttons_list[new_idx].setFocus()
         ###############################################################
+
+
 
     def close_Dialog(self, event):
         """
