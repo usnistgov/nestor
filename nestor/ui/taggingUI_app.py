@@ -1360,6 +1360,25 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             elif self.tabWidget.currentIndex() ==1:
                 self.onClick_UpdateNGramVocab()
 
+        if event.key() == Qt.Key_Up:
+            if self.tabWidget.currentIndex() == 0:
+                enum = None
+                for n,button in enumerate(self.buttonGroup_similarityPattern.buttons_list):
+                    if button.hasFocus():
+                        enum = n
+                if enum:
+                    self.buttonGroup_similarityPattern.buttons_list[enum - 1].setFocus()
+
+        if event.key() == Qt.Key_Down:
+            if self.tabWidget.currentIndex() == 0:
+                enum = None
+                for n,button in enumerate(self.buttonGroup_similarityPattern.buttons_list):
+                    if button.hasFocus():
+                        enum = n
+                if enum:
+                    self.buttonGroup_similarityPattern.buttons_list[enum + 1].setFocus()
+
+
     def close_Dialog(self, event):
         """
         When a window is closed (x, cancel, ok)
@@ -1863,6 +1882,7 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         if event.key() == Qt.Key_Backspace:
             self.stopTime()
 
+
     def stopTime(self):
         """
         stop the time
@@ -1963,6 +1983,8 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         self.textAlreadySelected = set()
         self.textToUncheck = set()
 
+        self.buttons_list=[]
+
         self.buttonClicked.connect(self.set_textSelected)
 
     def set_textSelected(self, button):
@@ -2010,6 +2032,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         for token, score in similar:
             btn = Qw.QCheckBox(token)
 
+
             loc = self.tokenExtractor_1Gram.ranks_[self.vocab.index.get_loc(token)]
             mask = self.tfidf[:, loc].todense() > 0
             tooltip = str('<br><br> '.join(
@@ -2040,6 +2063,9 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             if token in self.textAlreadySelected:
                 btn.setChecked(True)
 
+            self.buttons_list.append(btn)
+
+
         self.spacer = Qw.QSpacerItem(20, 40, Qw.QSizePolicy.Minimum, Qw.QSizePolicy.Expanding)
         self.layout.addSpacerItem(self.spacer)
 
@@ -2059,6 +2085,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
             self.layout.removeWidget(btn)
             btn.deleteLater()
         self.layout.removeItem(self.spacer)
+        self.buttons_list = []
 
 
 class MyMplCanvas(FigureCanvas):
