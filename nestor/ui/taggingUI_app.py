@@ -1170,15 +1170,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         #1gramtab
         if tabindex == 0:
-            self.tableWidget_1gram_TagContainer.selectRow(0)
-
+            pass
         #ngramtab
         elif tabindex == 1:
             self.extract_NgVocab(init=self.dataframe_vocabNGram)
             self.printDataframe_TableviewProgressBar(dataframe=self.dataframe_vocabNGram,
                                                      tableview=self.tableWidget_Ngram_TagContainer,
                                                      progressBar=self.progressBar_Ngram_TagComplete)
-            self.tableWidget_Ngram_TagContainer.selectRow(0)
 
 
         #reporttab
@@ -1264,6 +1262,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                                             tfidf = self.tfidf_1g,
                                                                             tokenExtractor_1Gram=self.tokenExtractor_1Gram)
 
+        self.tableWidget_Ngram_TagContainer.selectRow(0)
         self.tableWidget_1gram_TagContainer.selectRow(0)
         self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
 
