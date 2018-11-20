@@ -1,8 +1,9 @@
 from pathlib import Path
-from PyQt5 import QtGui, uic
+from PyQt5 import uic
+# from nestor.ui import *
+import PyQt5.QtGui as Qg
 import PyQt5.QtWidgets as Qw
 from PyQt5.QtCore import Qt
-
 from nestor.store_data import integration as cypherQuery
 
 import pyaml, yaml
@@ -28,7 +29,7 @@ class DialogMenu_newProject(Qw.QDialog, Ui_MainWindow_newproject):
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
         self.pushButton_NewProject_LoadCSV.clicked.connect(self.onClick_loadCSV)
         self.buttonBox__NewProject.rejected.connect(self.close)
@@ -79,7 +80,7 @@ class DialogMenu_openProject(Qw.QDialog, Ui_MainWindow_openproject):
         self.set_values()
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
         self.buttonBox_OpenProject.rejected.connect(self.close)
         self.comboBox_OpenProject_ProjectName.currentTextChanged.connect(self.set_values)
@@ -145,7 +146,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         self.textEdit_Setup_UntrackedToken.setPlainText(untracked)
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
         self.buttonBox_Setup.rejected.connect(self.close)
 
@@ -189,7 +190,7 @@ class DialogMenu_TermsOfUse(Qw.QDialog, Ui_MainWindow_tou):
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
 
 fname_csvHeader = 'dialogmenu_csvheadermapping.ui'
@@ -214,7 +215,7 @@ class DialogMenu_csvHeaderMapping(Qw.QDialog, Ui_MainWindow_csvHeader):
         self.configCsvHeader = configCsvHeader
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
         self.buttonGroup_CSVHeaders_Checkbox = Qw.QButtonGroup()
         self.buttonGroup_CSVHeaders_Checkbox.setExclusive(False)
@@ -308,7 +309,7 @@ class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
         self.lineEdit_DialogDatabaseConnection_Username.setText(configDatabase.get("username",""))
         self.lineEdit_DialogDatabaseConnection_OpenSchema.setText(configDatabase.get("schema",""))
@@ -373,7 +374,7 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
 
         self.iconPath = iconPath
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
         if csvHeaderMapping :
             # change the csvHeaderOriginal to match with the given csv header
@@ -561,7 +562,7 @@ class DialogWait(Qw.QDialog, Ui_MainWindow_dialogWait):
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
     def setProgress(self, value):
         self.progressBar_DialogWait.setValue(value)
@@ -582,7 +583,7 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         if iconPath:
-            self.setWindowIcon(QtGui.QIcon(iconPath))
+            self.setWindowIcon(Qg.QIcon(iconPath))
 
         self.buttonBox_ResearchWindows.rejected.connect(self.close)
 

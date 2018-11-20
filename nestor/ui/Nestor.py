@@ -1,9 +1,9 @@
-from qtpy import QtGui
-
 from nestor.ui.taggingUI_app import MyTaggingToolWindow, openYAMLConfig_File
+import PyQt5.QtGui as Qg
+import PyQt5.QtWidgets as Qw
+from PyQt5.QtCore import Qt
 
 
-from PyQt5.QtWidgets import QApplication, QMessageBox, qApp
 from PyQt5 import QtCore
 import sys
 import traceback
@@ -11,21 +11,21 @@ from pathlib import Path
 
 
 def exception_handler(type_, value, traceback_):
-    if qApp.thread() is QtCore.QThread.currentThread():
+    if Qw.qApp.thread() is QtCore.QThread.currentThread():
         p = traceback.format_exc()
-        msg = QMessageBox()
+        msg = Qw.QMessageBox()
         msg.setWindowTitle("Nestor has encountered an error")
-        msg.setIcon(QMessageBox.Critical)
+        msg.setIcon(Qw.QMessageBox.Critical)
         msg.setText("An unhandled error occurred! Check the log for more detailed information...")
         msg.setDetailedText(p)
-        msg.setEscapeButton(QMessageBox.Ok)
+        msg.setEscapeButton(Qw.QMessageBox.Ok)
         msg.exec_()
 
 
 
 def main():
 
-    app = QApplication(sys.argv)
+    app = Qw.QApplication(sys.argv)
 
     stylesheet = """
         QGroupBox { 
@@ -59,7 +59,7 @@ def main():
         yaml_path= nestorPath / 'store_data' / 'csvHeader.yaml'
     )
     icon_path = nestorPath / 'ui' / 'kea-icon.png'
-    app.setWindowIcon(QtGui.QIcon(str(icon_path)))
+    app.setWindowIcon(Qg.QIcon(str(icon_path)))
 
     app.setStyleSheet(stylesheet)
     window = MyTaggingToolWindow(projectsPath=projectsPath,

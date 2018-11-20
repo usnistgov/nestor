@@ -16,6 +16,7 @@ import seaborn as sns
 
 import PyQt5.QtGui as Qg
 import PyQt5.QtWidgets as Qw
+from PyQt5.QtCore import Qt
 
 
 import nestor.keyword as kex
@@ -59,7 +60,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         self.iconPath = iconPath
         if self.iconPath:
-            self.setWindowIcon(QtGui.QIcon(self.iconPath))
+            self.setWindowIcon(Qg.QIcon(self.iconPath))
 
         self.existingProject =set([folder.name for folder in projectsPath.iterdir() if folder.is_dir()])
 
@@ -241,13 +242,13 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
         Set the shortcut 
         """
-        Qw.QShortcut(QtGui.QKeySequence("Ctrl+N"), self).activated.connect(self.setMenu_projectNew)
+        Qw.QShortcut(Qg.QKeySequence("Ctrl+N"), self).activated.connect(self.setMenu_projectNew)
         self.actionNew_Project.setText(self.actionNew_Project.text() + "\tCtrl+N")
-        Qw.QShortcut(QtGui.QKeySequence("Ctrl+S"), self).activated.connect(self.setMenu_projectSave)
+        Qw.QShortcut(Qg.QKeySequence("Ctrl+S"), self).activated.connect(self.setMenu_projectSave)
         self.actionSave_Project.setText(self.actionSave_Project.text() + "\tCtrl+S")
-        Qw.QShortcut(QtGui.QKeySequence("Ctrl+O"), self).activated.connect(self.setMenu_projectOpen)
+        Qw.QShortcut(Qg.QKeySequence("Ctrl+O"), self).activated.connect(self.setMenu_projectOpen)
         self.actionOpen_Project.setText(self.actionOpen_Project.text() + "\tCtrl+O")
-        Qw.QShortcut(QtGui.QKeySequence("Ctrl+D"), self).activated.connect(self.setMenu_databaseConnect)
+        Qw.QShortcut(Qg.QKeySequence("Ctrl+D"), self).activated.connect(self.setMenu_databaseConnect)
         self.actionConnect.setText(self.actionConnect.text() + "\tCtrl+D")
 
 

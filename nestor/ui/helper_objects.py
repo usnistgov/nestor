@@ -1,9 +1,6 @@
-from PyQt5.QtCore import Qt
-import PyQt5.QtWidgets as Qw
 import PyQt5.QtGui as Qg
-
-
-
+import PyQt5.QtWidgets as Qw
+from PyQt5.QtCore import Qt
 
 
 class QTableWidget_token(Qw.QTableWidget):
