@@ -1,3 +1,5 @@
+from qtpy import QtGui
+
 from nestor.ui.taggingUI_app import MyTaggingToolWindow, openYAMLConfig_File
 
 
@@ -47,7 +49,8 @@ def main():
         yaml_path= nestorPath / 'store_data' / 'csvHeader.yaml'
     )
     icon_path = nestorPath / 'ui' / 'kea-icon.png'
-    print(str(icon_path))
+    app.setWindowIcon(QtGui.QIcon(str(icon_path)))
+
     app.setStyleSheet(stylesheet)
     window = MyTaggingToolWindow(projectsPath=projectsPath,
                                  iconPath=str(icon_path),
