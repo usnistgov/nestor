@@ -9,19 +9,21 @@ application.
 Start the Application
 ---------------------
 
-1. Open a terminal window and navigate to the folder where the tagging tool is installed. For example, it may be installed in '/anaconda3/lib/python3.6/site-packages
-' on a Linux machine, but the installed location might vary from one computer to another and one OS to another.
+1. Open a terminal window 
+
+:Linux:      ``Ctrl`` + ``Alt`` + ``T``
+:Windows:    ``Windows`` + ``R`` -> Type 'cmd'
+:Mac:        ``⌘`` + ``Space`` -> Type 'Terminal'
 
 
-2. Launch the app by typing in 'python app.py'
+2. Launch the app by typing in ``nestor-gui``
 
 3. The application should open as seen below:
 
 |image6|
 
-4. Open your .csv file with your MWOs. Included in the application, is a
-   publicly available dataset. We will use this file (mine_raw.csv) as
-   the example.
+4. Open your .csv file with your MWOs. Please note, the file must be UTF-8 encoding. Included in the application, is a
+   publicly available dataset. We will use this file as the example. The file, excavators.csv, is located in <python path>\\site-packages\\nestor\\datasets\\.
 
 |image7|
 
@@ -31,14 +33,38 @@ Start the Application
 
 |image9|
 
-6. Select the column(s) that you would like to “tag.” In this example,
-   the column is “OriginalShorttext.” Hit “Next”.
+If you are continuing from a previous session of tagging using Nestor,
+load up the 1-gram and the N-gram files. Usually, they are automatically
+loaded up using the same file-path as the .csv file. If the file-path has
+changed, ensure that the correct 1-gram and N-gram files are selected using
+the **Open** button.
+
+|image91|
+
+6. Select the column(s) that you would like to “tag.” Check the check box. In this example,
+   the column is “OriginalShorttext.”
 
 |image10|
 
-7. The application window will open as seen below:
+.. _Dropdown Categories:
+
+7. There is also a drop-down to say what the column likely represents -
+   this is for later analyses and future storage in a graph database. These categories
+   in the drop-down come from `prior studies <https://www.nist.gov/publications/developing-maintenance-key-performance-indicators-maintenance-work-order-data>`__ on Maintenance Key Performance Indicators (KPIs).
+   These categories are used as the headers in the *.h5* binary files used to store the tagged data (See the Section: `Report tab`_).
+   A subset of these categories, *Machine Name* and *Maintenance Technician*, are used for the Nestor Dashboard. **Please note, the columns that are selected as headers do not need to be "checked" if these columns are not going to be tagged.** 
+
+   These categories will be used for constructing a graph database (**COMING SOON!**)
+
+   The “OriginalShorttext” in this example matches "Description of Problem". Hit “Next”.
+
+|image101|
+
+8. The application window will open as seen below:
 
 |image11|
+
+
 
 1 Gram Token tab
 ----------------
@@ -50,18 +76,18 @@ into detail on the “1 Gram Token” tab.
 
 -  This window contains the following information:
 
-   -  “tokens”: The token as seen in the corpus and ranked by TF-IDF
-      weighting.
+   -  **tokens**: The token as seen in the corpus and ranked by `TF-IDF weighting <http://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting>`__.
 
-   -  “NE”: This is a “Named Entity.” This column will track the
+   -  **NE**: This is a “Named Entity.” This column will track the
       classifications of the tokens, which will be explained in more
-      detail later.
+      detail later in the `Classification Section`_.
 
-   -  “alias”: This column tracks any aliases for tokens as made by the
+   -  **alias**: This column tracks any aliases for tokens as made by the
       tool. These represent your new “tags."
 
-   -  “notes”: This column tracks your notes for any tokens you have
+   -  **notes**: This column tracks your notes for any tokens you have
       mapped to an alias.
+
 
 -  Next, select a token to “tag.” In this example, we use “replace.”
 
@@ -69,8 +95,7 @@ into detail on the “1 Gram Token” tab.
 |image13|
 
 -  The “similar pattern” field will display words similar to the token
-   using an “edit-distance"-based metric, via
-   *`fuzzywuzzy <https://github.com/seatgeek/fuzzywuzzy>`__*. Any term
+   using an “edit-distance"-based metric, via `fuzzywuzzy <https://github.com/seatgeek/fuzzywuzzy>`__. Any term
    that is selected here will be given the same alias and classification
    as the original token. So in this example, if “replaced” is selected,
    it will be given the same alias, notes, and classification as
@@ -85,25 +110,26 @@ into detail on the “1 Gram Token” tab.
 
 |image15|
 
+.. _Classification Section: 
+
 -  This field is where the user can classify the “token.” The
    classifications provided are:
 
-   -  “Item”: The objects directly relevant to the issue such as
+   -  **Item**: The objects directly relevant to the issue such as
       machine, resources, parts, etc. An example is a “pump” is always
       an item, however, “pumping” would not be an item.
 
-   -  “Problem”: The problem that is occurring at an item. An example is
+   -  **Problem**: The problem that is occurring at an item. An example is
       “leak” is always a problem.
 
-   -  “Solution”: The solution action taken on an item. An example is
+   -  **Solution**: The solution action taken on an item. An example is
       “replace” is always a solution.
 
-   -  “Ambiguous (Unknown)”: Words that are unknown without more
+   -  **Ambiguous (Unknown)**: Words that are unknown without more
       context. An example is “oil” as this can be an item or a solution.
-      This is further described in the N Gram Token tab section
-      `4.3 <#sec:Ngram>`__
+      This is further described in the Section: `N Gram Token tab`_
 
-   -  “Stop-word”: A word that does not matter for analysis. For
+   -  **Stop-word**: A word that does not matter for analysis. For
       example, “see” or “according” are stop-words.
 
 |image16|
@@ -113,8 +139,24 @@ into detail on the “1 Gram Token” tab.
 
 |image17|
 
+- For each new session, regardless of whether using earlier tagged 1-gram and
+  N-gram files, each new word that is classified will be highlighted in a
+  different color.
 
-.. _sec:Ngram:
+|image171|
+
+- The “Update” button will update the interface with the user's selections. 
+
+- The "Save" button will save the vocab files to a .csv file
+
+|image172|
+
+- The “Slider” will update the amount of similar terms that are displayed. As the slider moves right, more terms will display in "Similar Pattern". 
+
+|image173|
+
+- For our example using "replace" from above, select all words that are similar, select "Solution", and then hit "Update". 
+
 
 N Gram Token tab
 ----------------
@@ -125,23 +167,28 @@ into detail on the “N Gram Token” tab.
 -  The N Gram token tab will provide detail on common 2 grams tokens,
    ordered in TF-IDF ranking, for the corpus (e.g., “hydraulic leak” is
    a common 2 gram in some data sets). The 2 grams can also provide more
-   context for the “Uknown” classifications from the above section. For
+   context for the “Unknown” classifications from the above section. For
    example, “oil” is unknown until the user is provided more context.
 
 |image18|
 
 -  When a user selects the N Gram Token tab, the window below is
-   presented:
+   presented. Initially all the n-gram Named Entity classes are empty.
 
 |image19|
 
--  The user is presented with the Composition of the 2 gram, which are
-   composed of two 1 gram tokens. Each 1 gram is presented, with the
-   classification (“type”) and the synonyms (the other words that were
-   linked with the Similar Pattern subwindow in the above section). In
-   this example, “oil” is an “unknown (U)” classification and has no
-   other synonyms at this point; “leak” is a “problem (P)” and has no
-   other synonyms at this point.
+-  If the menu option for "Auto-populate" -> "From 1gram Vocab" is chosen,
+   the user is then presented with the "Composition" of the 2 gram, which are
+   composed of two 1 gram tokens. The other options are currently under development (**COMING SOON!**).
+
+|image191|
+|image192|
+
+-  Each 1 gram is presented, with the classification (“type”) and the
+   synonyms (the other words that were linked with the Similar Pattern
+   subwindow in the Section: `1 Gram Token tab`_).
+   In this example, “oil” is an “unknown (U)” classification and has no
+   other synonyms at this point; “leak” is a “problem (P)” and has synonyms: leak, leaking, leaks, leaky. 
 
 |image20|
 
@@ -152,47 +199,23 @@ into detail on the “N Gram Token” tab.
 
 |image21|
 
-   -  Problem Item: This is a problem-item (or item-problem) pair. For
-      example, “hydraulic” is an item and “leak” is a problem so
-      “hydraulic leak” is a problem-item pair. The tool will
-      pre-populate some problem-item pairs using the 1 grams that are
-      classified as problems and items.
+- **Problem Item**: This is a problem-item (or item-problem) pair. For example, “hydraulic” is an item and “leak” is a problem so “hydraulic leak” is a problem-item pair. The tool will pre-populate some problem-item pairs using the 1 grams that are classified as problems and items. The user will need to confirm these pairs are correct. 
 
-   -  Solution Item: This is a solution-item (or item-solution) pair.
-      For example, “hydraulic” is an item and “replace” is a solution so
-      “replace hydraulic” is a solution-item pair. The tool will
-      pre-populate some solution-item pairs using the 1 grams that are
-      classified as solutions and items.
+-  **Solution Item**: This is a solution-item (or item-solution) pair. For example, “hydraulic” is an item and “replace” is a solution so “replace hydraulic” is a solution-item pair. The tool will pre-populate some solution-item pairs using the 1 grams that are classified as solutions and items. The user will need to confirm these pairs are correct. 
 
-   -  Item: This is for pairs of items that are de facto 1-grams. For
-      example “grease” is an item, line is an “item”, but a
-      “grease_line” is most likely its own “item". The tool will
-      pre-populate some items based on 1 grams that are both items.
-      Please note that 2 gram items, since they are really being treated
-      as 1-grams, must have an underscore (_) in their alias, between
-      the 2 individual items as seen below:
+-  **Item**: This is for pairs of items that are de facto 1-grams. For example “grease” is an item, line is an “item”, but a “grease_line” is most likely its own “item". The tool will pre-populate some items based on 1 grams that are both items. The user will need to confirm these pairs are correct. Please note that 2 gram items, since they are really being treated as 1-grams, must have an underscore (_) in their alias, between the 2 individual items as seen below:
 
 |image22|
 
-   -  Problem: This is a problem that is a 2 gram. This will be left up
-      to the user to classify as these will not be pre-populated using 1
-      gram classifications. Please note that 2 gram problems, since they
-      are really being treated as 1-grams, must have an underscore (_)
-      in their alias, between the 2 individual problems.
+-  **Problem**: This is a problem that is a 2 gram. This will be left up to the user to classify as these will not be pre-populated using 1 gram classifications. Please note that 2 gram problems, since they are  being treated as 1-grams, must have an underscore (_) in their alias, between the 2 individual problems.
 
-   -  Solution: This is a solution that is a 2 gram. This will be left
-      up to the user to classify as these will not be pre-populated
-      using 1 gram classifications. Please note that 2 gram solutions,
-      since they are really being treated as 1-grams, must have an
-      underscore (_) in their alias, between the 2 individual solutions.
+-  **Solution**: This is a solution that is a 2 gram. This will be left up to the user to classify as these will not be pre-populated using 1 gram classifications. Please note that 2 gram solutions, since they are really being treated as 1-grams, must have an underscore (_) in their alias, between the 2 individual solutions.
 
-   -  Ambigious (Unknown): This is an unknown 2 gram that needs more
-      context. This will be left up to the user to classify as these
-      will not be pre-populated using 1 gram classifications.
+-  **Ambigious (Unknown)**: This is an unknown 2 gram that needs more context. This will be left up to the user to classify as these will not be pre-populated using 1 gram classifications.
 
-   -  Stop-word: This is 2 gram stop-word. This will be pre-populated
-      when a “solution” 1 gram is paired with a “problem” ‘ gram. The
-      user can decide if any other 2 grams are not useful.
+-  **Stop-word**: This is 2 gram stop-word. This will be pre-populated when a “solution” 1 gram is paired with a “problem” ‘ gram. The user can decide if any other 2 grams are not useful.
+
+
 
 Report tab
 ----------------------------------
@@ -201,7 +224,7 @@ Once the user is done tagging their desired amount of tokens, they can
 begin using the report tab.
 
 -  Please make sure to hit the “update tag extraction” button before
-   proceeding. This may take some time to compute.
+   proceeding. This may take some time to compute. Please note on Windows computers, the application may state "Not Responding", however, the application is often still running. 
 
 |image23|
 
@@ -213,60 +236,62 @@ begin using the report tab.
 
 |image24|
 
--  Summary statistics are also shown.
+-  Summary statistics are also shown: 
+
+   -  **Tag PPV**: This is the Tag `Positive Predictive Value (PPV) <https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values>`__.
+
+   -  **Complete Docs**: This is the number of MWOs that have all of the tokens completely tagged. In this example, 178 MWOs are completely tagged out of a possible 5485, which is 3.25%.
+
+   -  **Empty Docs**: This is the number of MWOs that have zero tokens tagged. In this example, 1738 MWOs have no tokens tagged out of a possible 5485, which is 31.69%.
 
 |image25|
 
--  The “create new CSV” button will create an .csv with the original
+-  The “create new CSV” button will open a save window. A .csv file will be created with the original
    dataset and 7 new columns (“I”,“P”,”PI”, “S”,“SI”,“U”, and “X”) ,
    which contain the new tags from each category. Please note that “X”
    contains any stop words.
 
 |image26|
 
--  The “create a binary CSV” button will create 2 new .csv files. Each
-   file will contain the work order number (starting with 0), and is
-   ordered identically to the .csv file that was originally loaded. Two
-   new files are created: binary_tags and binary_relations.
+-  The “create a HDFS (binary)” button will open a save window and create a .h5 file. This file
+   will be utilized later on to visualise the data on the Nestor Dashboard.
+   It stores the tagged data with three keys - the original data (only columns with
+   **updated headers** - as discussed in the step: `Dropdown Categories`_.), an occurrence matrix for tags versus documents, and an
+   occurrence matrix for Problem-Items - Solution-Items versus documents.
 
 |image27|
 
-   -  binary_tags: The left most column contains the work order number,
-      while the headers contain all 1 gram tags. A “0” is placed when
-      the work order does not contain the tag in the header and a “1” is
-      placed when the tag in the header is contained in the work order.
-
-   -  binary_relations: The left most column contains the work order
-      number, while the headers contain Problem-Item and Solution-Item
-      tag combinations. A “0” is placed when the work order does not
-      contain the tag in the header and a “1” is placed when the tag in
-      the header is contained in the work order.
 
 
 
 
-
-
-.. |image6| image:: images/Graphic34_v2.png
-.. |image7| image:: images/Graphic35_v2.png
-.. |image8| image:: images/Graphics36_v2.png
-.. |image9| image:: images/Graphics37_v2.png
-.. |image10| image:: images/Graphics38_v2.png
-.. |image11| image:: images/Graphics40_v2.png
-.. |image12| image:: images/Graphics41_v2.png
-.. |image13| image:: images/Graphics42_v2.png
-.. |image14| image:: images/Graphics43_v2.png
-.. |image15| image:: images/Graphics44_v2.png
-.. |image16| image:: images/Graphics45_v2.png
-.. |image17| image:: images/Graphics46_v2.png
-.. |image18| image:: images/Graphics47_v2.png
-.. |image19| image:: images/Graphics48_v2.png
-.. |image20| image:: images/Graphics49_v2.png
-.. |image21| image:: images/Graphics50_v2.png
-.. |image22| image:: images/Graphics51_v2.png
-.. |image23| image:: images/Graphics52_v2.png
-.. |image24| image:: images/Graphics53_v2.png
-.. |image25| image:: images/Graphics54_v2.png
-.. |image26| image:: images/Graphics55_v2.png
-.. |image27| image:: images/Graphics56_v2.png
+.. |image6| image:: images/Graphics34_v3.png
+.. |image7| image:: images/Graphics35_v3.png
+.. |image8| image:: images/Graphics36_v3.png
+.. |image9| image:: images/Graphics37_v3.png
+.. |image91| image:: images/Graphics37_v3_2.png
+.. |image10| image:: images/Graphics38_v3.png
+.. |image101| image:: images/Graphics38_v3_2.png
+.. |image11| image:: images/Graphics40_v3.png
+.. |image12| image:: images/Graphics41_v3.png
+.. |image13| image:: images/Graphics42_v3.png
+.. |image14| image:: images/Graphics43_v3.png
+.. |image15| image:: images/Graphics44_v3.png
+.. |image16| image:: images/Graphics45_v3.png
+.. |image17| image:: images/Graphics46_v3.png
+.. |image171| image:: images/Graphics46_v3_2.png
+.. |image172| image:: images/Graphics46_v3_1.png
+.. |image173| image:: images/nestor_thresholds.png
+.. |image18| image:: images/Graphics47_v3.png
+.. |image19| image:: images/Graphics48_v3.png
+.. |image191| image:: images/Graphics48_v3_2.png
+.. |image192| image:: images/Graphics48_v3_3.png
+.. |image20| image:: images/Graphics49_v3.png
+.. |image21| image:: images/Graphics50_v3.png
+.. |image22| image:: images/Graphics51_v3.png
+.. |image23| image:: images/Graphics52_v3.png
+.. |image24| image:: images/Graphics53_v3.png
+.. |image25| image:: images/Graphics54_v3.png
+.. |image26| image:: images/Graphics55_v3.png
+.. |image27| image:: images/Graphics56_v3.png
 

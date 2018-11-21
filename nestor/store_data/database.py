@@ -16,6 +16,7 @@ Description:
 """
 from tqdm import tqdm
 from neo4j.v1 import GraphDatabase
+import webbrowser
 
 
 class DatabaseNeo4J(object):
@@ -31,9 +32,12 @@ class DatabaseNeo4J(object):
 
     """
 
-    def __init__(self, uri, user, password, schema=None):
+    def __init__(self, server = "localhost", portBolt = "7687", portUi = "7474", user ="neo4j", password = "neo4j", schema=None):
         self.schema=schema
-        self._driver = GraphDatabase.driver(uri, auth=(user, password))
+        self.uri = "bolt:" + server+ ":" + portBolt
+        self.url = server + ":" + portUi
+
+        self._driver = GraphDatabase.driver(self.uri, auth=(user, password))
 
     def close(self):
         """
@@ -57,7 +61,7 @@ class DatabaseNeo4J(object):
                 result = session.write_transaction(self._execute_code, query)
             return 1, result
         except:
-            print("cannot run the query")
+            print("ERROR --> cannot run the queries")
             return 0, None
 
     def runQueries(self, queries):
@@ -71,7 +75,8 @@ class DatabaseNeo4J(object):
             done, result = self.runQuery(query)
 
             if not done:
-                print("ERROR on Maintenance Work Order \tOn query\n", query, "\n\n")
+                print("ERROR --> on Maintenance Work Order"
+                      "\n Query: ", query, "\n cannot be executed \n")
         return 1
 
     def deleteData(self):
@@ -80,7 +85,7 @@ class DatabaseNeo4J(object):
         :return: 1 if it works
         """
         with self._driver.session() as session:
-            session.write_transaction(self._execute_code, "MATCH(n) OPTIONAL MATCH(n) - [r] - () DELETE n, r")
+            session.write_transaction(self._execute_code, "MATCH(n) OPTIONAL MATCH (n)-[r]-() DELETE n, r")
         return 1
 
     def createIndexes(self):
@@ -88,6 +93,7 @@ class DatabaseNeo4J(object):
         Create the indexs on the database for the properties often asked
         :return: 1 if it works
         """
+
         self.runQuery(f'CREATE INDEX ON {self.schema["issue"]["label"]["issue"]}({self.schema["issue"]["properties"]["description_problem"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["human"]["label"]["human"]}({self.schema["human"]["properties"]["name"]})')
         self.runQuery(f'CREATE INDEX ON {self.schema["machine"]["label"]["machine"]}({self.schema["machine"]["properties"]["name"]})')
@@ -196,4 +202,19 @@ class DatabaseNeo4J(object):
 
         return nodeProperties
 
+
+    def getTokenTagClassification(self):
+
+       return self.runQuery(f'MATCH (tag:TAG)\
+                        UNWIND tag.synonyms as token\
+                        RETURN token AS tokens, tag.keyword AS alias,\
+                        CASE\
+                            WHEN "PROBLEM" in labels(tag) THEN "P"\
+                            WHEN "ITEM" in labels(tag) THEN "I"\
+                            WHEN "SOLUTION" in labels(tag) THEN "S"\
+                            WHEN "UNKNOWN" in labels(tag) THEN "U"\
+                            WHEN "SOLUTION_ITEM" in labels(tag) THEN "S I"\
+                            WHEN "PROBLEM_ITEM" in labels(tag) THEN "P I"\
+                            ELSE ""\
+                        END AS NE')
 

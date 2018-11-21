@@ -31,10 +31,8 @@ dist
 
 # exception
 <<<<<<< HEAD
-!database_storage/database/DatabaseSchema.yaml
-!data/public/*.yaml
 =======
 !nestor/datasets/**
-!database_storage/database/DatabaseSchema.yaml
+!nestor/store_data/*.yaml
 !nestor/ui/csvHeader.yaml
 >>>>>>> master

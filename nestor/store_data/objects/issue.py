@@ -22,8 +22,8 @@ Description:
 """
 
 from datetime import datetime
-from database_storage.helper import isoStringToDate, standardizeString
 
+from nestor.store_data.helper import isoStringToDate, standardizeString
 
 
 class Issue:

@@ -33,7 +33,7 @@ Description:
     However, the hierarchy followed the rules created in this file
 """
 
-from database_storage.helper import standardizeString
+from nestor.store_data.helper import standardizeString
 
 class Tag:
     """
@@ -79,7 +79,7 @@ class Tag:
         if isinstance(synonyms, str):
             self.synonyms = [standardizeString(synonyms).lower()]
         elif isinstance(synonyms, list):
-            self.synonyms = [standardizeString(s).lower() for s in synonyms]
+            self.synonyms = [standardizeString(str(s)).lower() for s in synonyms]
         else:
             self.synonyms = None
 

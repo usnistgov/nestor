@@ -17,7 +17,12 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../nestor'))
+from version import get_version
 
+# At top on conf.py (with other import statements)
+# import recommonmark
+# from recommonmark.transform import AutoStructify
+# from recommonmark.parser import CommonMarkParser
 
 # -- Project information -----------------------------------------------------
 
@@ -27,21 +32,9 @@ author = "KEA Development Team"
 
 from subprocess import Popen, PIPE
 
-def get_version():
-    """
-    Returns project version as string from 'git describe' command.
-    """
-    pipe = Popen('git describe --tags --always', stdout=PIPE, shell=True)
-    version = pipe.stdout.read()
 
-    if version:
-        return version.decode('utf-8').lstrip('v').rstrip()
-    else:
-        return 'X.Y'
-
-# The short X.Y version.
-version = get_version()
 # The full version, including alpha/beta/rc tags.
+version = get_version()
 release = version
 
 
@@ -67,6 +60,7 @@ extensions = [
     'numpydoc',
     'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
+    'm2r',
 ]
 
 add_module_names = False
@@ -93,9 +87,9 @@ templates_path = ['_templates']
 ## The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 
-# source_parsers = {
-#     '.md': 'recommonmark.parser.CommonMarkParser',
-# }
+# # source_parsers = {
+#     '.md': CommonMarkParser,
+# # }
 source_suffix = ['.rst', '.md']
 # source_suffix = '.rst'
 
@@ -171,6 +165,7 @@ latex_elements = {
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
+    # 'preamble': '\\addto\\captionsenglish{\\renewcommand{\\contentsname}{Table of contents}}',
 
     # Latex figure (float) alignment
     #
@@ -214,3 +209,11 @@ texinfo_documents = [
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+# # At the bottom of conf.py
+# def setup(app):
+#     app.add_config_value('recommonmark_config', {
+#             'url_resolver': lambda url: github_doc_root + url,
+#             'auto_toc_tree_section': 'Contents',
+#             }, True)
+#     app.add_transform(AutoStructify)

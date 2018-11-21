@@ -12,10 +12,11 @@ from itertools import product
 
 try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
     ipy_str = str(type(get_ipython()))
-    if 'zmqshell' in ipy_str:
-        print('')
+    # print(ipy_str)
+    if 'zmqshell' in ipy_str.lower():
+        print('Using Notebook Progress-bars...')
         from tqdm import tqdm_notebook as tqdm
-    if 'terminal' in ipy_str:
+    if 'terminal' in ipy_str.lower():
         from tqdm import tqdm
 except:
 
@@ -66,6 +67,8 @@ class NLPSelect(Transformer):
 
         self.columns = columns
         self.special_replace = special_replace
+        self.together = None
+        self.clean_together = None
         # self.to_np = to_np
 
     def get_params(self, deep=True):
@@ -87,18 +90,24 @@ class NLPSelect(Transformer):
         else:
             nlp_cols = [self.columns]  # allow...duck-typing I guess? Don't remember.
 
-        raw_text = X.loc[:, nlp_cols].fillna('')  # fill nan's
-        # if len(nlp_cols) > 1:  # more than one column, concat them
-        raw_text = raw_text.add(' ').sum(axis=1).str[:-1]
-        raw_text = raw_text.str.lower()  # all lowercase
-        raw_text = raw_text.str.replace('\n', ' ')  # no hanging newlines
+        raw_text = (X
+                    .loc[:, nlp_cols]
+                    .fillna('')  # fill nan's
+                    .add(' ')
+                    .sum(axis=1) # if len(nlp_cols) > 1:  # more than one column, concat them
+                    .str[:-1])
+        self.together = raw_text
 
-        # No punctuation
-        raw_text = raw_text.str.replace('[{}]'.format(string.punctuation), ' ')
-        if self.special_replace is not None:
+        raw_text = (raw_text
+                    .str.lower()  # all lowercase
+                    .str.replace('\n', ' ')  # no hanging newlines
+                    .str.replace('[{}]'.format(string.punctuation), ' '))
+
+        if self.special_replace:
             rx = re.compile('|'.join(map(re.escape, self.special_replace)))
             # allow user-input special replacements.
             raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
+        self.clean_together = raw_text
         return raw_text
 
 
@@ -194,7 +203,7 @@ class TokenExtractor(TransformerMixin):
         return X_tf
 
     @property
-    def ranks_(self):
+    def  ranks_(self):
         """
         Retrieve the rank of each token, for sorting. Uses summed scoring over the
         TF-IDF for each token, so that: :math:`S_t = \\Sum_{\\text{MWO}}\\text{TF-IDF}_t`
@@ -406,10 +415,9 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
                           position=1,
                           leave=False,
                           desc=clf + ' token loop'):
-            # pbar2.set_description(clf + ' token loop'
-            # pbar2.update(1)
             to_map = v_filled.loc[v_filled.alias == query].index.tolist()  # the tokens
             query_idx = [transformer._model.vocabulary_[i] for i in to_map]
+
             # make a binary indicator for the tag, 1 if any of the tokens occurred, 0 if not.
             match = ((toks[:, query_idx]).toarray() > 0).any(axis=1).astype(int)
 
@@ -450,11 +458,8 @@ def token_to_alias(raw_text, vocab):
     thes_dict = vocab[vocab.alias.replace('', np.nan).notna()].alias.to_dict()
     substr = sorted(thes_dict, key=len, reverse=True)
     if substr:
-        # matcher = lambda s: r'\b'+re.escape(s)+r'\b'
-        # matcher = lambda s: re.escape(s)
         rx = re.compile(r'\b(' + '|'.join(map(re.escape, substr)) + r')\b')
         clean_text = raw_text.str.replace(rx, lambda match: thes_dict[match.group(0)])
-    # clean_text.compute()[:4]
     else:
         clean_text=raw_text
     return clean_text
@@ -468,7 +473,7 @@ ne_types = 'IPSUX'
 
 def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     """ Experimental method to auto-match tag combinations into higher-level
-    concepts, for user-suggestion. Used in ``nestor._ui`` """
+    concepts, for user-suggestion. Used in ``nestor.ui`` """
     if NE_types is None:
         NE_types = ne_types
     if NE_map_rules is None:
@@ -476,42 +481,48 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
 
     vocab = voc1.copy()
     vocab.NE.replace('', np.nan, inplace=True)
+
     # first we need to substitute alias' for their NE identifier
-    NE_dict = vocab.NE.fillna('U').to_dict()
-    NE_dict.update(vocab
-        .fillna('U')
-        .reset_index()[['NE', 'alias']]
-        .drop_duplicates()
-        .set_index('alias')
-        .NE.to_dict()
+    NE_dict = (
+        vocab
+            .NE
+            .fillna('U')
+            .to_dict()
+    )
+
+    NE_dict.update(
+        vocab
+            .fillna('U')
+            .reset_index()[['NE', 'alias']]
+            .drop_duplicates()
+            .set_index('alias')
+            .NE
+            .to_dict()
     )
 
     _ = NE_dict.pop('', None)
 
-    print('found bug! \t', _)
-
+    # regex-based multi-replace
     NE_sub = sorted(NE_dict, key=len, reverse=True)
-    # print(NE_sub)
-    # print(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
     NErx = re.compile(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
     NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
-    # print(NE_text)
+
     # now we have NE-soup/DNA of the original text.
     mask = voc2.alias.replace('', np.nan).isna() # don't overwrite the NE's the user has input (i.e. alias != NaN)
     voc2.loc[mask, 'NE'] = NE_text[mask].tolist()
 
-    # all combinations of NE types
+    # track all combinations of NE types (cartesian prod)
     NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
     for typ in NE_types:
         NE_map[typ] = typ
     NE_map.update(NE_map_rules)
-    # print(NE_map)
-    # apply rule substitutions
+
+    # apply rule substitutions that are defined
     voc2.loc[mask, 'NE'] = (voc2
         .loc[mask, 'NE']
         .apply(lambda x: NE_map.get(x, ''))  # TODO ne_sub matching issue??
     )  # special logic for custom NE type-combinations (config.yaml)
-    # voc2['score'] = tex2.scores_  # should already happen?
+
     return voc2
 
 
@@ -536,7 +547,12 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     vocab_combo['score'] = 0
 
     # keep just in case of duplicates
-    vocab_combo = vocab_combo.reset_index().drop_duplicates(subset=['tokens']).set_index('tokens')
+    vocab_combo = (
+        vocab_combo
+            .reset_index()
+            .drop_duplicates(subset=['tokens'])
+            .set_index('tokens')
+    )
     replaced_text2 = token_to_alias(replaced_text, vocab_combo)
     tex3.fit(replaced_text2)
 
@@ -549,7 +565,18 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3)
 
     # merge 1 and 2-grams?
-    tag_df = tags_df.join(tags3_df.drop(axis='columns', labels=tags_df.columns.levels[1].tolist(), level=1))
+    tag_df = tags_df.join(
+        tags3_df.drop(
+            axis='columns',
+            level=1,
+            labels=(
+                tags_df
+                    .columns
+                    .levels[1]
+                    .tolist()
+            )
+        )
+    )
     relation_df = tag_df.loc[:, ['P I', 'S I']]
     untagged_df = tag_df.NA
     untagged_df.columns = pd.MultiIndex.from_product([['NA'], untagged_df.columns])
