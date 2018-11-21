@@ -17,13 +17,15 @@ Description:
 
 from tqdm import tqdm
 
-from database_storage.objects.human import *
-from database_storage.objects.issue import *
-from database_storage.objects.maintenanceworkorder import *
-from database_storage.objects.tag import *
-from database_storage.objects.machine import *
 
-from  database_storage.helper import getListIndexDataframe
+from nestor.store_data.objects.human import Technician, Operator
+from nestor.store_data.objects.issue import Issue
+from nestor.store_data.objects.tag import TagItem, TagSolution, TagProblem, TagUnknown, TagSolutionItem, TagProblemItem, TagNA, TagStopWord
+from nestor.store_data.objects.machine import Machine
+from nestor.store_data.objects.maintenanceworkorder import MaintenanceWorkOrder
+
+
+from nestor.store_data.helper import getListIndexDataframe
 
 
 def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, propertyToHeader_dict):
@@ -40,10 +42,6 @@ def cypherCreate_historicalMaintenanceWorkOrder(schema, originalDataframe, prope
         issue = None
 
         try:
-            # print("----------")
-            # print(row)
-            # print(propertyToHeader_dict)
-            # print(schema)
             issue = Issue(problem=row[propertyToHeader_issue['issue']['description_problem']],
                           databaseInfo=schema)
             try:

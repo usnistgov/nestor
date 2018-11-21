@@ -9,15 +9,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>497</width>
-    <height>133</height>
+    <width>350</width>
+    <height>68</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>350</width>
+    <height>100</height>
+   </size>
   </property>
   <property name="cursor">
    <cursorShape>WaitCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Wait please</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">

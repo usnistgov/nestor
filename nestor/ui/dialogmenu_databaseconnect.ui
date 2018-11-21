@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>702</width>
-    <height>725</height>
+    <width>480</width>
+    <height>258</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>480</width>
+    <height>258</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Connect to Database</string>
@@ -39,16 +45,6 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_BrowserPortNumber">
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="0">
       <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_ServerName">
        <property name="sizePolicy">
@@ -56,6 +52,16 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_BrowserPortNumber">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -74,52 +80,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="4" column="0">
-    <layout class="QGridLayout" name="gridLayout_5">
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit_DialogDatabaseConnection_ConnectInfo">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="frame">
-        <bool>false</bool>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Normal</enum>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-       <property name="clearButtonEnabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_Connect">
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="5" column="0">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
@@ -168,8 +128,11 @@
        </item>
        <item row="2" column="0">
         <widget class="QPushButton" name="pushButton_DialogDatabaseConnection_OpenSchema">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
-          <string>Open Schema</string>
+          <string>Load database schema</string>
          </property>
         </widget>
        </item>
@@ -177,15 +140,22 @@
      </item>
     </layout>
    </item>
+   <item row="3" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox_DialogDatabaseConnection">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup_DialogDatabaseConnection_Queries">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
- </buttongroups>
 </ui>
