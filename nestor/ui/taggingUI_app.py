@@ -754,6 +754,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.horizontalSlider_1gram_FindingThreshold.setValue(self.config['settings'].get('showCkeckBox_threshold',50))
                 self.onMoveSlider_similarPattern()
 
+                #TODO: should be executed even if empty, just not if unchanged
                 if oldnumberToken != self.config["settings"].get("numberTokens",1000) or self.config["csvinfo"].get("untracked_token", None):
                     self.setMenu_projectSave()
                     self.whenProjectOpen()

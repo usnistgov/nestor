@@ -14,8 +14,8 @@
    <string>NIST: Nestor Tagging Tool</string>
   </property>
   <widget class="QWidget" name="T">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
      <layout class="QGridLayout" name="gridLayout_general">
       <item row="0" column="1">
        <widget class="QTabWidget" name="tabWidget">
@@ -23,7 +23,7 @@
          <enum>Qt::ClickFocus</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab_1gram">
          <attribute name="title">
@@ -358,79 +358,7 @@
          </attribute>
          <layout class="QGridLayout" name="gridLayout_7">
           <item row="0" column="0">
-           <layout class="QGridLayout" name="gridLayout_Ngram_general" columnstretch="2,1,0">
-            <item row="0" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_Ngram_TableTagDescription">
-              <property name="text">
-               <string>Word Annotation</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QTableWidget" name="tableWidget_Ngram_TagContainer">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>1</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::ClickFocus</enum>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
-              </property>
-              <property name="tabKeyNavigation">
-               <bool>false</bool>
-              </property>
-              <property name="dragDropOverwriteMode">
-               <bool>false</bool>
-              </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::SingleSelection</enum>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
-              </property>
-              <attribute name="horizontalHeaderStretchLastSection">
-               <bool>false</bool>
-              </attribute>
-              <attribute name="verticalHeaderStretchLastSection">
-               <bool>false</bool>
-              </attribute>
-             </widget>
-            </item>
-            <item row="0" column="2" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_Ngram_PropertyEditorDescription">
-              <property name="text">
-               <string>Tag current words</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_Ngram_CompositionDescription">
-              <property name="text">
-               <string>Word composition [?]</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <layout class="QGridLayout" name="gridLayout_Ngram_ActionButton">
-              <item row="0" column="0" alignment="Qt::AlignHCenter">
-               <widget class="QPushButton" name="pushButton_Ngram_UpdateTokenProperty">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>shortcut Enter key</string>
-                </property>
-                <property name="text">
-                 <string>Next word</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
+           <layout class="QGridLayout" name="gridLayout_Ngram_general" columnstretch="2,0,0">
             <item row="1" column="2">
              <layout class="QVBoxLayout" name="verticalLayout_Ngram_PropertiesEditor">
               <item>
@@ -662,8 +590,77 @@
               </item>
              </layout>
             </item>
-            <item row="1" column="1">
-             <layout class="QGridLayout" name="gridLayout_Ngram_NGramComposedof"/>
+            <item row="2" column="2">
+             <layout class="QGridLayout" name="gridLayout_Ngram_ActionButton">
+              <item row="0" column="0" alignment="Qt::AlignHCenter">
+               <widget class="QPushButton" name="pushButton_Ngram_UpdateTokenProperty">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
+                <property name="toolTip">
+                 <string>shortcut Enter key</string>
+                </property>
+                <property name="text">
+                 <string>Next word</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="2" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_Ngram_PropertyEditorDescription">
+              <property name="text">
+               <string>Tag current words</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_Ngram_CompositionDescription">
+              <property name="text">
+               <string>Word composition [?]</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QTableWidget" name="tableWidget_Ngram_TagContainer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::ClickFocus</enum>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="tabKeyNavigation">
+               <bool>false</bool>
+              </property>
+              <property name="dragDropOverwriteMode">
+               <bool>false</bool>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderStretchLastSection">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+            <item row="0" column="0" alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_Ngram_TableTagDescription">
+              <property name="text">
+               <string>Word Annotation</string>
+              </property>
+             </widget>
             </item>
             <item row="2" column="0">
              <layout class="QGridLayout" name="gridLayout_6">
@@ -679,6 +676,38 @@
                 <property name="text">
                  <string>Overall progress</string>
                 </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="1">
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="0" column="0">
+               <widget class="QScrollArea" name="scrollArea">
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="scrollArea_NgramComposition">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>142</width>
+                   <height>704</height>
+                  </rect>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                   <layout class="QGridLayout" name="gridLayout_Ngram_NGramComposedof"/>
+                  </item>
+                 </layout>
+                </widget>
                </widget>
               </item>
              </layout>
@@ -1307,7 +1336,7 @@ Copy of your data, appended with tag columns .
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_1Gram_Classification"/>
   <buttongroup name="buttonGroup_NGram_Classification"/>
+  <buttongroup name="buttonGroup_1Gram_Classification"/>
  </buttongroups>
 </ui>

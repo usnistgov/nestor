@@ -26,8 +26,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>970</width>
-          <height>513</height>
+          <width>986</width>
+          <height>539</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
@@ -63,7 +63,7 @@
        <item row="1" column="2">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>These are standard terms for the CSV column name
+          <string>These are default terms for the CSV column name
  used for storing, analysis and results later on
 It is needed for cleaner results and standardization</string>
          </property>
@@ -125,8 +125,7 @@ Only words from checked header will be tagged</string>
           </font>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://proceedings.asmedigitalcollection.asme.org/proceeding.aspx?articleid=2704323&quot;&gt;Standardized categories&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://proceedings.asmedigitalcollection.asme.org/proceeding.aspx?articleid=2704323&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Generalized categories&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
