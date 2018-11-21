@@ -118,7 +118,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
     Class used to change the settings
     """
     def __init__(self, iconPath=None, name=None, author=None, description=None, vocab1g=None, vocabNg=None,
-                 configSettings = None, untracked= ""):
+                 configSettings = None, specialReplace= {}):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_settings.__init__(self)
         self.setupUi(self)
@@ -134,6 +134,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         self.lineEdit_Settings_Project1gVocabName.setText(vocab1g)
         self.lineEdit_Settings_ProjectNgVocabName.setText(vocabNg)
 
+
         if configSettings:
             self.lineEdit_Setup_NumberToken.setText(str(configSettings.get('numberTokens','1000')))
             self.lineEdit_Setup_TokenChecked.setText(str(configSettings.get('alreadyChecked_threshold','99')))
@@ -143,7 +144,15 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
             self.lineEdit_Setup_TokenChecked.setText('99')
             self.lineEdit_Setup_TokenShow.setText('50')
 
-        self.textEdit_Setup_UntrackedToken.setPlainText(untracked)
+        untracked = []
+        replace = []
+        for key, value in specialReplace.items():
+            untracked.append(key)
+            replace.append(value)
+        self.textEdit_Setup_UntrackedToken.setPlainText(','.join(untracked))
+        self.textEdit_Setup_ReplaceToken.setPlainText(','.join(replace))
+
+
 
         if iconPath:
             self.setWindowIcon(Qg.QIcon(iconPath))
@@ -169,7 +178,6 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
                 replace = replace.split(',')
                 replace = [i.lstrip() for i in replace]
             special_replace = dict(zip(exclude, replace))
-        # print(special_replace)
         return  self.lineEdit_Settings_ProjectName.text(),\
                 self.lineEdit_Settings_ProjectAuthor.text(),\
                 self.textEdit_Settings_ProjectDescription.toPlainText(), \

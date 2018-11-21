@@ -103,7 +103,7 @@ class NLPSelect(Transformer):
                     .str.replace('\n', ' ')  # no hanging newlines
                     .str.replace('[{}]'.format(string.punctuation), ' '))
 
-        if self.special_replace is not None:
+        if self.special_replace:
             rx = re.compile('|'.join(map(re.escape, self.special_replace)))
             # allow user-input special replacements.
             raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])

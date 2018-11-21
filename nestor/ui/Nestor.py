@@ -65,7 +65,7 @@ def main():
     window = MyTaggingToolWindow(projectsPath=projectsPath,
                                  iconPath=str(icon_path),
                                  databaseToCsv_mapping = databaseToCsv_mapping)
-    sys.excepthook = exception_handler
+    #sys.excepthook = exception_handler
     sys.exit(app.exec_())
 
 

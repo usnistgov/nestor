@@ -708,7 +708,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                   vocab1g = self.config.get('vocab1g',''),
                                                   vocabNg = self.config.get('vocabNg',''),
                                                   configSettings = self.config.get('settings'),
-                                                  untracked = "; ".join(self.config['csvinfo'].get('untracked_token', "")),
+                                                  specialReplace= self.config['csvinfo'].get('untracked_token', ""),
                                                   iconPath=self.iconPath
                                                   )
         self.setEnabled(False)
@@ -738,7 +738,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                 self.existingProject.add(name)
 
-
+                print(special_replace)
                 self.set_config(name=name,
                                 author= author,
                                 description= description,
@@ -1154,6 +1154,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             self.config['settings']["showCkeckBox_threshold"] = showCkeckBox_threshold
 
         if untrackedTokenList is not None:
+            print(untrackedTokenList)
             self.config['csvinfo']["untracked_token"] = untrackedTokenList
         if nlpHeader is not None:
             self.config['csvinfo']["nlpheader"] = nlpHeader
@@ -1286,11 +1287,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         :return:
         """
         columns = self.config['csvinfo'].get('nlpheader', 0)
-        special_replace = self.config['csvinfo'].get('untracked_token', None)
-        if special_replace:
-            nlp_selector = kex.NLPSelect(columns=columns, special_replace=special_replace)
-        else:
-            nlp_selector = kex.NLPSelect(columns=columns)
+
+        nlp_selector = kex.NLPSelect(columns=columns, special_replace=self.config['csvinfo'].get('untracked_token', None))
 
         self.clean_rawText = nlp_selector.transform(self.dataframe_Original)  # might not need to set it as self
         self.together = nlp_selector.together # acces the text before it is cleaned
@@ -1389,8 +1387,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                     # print(enum, new_idx)
                     self.buttonGroup_similarityPattern.buttons_list[new_idx].setFocus()
         ###############################################################
-
-
 
     def close_Dialog(self, event):
         """
@@ -1554,17 +1550,24 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
     def enableFeature(self, existProject = None, existDatabase = None, existTagExtracted=None):
         #database exists
         if existDatabase is not None:
-            if existDatabase is True:
-                self.actionRun_Query.setEnabled(True)
-                self.actionOpen_Database.setEnabled(True)
-                self.menu_AutoPopulate_FromDatabase.setEnabled(True)
-                self.actionDisconnect.setEnabled(True)
+            if dbModule_exists is True:
+                if existDatabase is True :
+                    self.actionRun_Query.setEnabled(True)
+                    self.actionOpen_Database.setEnabled(True)
+                    self.menu_AutoPopulate_FromDatabase.setEnabled(True)
+                    self.actionDisconnect.setEnabled(True)
 
-            elif existDatabase is False:
+                elif existDatabase is False:
+                    self.actionRun_Query.setEnabled(False)
+                    self.actionOpen_Database.setEnabled(False)
+                    self.menu_AutoPopulate_FromDatabase.setEnabled(False)
+                    self.actionDisconnect.setEnabled(False)
+            else:
                 self.actionRun_Query.setEnabled(False)
                 self.actionOpen_Database.setEnabled(False)
                 self.menu_AutoPopulate_FromDatabase.setEnabled(False)
                 self.actionDisconnect.setEnabled(False)
+                self.actionConnect.setEnabled(False)
 
         #if project exists
         if existProject is not None:
