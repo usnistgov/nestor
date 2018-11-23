@@ -202,7 +202,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionOpen_Project.triggered.connect(self.setMenu_projectOpen)
         self.actionProject_Settings.triggered.connect(self.setMenu_settings)
         self.actionSave_Project.triggered.connect(self.setMenu_projectSave)
+
         self.actionMap_CSV.triggered.connect(self.setMenu_mapCsvHeader)
+        self.actionReplace_special_words.triggered.connect(self.setMenu_specialReplace)
 
         self.actionConnect.triggered.connect(self.setMenu_databaseConnect)
         self.actionRun_Query.triggered.connect(self.setMenu_databaseRunQuery)
@@ -799,6 +801,27 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.whenProjectOpen()
 
         self.dialogMenu_csvHeaderMapping.buttonBox_csvHeaderMapping.accepted.connect(onclick_ok)
+
+    def setMenu_specialReplace(self):
+        dialogMenu_specialReplace = DialogMenu_SpecialReplace(iconPath=self.iconPath,
+                                                              specialReplace= self.config["csvinfo"].get("untracked_token",{}))
+        self.setEnabled(False)
+        dialogMenu_specialReplace.closeEvent = self.close_Dialog
+        rect = self.geometry()
+        rect.setHeight(300)
+        rect.setWidth(200)
+        dialogMenu_specialReplace.setGeometry(rect)
+        dialogMenu_specialReplace.show()
+
+        def onclick_ok():
+            self.set_config(untrackedTokenList=dialogMenu_specialReplace.get_data())
+
+            self.whenProjectOpen()
+
+            dialogMenu_specialReplace.close()
+
+        dialogMenu_specialReplace.buttonBox_specialReplace.accepted.connect(onclick_ok)
+
 
     def setMenu_ExportZip(self, format):
         """
@@ -1909,7 +1932,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         choice = Qw.QMessageBox.question(self, 'Pause the app', 'App in pause', Qw.QMessageBox.Ok)
 
         self.timeToRemove = self.timeToRemove + (time.time() - thisTime)
-
 
 
 def openYAMLConfig_File(yaml_path, dict={}):

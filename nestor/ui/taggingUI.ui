@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1080</width>
-    <height>900</height>
+    <width>708</width>
+    <height>756</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -698,8 +698,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>142</width>
-                   <height>704</height>
+                   <width>129</width>
+                   <height>545</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -978,7 +978,7 @@ Copy of your data, appended with tag columns .
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1080</width>
+     <width>708</width>
      <height>22</height>
     </rect>
    </property>
@@ -1016,6 +1016,7 @@ Copy of your data, appended with tag columns .
      <string>Edit</string>
     </property>
     <addaction name="actionMap_CSV"/>
+    <addaction name="actionReplace_special_words"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="enabled">
@@ -1307,6 +1308,14 @@ Copy of your data, appended with tag columns .
     <string>Pause Timer</string>
    </property>
   </action>
+  <action name="actionReplace_special_words">
+   <property name="text">
+    <string>Replace special words</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>lineEdit_1gram_AliasEditor</tabstop>
@@ -1336,7 +1345,7 @@ Copy of your data, appended with tag columns .
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_NGram_Classification"/>
   <buttongroup name="buttonGroup_1Gram_Classification"/>
+  <buttongroup name="buttonGroup_NGram_Classification"/>
  </buttongroups>
 </ui>

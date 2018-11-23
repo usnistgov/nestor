@@ -678,6 +678,154 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
 
 
 
+fname_dialogspecialreplace = 'dialogmenu_specialreplace.ui'
+qtDesignerFile_dialogspecialreplace = script_dir / fname_dialogspecialreplace
+Ui_MainWindow_dialogspecialreplace, QtBaseClass_dialogspecialreplace = uic.loadUiType(qtDesignerFile_dialogspecialreplace)
+
+class DialogMenu_SpecialReplace(Qw.QDialog, Ui_MainWindow_dialogspecialreplace):
+
+    def __init__(self, iconPath=None, specialReplace={}):
+        Qw.QDialog.__init__(self)
+        Ui_MainWindow_dialogspecialreplace.__init__(self)
+        self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        if iconPath:
+            self.setWindowIcon(Qg.QIcon(iconPath))
+
+        self.specialReplace = specialReplace
+        self.setSpecialReplace()
+
+        self.pushButton_specialReplace_newAdd.clicked.connect(self.onClick_add)
+
+        self.buttonBox_specialReplace.rejected.connect(self.close)
+        self.buttonBox_specialReplace.button(Qw.QDialogButtonBox.Reset).clicked.connect(self.onClick_reset)
+
+
+    def setSpecialReplace(self):
+        """
+        init the window by adding the special replace that was already in the config file
+        :return:
+        """
+        for untrack, replace in self.specialReplace.items():
+
+            hBoxLayout = self.create_SpecialReplace_layout(untrack, replace)
+            self.verticalLayout_specialReplace_replacement.addLayout(hBoxLayout)
+
+
+
+    def onClick_add(self):
+        """
+        when click on the add button chekc the input
+        :return:
+        """
+        untrack = self.lineEdit_specialReplace_newUntrack.text()
+        replace = self.lineEdit_specialReplace_newReaplce.text()
+
+        if untrack and "#" not in untrack:
+
+            hBoxLayout = self.create_SpecialReplace_layout(untrack, replace)
+            self.verticalLayout_specialReplace_replacement.addLayout(hBoxLayout)
+
+            self.lineEdit_specialReplace_newUntrack.setText("")
+            self.lineEdit_specialReplace_newReaplce.setText("")
+
+        else:
+            self.lineEdit_specialReplace_newUntrack.setStyleSheet('background-color: rgb(255, 51, 0);')
+
+
+
+    def create_SpecialReplace_layout(self, untrack, replace=""):
+        """
+        return a layout that contains 2 line edit for the untacked and replace as well as the button to remove the layout
+        :param untrack:
+        :param replace:
+        :return:
+        """
+        self.lineEdit_specialReplace_newUntrack.setStyleSheet('background-color: None;')
+        linedit_untrack = Qw.QLineEdit(self)
+        linedit_untrack.setText(untrack)
+        linedit_untrack.setObjectName("untrack="+untrack)
+
+        labelArrow = Qw.QLabel()
+        labelArrow.setText('-->')
+        labelArrow.setObjectName('arrow')
+
+        linedit_replace = Qw.QLineEdit(self)
+        linedit_replace.setText(replace)
+        linedit_replace.setObjectName("replace="+replace)
+
+        button_remove = Qw.QPushButton("-", self)
+
+        hBoxLayout = Qw.QHBoxLayout()
+        hBoxLayout.addWidget(linedit_untrack)
+        hBoxLayout.addWidget(labelArrow)
+        hBoxLayout.addWidget(linedit_replace)
+        hBoxLayout.addWidget(button_remove)
+
+        button_remove.clicked.connect(lambda: self.onClick_removeReplacement(hBoxLayout))
+
+        return hBoxLayout
+
+    def onClick_removeReplacement(self, hBoxLayout):
+        """
+        remove widjet in the given layout and remove itself from the scrolarealayout
+        :param localisation:
+        :return:
+        """
+        for w in reversed(range(hBoxLayout.count())):
+            hBoxLayout.itemAt(w).widget().deleteLater()
+
+        self.verticalLayout_specialReplace_replacement.removeItem(hBoxLayout)
+
+    def onClick_reset(self):
+        """
+        remove all the layout and widjet from the scollarea
+        :return:
+        """
+        for i in reversed(range(self.verticalLayout_specialReplace_replacement.count())):
+            l = self.verticalLayout_specialReplace_replacement.itemAt(i)
+            for w in reversed(range(l.count())):
+                l.itemAt(w).widget().deleteLater()
+
+            self.verticalLayout_specialReplace_replacement.removeItem(l)
+
+    def get_data(self):
+        """
+        Implement a wierd logic by using the name of the object which contains the needed information
+        :return:
+        """
+        specialReplace_dict = {}
+
+        #for layout in layour
+        for i in range(self.verticalLayout_specialReplace_replacement.count()):
+            l = self.verticalLayout_specialReplace_replacement.itemAt(i)
+
+            #for widjet in layout
+
+
+            for j in range(l.count()):
+                w = l.itemAt(j).widget()
+                texts = w.objectName().split("=")
+
+                #if widjetname is interesting for us
+                if len(texts) > 1:
+                    print(w.objectName())
+                    if texts[0] == "untrack":
+                        untrack = texts[1]
+                    elif texts[0] == "replace":
+                        replace = texts[1]
+
+            specialReplace_dict[untrack] = replace
+
+        return specialReplace_dict
+
+
+
+
+        return "getdata"
+
+
 def openYAMLConfig_File(yaml_path, dict={}):
     """open a Yaml file based on the given path
     :return: a dictionary
