@@ -710,7 +710,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                   vocab1g = self.config.get('vocab1g',''),
                                                   vocabNg = self.config.get('vocabNg',''),
                                                   configSettings = self.config.get('settings'),
-                                                  specialReplace= self.config['csvinfo'].get('untracked_token', ""),
                                                   iconPath=self.iconPath
                                                   )
         self.setEnabled(False)
@@ -723,7 +722,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         def onclick_ok():
             self.existingProject.remove(self.config.get("name"))
-            name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, special_replace = dialogMenu_settings.get_data()
+            name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold = dialogMenu_settings.get_data()
 
             if name and name not in self.existingProject:
 
@@ -740,7 +739,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                 self.existingProject.add(name)
 
-                print(special_replace)
                 self.set_config(name=name,
                                 author= author,
                                 description= description,
@@ -748,8 +746,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                 vocabNg=vocabNg,
                                 numberTokens=numberTokens,
                                 alreadyChecked_threshold=alreadyChecked_threshold,
-                                showCkeckBox_threshold=showCkeckBox_threshold,
-                                untrackedTokenList=special_replace
+                                showCkeckBox_threshold=showCkeckBox_threshold
                                 )
                 dialogMenu_settings.close()
 
@@ -821,7 +818,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             dialogMenu_specialReplace.close()
 
         dialogMenu_specialReplace.buttonBox_specialReplace.accepted.connect(onclick_ok)
-
 
     def setMenu_ExportZip(self, format):
         """

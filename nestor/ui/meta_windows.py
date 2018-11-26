@@ -11,7 +11,6 @@ import pyaml, yaml
 #from nestor.ui.taggingUI_app import openYAMLConfig_File
 
 
-
 script_dir = Path(__file__).parent
 
 fname_newproject = 'dialogmenu_newproject.ui'
@@ -118,7 +117,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
     Class used to change the settings
     """
     def __init__(self, iconPath=None, name=None, author=None, description=None, vocab1g=None, vocabNg=None,
-                 configSettings = None, specialReplace= {}):
+                 configSettings = None):
         Qw.QDialog.__init__(self)
         Ui_MainWindow_settings.__init__(self)
         self.setupUi(self)
@@ -144,14 +143,6 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
             self.lineEdit_Setup_TokenChecked.setText('99')
             self.lineEdit_Setup_TokenShow.setText('50')
 
-        untracked = []
-        replace = []
-        for key, value in specialReplace.items():
-            untracked.append(key)
-            replace.append(value)
-        self.textEdit_Setup_UntrackedToken.setPlainText(','.join(untracked))
-        self.textEdit_Setup_ReplaceToken.setPlainText(','.join(replace))
-
 
 
         if iconPath:
@@ -166,18 +157,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
         Return the needed data
         :return:
         """
-        exclude = self.textEdit_Setup_UntrackedToken.toPlainText()
-        replace = self.textEdit_Setup_ReplaceToken.toPlainText()
-        special_replace = dict()
-        if exclude:
-            exclude = exclude.split(',')
-            exlude = [i.lstrip() for i in exclude]
-            if not replace:
-                replace = len(exclude)*['']
-            else:
-                replace = replace.split(',')
-                replace = [i.lstrip() for i in replace]
-            special_replace = dict(zip(exclude, replace))
+
         return  self.lineEdit_Settings_ProjectName.text(),\
                 self.lineEdit_Settings_ProjectAuthor.text(),\
                 self.textEdit_Settings_ProjectDescription.toPlainText(), \
@@ -185,10 +165,7 @@ class DialogMenu_settings(Qw.QDialog, Ui_MainWindow_settings):
                 self.lineEdit_Settings_ProjectNgVocabName.text(),\
                 int(self.lineEdit_Setup_NumberToken.text()) if self.lineEdit_Setup_NumberToken.text() else 1000,\
                 int(self.lineEdit_Setup_TokenChecked.text()) if self.lineEdit_Setup_TokenChecked.text() else 99,\
-                int(self.lineEdit_Setup_TokenShow.text()) if self.lineEdit_Setup_TokenShow.text() else 50, \
-                special_replace
-
-
+                int(self.lineEdit_Setup_TokenShow.text()) if self.lineEdit_Setup_TokenShow.text() else 50
 
 fname_tou = 'dialogmenu_termsofuse.ui'
 qtDesignerFile_tou = script_dir/fname_tou
@@ -563,7 +540,6 @@ class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
             self.checkBox_DialogDatabaseRunQuery_ItemToItem.setEnabled(False)
 
 
-
 fname_dialogWait = 'dialog_wait.ui'
 qtDesignerFile_dialogWait = script_dir / fname_dialogWait
 Ui_MainWindow_dialogWait, QtBaseClass_dialogWait = uic.loadUiType(qtDesignerFile_dialogWait)
@@ -583,7 +559,6 @@ class DialogWait(Qw.QDialog, Ui_MainWindow_dialogWait):
     def setProgress(self, value):
         self.progressBar_DialogWait.setValue(value)
         Qw.QApplication.processEvents()
-
 
 
 fname_researchWindow = 'dialogmenu_researchwindow.ui'
@@ -676,8 +651,6 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
             self.lineEdit_ResearchWindows_saveVocab_nbUpdate.setEnabled(False)
 
 
-
-
 fname_dialogspecialreplace = 'dialogmenu_specialreplace.ui'
 qtDesignerFile_dialogspecialreplace = script_dir / fname_dialogspecialreplace
 Ui_MainWindow_dialogspecialreplace, QtBaseClass_dialogspecialreplace = uic.loadUiType(qtDesignerFile_dialogspecialreplace)
@@ -746,6 +719,7 @@ class DialogMenu_SpecialReplace(Qw.QDialog, Ui_MainWindow_dialogspecialreplace):
         linedit_untrack = Qw.QLineEdit(self)
         linedit_untrack.setText(untrack)
         linedit_untrack.setObjectName("untrack="+untrack)
+        linedit_untrack.setEnabled(False)
 
         labelArrow = Qw.QLabel()
         labelArrow.setText('-->')
@@ -754,8 +728,9 @@ class DialogMenu_SpecialReplace(Qw.QDialog, Ui_MainWindow_dialogspecialreplace):
         linedit_replace = Qw.QLineEdit(self)
         linedit_replace.setText(replace)
         linedit_replace.setObjectName("replace="+replace)
+        linedit_replace.setEnabled(False)
 
-        button_remove = Qw.QPushButton("-", self)
+        button_remove = Qw.QPushButton("--", self)
 
         hBoxLayout = Qw.QHBoxLayout()
         hBoxLayout.addWidget(linedit_untrack)
@@ -819,11 +794,6 @@ class DialogMenu_SpecialReplace(Qw.QDialog, Ui_MainWindow_dialogspecialreplace):
             specialReplace_dict[untrack] = replace
 
         return specialReplace_dict
-
-
-
-
-        return "getdata"
 
 
 def openYAMLConfig_File(yaml_path, dict={}):
