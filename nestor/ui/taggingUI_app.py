@@ -1918,7 +1918,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         if event.key() == Qt.Key_Backspace:
             self.stopTime()
 
-
     def stopTime(self):
         """
         stop the time
@@ -2063,6 +2062,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         alias = self.vocab.loc[token, 'alias']
 
         #for each one, create the checkbox
+
         for token, score in similar:
             btn = Qw.QCheckBox(token)
 
@@ -2079,6 +2079,8 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
                     .tolist()
                 )
             )
+            #make the token bold not working everytime
+            #tooltip = tooltip.replace(' '+token+' ', ' <b>'+token+'</b> ')
             btn.setToolTip('<font>'+tooltip+'</font>')
 
             self.addButton(btn)
