@@ -190,6 +190,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_Settings_ProjectName</tabstop>
+  <tabstop>lineEdit_Settings_ProjectAuthor</tabstop>
+  <tabstop>textEdit_Settings_ProjectDescription</tabstop>
+  <tabstop>lineEdit_Settings_Project1gVocabName</tabstop>
+  <tabstop>lineEdit_Settings_ProjectNgVocabName</tabstop>
+  <tabstop>lineEdit_Setup_NumberToken</tabstop>
+  <tabstop>lineEdit_Setup_TokenChecked</tabstop>
+  <tabstop>lineEdit_Setup_TokenShow</tabstop>
+  <tabstop>textEdit_Setup_UntrackedToken</tabstop>
+  <tabstop>textEdit_Setup_ReplaceToken</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

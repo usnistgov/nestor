@@ -50,6 +50,19 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_specialReplace_replacement"/>
          </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </widget>
       </widget>
@@ -86,6 +99,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_specialReplace_newUntrack</tabstop>
+  <tabstop>lineEdit_specialReplace_newReaplce</tabstop>
+  <tabstop>pushButton_specialReplace_newAdd</tabstop>
+  <tabstop>scrollArea_specialReplace_untrackReplace</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

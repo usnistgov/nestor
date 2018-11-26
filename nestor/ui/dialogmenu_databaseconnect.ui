@@ -156,6 +156,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_DialogDatabaseConnection_Username</tabstop>
+  <tabstop>lineEdit_DialogDatabaseConnection_Password</tabstop>
+  <tabstop>lineEdit_DialogDatabaseConnection_ServerName</tabstop>
+  <tabstop>lineEdit_DialogDatabaseConnection_ServerPortNumber</tabstop>
+  <tabstop>lineEdit_DialogDatabaseConnection_BrowserPortNumber</tabstop>
+  <tabstop>pushButton_DialogDatabaseConnection_OpenSchema</tabstop>
+  <tabstop>lineEdit_DialogDatabaseConnection_OpenSchema</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

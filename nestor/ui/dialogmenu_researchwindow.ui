@@ -187,6 +187,20 @@ Select the option and then write when to save it
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>textBrowser_ResearchWindows_description</tabstop>
+  <tabstop>checkBox_ResearchWindows_saveVocab_percentage</tabstop>
+  <tabstop>checkBox_ResearchWindows_saveVocab_time</tabstop>
+  <tabstop>checkBox_ResearchWindows_saveVocab_nbtoken</tabstop>
+  <tabstop>checkBox_ResearchWindows_saveVocab_nbUpdate</tabstop>
+  <tabstop>lineEdit_ResearchWindows_saveVocab_percentage</tabstop>
+  <tabstop>lineEdit_ResearchWindows_saveVocab_time</tabstop>
+  <tabstop>lineEdit_ResearchWindows_saveVocab_nbtoken</tabstop>
+  <tabstop>lineEdit_ResearchWindows_saveVocab_nbUpdate</tabstop>
+  <tabstop>comboBox_ResearchWindows_projectName</tabstop>
+  <tabstop>lineEdit_ResearchWindows_projectAuthor</tabstop>
+  <tabstop>textEdit_ResearchWindows_projectDescription</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <buttongroups>
