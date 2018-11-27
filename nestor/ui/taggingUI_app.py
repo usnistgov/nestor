@@ -450,6 +450,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.dataframe_vocabNGram.to_csv(vocabNgPath, encoding='utf-8-sig')
 
             self.existingProject.add(projectName)
+            print('SAVE --> All yout project is now saved!!')
 
     def setMenu_databaseConnect(self):
         """
@@ -1621,6 +1622,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def printReportTable(self):
 
+        self.label_report_NumberNotTaggedValue.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == ""])))
+        self.label_report_NumberTaggedValue.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] != ""])))
+
+
         self.label_report_table_NumberwordProblem.setText(
             str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"])))
         self.label_report_table_NumberwordItem.setText(
@@ -1635,12 +1642,8 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "U"])))
         self.label_report_table_NumberwordIrrelevante.setText(
             str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "X"])))
-        self.label_report_table_NumberwordNotdone.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == ""])))
         self.label_report_table_NumberwordTotal.setText(
             str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] != ""])))
-
-        print(str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"].alias.unique())))
 
         self.label_report_table_NumbertagProblem.setText(
             str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"].alias.unique())))
@@ -1656,10 +1659,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "U"].alias.unique())))
         self.label_report_table_NumbertagIrrelevant.setText(
             str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "X"].alias.unique())))
-        self.label_report_table_NumbertagNotdone.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == ""].alias.unique())))
-        # self.label_report_table_NumbertagTotal.setText(
-        #     str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"].alias.unique())))
+        self.label_report_table_NumbertagTotal.setText("0")
+
+
 
         self.label_report_table_FractionProblem.setText("0")
         self.label_report_table_FractionItem.setText("0")
@@ -1668,7 +1670,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.label_report_table_FractionSolutionitem.setText("0")
         self.label_report_table_FractionAmbiguous.setText("0")
         self.label_report_table_FractionIrrelevant.setText("0")
-        self.label_report_table_FractionNotdone.setText("0")
         self.label_report_table_FractionTotal.setText("0")
 
 class MyTaggingToolWindow_research(MyTaggingToolWindow):
