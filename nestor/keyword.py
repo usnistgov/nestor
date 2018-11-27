@@ -344,9 +344,9 @@ def get_tag_completeness(tag_df):
     -------
 
     """
-    tag_pct = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))  #TODO: if they tag everything?
-    all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
 
+    all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
+    tag_pct = 1 - (tag_df.get(['NA', 'U'], all_empt).sum(axis=1) / tag_df.sum(axis=1))  # TODO: if they tag everything?
     print(f'Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}')
 
     tag_comp = (tag_df.get('NA', all_empt).sum(axis=1) == 0).sum()
@@ -402,7 +402,8 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
         })
         .fillna({
             'NE':    'NA',  # TODO make this optional
-            'alias': vocab['tokens'],
+            # 'alias': vocab['tokens'],
+            'alias': '_untagged',  # currently combines all NA into 1, for weighted sum
         })
     )
     """
@@ -446,18 +447,24 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     tran = (table
         .score
         .T
+        .to_sparse(fill_value=0.)
         # .drop(columns=['NA'])
     )
-    docterm = pd.DataFrame(data=toks.todense()[:, transformer.ranks_],
-                           columns=v_filled['tokens'])
+    A = toks[:, transformer.ranks_]
+    A[A > 0] = 1
+    docterm = pd.SparseDataFrame(
+        data=A,
+        columns=v_filled['tokens'],
+        default_fill_value=0.
+    )
 
     tag_df = docterm.dot(tran)
-    tag_df[tag_df > 0] = 1
+    # tag_df[tag_df > 0] = 1
 
     if readable:
         tag_df = _get_readable_tag_df(tag_df)
 
-    return tag_df
+    return tag_df.to_dense()
 
 
 def token_to_alias(raw_text, vocab):
@@ -584,7 +591,7 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
 
     # extract 2-gram tags from cleaned text
     print('\n TWO GRAMS...')
-    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop['NA']
+    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop('NA', axis='columns')
 
     print('\n MERGING...')
     # merge 1 and 2-grams?
