@@ -1213,7 +1213,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         #reporttab
         elif tabindex == 2:
-            pass
+            self.printReportTable()
 
     def whenProjectOpen(self):
         """
@@ -1463,7 +1463,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         window_DialogWait.show()
         window_DialogWait.setProgress(0)
 
-        # Qw.QApplication.processEvents()
+        Qw.QApplication.processEvents()
 
         print("SAVE IN PROCESS --> calculating the extracted tags and statistics...")
         # do 1-grams
@@ -1619,6 +1619,57 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.pushButton_report_saveNewCsv.setEnabled(False)
                 self.pushButton_report_saveH5.setEnabled(False)
 
+    def printReportTable(self):
+
+        self.label_report_table_NumberwordProblem.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"])))
+        self.label_report_table_NumberwordItem.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "I"])))
+        self.label_report_table_NumberwordSolution.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "S"])))
+        self.label_report_table_NumberwordProblemitem.setText(
+            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "P I"])))
+        self.label_report_table_NumberwordSolutionitem.setText(
+            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "S I"])))
+        self.label_report_table_NumberwordAmbiguous.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "U"])))
+        self.label_report_table_NumberwordIrrelevante.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "X"])))
+        self.label_report_table_NumberwordNotdone.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == ""])))
+        self.label_report_table_NumberwordTotal.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] != ""])))
+
+        print(str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"].alias.unique())))
+
+        self.label_report_table_NumbertagProblem.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"].alias.unique())))
+        self.label_report_table_NumbertagItem.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "I"].alias.unique())))
+        self.label_report_table_NumbertagSolution.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "S"].alias.unique())))
+        self.label_report_table_NumbertagProblemitem.setText(
+            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "P I"].alias.unique())))
+        self.label_report_table_NumbertagSolutionitem.setText(
+            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "S I"].alias.unique())))
+        self.label_report_table_NumbertagAmbiguous.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "U"].alias.unique())))
+        self.label_report_table_NumbertagIrrelevant.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "X"].alias.unique())))
+        self.label_report_table_NumbertagNotdone.setText(
+            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == ""].alias.unique())))
+        # self.label_report_table_NumbertagTotal.setText(
+        #     str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"].alias.unique())))
+
+        self.label_report_table_FractionProblem.setText("0")
+        self.label_report_table_FractionItem.setText("0")
+        self.label_report_table_FractionSolution.setText("0")
+        self.label_report_table_FractionProblemitem.setText("0")
+        self.label_report_table_FractionSolutionitem.setText("0")
+        self.label_report_table_FractionAmbiguous.setText("0")
+        self.label_report_table_FractionIrrelevant.setText("0")
+        self.label_report_table_FractionNotdone.setText("0")
+        self.label_report_table_FractionTotal.setText("0")
 
 class MyTaggingToolWindow_research(MyTaggingToolWindow):
     def __init__(self, savetype,  name, author=None, description=None,
