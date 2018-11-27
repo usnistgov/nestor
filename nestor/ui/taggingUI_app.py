@@ -1622,44 +1622,52 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
     def printReportTable(self):
 
-        self.label_report_NumberNotTaggedValue.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == ""])))
+        tmp_df = pd.concat([self.dataframe_vocab1Gram, self.dataframe_vocabNGram[self.dataframe_vocabNGram.NE != '']])
+        totalword = tmp_df.NE.replace('','NA').value_counts()
+        print(totalword)
+
         self.label_report_NumberTaggedValue.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] != ""])))
+            str(totalword.drop('NA').sum()))
+        self.label_report_NumberNotTaggedValue.setText(
+            str(totalword.get('NA', '0')))
 
 
         self.label_report_table_NumberwordProblem.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"])))
+            str(totalword.get('P','')))
         self.label_report_table_NumberwordItem.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "I"])))
+            str(totalword.get('I','')))
         self.label_report_table_NumberwordSolution.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "S"])))
+            str(totalword.get('S','')))
         self.label_report_table_NumberwordProblemitem.setText(
-            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "P I"])))
+            str(totalword.get('P I','')))
         self.label_report_table_NumberwordSolutionitem.setText(
-            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "S I"])))
+            str(totalword.get('S I','')))
         self.label_report_table_NumberwordAmbiguous.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "U"])))
+            str(totalword.get('U','')))
         self.label_report_table_NumberwordIrrelevante.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "X"])))
+            str(totalword.get('X','')))
         self.label_report_table_NumberwordTotal.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] != ""])))
+            str(totalword.drop('NA').sum()))
+
+        totaltag = tmp_df[['alias','NE']].drop_duplicates().NE.replace('', 'NA').value_counts()
+        print(totaltag)
 
         self.label_report_table_NumbertagProblem.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "P"].alias.unique())))
+            str(totaltag.get('P', '')))
         self.label_report_table_NumbertagItem.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "I"].alias.unique())))
+            str(totaltag.get('I', '')))
         self.label_report_table_NumbertagSolution.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "S"].alias.unique())))
+            str(totaltag.get('S', '')))
         self.label_report_table_NumbertagProblemitem.setText(
-            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "P I"].alias.unique())))
+            str(totaltag.get('P I','')))
         self.label_report_table_NumbertagSolutionitem.setText(
-            str(len(self.dataframe_vocabNGram[self.dataframe_vocabNGram["NE"] == "S I"].alias.unique())))
+            str(totaltag.get('S I','')))
         self.label_report_table_NumbertagAmbiguous.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "U"].alias.unique())))
+            str(totaltag.get('U','')))
         self.label_report_table_NumbertagIrrelevant.setText(
-            str(len(self.dataframe_vocab1Gram[self.dataframe_vocab1Gram["NE"] == "X"].alias.unique())))
-        self.label_report_table_NumbertagTotal.setText("0")
+            str(totaltag.get('X','')))
+        self.label_report_table_NumbertagTotal.setText(
+            str(totaltag.drop('NA').sum()))
 
 
 
