@@ -202,7 +202,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.actionOpen_Project.triggered.connect(self.setMenu_projectOpen)
         self.actionProject_Settings.triggered.connect(self.setMenu_settings)
         self.actionSave_Project.triggered.connect(self.setMenu_projectSave)
+
         self.actionMap_CSV.triggered.connect(self.setMenu_mapCsvHeader)
+        self.actionReplace_special_words.triggered.connect(self.setMenu_specialReplace)
 
         self.actionConnect.triggered.connect(self.setMenu_databaseConnect)
         self.actionRun_Query.triggered.connect(self.setMenu_databaseRunQuery)
@@ -448,6 +450,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.dataframe_vocabNGram.to_csv(vocabNgPath, encoding='utf-8-sig')
 
             self.existingProject.add(projectName)
+            print('SAVE --> All yout project is now saved!!')
 
     def setMenu_databaseConnect(self):
         """
@@ -708,7 +711,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                                   vocab1g = self.config.get('vocab1g',''),
                                                   vocabNg = self.config.get('vocabNg',''),
                                                   configSettings = self.config.get('settings'),
-                                                  specialReplace= self.config['csvinfo'].get('untracked_token', ""),
                                                   iconPath=self.iconPath
                                                   )
         self.setEnabled(False)
@@ -721,7 +723,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         def onclick_ok():
             self.existingProject.remove(self.config.get("name"))
-            name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold, special_replace = dialogMenu_settings.get_data()
+            name, author, description, vocab1g, vocabNg, numberTokens, alreadyChecked_threshold, showCkeckBox_threshold = dialogMenu_settings.get_data()
 
             if name and name not in self.existingProject:
 
@@ -738,7 +740,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
                 self.existingProject.add(name)
 
-                print(special_replace)
                 self.set_config(name=name,
                                 author= author,
                                 description= description,
@@ -746,8 +747,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                                 vocabNg=vocabNg,
                                 numberTokens=numberTokens,
                                 alreadyChecked_threshold=alreadyChecked_threshold,
-                                showCkeckBox_threshold=showCkeckBox_threshold,
-                                untrackedTokenList=special_replace
+                                showCkeckBox_threshold=showCkeckBox_threshold
                                 )
                 dialogMenu_settings.close()
 
@@ -799,6 +799,26 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.whenProjectOpen()
 
         self.dialogMenu_csvHeaderMapping.buttonBox_csvHeaderMapping.accepted.connect(onclick_ok)
+
+    def setMenu_specialReplace(self):
+        dialogMenu_specialReplace = DialogMenu_SpecialReplace(iconPath=self.iconPath,
+                                                              specialReplace= self.config["csvinfo"].get("untracked_token",{}))
+        self.setEnabled(False)
+        dialogMenu_specialReplace.closeEvent = self.close_Dialog
+        rect = self.geometry()
+        rect.setHeight(300)
+        rect.setWidth(200)
+        dialogMenu_specialReplace.setGeometry(rect)
+        dialogMenu_specialReplace.show()
+
+        def onclick_ok():
+            self.set_config(untrackedTokenList=dialogMenu_specialReplace.get_data())
+
+            self.whenProjectOpen()
+
+            dialogMenu_specialReplace.close()
+
+        dialogMenu_specialReplace.buttonBox_specialReplace.accepted.connect(onclick_ok)
 
     def setMenu_ExportZip(self, format):
         """
@@ -1194,7 +1214,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
 
         #reporttab
         elif tabindex == 2:
-            pass
+            self.printReportTable()
 
     def whenProjectOpen(self):
         """
@@ -1444,7 +1464,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         window_DialogWait.show()
         window_DialogWait.setProgress(0)
 
-        # Qw.QApplication.processEvents()
+        Qw.QApplication.processEvents()
 
         print("SAVE IN PROCESS --> calculating the extracted tags and statistics...")
         # do 1-grams
@@ -1600,6 +1620,74 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                 self.pushButton_report_saveNewCsv.setEnabled(False)
                 self.pushButton_report_saveH5.setEnabled(False)
 
+    def printReportTable(self):
+
+        tmp_df = pd.concat([self.dataframe_vocab1Gram, self.dataframe_vocabNGram[self.dataframe_vocabNGram.NE != '']])
+        totalword = tmp_df.NE.replace('','NA').value_counts()
+        print(totalword)
+
+        self.label_report_NumberTaggedValue.setText(
+            str(totalword.drop('NA').sum()))
+        self.label_report_NumberNotTaggedValue.setText(
+            str(totalword.get('NA', '0')))
+
+
+        self.label_report_table_NumberwordProblem.setText(
+            str(totalword.get('P','')))
+        self.label_report_table_NumberwordItem.setText(
+            str(totalword.get('I','')))
+        self.label_report_table_NumberwordSolution.setText(
+            str(totalword.get('S','')))
+        self.label_report_table_NumberwordProblemitem.setText(
+            str(totalword.get('P I','')))
+        self.label_report_table_NumberwordSolutionitem.setText(
+            str(totalword.get('S I','')))
+        self.label_report_table_NumberwordAmbiguous.setText(
+            str(totalword.get('U','')))
+        self.label_report_table_NumberwordIrrelevante.setText(
+            str(totalword.get('X','')))
+        self.label_report_table_NumberwordTotal.setText(
+            str(totalword.drop('NA').sum()))
+
+        totaltag = tmp_df[['alias','NE']].drop_duplicates().NE.replace('', 'NA').value_counts()
+        print(totaltag)
+
+        self.label_report_table_NumbertagProblem.setText(
+            str(totaltag.get('P', '')))
+        self.label_report_table_NumbertagItem.setText(
+            str(totaltag.get('I', '')))
+        self.label_report_table_NumbertagSolution.setText(
+            str(totaltag.get('S', '')))
+        self.label_report_table_NumbertagProblemitem.setText(
+            str(totaltag.get('P I','')))
+        self.label_report_table_NumbertagSolutionitem.setText(
+            str(totaltag.get('S I','')))
+        self.label_report_table_NumbertagAmbiguous.setText(
+            str(totaltag.get('U','')))
+        self.label_report_table_NumbertagIrrelevant.setText(
+            str(totaltag.get('X','')))
+        self.label_report_table_NumbertagTotal.setText(
+            str(totaltag.drop('NA').sum()))
+
+
+        totalfrac = (totalword-totaltag)/totalword
+
+        self.label_report_table_FractionProblem.setText(
+            '{:.1%}'.format(totalfrac.get('P', '')))
+        self.label_report_table_FractionItem.setText(
+            '{:.1%}'.format(totalfrac.get('I', '')))
+        self.label_report_table_FractionSolution.setText(
+            '{:.1%}'.format(totalfrac.get('S', '')))
+        self.label_report_table_FractionProblemitem.setText(
+            '{:.1%}'.format(totalfrac.get('P I', '')))
+        self.label_report_table_FractionSolutionitem.setText(
+            '{:.1%}'.format(totalfrac.get('S I', '')))
+        self.label_report_table_FractionAmbiguous.setText(
+            '{:.1%}'.format(totalfrac.get('U', '')))
+        self.label_report_table_FractionIrrelevant.setText(
+            '{:.1%}'.format(totalfrac.get('X', '')))
+        self.label_report_table_FractionTotal.setText(
+            '{:.1%}'.format((totalword.sum()-totaltag.sum())/totalword.sum()))
 
 class MyTaggingToolWindow_research(MyTaggingToolWindow):
     def __init__(self, savetype,  name, author=None, description=None,
@@ -1899,7 +1987,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         if event.key() == Qt.Key_Backspace:
             self.stopTime()
 
-
     def stopTime(self):
         """
         stop the time
@@ -1909,7 +1996,6 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         choice = Qw.QMessageBox.question(self, 'Pause the app', 'App in pause', Qw.QMessageBox.Ok)
 
         self.timeToRemove = self.timeToRemove + (time.time() - thisTime)
-
 
 
 def openYAMLConfig_File(yaml_path, dict={}):
@@ -2045,6 +2131,7 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
         alias = self.vocab.loc[token, 'alias']
 
         #for each one, create the checkbox
+
         for token, score in similar:
             btn = Qw.QCheckBox(token)
 
@@ -2061,6 +2148,8 @@ class QButtonGroup_similarityPattern(Qw.QButtonGroup):
                     .tolist()
                 )
             )
+            #make the token bold not working everytime
+            #tooltip = tooltip.replace(' '+token+' ', ' <b>'+token+'</b> ')
             btn.setToolTip('<font>'+tooltip+'</font>')
 
             self.addButton(btn)

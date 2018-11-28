@@ -10,21 +10,21 @@ from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
 from itertools import product
 
-try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
-    ipy_str = str(type(get_ipython()))
-    # print(ipy_str)
-    if 'zmqshell' in ipy_str.lower():
-        print('Using Notebook Progress-bars...')
-        from tqdm import tqdm_notebook as tqdm
-    if 'terminal' in ipy_str.lower():
-        from tqdm import tqdm
-except:
-
-    if sys.stderr.isatty():
-        from tqdm import tqdm
-    else:
-        def tqdm(iterable, **kwargs):
-            return iterable
+# try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
+#     ipy_str = str(type(get_ipython()))
+#     # print(ipy_str)
+#     if 'zmqshell' in ipy_str.lower():
+#         print('Using Notebook Progress-bars...')
+#         from tqdm import tqdm_notebook as tqdm
+#     if 'terminal' in ipy_str.lower():
+#         from tqdm import tqdm
+# except:
+#
+#     if sys.stderr.isatty():
+#         from tqdm import tqdm
+#     else:
+#         def tqdm(iterable, **kwargs):
+#             return iterable
 
 
 __all__ = ['NLPSelect',
@@ -307,7 +307,7 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
                 print('File not Found! Can\'t import!')
                 raise
         df.update(df_import)
-        print('intialized successfully!')
+        # print('intialized successfully!')
         df.fillna('', inplace=True)
 
     if filename is not None:
@@ -344,9 +344,9 @@ def get_tag_completeness(tag_df):
     -------
 
     """
-    tag_pct = 1-(tag_df['NA'].sum(axis=1)/tag_df.sum(axis=1))  #TODO: if they tag everything?
-    all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
 
+    all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
+    tag_pct = 1 - (tag_df.get(['NA', 'U'], all_empt).sum(axis=1) / tag_df.sum(axis=1))  # TODO: if they tag everything?
     print(f'Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}')
 
     tag_comp = (tag_df.get('NA', all_empt).sum(axis=1) == 0).sum()
@@ -393,11 +393,20 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     except NotFittedError:
         toks = transformer.fit_transform(raw_text)
 
-    vocab = generate_vocabulary_df(transformer, init=vocab_df)
+    vocab = generate_vocabulary_df(transformer, init=vocab_df).reset_index()
 
-    v_filled = vocab.replace({'NE':{'':np.nan},
-                              'alias':{'':np.nan}}).fillna({'NE': 'NA',  # TODO make this optional
-                                                            'alias': vocab.index.to_series()})  # we want NA?
+    v_filled = (vocab
+        .replace({
+            'NE':    {'': np.nan},
+            'alias': {'': np.nan}
+        })
+        .fillna({
+            'NE':    'NA',  # TODO make this optional
+            # 'alias': vocab['tokens'],
+            'alias': '_untagged',  # currently combines all NA into 1, for weighted sum
+        })
+    )
+    """
     # make a df with one column per clf of tag
     tags = {typ: pd.DataFrame(index=range(len(raw_text))) for typ in v_filled.NE.unique()}
 
@@ -431,11 +440,31 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
         return tag_df
 
     tag_df = tags_to_df(tags)
+    """
+    table = pd.pivot_table(v_filled, index=['NE', 'alias'], columns=['tokens']).fillna(0)
+    table[table > 0] = 1
+
+    tran = (table
+        .score
+        .T
+        .to_sparse(fill_value=0.)
+        # .drop(columns=['NA'])
+    )
+    A = toks[:, transformer.ranks_]
+    A[A > 0] = 1
+    docterm = pd.SparseDataFrame(
+        data=A,
+        columns=v_filled['tokens'],
+        default_fill_value=0.
+    )
+
+    tag_df = docterm.dot(tran)
+    # tag_df[tag_df > 0] = 1
 
     if readable:
         tag_df = _get_readable_tag_df(tag_df)
 
-    return tag_df
+    return tag_df.to_dense()
 
 
 def token_to_alias(raw_text, vocab):
@@ -562,8 +591,9 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
 
     # extract 2-gram tags from cleaned text
     print('\n TWO GRAMS...')
-    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3)
+    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop('NA', axis='columns')
 
+    print('\n MERGING...')
     # merge 1 and 2-grams?
     tag_df = tags_df.join(
         tags3_df.drop(

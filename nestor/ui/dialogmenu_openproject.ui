@@ -92,6 +92,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>comboBox_OpenProject_ProjectName</tabstop>
+  <tabstop>lineEdit_OpenProject_CSVName</tabstop>
+  <tabstop>lineEdit_OpenProject_ProjectAuthor</tabstop>
+  <tabstop>textEdit_OpenProject_ProjectDescription</tabstop>
+  <tabstop>pushButton_OpenProject_ProjectRemove</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

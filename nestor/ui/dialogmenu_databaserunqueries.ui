@@ -135,6 +135,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>checkBox_DialogDatabaseRunQuery_OriginalData</tabstop>
+  <tabstop>checkBox_DialogDatabaseRunQuery_Tag1g</tabstop>
+  <tabstop>checkBox_DialogDatabaseRunQuery_TagNg</tabstop>
+  <tabstop>checkBox_DialogDatabaseRunQuery_1gToNg</tabstop>
+  <tabstop>checkBox_DialogDatabaseRunQuery_IssueToItem</tabstop>
+  <tabstop>checkBox_DialogDatabaseRunQuery_ItemToItem</tabstop>
+  <tabstop>pushButton_DialogDatabaseRunQuery_RemoveData</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <buttongroups>
