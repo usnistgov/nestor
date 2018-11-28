@@ -1670,15 +1670,24 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             str(totaltag.drop('NA').sum()))
 
 
+        totalfrac = (totalword-totaltag)/totalword
 
-        self.label_report_table_FractionProblem.setText("0")
-        self.label_report_table_FractionItem.setText("0")
-        self.label_report_table_FractionSolution.setText("0")
-        self.label_report_table_FractionProblemitem.setText("0")
-        self.label_report_table_FractionSolutionitem.setText("0")
-        self.label_report_table_FractionAmbiguous.setText("0")
-        self.label_report_table_FractionIrrelevant.setText("0")
-        self.label_report_table_FractionTotal.setText("0")
+        self.label_report_table_FractionProblem.setText(
+            '{:.1%}'.format(totalfrac.get('P', '')))
+        self.label_report_table_FractionItem.setText(
+            '{:.1%}'.format(totalfrac.get('I', '')))
+        self.label_report_table_FractionSolution.setText(
+            '{:.1%}'.format(totalfrac.get('S', '')))
+        self.label_report_table_FractionProblemitem.setText(
+            '{:.1%}'.format(totalfrac.get('P I', '')))
+        self.label_report_table_FractionSolutionitem.setText(
+            '{:.1%}'.format(totalfrac.get('S I', '')))
+        self.label_report_table_FractionAmbiguous.setText(
+            '{:.1%}'.format(totalfrac.get('U', '')))
+        self.label_report_table_FractionIrrelevant.setText(
+            '{:.1%}'.format(totalfrac.get('X', '')))
+        self.label_report_table_FractionTotal.setText(
+            '{:.1%}'.format((totalword.sum()-totaltag.sum())/totalword.sum()))
 
 class MyTaggingToolWindow_research(MyTaggingToolWindow):
     def __init__(self, savetype,  name, author=None, description=None,

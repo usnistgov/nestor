@@ -707,8 +707,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>129</width>
-                   <height>644</height>
+                   <width>100</width>
+                   <height>30</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -811,7 +811,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Corpus coverage</string>
+                 <string>Reduction Factor</string>
                 </property>
                </widget>
               </item>
