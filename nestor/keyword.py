@@ -459,6 +459,7 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     )
 
     tag_df = docterm.dot(tran)
+    tag_df.rename_axis([None, None], axis=1, inplace=True)
     # tag_df[tag_df > 0] = 1
 
     if readable:
