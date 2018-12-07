@@ -611,10 +611,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             # get the list of updated index localisation from dataframe_vocab1Gram
             dataframe_vocabNGram_copy = self.dataframe_vocabNGram.reset_index()
 
-            self.tokenUpdateNg_database.update(dataframe_vocabNGram_copy.
-                                               index[dataframe_vocabNGram_copy['tokens']
-                                               .isin(df_tmp.index.tolist())]
-                                               .tolist())
+            self.tokenUpdateNg_database.update(
+                dataframe_vocabNGram_copy
+                    .index[dataframe_vocabNGram_copy['tokens']
+                    .isin(df_tmp.index.tolist())]
+                    .tolist()
+            )
 
             self.dataframe_vocabNGram.update(df_tmp, overwrite=False)
             self.dataframe_vocabNGram.fillna('', inplace=True)
@@ -640,7 +642,6 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             df_tmp = self.dataframe_vocab1Gram.loc[mask, :]
             df_tmp.update(other=df, overwrite=False)
             df_tmp = df_tmp.dropna(thresh=3)
-
 
             # get the list of updated index localisation from dataframe_vocab1Gram
             dataframe_vocab1Gram_copy = self.dataframe_vocab1Gram.reset_index()
@@ -911,31 +912,30 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         Change the color of the item changed based on the type of change
         :return:
         """
+        max_token_num = self.config['settings'].get('numberTokens', 1000)
 
         for t in self.tokenUpdate1g_database:
-            if t <= self.config['settings'].get('numberTokens', 1000):
+            if t < max_token_num:
                 self.tableWidget_1gram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_database'])
 
         for t in self.tokenUpdateNg_database:
-            if t <= self.config['settings'].get('numberTokens', 1000):
+            if t < max_token_num:
                 self.tableWidget_Ngram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_database'])
 
-
         for t in self.tokenUpdate1g_vocab:
-            if t <= self.config['settings'].get('numberTokens', 1000):
+            if t < max_token_num:
                 self.tableWidget_1gram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_vocab'])
 
         for t in self.tokenUpdateNg_vocab:
-            if t <= self.config['settings'].get('numberTokens', 1000):
+            if t < max_token_num:
                 self.tableWidget_Ngram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_vocab'])
 
-
         for t in self.tokenUpdateNg_user:
-            if t <= self.config['settings'].get('numberTokens', 1000):
+            if t < max_token_num:
                 self.tableWidget_Ngram_TagContainer.item(t, 0).setBackground(self.changeColor['updateToken_user'])
 
         for t in self.tokenUpdate1g_user:
-            if t <= self.config['settings'].get('numberTokens', 1000):
+            if t < max_token_num:
                 self.tableWidget_1gram_TagContainer.item(t, 0).setBackground(
                     self.changeColor['updateToken_user'])
 
