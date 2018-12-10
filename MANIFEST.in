@@ -5,6 +5,7 @@ recursive-include docs *
 include requirements/*.txt
 include nestor/datasets/*.csv
 include nestor/ui/*
+include nestor/store_data/*.yaml
 include nestor/dash/templates/*.html
 include nestor/dash/templates/includes/*.html
 include nestor/dash/static/*

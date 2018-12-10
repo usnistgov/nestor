@@ -1,7 +1,5 @@
 import os
 from setuptools import setup, find_packages
-import configparser
-from subprocess import Popen, PIPE
 from pathlib import Path
 from version import get_version
 

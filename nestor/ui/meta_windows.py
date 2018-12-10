@@ -204,7 +204,7 @@ class DialogMenu_csvHeaderMapping(Qw.QDialog, Ui_MainWindow_csvHeader):
 
         self.mappingContent = mappingContent
         self.csvHeaderContent = csvHeaderContent
-        self.configMapping=configMapping
+        self.configMapping = configMapping
         self.configCsvHeader = configCsvHeader
 
         if iconPath:
