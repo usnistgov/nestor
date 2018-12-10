@@ -900,6 +900,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             tableview.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
             tableview.setSelectionBehavior(Qw.QTableWidget.SelectRows)
 
+            header = tableview.horizontalHeader()
+            header.setSectionResizeMode(3, Qw.QHeaderView.Stretch)  # notes column can stretch
+
             self.changeTableview_color()
 
             self.update_progress_bar(progressBar, dataframe)
