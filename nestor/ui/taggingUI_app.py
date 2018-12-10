@@ -368,6 +368,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                     self.setMenu_mapCsvHeader()
 
                 else:
+                    Qw.QMessageBox.about(self, 'Name alreay exists', "The name you have writen already exists, please write another one")
                     dialogMenu_newProject.lineEdit_NewProject_ProjectName.setStyleSheet(self.changeColor['wrongInput'])
 
             else:
