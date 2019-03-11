@@ -368,6 +368,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
                     self.setMenu_mapCsvHeader()
 
                 else:
+                    Qw.QMessageBox.about(self, 'Name alreay exists', "The name you have writen already exists, please write another one")
                     dialogMenu_newProject.lineEdit_NewProject_ProjectName.setStyleSheet(self.changeColor['wrongInput'])
 
             else:
@@ -899,6 +900,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             tableview.resizeRowsToContents()
             tableview.setHorizontalHeaderLabels(temp_df.columns.tolist()[:-1])  # ignore score column
             tableview.setSelectionBehavior(Qw.QTableWidget.SelectRows)
+
+            header = tableview.horizontalHeader()
+            header.setSectionResizeMode(3, Qw.QHeaderView.Stretch)  # notes column can stretch
 
             self.changeTableview_color()
 
