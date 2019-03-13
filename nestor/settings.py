@@ -71,6 +71,24 @@ class NestorParams(MutableMapping, dict):
                 '%s is not a valid rc parameter. See rcParams.keys() for a '
                 'list of valid parameters.' % (key,))
 
+
+def nestor_params():
+    """function to instantiate a :class:`nestor.NestorParams` instance from
+    the default nestor config/type .yaml files"""
+    def nestor_fnames():
+        """return defult files being used by nestor (could use environment
+        variables, etc. in the future), in order of priority"""
+
+    def nestor_params_from_files():
+        """Build up a :class:`nestor.NestorParams` object from the default
+        config file locations"""
+
+    fnames = nestor_fnames()
+    # could check they exist, probably
+    return nestor_params_from_files(fnames)
+
+
+
 class Settings:
     def __init__(self, db=False):
         self._store_path = Path(__file__).parent/'store_data'
