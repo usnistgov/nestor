@@ -9,22 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
 from itertools import product
-
-# try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
-#     ipy_str = str(type(get_ipython()))
-#     # print(ipy_str)
-#     if 'zmqshell' in ipy_str.lower():
-#         print('Using Notebook Progress-bars...')
-#         from tqdm import tqdm_notebook as tqdm
-#     if 'terminal' in ipy_str.lower():
-#         from tqdm import tqdm
-# except:
-#
-#     if sys.stderr.isatty():
-#         from tqdm import tqdm
-#     else:
-#         def tqdm(iterable, **kwargs):
-#             return iterable
+from tqdm.autonotebook import tqdm
 
 
 __all__ = ['NLPSelect',
@@ -325,7 +310,7 @@ def _series_itervals(s):
 def _get_readable_tag_df(tag_df):
     """ helper function to take binary tag co-occurrence matrix and make comma-sep readable columns"""
     temp_df = pd.DataFrame(index=tag_df.index)  # empty init
-    for clf, clf_df in tag_df.T.groupby(level=0):  # loop over top-level classes (ignore NA)
+    for clf, clf_df in tqdm(tag_df.T.groupby(level=0)):  # loop over top-level classes (ignore NA)
         join_em = lambda strings: ', '.join([x for x in strings if x != ''])  # func to join str
         strs = np.where(clf_df.T == 1, clf_df.T.columns.droplevel(0).values, '').T
         temp_df[clf] = pd.DataFrame(strs).apply(join_em)

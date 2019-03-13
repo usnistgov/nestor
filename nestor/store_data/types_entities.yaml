@@ -1,0 +1,21 @@
+types:
+  - 'I'
+  - 'P'
+  - 'S'
+  - 'U'
+  - 'X'
+
+
+rules:
+  # two items makes one new item
+  'I I': 'I'
+  # order-free
+  'I P': 'P I'
+  'I S': 'S I'
+  'P I': 'P I'
+  'S I': 'S I'
+  # redundancies
+  'P P': 'X'
+  'P S': 'X'
+  'S P': 'X'
+  'S S': 'X'

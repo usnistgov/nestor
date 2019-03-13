@@ -9,10 +9,17 @@ import holoviews as hv
 from tornado.ioloop import IOLoop
 import sys
 from nestor.tagplots import TagPlot
-from nestor.ui import load_header_mapping
+from nestor.ui.taggingUI_app import openYAMLConfig_File
 
 
 def serve_bokeh_tags(hdfstore):
+    projectsPath = Path.home() / '.nestor-tmp'
+    projectsPath.mkdir(parents=True, exist_ok=True)
+    nestorPath = Path(__file__).parent.parent
+    databaseToCsv_mapping = openYAMLConfig_File(
+        yaml_path=nestorPath / 'store_data' / 'csvHeader.yaml'
+    )
+
     names = load_header_mapping()
     tech = names['technician']['name']
     mach = names['machine']['name']
@@ -42,7 +49,6 @@ def serve_bokeh_tags(hdfstore):
     loop.start()
 
 def main():
-    import sys
     file_loc = sys.argv[1]
     serve_bokeh_tags(file_loc)
 
