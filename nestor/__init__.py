@@ -12,3 +12,4 @@ __all__ = ['keyword',
            'tagtrees',
            'datasets']
 
+rcParams = NestorParams()

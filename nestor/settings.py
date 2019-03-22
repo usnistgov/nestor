@@ -10,6 +10,7 @@ __all__ = [
 
 _deprecated_map = dict()
 
+
 def getFromDict(dataDict, mapstr):
     maplist = mapstr.split('.')
     first, rest = maplist[0], '.'.join(maplist[1:])
@@ -18,6 +19,7 @@ def getFromDict(dataDict, mapstr):
         return getFromDict(dataDict[first], rest)
     else:
         return dataDict[first]
+
 
 def find_key_path(d, value, join='.'):
     """
@@ -79,9 +81,21 @@ def nestor_params():
         """return defult files being used by nestor (could use environment
         variables, etc. in the future), in order of priority"""
 
-    def nestor_params_from_files():
+    def flatten_dict(d):
+        new_dict = {}
+        for key, value in d.items():
+            if type(value) == dict:
+                _dict = {'.'.join([key, _key]): _value for _key, _value in flatten_dict(value).items()}
+                new_dict.update(_dict)
+            else:
+                new_dict[key] = value
+        return new_dict
+
+    def nestor_params_from_files(fnames):
         """Build up a :class:`nestor.NestorParams` object from the default
         config file locations"""
+
+
 
     fnames = nestor_fnames()
     # could check they exist, probably

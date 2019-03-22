@@ -1,21 +1,25 @@
 types:
-  - 'I'
-  - 'P'
-  - 'S'
-  - 'U'
-  - 'X'
-
+  'atomic': # atomic types
+    'I': 'Item'
+    'P': 'Problem'
+    'S': 'Solution'
+    'U': 'Unknown'
+    'X': 'Non Entity'
+  'derived':  # only made from atoms
+    'PI': 'Object Fault'
+    'SI': 'Object Resolution'
 
 rules:
   # two items makes one new item
-  'I I': 'I'
-  # order-free
-  'I P': 'P I'
-  'I S': 'S I'
-  'P I': 'P I'
-  'S I': 'S I'
+  'I':
+    - ['I','I']
+  'PI':
+    - ['P','I']
+  'SI':
+    - ['S','I']
   # redundancies
-  'P P': 'X'
-  'P S': 'X'
-  'S P': 'X'
-  'S S': 'X'
+  'X':
+    - ['P', 'P']
+    - ['S', 'S']
+    - ['P', 'S']
+# note: could try ordered as 'X':{1:'P',2:'S'}, etc.
