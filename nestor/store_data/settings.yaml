@@ -1,0 +1,65 @@
+entities:
+  types:
+    'atomic': # atomic types
+      'I': 'Item'
+      'P': 'Problem'
+      'S': 'Solution'
+      'U': 'Unknown'
+      'X': 'Non Entity'
+    'derived':  # only made from atoms
+      'PI': 'Object Fault'
+      'SI': 'Object Resolution'
+
+  rules:
+    # two items makes one new item
+    'I':
+      - ['I','I']
+    'PI':
+      - ['P','I']
+    'SI':
+      - ['S','I']
+    # redundancies
+    'X':
+      - ['P', 'P']
+      - ['S', 'S']
+      - ['P', 'S']
+  # note: could try ordered as 'X':{1:'P',2:'S'}, etc.
+
+datatypes:
+  issue:
+    description:
+      problem: 'Description of Problem'
+      solution: 'Description of Solution'
+      cause: 'Description of Cause'
+      effect: 'Description of Observed Symptoms (Effects)'
+    machine_down: 'Machine Up/Down'
+    necessary_part: 'Necessary Part'
+    part_in_process: 'Part in Process'
+    cost: 'Maintenance Cost'
+    id: 'MWO ID Number'
+    date:
+      machine_down: 'Machine Down Time-stamp'
+      workorder_start: 'Work Order Start Time-stamp'
+      maintenance_technician_arrive: 'Maintenance Technician Arrives Time-stamp'
+      solution_found: 'Problem Found Time-stamp'
+      part_ordered: 'Part(s) Ordered Time-stamp'
+      part_received: 'Part(s) Received Time-stamp'
+      solution_solve: 'Problem Solved Time-stamp'
+      machine_up: 'Machine Up Time-stamp'
+      workorder_completion: 'Work Order Completion Time-stamp'
+
+  technician:
+    name: 'Maintenance Technician'
+    skills: 'Skill(s)'
+    crafts: 'Craft(s)'
+
+  operator:
+    name: 'Operator'
+
+  machine:
+    name: 'Asset ID'
+    manufacturer: 'Original Equipment Manufacturer'
+    type: 'Machine Type'
+
+  location:
+    name: "Location"

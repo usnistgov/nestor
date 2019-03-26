@@ -73,13 +73,31 @@ class NestorParams(MutableMapping, dict):
                 '%s is not a valid rc parameter. See rcParams.keys() for a '
                 'list of valid parameters.' % (key,))
 
+# class NestorParams()
+
+class EntityParams(NestorParams):
+
+    @property
+    def types(self):
+        return
+
+def nestor_fnames():
+    """return defult file being used by nestor (could use environment
+    variables, etc. in the future), in order of priority"""
+
+    default_cfg = Path(__file__)/'store_data'/'settings.yaml'
+
+    return default_cfg
+
+def nestor_params_from_files(fnames):
+    """Build up a :class:`nestor.NestorParams` object from the default
+    config file locations"""
+
 
 def nestor_params():
     """function to instantiate a :class:`nestor.NestorParams` instance from
     the default nestor config/type .yaml files"""
-    def nestor_fnames():
-        """return defult files being used by nestor (could use environment
-        variables, etc. in the future), in order of priority"""
+
 
     def flatten_dict(d):
         new_dict = {}
@@ -91,9 +109,7 @@ def nestor_params():
                 new_dict[key] = value
         return new_dict
 
-    def nestor_params_from_files(fnames):
-        """Build up a :class:`nestor.NestorParams` object from the default
-        config file locations"""
+
 
 
 
