@@ -1507,6 +1507,7 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         self.completenessPlot._set_dataframe(tag_pct)
         nbins = int(np.percentile(self.tag_df.sum(axis=1), 90))
         print(f'Docs have at most {nbins} tokens (90th percentile)')
+
         self.completenessPlot.plot_it(nbins)
 
         self.dataframe_completeness = tag_pct
@@ -1887,18 +1888,18 @@ class MyTaggingToolWindow_research(MyTaggingToolWindow):
         """
         percent1g = self.progressBar_1gram_TagComplete.value()
         percentNg = self.progressBar_Ngram_TagComplete.value()
+        if self.savePercentage1gram:  # not empty, avoids (?) indexing err #58
+            if percent1g >= self.savePercentage1gram[0]:
+                thisPercent = self.savePercentage1gram.pop(0)
 
-        if percent1g >= self.savePercentage1gram[0]:
-            thisPercent = self.savePercentage1gram.pop(0)
+                vocabname = f'{thisPercent}_{self.config.get("vocab1g")}.csv'
+                self.dataframe_vocab1Gram.to_csv(self.path_savePercentage / vocabname, encoding='utf-8-sig')
 
-            vocabname = f'{thisPercent}_{self.config.get("vocab1g")}.csv'
-            self.dataframe_vocab1Gram.to_csv(self.path_savePercentage / vocabname, encoding='utf-8-sig')
+            if percentNg >= self.savePercentageNgram[0]:
+                thisPercent = self.savePercentageNgram.pop(0)
 
-        if percentNg >= self.savePercentageNgram[0]:
-            thisPercent = self.savePercentageNgram.pop(0)
-
-            vocabname = f'{thisPercent}_{self.config.get("vocabNg")}.csv'
-            self.dataframe_vocabNGram.to_csv(self.path_savePercentage/ vocabname, encoding='utf-8-sig')
+                vocabname = f'{thisPercent}_{self.config.get("vocabNg")}.csv'
+                self.dataframe_vocabNGram.to_csv(self.path_savePercentage/ vocabname, encoding='utf-8-sig')
 
     def saveNumberToken_whenUpdate(self):
         """
@@ -2260,9 +2261,10 @@ class MyMplCanvas(FigureCanvas):
             #         sns.plotting_context('poster') as context:
             sns.distplot(self.dataframe.dropna(),
                          bins=nbins,
-                         kde_kws={'cut': 0},
+                         kde=False,  # issue 56, 60
+                         # kde_kws={'cut': 0},
                          hist_kws={'align': 'mid'},
-                         kde=True,
+                         # kde=True,
                          ax=self.axes,
                          color='xkcd:slate')
             self.axes.set_xlim(0.1, 1.0)
