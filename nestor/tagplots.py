@@ -13,7 +13,10 @@ import numpy as np
 import pandas as pd
 from matplotlib.colors import ColorConverter
 
-color_opts = {
+import nestor
+nestorParams = nestor.CFG
+
+color_opts = {  # TODO: make this tag-agnostic somehow?
         'P': 'crimson',
         'S': '#7ABC32',
         'I': '#4F81BD',
@@ -135,45 +138,70 @@ class TagPlot:
     Central holder for holoviews dynamic-maps, to be served as a Bokeh App.
     TODO make this data-set agnostic!
     """
-    def __init__(self, data_file, mach='machine-name', tech='technician-name'):
+    def __init__(self, data_file, cat_specifier='name', topn = 10):
+
+        # cross-ref category with nestorParams
+        possible_cats = list(nestorParams.datatype_search(cat_specifier))
 
         # load up the data
         self.df = pd.read_hdf(data_file, key='df')
         self.tag_df = pd.read_hdf(data_file, key='tags')
+        # print(self.tag_df)
+        self.names = [name for name in possible_cats
+                 if name in self.df.columns.tolist()]
+        # set allowed options here
+        # people = (
+        #     self.df[tech]
+        #         .str.split(', ', expand=True)
+        #         .stack()
+        #         .dropna()
+        #         .value_counts()
+        #         .index[:20]  # top 20 occurring
+        #         .tolist()
+        # )
+        #
+        # machs = (
+        #     self.df[mach]
+        #         .value_counts()
+        #         .index[:20]
+        #         .tolist()
+        # )
+        #
+        # # put it together with pretty names
+        # self.name_opt = {
+        #     mach: {'name': 'Machine',
+        #              'opts': machs[:10]},
+        #     tech: {'name': 'Technician',
+        #              'opts': people[:10]}
+        # }
+        # print(self.df.head())
+        # print(self.tag_df.columns)
 
-        # set allowed technician options here
-        people = (
-            self.df[tech]
-                .str.split(', ', expand=True)
-                .stack()
-                .dropna()
-                .value_counts()
-                .index[:20]  # top 20 occurring
-                .tolist()
-        )
-
-        machs = (
-            self.df[mach]
-                .value_counts()
-                .index[:20]
-                .tolist()
-        )
-
-        # put it together with pretty names
         self.name_opt = {
-            mach: {'name': 'Machine',
-                     'opts': machs[:10]},
-            tech: {'name': 'Technician',
-                     'opts': people[:10]}
+            name: {'name': nestorParams._datatypes[name],
+                   'opts': self._get_cat_list(name, topn)}
+            for name in self.names
         }
         # filtering tags by count
-        self.node_thres = np.logspace(-1, 1)
+        # self.node_thres = range(1, 91, 10)
+        self.node_thres = np.logspace(-.1, 1.5)[::-1]
 
         # for network-based plot options
         self.weights = ['cosine', 'count']
         self.edge_thres = range(1, 91, 10)
 
         self.table = hv.Table(self.df)
+
+    def _get_cat_list(self, col_name, topn):
+        return (
+            self.df[col_name]
+            .str.split(', ', expand=True)
+            .stack()
+            .dropna()
+            .value_counts()
+            .index[:topn]  # top occurring
+            .tolist()
+        )
 
     def filter_type_name(self, obj_type, obj_name):
         """
@@ -186,10 +214,14 @@ class TagPlot:
         -------
         pd.Series, mask for filtering df, tag_df.
         """
-        is_obj = self.df[obj_type].str.contains(obj_name, case=False).fillna(False)
+        is_obj = (
+            self.df[obj_type]
+            .str.contains(obj_name, case=False)
+            .fillna(False)
+        )
         return is_obj
 
-    def filter_tags(self, obj_type, obj_name, n_thres=10):
+    def filter_tags(self, obj_type, obj_name, n_thres=20):
         """
         apply filter to binary tag matrix (tag_df)
         Parameters
@@ -204,10 +236,26 @@ class TagPlot:
         is_obj = self.filter_type_name(obj_type, obj_name)
 
         assert 0 <= n_thres <= 100, 'percentiles must be between [0,100]'
-        cts = self.tag_df.loc[is_obj, :].sum()
-        upper = max(1, np.percentile(cts, 100 - n_thres))
+        cts = self.tag_df.drop(columns=['NA']).loc[is_obj, :].sum()
+        # print(cts)
+        upper = max([
+            1,
+            cts.groupby(level=0).nlargest(2).min(),
+            np.percentile(cts, 100 - n_thres, interpolation='lower')
 
-        return self.tag_df.loc[is_obj, (cts >= upper).values]
+        ])
+        print([
+            1,
+            cts.groupby(level=0).nlargest(2).min(),
+            np.percentile(cts, 100 - n_thres, interpolation='lower')
+
+        ])
+        # print(upper)
+        filt_tags = self.tag_df.loc[is_obj, (cts >= upper).values]
+        # print('Total: ', sum((cts >= upper).values))
+        # filt_tags = self.tag_df.loc[is_obj]
+
+        return filt_tags
 
     def hv_nodelink(self, obj_type):
         """
@@ -304,12 +352,25 @@ class TagPlot:
         -------
         hv.DynamicMap
         """
-        def load_bar(obj_name, n_thres=10, order='grouped'):
-            tags = self.filter_tags(obj_type, obj_name, n_thres).drop(columns=['U']).sum()
-            tags = tags.groupby(level=0).nlargest(10).reset_index(level=0, drop=True)
-            tags = tags.reset_index()
-            tags.columns = ['class', 'tag name', 'count']
+        def load_bar(obj_name, n_thres=20, order='grouped'):
+            filt_tags = self.filter_tags(obj_type, obj_name, n_thres)
+            print(filt_tags)
+            tags = (
+                filt_tags
+                .drop(columns=['NA'], errors='ignore')
+                .sum()
+                .groupby(level=0)
+                .nlargest(10)
+                .reset_index(level=0, drop=True)
+                .reset_index()
+            )
 
+            tags.rename({
+                'level_0': 'class',
+                'level_1': 'tag name',
+                '0': 'count'
+            }, inplace=True)
+            print(tags)
             bar_kws = dict(color_index='class',
                            xrotation=90,
                            cmap=color_opts,

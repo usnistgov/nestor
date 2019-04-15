@@ -1,6 +1,7 @@
 """
 author: Thurston Sexton
 """
+import nestor
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -11,6 +12,7 @@ from sklearn.utils.validation import check_is_fitted, NotFittedError
 from itertools import product
 from tqdm.autonotebook import tqdm
 
+nestorParams = nestor.CFG
 
 __all__ = ['NLPSelect',
            'TokenExtractor',
@@ -480,19 +482,27 @@ def token_to_alias(raw_text, vocab):
     return clean_text
 
 
-ne_map = {'I I': 'I',  # two items makes one new item
-          'I P': 'P I', 'I S': 'S I', 'P I': 'P I', 'S I': 'S I',  # order-free
-          'P P': 'X', 'P S': 'X', 'S P': 'X', 'S S': 'X'}  # redundancies
-ne_types = 'IPSUX'
+# ne_map = {'I I': 'I',  # two items makes one new item
+#           'I P': 'P I', 'I S': 'S I', 'P I': 'P I', 'S I': 'S I',  # order-free
+#           'P P': 'X', 'P S': 'X', 'S P': 'X', 'S S': 'X'}  # redundancies
+# ne_types = 'IPSUX'
 
 
 def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     """ Experimental method to auto-match tag combinations into higher-level
     concepts, for user-suggestion. Used in ``nestor.ui`` """
     if NE_types is None:
-        NE_types = ne_types
+        NE_types = nestorParams._entities
+    NE_comb = {' '.join(i) for i in product(NE_types, repeat=2)}
+
     if NE_map_rules is None:
-        NE_map_rules = ne_map
+        NE_map = dict(zip(NE_comb,map(nestorParams.apply_rules, NE_comb)))
+    else:
+        NE_map = {typ:'' for typ in NE_comb}.update(NE_map_rules)
+
+    # for typ in NE_types:
+    #     NE_map[typ] = typ
+    # NE_map.update(NE_map_rules)
 
     vocab = voc1.copy()
     vocab.NE.replace('', np.nan, inplace=True)
@@ -527,10 +537,8 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     voc2.loc[mask, 'NE'] = NE_text[mask].tolist()
 
     # track all combinations of NE types (cartesian prod)
-    NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
-    for typ in NE_types:
-        NE_map[typ] = typ
-    NE_map.update(NE_map_rules)
+
+
 
     # apply rule substitutions that are defined
     voc2.loc[mask, 'NE'] = (voc2

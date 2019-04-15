@@ -1,14 +1,17 @@
+import nestor
 from nestor.ui.taggingUI_app import MyTaggingToolWindow, openYAMLConfig_File
+
+
 import PyQt5.QtGui as Qg
 import PyQt5.QtWidgets as Qw
 from PyQt5.QtCore import Qt
-
 
 from PyQt5 import QtCore
 import sys
 import traceback
 from pathlib import Path
 
+nestorParams = nestor.CFG
 
 def exception_handler(type_, value, traceback_):
     if Qw.qApp.thread() is QtCore.QThread.currentThread():
@@ -55,16 +58,16 @@ def main():
 
 
     nestorPath = Path(__file__).parent.parent
-    databaseToCsv_mapping = openYAMLConfig_File(
-        yaml_path= nestorPath / 'store_data' / 'csvHeader.yaml'
-    )
+    # databaseToCsv_mapping = openYAMLConfig_File(
+    #     yaml_path= nestorPath / 'store_data' / 'csvHeader.yaml'
+    # )
     icon_path = nestorPath / 'ui' / 'kea-icon.png'
     app.setWindowIcon(Qg.QIcon(str(icon_path)))
 
     app.setStyleSheet(stylesheet)
     window = MyTaggingToolWindow(projectsPath=projectsPath,
                                  iconPath=str(icon_path),
-                                 databaseToCsv_mapping = databaseToCsv_mapping)
+                                 databaseToCsv_mapping = nestorParams._datatypes)
     #sys.excepthook = exception_handler
     sys.exit(app.exec_())
 

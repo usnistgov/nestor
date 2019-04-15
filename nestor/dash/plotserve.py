@@ -7,35 +7,46 @@
 from bokeh.server.server import Server
 import holoviews as hv
 from tornado.ioloop import IOLoop
-import sys
+from pathlib import Path
+import sys, urllib, nestor
 from nestor.tagplots import TagPlot
 from nestor.ui.taggingUI_app import openYAMLConfig_File
+
+nestorParams = nestor.CFG
 
 
 def serve_bokeh_tags(hdfstore):
     projectsPath = Path.home() / '.nestor-tmp'
     projectsPath.mkdir(parents=True, exist_ok=True)
-    nestorPath = Path(__file__).parent.parent
-    databaseToCsv_mapping = openYAMLConfig_File(
-        yaml_path=nestorPath / 'store_data' / 'csvHeader.yaml'
-    )
+    # nestorPath = Path(__file__).parent.parent
+    # databaseToCsv_mapping = openYAMLConfig_File(
+    #     yaml_path=nestorPath / 'store_data' / 'csvHeader.yaml'
+    # )
 
-    names = load_header_mapping()
-    tech = names['technician']['name']
-    mach = names['machine']['name']
+    # names = load_header_mapping()
+    # tech = names['technician']['name']
+    # mach = names['machine']['name']
 
-    tagplot = TagPlot(hdfstore, tech=tech, mach=mach)
+    tagplot = TagPlot(hdfstore, cat_specifier='name', topn=10)
 
     renderer = hv.renderer('bokeh').instance(mode='server')
 
-
     server = Server({
-        '/bars_tech': renderer.app(tagplot.hv_bars(tech).options(width=900)),
-        '/bars_mach': renderer.app(tagplot.hv_bars(mach).options(width=900)),
-        '/node_tech': renderer.app(tagplot.hv_nodelink(tech).options(width=600, height=600)),
-        '/node_mach': renderer.app(tagplot.hv_nodelink(mach).options(width=600, height=600)),
-        '/flow_tech': renderer.app(tagplot.hv_flow(tech).options(width=900, height=600)),
-        '/flow_mach': renderer.app(tagplot.hv_flow(mach).options(width=900, height=600)),
+        **{
+            '/' + urllib.parse.quote_plus(name)+'%bars':
+                renderer.app(tagplot.hv_bars(name).options(width=900))
+            for name in tagplot.names
+        },
+        **{
+            '/' + urllib.parse.quote_plus(name)+'%node':
+                renderer.app(tagplot.hv_nodelink(name).options(width=900))
+            for name in tagplot.names
+        },
+        **{
+            '/' + urllib.parse.quote_plus(name)+'%flow':
+                renderer.app(tagplot.hv_flow(name).options(width=900))
+            for name in tagplot.names
+        }
     }, port=5006, allow_websocket_origin=[
         "127.0.0.1:5000", 
         "localhost:5000", 
