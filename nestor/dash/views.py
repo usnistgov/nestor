@@ -80,12 +80,13 @@ def upload_file():
             filename = secure_filename(file.filename)
             # save_loc = Path(app.root_path)/app.config['UPLOAD_FOLDER']/filename
             save_loc = app.config['UPLOAD_FOLDER']/filename
-            # print(save_loc)
+            print(save_loc)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             file.close()
             FILES.append(filename)
 
-            data_model.set_data_location(save_loc)
+            # data_model.set_data_location(save_loc)
+            data_model.fname = save_loc
             proc = data_model.serve_data()
 
             # return render_template('upload.html', filename=FILES)
@@ -113,54 +114,56 @@ def dashboard():
 
 # assigns the feature names for the dropdown
 # feature_names = ['Machines', 'Technicians']
-feature_names = data_model.data_names
-print(feature_names)
+
 # locally creates a page
 @app.route('/bar')
 def bar():
-        current_feature_name = request.args.get('feature_name',
-                                                feature_names[0])
-        url_spec = 'http://localhost:5006/' +\
-                   urllib.parse.quote_plus(current_feature_name) + '%bars'
-        with pull_session(url=url_spec) as session:
-            # generate a script to load the customized session
-            script = server_session(session_id=session.id, url=url_spec)
-            # use the script in the rendered page
+    current_feature_name = request.args.get('feature_name',
+                                            data_model.data_names[0])
+    url_spec = 'http://localhost:5006/' +\
+               urllib.parse.quote_plus(current_feature_name) + '.bars'
+    print('getting URL: ', url_spec)
+    with pull_session(url=url_spec) as session:
+        # generate a script to load the customized session
+        script = server_session(session_id=session.id, url=url_spec)
+        # use the script in the rendered page
 
-        return render_template("bar.html", script=script, template="Flask",
-                               feature_names=feature_names,
-                               current_feature_name=current_feature_name)
+    return render_template("bar.html", script=script, template="Flask",
+                           feature_names=data_model.data_names,
+                           current_feature_name=current_feature_name)
 
 # locally creates a page
 @app.route('/node')
 def node():
     current_feature_name = request.args.get('feature_name',
-                                            feature_names[0])
+                                            data_model.data_names[0])
     url_spec = 'http://localhost:5006/' + \
-               urllib.parse.quote_plus(current_feature_name) + '%node'
+               urllib.parse.quote_plus(current_feature_name) + '.node'
+    print('getting URL: ', url_spec)
     with pull_session(url=url_spec) as session:
         # generate a script to load the customized session
         script = server_session(session_id=session.id, url=url_spec)
         # use the script in the rendered page
 
     return render_template("node.html", script=script, template="Flask",
-                           feature_names=feature_names,
+                           feature_names=data_model.data_names,
                            current_feature_name=current_feature_name)
 
 # locally creates a page
 @app.route('/flow')
 def flow():
     current_feature_name = request.args.get('feature_name',
-                                            feature_names[0])
+                                            data_model.data_names[0])
     url_spec = 'http://localhost:5006/' + \
-               urllib.parse.quote_plus(current_feature_name) + '%flow'
+               urllib.parse.quote_plus(current_feature_name) + '.flow'
+    print('getting URL: ', url_spec)
     with pull_session(url=url_spec) as session:
         # generate a script to load the customized session
         script = server_session(session_id=session.id, url=url_spec)
         # use the script in the rendered page
 
     return render_template("node.html", script=script, template="Flask",
-                           feature_names=feature_names,
+                           feature_names=data_model.data_names,
                            current_feature_name=current_feature_name)
 
 # locally creates a page

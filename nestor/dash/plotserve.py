@@ -10,7 +10,7 @@ from tornado.ioloop import IOLoop
 from pathlib import Path
 import sys, urllib, nestor
 from nestor.tagplots import TagPlot
-from nestor.ui.taggingUI_app import openYAMLConfig_File
+from itertools import product
 
 nestorParams = nestor.CFG
 
@@ -33,20 +33,21 @@ def serve_bokeh_tags(hdfstore):
 
     server = Server({
         **{
-            '/' + urllib.parse.quote_plus(name)+'%bars':
+            '/' + urllib.parse.quote_plus(name)+'.bars':
                 renderer.app(tagplot.hv_bars(name).options(width=900))
             for name in tagplot.names
         },
         **{
-            '/' + urllib.parse.quote_plus(name)+'%node':
+            '/' + urllib.parse.quote_plus(name)+'.node':
                 renderer.app(tagplot.hv_nodelink(name).options(width=900))
             for name in tagplot.names
         },
         **{
-            '/' + urllib.parse.quote_plus(name)+'%flow':
+            '/' + urllib.parse.quote_plus(name)+'.flow':
                 renderer.app(tagplot.hv_flow(name).options(width=900))
             for name in tagplot.names
         }
+
     }, port=5006, allow_websocket_origin=[
         "127.0.0.1:5000", 
         "localhost:5000", 

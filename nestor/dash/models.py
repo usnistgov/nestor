@@ -17,21 +17,44 @@ class DataModel:
 
     def __init__(self):
         print('instantiating data connection service')
-        self.fname = None
-        self.data_names = None
+        self._fname = None
+        self._data_names = None
 
-    def set_data_location(self, fname):
-        self.fname = fname
+    @property
+    def data_names(self):
+        """which data column names are being served"""
+        return self._data_names
+
+    @data_names.setter
+    def data_names(self, colnames):
+        data = [name for name in colnames
+                if name in list(nestorParams.datatype_search('name'))]
+        self._data_names = data
+        print(
+            'Found valid data columns: \n',
+            self.data_pprint
+        )
+
+    @property
+    def data_pprint(self):
+        data = self._data_names
+        return [nestorParams._datatypes.get(name) for name in data]
+
+    @property
+    def fname(self):
+        """I'm the 'x' property."""
+        return self._fname
+
+    @fname.setter
+    def fname(self, fname):
+        self._fname = fname
         print(f'data location set to {fname}')
-        with pd.HDFStore(fname, 'r') as store:
-            colnames = store.select('df', stop=1).columns
-        self.data = [i for i in colnames if i in nestorParams._datatypes.keys()]
-        self.data_names = [nestorParams._datatypes.get(name) for name in self.data]
 
-        print('Found valid data columns: \n', self.data_names)
+        with pd.HDFStore(fname, 'r') as store:
+            self.data_names = store.select('df', stop=1).columns
 
     def serve_data(self):
-        assert self.fname != None, 'File has not been assigned! Raising error...'
+        assert self.fname is not None, 'File has not been assigned! Raising error...'
         exec_loc = Path(__file__).parent/"plotserve.py"
         proc = Popen(['python', str(exec_loc), str(self.fname)])
         return proc
