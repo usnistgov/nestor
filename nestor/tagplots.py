@@ -13,7 +13,10 @@ import numpy as np
 import pandas as pd
 from matplotlib.colors import ColorConverter
 
-color_opts = {
+import nestor
+nestorParams = nestor.CFG
+
+color_opts = {  # TODO: make this tag-agnostic somehow?
         'P': 'crimson',
         'S': '#7ABC32',
         'I': '#4F81BD',
@@ -133,47 +136,44 @@ def tag_relation_net(tag_df, name=None, kind='coocc',
 class TagPlot:
     """
     Central holder for holoviews dynamic-maps, to be served as a Bokeh App.
-    TODO make this data-set agnostic!
     """
-    def __init__(self, data_file, mach='machine-name', tech='technician-name'):
+    def __init__(self, data_file, cat_specifier='name', topn = 10):
+
+        # cross-ref category with nestorParams
+        possible_cats = list(nestorParams.datatype_search(cat_specifier))
 
         # load up the data
         self.df = pd.read_hdf(data_file, key='df')
         self.tag_df = pd.read_hdf(data_file, key='tags')
+        # print(self.tag_df)
+        self.names = [name for name in possible_cats
+                 if name in self.df.columns.tolist()]
 
-        # set allowed technician options here
-        people = (
-            self.df[tech]
-                .str.split(', ', expand=True)
-                .stack()
-                .dropna()
-                .value_counts()
-                .index[:20]  # top 20 occurring
-                .tolist()
-        )
-
-        machs = (
-            self.df[mach]
-                .value_counts()
-                .index[:20]
-                .tolist()
-        )
-
-        # put it together with pretty names
         self.name_opt = {
-            mach: {'name': 'Machine',
-                     'opts': machs[:10]},
-            tech: {'name': 'Technician',
-                     'opts': people[:10]}
+            name: {'name': nestorParams._datatypes[name],
+                   'opts': self._get_cat_list(name, topn)}
+            for name in self.names
         }
         # filtering tags by count
-        self.node_thres = np.logspace(-1, 1)
+        # self.node_thres = range(1, 91, 10)
+        self.node_thres = np.around(np.logspace(0, 1.5), decimals=1)
 
         # for network-based plot options
         self.weights = ['cosine', 'count']
         self.edge_thres = range(1, 91, 10)
 
         self.table = hv.Table(self.df)
+
+    def _get_cat_list(self, col_name, topn):
+        return (
+            self.df[col_name]
+            .str.split(', ', expand=True)
+            .stack()
+            .dropna()
+            .value_counts()
+            .index[:topn]  # top occurring
+            .tolist()
+        )
 
     def filter_type_name(self, obj_type, obj_name):
         """
@@ -186,10 +186,14 @@ class TagPlot:
         -------
         pd.Series, mask for filtering df, tag_df.
         """
-        is_obj = self.df[obj_type].str.contains(obj_name, case=False).fillna(False)
+        is_obj = (
+            self.df[obj_type]
+            .str.contains(obj_name, case=False)
+            .fillna(False)
+        )
         return is_obj
 
-    def filter_tags(self, obj_type, obj_name, n_thres=10):
+    def filter_tags(self, obj_type, obj_name, n_thres=20):
         """
         apply filter to binary tag matrix (tag_df)
         Parameters
@@ -205,9 +209,24 @@ class TagPlot:
 
         assert 0 <= n_thres <= 100, 'percentiles must be between [0,100]'
         cts = self.tag_df.loc[is_obj, :].sum()
-        upper = max(1, np.percentile(cts, 100 - n_thres))
+        top2 = set((  # 2 most-freq tags of each type
+            cts
+            .reset_index(name='cts')
+            .groupby('level_0')
+            .apply(lambda x: x.nlargest(2, columns=['cts']))
+        )['level_1'].tolist())
 
-        return self.tag_df.loc[is_obj, (cts >= upper).values]
+        pct = max(1, cts.quantile((100 - n_thres)/100., interpolation='lower'))
+        top_pct = set(
+            cts[cts >= pct]
+            .reset_index()['level_1']
+            .tolist()
+        )
+
+        filt_set = (top2 | top_pct)-{'_untagged'}
+        filt_tags = self.tag_df.loc[is_obj, (slice(None), filt_set)]
+
+        return filt_tags
 
     def hv_nodelink(self, obj_type):
         """
@@ -235,10 +254,10 @@ class TagPlot:
                                                edge_alpha=.3,
                                                node_line_color='white',
                                                xaxis=None, yaxis=None)})
-            return elem.options(width=500, height=500)
-            # SOME KIND OF BUG!
-            # return (elem.options(width=500, height=500) +
-            #         self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
+            return (
+                    elem.options(width=500, height=500) +
+                    self.table.select(**{obj_type: obj_name}).options(width=1000)
+            ).cols(1)
 
         dmap = hv.DynamicMap(load_nodelink,
                              #                              cache_size=1,
@@ -278,10 +297,10 @@ class TagPlot:
                                                edge_cmap='blues',
                                                node_line_color='white',
                                                xaxis=None, yaxis=None)})
-            return elem.options(width=800, height=500)
-            # SOME KIND OF BUG!
-            # return (elem.options(width=500, height=500) +
-            #         self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
+            return (
+                elem.options(width=800, height=500) +
+                self.table.select(**{obj_type: obj_name}).options(width=1000)
+            ).cols(1)
 
         dmap = hv.DynamicMap(load_flow,
                              #                              cache_size=1,
@@ -292,6 +311,7 @@ class TagPlot:
                                  n_thres=self.node_thres,
                                  weight=self.weights)
         return dmap
+
 
     def hv_bars(self, obj_type):
         """
@@ -304,11 +324,22 @@ class TagPlot:
         -------
         hv.DynamicMap
         """
-        def load_bar(obj_name, n_thres=10, order='grouped'):
-            tags = self.filter_tags(obj_type, obj_name, n_thres).drop(columns=['U']).sum()
-            tags = tags.groupby(level=0).nlargest(10).reset_index(level=0, drop=True)
-            tags = tags.reset_index()
-            tags.columns = ['class', 'tag name', 'count']
+        def load_bar(obj_name, n_thres=20, order='grouped'):
+            filt_tags = self.filter_tags(obj_type, obj_name, n_thres)
+            tags = (
+                filt_tags
+                # .drop(columns=['NA'], errors='ignore')
+                .sum()
+                .reset_index()
+                .rename(columns={
+                    'level_0': 'class',
+                    'level_1': 'tag name',
+                    0: 'count'
+                })
+                .groupby('class')
+                .apply(lambda x: x.nlargest(10, columns=['count']))
+                .reset_index(drop=True)
+            )
 
             bar_kws = dict(color_index='class',
                            xrotation=90,
@@ -325,14 +356,12 @@ class TagPlot:
                     self.table.select(**{obj_type: obj_name}).options(width=1000)).cols(1)
 
         dmap = hv.DynamicMap(load_bar,
-                             #                              cache_size=1,
                              kdims=['obj_name',
                                     'n_thres',
                                     'order']).options(framewise=True, title_format='')
         dmap = dmap.redim.values(obj_name=self.name_opt[obj_type]['opts'],
                                  n_thres=self.node_thres,
                                  order=['sorted', 'grouped'])
-#         curdoc().add_root(dmap)
         return dmap
 
 

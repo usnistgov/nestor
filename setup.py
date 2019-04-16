@@ -12,7 +12,9 @@ from version import get_version
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
 
+
 VERSION = get_version()
+
 
 def run_setup(packages, install_requires, extras_require):
     setup(
@@ -52,6 +54,7 @@ packages = find_packages(exclude=[
     'database_storage',
     'database_storage.*',
 ])
+
 
 def get_reqs(name):
     req_file = Path('.')/'requirements'/(name+'.txt')

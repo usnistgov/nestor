@@ -12,3 +12,6 @@ __all__ = ['keyword',
            'tagtrees',
            'datasets']
 
+from nestor.settings import nestor_params
+
+CFG = nestor_params()

@@ -1,6 +1,7 @@
 """
 author: Thurston Sexton
 """
+import nestor
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -9,23 +10,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
 from itertools import product
+from tqdm.autonotebook import tqdm
 
-# try:  # thanks tcrimi! https://github.com/tqdm/tqdm/issues/506#issuecomment-373126698
-#     ipy_str = str(type(get_ipython()))
-#     # print(ipy_str)
-#     if 'zmqshell' in ipy_str.lower():
-#         print('Using Notebook Progress-bars...')
-#         from tqdm import tqdm_notebook as tqdm
-#     if 'terminal' in ipy_str.lower():
-#         from tqdm import tqdm
-# except:
-#
-#     if sys.stderr.isatty():
-#         from tqdm import tqdm
-#     else:
-#         def tqdm(iterable, **kwargs):
-#             return iterable
-
+nestorParams = nestor.CFG
 
 __all__ = ['NLPSelect',
            'TokenExtractor',
@@ -325,7 +312,7 @@ def _series_itervals(s):
 def _get_readable_tag_df(tag_df):
     """ helper function to take binary tag co-occurrence matrix and make comma-sep readable columns"""
     temp_df = pd.DataFrame(index=tag_df.index)  # empty init
-    for clf, clf_df in tag_df.T.groupby(level=0):  # loop over top-level classes (ignore NA)
+    for clf, clf_df in tqdm(tag_df.T.groupby(level=0)):  # loop over top-level classes (ignore NA)
         join_em = lambda strings: ', '.join([x for x in strings if x != ''])  # func to join str
         strs = np.where(clf_df.T == 1, clf_df.T.columns.droplevel(0).values, '').T
         temp_df[clf] = pd.DataFrame(strs).apply(join_em)
@@ -495,19 +482,27 @@ def token_to_alias(raw_text, vocab):
     return clean_text
 
 
-ne_map = {'I I': 'I',  # two items makes one new item
-          'I P': 'P I', 'I S': 'S I', 'P I': 'P I', 'S I': 'S I',  # order-free
-          'P P': 'X', 'P S': 'X', 'S P': 'X', 'S S': 'X'}  # redundancies
-ne_types = 'IPSUX'
+# ne_map = {'I I': 'I',  # two items makes one new item
+#           'I P': 'P I', 'I S': 'S I', 'P I': 'P I', 'S I': 'S I',  # order-free
+#           'P P': 'X', 'P S': 'X', 'S P': 'X', 'S S': 'X'}  # redundancies
+# ne_types = 'IPSUX'
 
 
 def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     """ Experimental method to auto-match tag combinations into higher-level
     concepts, for user-suggestion. Used in ``nestor.ui`` """
     if NE_types is None:
-        NE_types = ne_types
+        NE_types = nestorParams._entities
+    NE_comb = {' '.join(i) for i in product(NE_types, repeat=2)}
+
     if NE_map_rules is None:
-        NE_map_rules = ne_map
+        NE_map = dict(zip(NE_comb,map(nestorParams.apply_rules, NE_comb)))
+    else:
+        NE_map = {typ:'' for typ in NE_comb}.update(NE_map_rules)
+
+    # for typ in NE_types:
+    #     NE_map[typ] = typ
+    # NE_map.update(NE_map_rules)
 
     vocab = voc1.copy()
     vocab.NE.replace('', np.nan, inplace=True)
@@ -542,10 +537,8 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     voc2.loc[mask, 'NE'] = NE_text[mask].tolist()
 
     # track all combinations of NE types (cartesian prod)
-    NE_map = {' '.join(i): '' for i in product(NE_types, repeat=2)}
-    for typ in NE_types:
-        NE_map[typ] = typ
-    NE_map.update(NE_map_rules)
+
+
 
     # apply rule substitutions that are defined
     voc2.loc[mask, 'NE'] = (voc2
@@ -614,3 +607,4 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U']]
 
     return tag_df, relation_df, untagged_df
+

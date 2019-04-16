@@ -1,6 +1,7 @@
+__author__ = 'Sascha Moccozet'
+
 from pathlib import Path
 from PyQt5 import uic
-# from nestor.ui import *
 import PyQt5.QtGui as Qg
 import PyQt5.QtWidgets as Qw
 from PyQt5.QtCore import Qt
@@ -8,14 +9,12 @@ from nestor.store_data import integration as cypherQuery
 
 import pyaml, yaml
 
-#from nestor.ui.taggingUI_app import openYAMLConfig_File
-
-
 script_dir = Path(__file__).parent
 
 fname_newproject = 'dialogmenu_newproject.ui'
 qtDesignerFile_newproject = script_dir/fname_newproject
 Ui_MainWindow_newproject, QtBaseClass_newproject = uic.loadUiType(qtDesignerFile_newproject)
+
 
 class DialogMenu_newProject(Qw.QDialog, Ui_MainWindow_newproject):
     """
@@ -34,19 +33,17 @@ class DialogMenu_newProject(Qw.QDialog, Ui_MainWindow_newproject):
         self.buttonBox__NewProject.rejected.connect(self.close)
         self.show()
 
-
     def get_data(self):
         """
         return the needed data from the dialog
         :return:
         """
-        return  self.lineEdit_NewProject_ProjectName.text(),\
-                self.lineEdit_NewProject_ProjectAuthor.text(),\
-                self.textEdit_NewProject_ProjectDescription.toPlainText(),\
-                self.lineEdit_NewProject_Project1gVocabName.text(),\
-                self.lineEdit_NewProject_ProjectNgVocabName.text(),\
-                self.lineEdit_NewProject_LoadCSV.text()
-
+        return self.lineEdit_NewProject_ProjectName.text(),\
+            self.lineEdit_NewProject_ProjectAuthor.text(),\
+            self.textEdit_NewProject_ProjectDescription.toPlainText(),\
+            self.lineEdit_NewProject_Project1gVocabName.text(),\
+            self.lineEdit_NewProject_ProjectNgVocabName.text(),\
+            self.lineEdit_NewProject_LoadCSV.text()
 
     def onClick_loadCSV(self):
         """
@@ -63,6 +60,7 @@ class DialogMenu_newProject(Qw.QDialog, Ui_MainWindow_newproject):
 fname_openproject = 'dialogmenu_openproject.ui'
 qtDesignerFile_openproject = script_dir / fname_openproject
 Ui_MainWindow_openproject, QtBaseClass_openproject = uic.loadUiType(qtDesignerFile_openproject)
+
 
 class DialogMenu_openProject(Qw.QDialog, Ui_MainWindow_openproject):
     """
@@ -190,6 +188,7 @@ fname_csvHeader = 'dialogmenu_csvheadermapping.ui'
 qtDesignerFile_csvHeader = script_dir / fname_csvHeader
 Ui_MainWindow_csvHeader, QtBaseClass_csvHeader = uic.loadUiType(qtDesignerFile_csvHeader)
 
+
 class DialogMenu_csvHeaderMapping(Qw.QDialog, Ui_MainWindow_csvHeader):
     """
     Class use when mapping the Csv and settup thoses csv information
@@ -290,6 +289,7 @@ fname_dbconnect = 'dialogmenu_databaseconnect.ui'
 qtDesignerFile_dbconnect = script_dir / fname_dbconnect
 Ui_MainWindow_dbconnect, QtBaseClass_dbconnect = uic.loadUiType(qtDesignerFile_dbconnect)
 
+
 class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
     """
     class used to print the Term of Use
@@ -342,6 +342,7 @@ class DialogMenu_DatabaseConnect(Qw.QDialog, Ui_MainWindow_dbconnect):
 fname_dbrunquery = 'dialogmenu_databaserunqueries.ui'
 qtDesignerFile_dbrunquery = script_dir / fname_dbrunquery
 Ui_MainWindow_dbrunquery, QtBaseClass_dbrunquery = uic.loadUiType(qtDesignerFile_dbrunquery)
+
 
 class DialogMenu_DatabaseRunQueries(Qw.QDialog, Ui_MainWindow_dbrunquery):
     """
@@ -544,6 +545,7 @@ fname_dialogWait = 'dialog_wait.ui'
 qtDesignerFile_dialogWait = script_dir / fname_dialogWait
 Ui_MainWindow_dialogWait, QtBaseClass_dialogWait = uic.loadUiType(qtDesignerFile_dialogWait)
 
+
 class DialogWait(Qw.QDialog, Ui_MainWindow_dialogWait):
 
     def __init__(self, iconPath=None):
@@ -564,6 +566,7 @@ class DialogWait(Qw.QDialog, Ui_MainWindow_dialogWait):
 fname_researchWindow = 'dialogmenu_researchwindow.ui'
 qtDesignerFile_researchWindow = script_dir / fname_researchWindow
 Ui_MainWindow_researchWindow, QtBaseClass_researchWindow = uic.loadUiType(qtDesignerFile_researchWindow)
+
 
 class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
 
@@ -624,7 +627,6 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
                numberToken, \
                numberUpdate
 
-
     def setEnabledSaveList(self):
         """
         setEnabled True or False the list based on the checkbox
@@ -654,6 +656,7 @@ class DialogMenu_ResearchWindow(Qw.QDialog, Ui_MainWindow_researchWindow):
 fname_dialogspecialreplace = 'dialogmenu_specialreplace.ui'
 qtDesignerFile_dialogspecialreplace = script_dir / fname_dialogspecialreplace
 Ui_MainWindow_dialogspecialreplace, QtBaseClass_dialogspecialreplace = uic.loadUiType(qtDesignerFile_dialogspecialreplace)
+
 
 class DialogMenu_SpecialReplace(Qw.QDialog, Ui_MainWindow_dialogspecialreplace):
 
@@ -705,7 +708,6 @@ class DialogMenu_SpecialReplace(Qw.QDialog, Ui_MainWindow_dialogspecialreplace):
 
         else:
             self.lineEdit_specialReplace_newUntrack.setStyleSheet('background-color: rgb(255, 51, 0);')
-
 
 
     def create_SpecialReplace_layout(self, untrack, replace=""):
@@ -772,18 +774,18 @@ class DialogMenu_SpecialReplace(Qw.QDialog, Ui_MainWindow_dialogspecialreplace):
         """
         specialReplace_dict = {}
 
-        #for layout in layour
+        # for layout in layour
         for i in range(self.verticalLayout_specialReplace_replacement.count()):
             l = self.verticalLayout_specialReplace_replacement.itemAt(i)
 
-            #for widjet in layout
+            # for widjet in layout
 
 
             for j in range(l.count()):
                 w = l.itemAt(j).widget()
                 texts = w.objectName().split("=")
 
-                #if widjetname is interesting for us
+                # if widjetname is interesting for us
                 if len(texts) > 1:
                     print(w.objectName())
                     if texts[0] == "untrack":

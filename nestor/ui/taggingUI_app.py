@@ -21,7 +21,7 @@ from PyQt5.QtCore import Qt
 
 import nestor.keyword as kex
 from nestor.ui.meta_windows import *
-
+import nestor
 
 import warnings
 warnings.filterwarnings("ignore", 'This pattern has match groups')
@@ -29,7 +29,7 @@ warnings.filterwarnings("ignore", 'This pattern has match groups')
 neo4j_spec = importlib.util.find_spec("neo4j")
 simplecrypt_spec = importlib.util.find_spec("simplecrypt")
 
-dbModule_exists = neo4j_spec is not None and simplecrypt_spec is not None
+dbModule_exists = (neo4j_spec is not None) and (simplecrypt_spec is not None)
 #dbModule_exists = False
 
 if dbModule_exists:
@@ -39,6 +39,7 @@ if dbModule_exists:
     #from nestor.ui.menu_app import DialogDatabaseRunQuery
     from nestor.store_data.helper import resultToObservationDataframe
 
+nestorParams = nestor.CFG
 
 fname = 'taggingUI.ui'
 script_dir = Path(__file__).parent
@@ -774,9 +775,9 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
         """
 
         databaseToCsv_list = []
-        for key1 ,value1 in self.databaseToCsv_mapping.items():
-            for key2, value2 in value1.items():
-                databaseToCsv_list.append(value2)
+        for key,value in self.databaseToCsv_mapping.items():
+            # for key2, value2 in value1.items():
+            databaseToCsv_list.append(value)
 
         #TODO AttributeError: 'NoneType' object has no attribute 'columns'
         self.dialogMenu_csvHeaderMapping = DialogMenu_csvHeaderMapping(csvHeaderContent= list(self.dataframe_Original.columns.values),
@@ -1538,7 +1539,18 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             if fname[-4:] != '.csv':
                 fname += '.csv'
 
-            self.dataframe_Original.join(self.tag_readable, lsuffix="_pre").to_csv(fname)
+            col_names = self.config['csvinfo'].get('mapping', {})
+            if col_names:
+                col_map = {k: next(nestorParams.datatype_search(v))
+                       for k, v in col_names.items()}
+            else:
+                col_map = dict()
+            save_df = (self.dataframe_Original[list(col_names.keys())]
+                .join(self.tag_readable, lsuffix="_pre")
+                .rename(columns=col_map)
+            )
+            save_df.to_csv(fname)
+            # self.dataframe_Original.join(self.tag_readable, lsuffix="_pre").to_csv(fname)
             print('SAVE --> readable csv with tagged documents saved at: ', str(fname))
 
     def onClick_saveTagsHDFS(self):
@@ -1561,9 +1573,12 @@ class MyTaggingToolWindow(Qw.QMainWindow, Ui_MainWindow_taggingTool):
             if fname[-3:] != '.h5':
                 fname += '.h5'
 
-            col_map = self.config['csvinfo'].get('mapping', {})
-            save_df = self.dataframe_Original[list(col_map.keys())]
-            save_df = save_df.rename(columns=col_map)
+            col_names = self.config['csvinfo'].get('mapping', {})
+            col_map = {k:next(nestorParams.datatype_search(v))
+                       for k,v in col_names.items()}
+            save_df = self.dataframe_Original[
+                list(col_names.keys())
+            ].rename(columns=col_map)
             save_df.to_hdf(fname, key='df')
 
             self.tag_df.to_hdf(fname, key='tags')
