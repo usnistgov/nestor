@@ -1,6 +1,6 @@
 import nestor
 from nestor.ui.taggingUI_app import MyTaggingToolWindow, openYAMLConfig_File
-
+from multiprocessing import freeze_support
 
 import PyQt5.QtGui as Qg
 import PyQt5.QtWidgets as Qw
@@ -74,6 +74,7 @@ def main():
 
 
 if __name__ == "__main__":
+    freeze_support()
     print(
         "====================================================================\n",
         " Welcome to NESTOR, a tagging tool created by the KEA team at NIST\n",

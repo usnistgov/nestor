@@ -815,7 +815,7 @@ def openYAMLConfig_File(yaml_path, dict={}):
     """
     if yaml_path.is_file():
         with open(yaml_path, 'r') as yamlfile:
-            config = yaml.load(yamlfile)
+            config = yaml.safe_load(yamlfile)
             print("OPEN --> YAML file at: ", yaml_path)
             if not config:
                 config = {}

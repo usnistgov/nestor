@@ -25,6 +25,7 @@ def find_key_path(d, value, join='.'):
     If `value` is a key in any of the levels, will yield a string of all keys to
     reach it (inclusive). If `value` is a value, string will be exclusively keys
 
+    hackey pattern matching
 
     Parameters
     ----------
