@@ -21,7 +21,6 @@ dist
 >>>>>>> master
 
 #   special file type
-**.spec
 **.pyc
 **.csv
 **.yaml
