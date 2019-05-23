@@ -79,3 +79,24 @@ Nestor v0.3 provides the user with predefined rules based on auto population.
 
 Additionally, Nestor will suggest a default alias for `word1`+`word2`, namely, `word1_word2`.
 
+
+## Reporting and Data Transfer
+After a sufficient time spent annotating concepts from your corpus, you might like to know what coverage your annotation has on the detected information within. Nestor provides some metrics and functions on the `Report` tab, both for exporting your hard work and giving you visual feedback on just how far you've come. 
+
+First, you will need to process the data using your annotations! 
+> Always start by pressing the `UPDATE TAG EXTRACTION` button. 
+
+### Exporting 
+Nestor parses through the original text and unifies detected words into the tags you have now created. This is done in two ways: human-readable (CSV) and binary file store (HDFS)
+
+- `create new CSV`: a new csv, containing your *mapped* column headers and new headers for each type of tag, will be exported. Each work-order will now have a list of tags of each type in its corresponding cell. Tags not annotated explicitly will be ommitted.
+
+- `create a HDFS (binary)`: This is a rapid-access filestore (`*.h5`), excellent for powering visualizations or analysis in other toolkits. Three keys represent three automatically created tables containing your annotated data: 
+ - `df`: columns from original dataset whose csv headers have been mapped
+ - `tags`: binary tag-occurrence matrix for each tag-document pair
+ - `rels` PI/SI-document pair occurrence matrix. 
+ 
+The binary file is a requirement to utilize the (beta) `nestor-dash` functionality. You can use the dashboard by uploading your `.h5` file to the dashboard, provided you have marked at least one column as being a `.name` type (e.g. machine.name is "Asset ID", technician.name is Technician, etc.)
+
+### Progress Report
+The bottom half of this window contains various metrics for annotation rates in a table, along with a histogram that shows a distribution of "completion" over all entries in your corpus. This is the completion-fraction distribution, where "1.0" means *all* extracted tokens in a work-order have a valid user-given tag and classification, while "0.0" means that none of them are annotated. 
