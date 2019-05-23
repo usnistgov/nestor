@@ -5,7 +5,7 @@ Starting with v0.3, [standalone executables are available](https://github.com/us
 
 > Note that `nestor-dash` and `nestor-gui` command line scripts will not be installed, and therefore unavailable! Only the interface normally accessible via `nestor-gui` is bundled as an executable at this time.
 
-At the link above, select a distribution (Linux 5.0 x86_64 or greater, tested on Ubuntu 18.10; Windows 10 or greater; OSx v?? or greater), which downloads a zipped folder containing dependencies and the program itself. Extract the folder to any directory and run the `Nestor` file to start tagging!
+At the link above, select a distribution (Linux 5.0 x86_64 or greater, tested on Ubuntu 18.10; Windows 10 or greater; OSx v10.1 or greater), which downloads a zipped folder containing dependencies and the program itself. Extract the folder to any directory and run the `Nestor` file to start tagging!
 
 > On Windows, you will see a `Nestor.exe`; on Linux you must ensure the `Nestor` script file is executable, and can be run in the terminal via `./<path-to-file>/Nestor`
 
