@@ -1,0 +1,16 @@
+numpy>=1.14.2
+pandas>=0.22.0
+tables
+scikit-learn==0.21.1
+joblib==0.11
+bokeh
+holoviews>=1.10
+pyqt5
+pyaml
+chardet
+seaborn>=0.8.1
+matplotlib>=2.2.2
+fuzzywuzzy
+networkx>=2.0
+tqdm
+
