@@ -65,10 +65,10 @@ def get_reqs(name):
 install_requires = get_reqs('defaults')
 extras_require = {
     'docs': get_reqs('docs'),
-    'dash': get_reqs('dash'),
+    # 'dash': get_reqs('dash'),
 }
 
-extras_require['all'] = extras_require['dash'] +\
-                        extras_require['docs']
+# extras_require['all'] = extras_require['dash'] +\
+#                         extras_require['docs']
 
 run_setup(packages, install_requires, extras_require)
