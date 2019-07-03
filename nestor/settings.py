@@ -1,6 +1,7 @@
 from pathlib import Path
-import yaml
 from itertools import product
+import yaml
+
 
 __all__ = [
     'nestor_params',
@@ -20,8 +21,9 @@ def nestor_fnames():
 def nestor_params_from_files(fname):
     """Build up a :class:`nestor.NestorParams` object from the default
     config file locations"""
-    d = yaml.safe_load(open(fname))
-    cfg = NestorParams(**d)
+
+    settings_dict = yaml.safe_load(open(fname))
+    cfg = NestorParams(**settings_dict)
     return cfg
 
 
@@ -35,7 +37,6 @@ def nestor_params():
 
 class NestorParams(dict):
 
-    # TODO rewrite using dataclasses and entity-rel model (v0.4)
     def __init__(self, *arg, **kw):
         super(NestorParams, self).__init__(*arg, **kw)
         self._datatypes = None
@@ -55,11 +56,7 @@ class NestorParams(dict):
     @property
     def entities(self):
         if self._entities is None:
-            # self._entities = ''.join(
-            #     self['entities']['types']['atomic'].keys()
-            # )
             self._entities = leafnames(self['entities']['types'])
-            # TODO: need NON-dict members of `entities`...!
         return self._entities
 
     @property
@@ -77,24 +74,26 @@ class NestorParams(dict):
             raw_rules = self['entities']['rules']
             rules = {k: [set(i) for i in v] for k, v in raw_rules.items()}
 
-            NE_comb = {' '.join(i) for i in product(self.entities, repeat=2)}
+            entity_comb = {  # all combinations of entities
+                ' '.join(i) for i in product(self.entities, repeat=2)
+            }
 
             def apply_rules(pair):
-                s = set(pair.split(' '))
-                query = (e for e, rul in rules.items() if s in rul)
+                ent_set = set(pair.split(' '))  # ordering doesn't matter
+                query = (e for e, rul in rules.items() if ent_set in rul)
                 return next(query, '')  # if no match
 
-            self._entity_rules = dict(zip(NE_comb, map(apply_rules, NE_comb)))
+            self._entity_rules = dict(zip(entity_comb, map(apply_rules, entity_comb)))
         return self._entity_rules
 
 
-def find_node_from_path(dataDict, pathstr):
+def find_node_from_path(data_dict, pathstr):
     """
     Gets a specific leaf/branch of a nested dict, by passing a `.`-separated
     string of keys. NB: Requires all accessed keys in `dataDict` to be `str`!
     Parameters
     ----------
-    dataDict: dict
+    data_dict: dict
         potentially nested, keyed on strings
     pathstr: string of dot-separated key path to traverse/retrieve
 
@@ -106,12 +105,12 @@ def find_node_from_path(dataDict, pathstr):
     first, rest = maplist[0], '.'.join(maplist[1:])
     if rest:
         # if `rest` is not empty, run the function recursively
-        return find_node_from_path(dataDict[first], rest)
-    else:
-        return dataDict[first]
+        return find_node_from_path(data_dict[first], rest)
+
+    return data_dict[first]
 
 
-def find_path_from_key(d, value, join='.'):
+def find_path_from_key(deep_dict, value, join='.'):
     """
     Lookup a value or key in a nested dict, yielding the path(s) that reach
     it as concatenated strings (e.g. for making pandas columns)
@@ -123,42 +122,34 @@ def find_path_from_key(d, value, join='.'):
 
     Parameters
     ----------
-    d: dict
+    deep_dict: dict
         Must have keys/values of type str
     value: str
         value (or key) to search for
     join: str
         connector between key names
     """
-    for k, v in d.items():
+    for key, val in deep_dict.items():
         # check if not leaf of tree
-        if isinstance(v, dict):
+        if isinstance(val, dict):
             # reached the desired key
-            if value in v.keys():
-                yield join.join([k] + [value])
+            if value in val.keys():
+                yield join.join([key] + [value])
             # recursively check keys
-            for p in find_path_from_key(v, value, join=join):
-                if p:  # non-empty
-                    yield join.join([k] + [p])
+            for path in find_path_from_key(val, value, join=join):
+                if path:  # non-empty
+                    yield join.join([key] + [path])
         # if we've reached a leaf
-        elif v == value:
-            yield k
+        elif val == value:
+            yield key
 
 
-def flatten_dict(d):
-    """
-    Turn `d` into a one-level dict keyed on `.`-joined path strings
-    Parameters
-    ----------
-    d: dict
-
-    Returns
-    -------
-    dict
-    """
+def flatten_dict(deep_dict):
+    """Turn `deep_dict` into a one-level dict keyed on `.`-joined
+    path strings"""
     new_dict = {}
-    for key, value in d.items():
-        if type(value) == dict:
+    for key, value in deep_dict.items():
+        if isinstance(value, dict):
             _dict = {
                 '.'.join([key, _key]): _value
                 for _key, _value in flatten_dict(value).items()
@@ -169,12 +160,12 @@ def flatten_dict(d):
     return new_dict
 
 
-def leafnames(d):
+def leafnames(deep_dict):
     """
     Find keys of leaf-items in a nested dict, using recursion.
     Parameters
     ----------
-    d
+    deep_dict
 
     Returns
     -------
@@ -184,10 +175,10 @@ def leafnames(d):
 
     def get_keys(doc):
         if isinstance(doc, dict):
-            for k, v in doc.items():
-                if not isinstance(v, dict):
-                    keylist.append(k)  # side-effect :(
-                get_keys(v)
-        return
-    get_keys(d)
+            for key, val in doc.items():
+                if not isinstance(val, dict):
+                    keylist.append(key)  # side-effect :(
+                get_keys(val)
+
+    get_keys(deep_dict)
     return keylist
