@@ -4,13 +4,19 @@ import networkx as nx
 
 from sklearn.preprocessing import MultiLabelBinarizer  # , minmax_scale
 from sklearn.metrics.pairwise import cosine_similarity
-
+import itertools as it
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+import nestor
 
 
-def node_adj_mat(tag_df, similarity='cosine', dag=False, pct_thres=None):
+nestorParams = nestor.CFG
+
+
+
+def node_adj_mat(tag_df, similarity='cosine', pct_thres=None,
+                 dag=False, dag_order=None):
     """
     Calculate the similarity of tags, in the form of a similarity kernel.
     Used as input to graph/network methods.
@@ -39,28 +45,39 @@ def node_adj_mat(tag_df, similarity='cosine', dag=False, pct_thres=None):
 
     if similarity == 'cosine':
         # adj_mat.loc[:, :] = cosine_similarity(tag_df.T)
-        adj_mat = cts/cts.sum(axis=1)[:, None]
+        adj_mat = (cts-np.diag(cts.values))/cts.sum(axis=1)[:, None]
 
     else:
         if similarity != 'count':
             print('similarity must be one of [count, cosine]!'
                   '\nDefaulting to count...')
-        adj_mat = cts
+        adj_mat = cts - np.diag(cts.values)
 
-    np.fill_diagonal(adj_mat.values, 0)
+    # np.fill_diagonal(adj_mat.values, 0)
 
     if dag:
-        for NE in 'IPS':
-            adj_mat.loc[NE, NE] = 0.  # no self-self
-        adj_mat.loc['P', 'S'] = 0.   # no action-action
-        adj_mat.loc['S', 'P'] = 0.
-        adj_mat.loc['I', 'P'] = 0.   # ensure DAG
-        adj_mat.loc['S', 'I'] = 0.   # (P)->(I)->(S)
+        def pairwise(iterable):
+            """recipe from itertools docs
+            s -> (s0,s1), (s1,s2), (s2, s3), ...
+            """
+            a, b = it.tee(iterable)
+            next(b, None)
+            return zip(a, b)
+
+        for pair in it.product(nestorParams.atomics, repeat=2):
+            # we only want a pipeline of types, no inter-connections
+            pipe = nestorParams.atomics if dag_order is None else dag_order
+            if not pair in pairwise(pipe):
+                adj_mat.loc[pair] = 0.  # no self-self
+        # adj_mat.loc['P', 'S'] = 0.   # no action-action
+        # adj_mat.loc['S', 'P'] = 0.
+        # adj_mat.loc['I', 'P'] = 0.   # ensure DAG
+        # adj_mat.loc['S', 'I'] = 0.   # (P)->(I)->(S)
 
     if pct_thres is not None:
         assert 0 <= pct_thres <= 100, 'percentiles must be between [0,100]'
         lower = np.percentile(adj_mat, pct_thres)
-        adj_mat[adj_mat < lower] = 0.
+        adj_mat.loc[adj_mat < lower] = 0.
 
     return adj_mat
 

@@ -1,8 +1,8 @@
 entities:
   types:
     'atomic': # atomic types
-      'I': 'Item'
       'P': 'Problem'
+      'I': 'Item'
       'S': 'Solution'
     'derived':  # only made from atoms
       'PI': 'Object Fault'

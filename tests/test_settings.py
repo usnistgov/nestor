@@ -31,11 +31,11 @@ def test_find_path_from_key(test_val, found_path):
 
 
 def test_default_entities():
-    assert nestorParams.entities == ['I', 'P', 'S', 'PI', 'SI', 'U', 'X']
+    assert nestorParams.entities == ['P', 'I', 'S', 'PI', 'SI', 'U', 'X']
 
 
 def test_default_atomics():
-    assert list(nestorParams.atomics) == ['I', 'P', 'S']
+    assert set(nestorParams.atomics) == {'I', 'P', 'S'}
 
 @pytest.mark.parametrize(
     'combine,result',
@@ -46,10 +46,10 @@ def test_default_rules(combine, result):
 
 
 def test_default_datatype():
-    tech_name = next(nestorParams.datatype_search('name'))
+    names = list(nestorParams.datatype_search('name'))
 
     assert (
-        tech_name == 'technician.name'
+        'technician.name' in names
     ) and (
-        tech_name in nestorParams.datatypes
+        names[0] in nestorParams.datatypes
     )

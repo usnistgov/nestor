@@ -150,7 +150,7 @@ class TagPlot:
                  if name in self.df.columns.tolist()]
 
         self.name_opt = {
-            name: {'name': nestorParams._datatypes[name],
+            name: {'name': nestorParams.datatypes[name],
                    'opts': self._get_cat_list(name, topn)}
             for name in self.names
         }
