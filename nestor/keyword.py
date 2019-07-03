@@ -431,7 +431,8 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     table = pd.pivot_table(v_filled, index=['NE', 'alias'], columns=['tokens']).fillna(0)
     table[table > 0] = 1
 
-    tran = (table
+    tran = (
+        table
         .score
         .T
         .to_sparse(fill_value=0.)
@@ -488,17 +489,19 @@ def token_to_alias(raw_text, vocab):
 # ne_types = 'IPSUX'
 
 
-def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
+def ngram_automatch(voc1, voc2):
     """ Experimental method to auto-match tag combinations into higher-level
     concepts, for user-suggestion. Used in ``nestor.ui`` """
-    if NE_types is None:
-        NE_types = nestorParams._entities
-    NE_comb = {' '.join(i) for i in product(NE_types, repeat=2)}
+    # if NE_types is None:
+    #     NE_types = nestorParams.entities
+    # NE_comb = {' '.join(i) for i in product(NE_types, repeat=2)}
+    #
+    # if NE_map_rules is None:
+    #     NE_map = dict(zip(NE_comb,map(nestorParams.apply_rules, NE_comb)))
+    # else:
+    #     NE_map = {typ:'' for typ in NE_comb}.update(NE_map_rules)
 
-    if NE_map_rules is None:
-        NE_map = dict(zip(NE_comb,map(nestorParams.apply_rules, NE_comb)))
-    else:
-        NE_map = {typ:'' for typ in NE_comb}.update(NE_map_rules)
+    NE_map = nestorParams.entity_rules_map
 
     # for typ in NE_types:
     #     NE_map[typ] = typ
@@ -510,19 +513,19 @@ def ngram_automatch(voc1, voc2, NE_types=None, NE_map_rules=None):
     # first we need to substitute alias' for their NE identifier
     NE_dict = (
         vocab
-            .NE
-            .fillna('U')
-            .to_dict()
+        .NE
+        .fillna('U')
+        .to_dict()
     )
 
     NE_dict.update(
         vocab
-            .fillna('U')
-            .reset_index()[['NE', 'alias']]
-            .drop_duplicates()
-            .set_index('alias')
-            .NE
-            .to_dict()
+        .fillna('U')
+        .reset_index()[['NE', 'alias']]
+        .drop_duplicates()
+        .set_index('alias')
+        .NE
+        .to_dict()
     )
 
     _ = NE_dict.pop('', None)
@@ -607,4 +610,3 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U']]
 
     return tag_df, relation_df, untagged_df
-

@@ -4,12 +4,11 @@ entities:
       'I': 'Item'
       'P': 'Problem'
       'S': 'Solution'
-      'U': 'Unknown'
-      'X': 'Non Entity'
     'derived':  # only made from atoms
       'PI': 'Object Fault'
       'SI': 'Object Resolution'
-
+    'U': 'Unknown'
+    'X': 'Non Entity'
   rules:
     # two items makes one new item
     'I':

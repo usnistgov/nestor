@@ -2,13 +2,12 @@
 
 import networkx as nx
 
-from sklearn.preprocessing import MultiLabelBinarizer#, minmax_scale
+from sklearn.preprocessing import MultiLabelBinarizer  # , minmax_scale
 from sklearn.metrics.pairwise import cosine_similarity
 
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-
 
 
 def node_adj_mat(tag_df, similarity='cosine', dag=False, pct_thres=None):
@@ -36,20 +35,23 @@ def node_adj_mat(tag_df, similarity='cosine', dag=False, pct_thres=None):
     -------
     pandas.DataFrame, containing adjacency measures for each tag-tag (row-column) occurrence
     """
-    adj_mat = tag_df.T.dot(tag_df)
+    cts = tag_df.T@tag_df
 
     if similarity == 'cosine':
-        adj_mat.loc[:, :] = cosine_similarity(tag_df.T)
-    elif similarity != 'count':
-        print('similarity must be one of [count, cosine]!\nDefaulting to count..."')
+        # adj_mat.loc[:, :] = cosine_similarity(tag_df.T)
+        adj_mat = cts/cts.sum(axis=1)[:, None]
+
     else:
-        pass
+        if similarity != 'count':
+            print('similarity must be one of [count, cosine]!'
+                  '\nDefaulting to count...')
+        adj_mat = cts
 
     np.fill_diagonal(adj_mat.values, 0)
 
     if dag:
         for NE in 'IPS':
-            adj_mat.loc[NE,NE] = 0.  # no self-self
+            adj_mat.loc[NE, NE] = 0.  # no self-self
         adj_mat.loc['P', 'S'] = 0.   # no action-action
         adj_mat.loc['S', 'P'] = 0.
         adj_mat.loc['I', 'P'] = 0.   # ensure DAG
@@ -69,7 +71,8 @@ def tag_network(adj_mat, column_lvl=0):
     and returns a networkx Graph object with those nodes/edge weights.
     """
     G = nx.from_numpy_matrix(adj_mat.values)
-    G = nx.relabel_nodes(G, dict(zip(G.nodes(), adj_mat.columns.get_level_values(column_lvl))))
+    G = nx.relabel_nodes(
+        G, dict(zip(G.nodes(), adj_mat.columns.get_level_values(column_lvl))))
     return G
 
 
@@ -111,10 +114,12 @@ def tag_df_network(tag_df, **node_adj_kws):
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
     #                        pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')],
     #                       axis=1).reset_index()
-    node_info = pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')
+    node_info = pd.DataFrame.from_dict(
+        {k: v for k, v in G.nodes(data=True)}, orient='index')
 
     edge_info = adj_mat.copy()
-    edge_info.index, edge_info.columns = edge_info.index.droplevel(0), edge_info.columns.droplevel(0)
+    edge_info.index, edge_info.columns = edge_info.index.droplevel(
+        0), edge_info.columns.droplevel(0)
 
     # trick to get out source-target relationships with pandas
     edge_info = edge_info.stack(level=0).reset_index()
@@ -122,7 +127,7 @@ def tag_df_network(tag_df, **node_adj_kws):
     edge_info = edge_info.replace(0., np.nan)
 
     # edge_info.weight = np.log(1+edge_info.weight)  # wait for Holoviews `op()` functionality
-    
+
     return G, node_info, edge_info.dropna()
 
 
@@ -195,7 +200,8 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
             # recalculate node centralities after removing each <tag>
             # EXPENSIVE.
             G.remove_node(tag)
-            cent = pd.Series(cent_dict[cent_prog](G)).sort_values(ascending=False)
+            cent = pd.Series(cent_dict[cent_prog](
+                G)).sort_values(ascending=False)
         else:
             cent.drop(tag, inplace=True)
 
@@ -235,7 +241,8 @@ def get_relevant(df, col, topn=20):
     binner = MultiLabelBinarizer().fit(tags)
     vecs = binner.transform(tags)
     counts = vecs.sum(axis=0)
-    relevant = [(binner.classes_[i], counts[i], vecs[:, i]) for i in counts.argsort()[-topn:][::-1]]
+    relevant = [(binner.classes_[i], counts[i], vecs[:, i])
+                for i in counts.argsort()[-topn:][::-1]]
     return relevant
 
 
@@ -245,6 +252,3 @@ def get_onehot(df, col, topn=700):
     itm_event = pd.DataFrame(columns=[i[0] for i in itm_relevant if i[0] != u''],
                              data=np.array([i[2] for i in itm_relevant if i[0] != u'']).T)
     return itm_event
-
-
-
