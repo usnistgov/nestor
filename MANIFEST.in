@@ -1,5 +1,6 @@
 include *.md *.rst
 recursive-include nestor/datasets/*
+recursive-include source *
 include requirements/*.txt
 include nestor/datasets/*.csv
 include nestor/settings.yaml

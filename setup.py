@@ -51,8 +51,8 @@ def run_setup(packages, install_requires, extras_require):
 
 
 packages = find_packages(exclude=[
-    'database_storage',
-    'database_storage.*',
+    # 'database_storage',
+    # 'database_storage.*',
 ])
 
 
