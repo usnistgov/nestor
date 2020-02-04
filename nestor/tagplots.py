@@ -14,6 +14,13 @@ import pandas as pd
 from matplotlib.colors import ColorConverter
 
 import nestor
+
+import warnings
+warnings.warn("The tagplots module is deprecated! "
+              "Functionality has moved to `nestor-eda`.",
+              DeprecationWarning,
+              stacklevel=2)
+
 nestorParams = nestor.CFG
 
 color_opts = {  # TODO: make this tag-agnostic somehow?

@@ -77,25 +77,67 @@ class NLPSelect(Transformer):
         else:
             nlp_cols = [self.columns]  # allow...duck-typing I guess? Don't remember.
 
-        raw_text = (X
-                    .loc[:, nlp_cols]
-                    .fillna('')  # fill nan's
-                    .add(' ')
-                    .sum(axis=1) # if len(nlp_cols) > 1:  # more than one column, concat them
-                    .str[:-1])
-        self.together = raw_text
+        def _robust_cat(df, cols):
+            """pandas doesn't like batch-cat of string cols...needs 1st col"""
+            if len(cols) <= 1:
+                return (
+                    df[cols].astype(str)
+                    .fillna('')
+                    .iloc[:, 0]
 
-        raw_text = (raw_text
-                    .str.lower()  # all lowercase
-                    .str.replace('\n', ' ')  # no hanging newlines
-                    .str.replace('[{}]'.format(string.punctuation), ' '))
+                )
+            else:
+                return (
+                    df[cols[0]]
+                    .astype(str)
+                    .str.cat(
+                        df.loc[:, cols[1:]].astype(str),
+                        sep=' ',
+                        na_rep='',
+                    ))
 
-        if self.special_replace:
-            rx = re.compile('|'.join(map(re.escape, self.special_replace)))
-            # allow user-input special replacements.
-            raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
-        self.clean_together = raw_text
-        return raw_text
+        def _clean_text(s, special_replace=None):
+            """lower, rm newlines and punct, and optionally special words"""
+            raw_text = (s
+                        .str.lower()  # all lowercase
+                        .str.replace('\n', ' ')  # no hanging newlines
+                        .str.replace('[{}]'.format(string.punctuation), ' ')
+                        )
+            if special_replace is not None:
+                rx = re.compile('|'.join(map(re.escape, special_replace)))
+                # allow user-input special replacements.
+                return (
+                    raw_text
+                    .str.replace(
+                        rx, lambda match: self.special_replace[match.group(0)]
+                ))
+            else:
+                return raw_text
+        # raw_text = (X
+        #             .loc[:, nlp_cols]
+        #             .astype(str)
+        #             .fillna('')  # fill nan's
+        #             .add(' ')
+        #             .sum(axis=1) # if len(nlp_cols) > 1:  # more than one column, concat them
+        #             .str[:-1])
+        # self.together = raw_text
+        self.together = X.pipe(_robust_cat, nlp_cols)
+        # print(nlp_cols)
+        # raw_text = (self.together
+        #             .str.lower()  # all lowercase
+        #             .str.replace('\n', ' ')  # no hanging newlines
+        #             .str.replace('[{}]'.format(string.punctuation), ' ')
+        #             )
+
+        # if self.special_replace:
+        #     rx = re.compile('|'.join(map(re.escape, self.special_replace)))
+        #     # allow user-input special replacements.
+        #     raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
+        self.clean_together = (
+            self.together
+                .pipe(_clean_text, special_replace=self.special_replace)
+        )
+        return self.clean_together
 
 
 class TokenExtractor(TransformerMixin):
