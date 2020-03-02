@@ -210,8 +210,6 @@ class TokenExtractor(TransformerMixin):
 
     def fit_transform(self, X, y=None, **fit_params):
         documents = _series_itervals(X)
-        # X is already a transformed view of dask_documents so
-        # we set copy to False
         if y is None:
             X_tf = self._model.fit_transform(documents)
         else:
@@ -223,12 +221,12 @@ class TokenExtractor(TransformerMixin):
         _ = self.fit_transform(X)
         return self
 
-    def transform(self, dask_documents, copy=True):
+    def transform(self, dask_documents):
 
         check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
 
         X = _series_itervals(dask_documents)
-        X_tf = self._model.transform(X, copy=False)
+        X_tf = self._model.transform(X)
         self._tf_tot = np.array(X_tf.sum(axis=0))[0]
         return X_tf
 
@@ -462,10 +460,9 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     A = toks[:, transformer.ranks_]
     A[A > 0] = 1
 
-    docterm = pd.DataFrame(
-        data=A,
+    docterm = pd.DataFrame.sparse.from_spmatrix(A,
         columns=v_filled['tokens'],
-    ).astype(sparse_dtype)
+    )
 
     tag_df = docterm.dot(table)
     tag_df.rename_axis([None, None], axis=1, inplace=True)
@@ -474,7 +471,7 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     if readable:
         tag_df = _get_readable_tag_df(tag_df)
 
-    return tag_df.sparse.to_dense()
+    return tag_df
 
 
 def token_to_alias(raw_text, vocab):
