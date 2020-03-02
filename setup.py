@@ -18,13 +18,13 @@ VERSION = get_version()
 
 def run_setup(packages, install_requires, extras_require):
     setup(
-        name = "nist-nestor",
+        name = "nestor",
         version = VERSION,
         author = "Thurston Sexton",
         author_email = "thurston.sexton@nist.gov",
         description = ("Quantifying tacit human knowledge for Smart Manufacturing Maintenance,\
                         for maintnenance-based investigatory analysis"),
-        keywords = "nlp smart manufacturing maintenance tag app",
+        keywords = "nlp smart manufacturing maintenance tag app dictionay knowledge management mining",
         url = "https://github.com/usnistgov/nestor/",
         packages=packages,
         long_description=read('README.md'),
@@ -36,13 +36,13 @@ def run_setup(packages, install_requires, extras_require):
             'Programming Language :: Python :: 3',
             'License :: Public Domain'
         ],
-        entry_points={
-            'console_scripts': [
-                'nestor-gui = nestor.ui:main',
-                'nestor-dash = nestor.dash:main',
-                # 'nestor-serve = nestor.dash.plotserve:main'
-            ],
-        },
+        # entry_points={
+        #     'console_scripts': [
+        #         'nestor-gui = nestor.ui:main',
+        #         'nestor-dash = nestor.dash:main',
+        #         # 'nestor-serve = nestor.dash.plotserve:main'
+        #     ],
+        # },
         install_requires=install_requires,
         extras_require=extras_require,
         include_package_data=True,

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import re, sys, string
+from scipy.sparse import csc_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
 from sklearn.utils.validation import check_is_fitted, NotFittedError
@@ -435,67 +436,45 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
             'alias': '_untagged',  # currently combines all NA into 1, for weighted sum
         })
     )
-    """
-    # make a df with one column per clf of tag
-    tags = {typ: pd.DataFrame(index=range(len(raw_text))) for typ in v_filled.NE.unique()}
-
-    # loop over the unique alias' (i.e.e all tags, by classification
-    groups = v_filled.groupby('NE').alias.unique().iteritems()
-    for clf, queries in tqdm(groups,
-                             total=vocab.NE.nunique(),
-                             file=sys.stdout,
-                             position=0,
-                             desc='Category Loop'):
-        # loop over each tag, returning any token where the alias matches
-        for query in tqdm(queries,
-                          total=len(queries),
-                          file=sys.stdout,
-                          position=1,
-                          leave=False,
-                          desc=clf + ' token loop'):
-            to_map = v_filled.loc[v_filled.alias == query].index.tolist()  # the tokens
-            query_idx = [transformer._model.vocabulary_[i] for i in to_map]
-
-            # make a binary indicator for the tag, 1 if any of the tokens occurred, 0 if not.
-            match = ((toks[:, query_idx]).toarray() > 0).any(axis=1).astype(int)
-
-            # make a big dict with all of it together
-            tags[clf][query] = match
-
-    def tags_to_df(tags, idx_col=None):
-        tag_df = pd.concat(tags.values(), axis=1, keys=tags.keys())
-        if idx_col is not None:  # not used currently...let the user do this himself
-            tag_df = tag_df.set_index(idx_col).sort_index()  # sort by idx
-        return tag_df
-
-    tag_df = tags_to_df(tags)
-    """
-    table = pd.pivot_table(v_filled, index=['NE', 'alias'], columns=['tokens']).fillna(0)
-    table[table > 0] = 1
-
-    tran = (
-        table
-        .score
-        .T
-        .to_sparse(fill_value=0.)
-        # .drop(columns=['NA'])
+    sparse_dtype = pd.SparseDtype(int, fill_value=0.)
+    # table = pd.pivot_table(v_filled, index=['NE', 'alias'], columns=['tokens']).fillna(0)
+    table = (  # more pandas-ey pivot, for future cat-types
+        v_filled
+        .assign(exists=1)  # placehold
+        .groupby(['NE', 'alias','tokens'])['exists']
+        .sum()
+        .unstack('tokens').T
+        .fillna(0)
+        .astype(sparse_dtype)
     )
+
+    # tran = (
+    #     table.score.T
+    #     .to_sparse(fill_value=0.)
+    #     # .drop(columns=['NA'])
+    # )
+    # tran = pd.DataFrame.sparse.from_spmatrix(
+    #     csc_matrix(table.values),
+    #     columns=table.columns,
+    #     index=table.index
+    # )
+
     A = toks[:, transformer.ranks_]
     A[A > 0] = 1
-    docterm = pd.SparseDataFrame(
+
+    docterm = pd.DataFrame(
         data=A,
         columns=v_filled['tokens'],
-        default_fill_value=0.
-    )
+    ).astype(sparse_dtype)
 
-    tag_df = docterm.dot(tran)
+    tag_df = docterm.dot(table)
     tag_df.rename_axis([None, None], axis=1, inplace=True)
     # tag_df[tag_df > 0] = 1
 
     if readable:
         tag_df = _get_readable_tag_df(tag_df)
 
-    return tag_df.to_dense()
+    return tag_df.sparse.to_dense()
 
 
 def token_to_alias(raw_text, vocab):
