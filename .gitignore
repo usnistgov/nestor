@@ -3,9 +3,8 @@
 .idea/
 **/.ipynb_checkpoints
 **.egg-info
-# data folder
-data/
-data/**
+
+
 build
 dist
 _build
@@ -25,3 +24,5 @@ _pdf
 !nestor/settings.yaml
 !nestor/datasets/**
 
+/poetry.lock
+**/.mypy_cache/
