@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nestor"
-version = "0.4.0"
+version = "0.0.0"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
 include = ["*.md", "*.rst", "*.ui",
@@ -36,7 +36,7 @@ m2r = "^0.2.1"
 poetry-dynamic-versioning = "^0.8.3"
 
 [tool.poetry-dynamic-versioning]
-enable = false
+enable = true
 vcs = "git"
 style = "semver"
 format = "{base}"
