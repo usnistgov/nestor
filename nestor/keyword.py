@@ -15,13 +15,16 @@ from tqdm.autonotebook import tqdm
 
 nestorParams = nestor.CFG
 
-__all__ = ['NLPSelect',
-           'TokenExtractor',
-           'generate_vocabulary_df',
-           'get_tag_completeness',
-           'tag_extractor',
-           'token_to_alias',
-           'ngram_automatch']
+__all__ = [
+    "NLPSelect",
+    "TokenExtractor",
+    "generate_vocabulary_df",
+    "get_tag_completeness",
+    "tag_extractor",
+    "token_to_alias",
+    "ngram_automatch",
+    "ngram_keyword_pipe",
+]
 
 
 class Transformer(TransformerMixin):
@@ -60,14 +63,16 @@ class NLPSelect(Transformer):
         # self.to_np = to_np
 
     def get_params(self, deep=True):
-        return dict(columns=self.columns,
-                    names=self.names,
-                    special_replace=self.special_replace)
+        return dict(
+            columns=self.columns, names=self.names, special_replace=self.special_replace
+        )
 
     def transform(self, X, y=None):
         if isinstance(self.columns, list):  # user passed a list of column labels
             if all([isinstance(x, int) for x in self.columns]):
-                nlp_cols = list(X.columns[self.columns])  # select columns by user-input indices
+                nlp_cols = list(
+                    X.columns[self.columns]
+                )  # select columns by user-input indices
             elif all([isinstance(x, str) for x in self.columns]):
                 nlp_cols = self.columns  # select columns by user-input names
             else:
@@ -81,39 +86,30 @@ class NLPSelect(Transformer):
         def _robust_cat(df, cols):
             """pandas doesn't like batch-cat of string cols...needs 1st col"""
             if len(cols) <= 1:
-                return (
-                    df[cols].astype(str)
-                    .fillna('')
-                    .iloc[:, 0]
-
-                )
+                return df[cols].astype(str).fillna("").iloc[:, 0]
             else:
                 return (
                     df[cols[0]]
                     .astype(str)
-                    .str.cat(
-                        df.loc[:, cols[1:]].astype(str),
-                        sep=' ',
-                        na_rep='',
-                    ))
+                    .str.cat(df.loc[:, cols[1:]].astype(str), sep=" ", na_rep="",)
+                )
 
         def _clean_text(s, special_replace=None):
             """lower, rm newlines and punct, and optionally special words"""
-            raw_text = (s
-                        .str.lower()  # all lowercase
-                        .str.replace('\n', ' ')  # no hanging newlines
-                        .str.replace('[{}]'.format(string.punctuation), ' ')
-                        )
+            raw_text = (
+                s.str.lower()  # all lowercase
+                .str.replace("\n", " ")  # no hanging newlines
+                .str.replace("[{}]".format(string.punctuation), " ")
+            )
             if special_replace is not None:
-                rx = re.compile('|'.join(map(re.escape, special_replace)))
+                rx = re.compile("|".join(map(re.escape, special_replace)))
                 # allow user-input special replacements.
-                return (
-                    raw_text
-                    .str.replace(
-                        rx, lambda match: self.special_replace[match.group(0)]
-                ))
+                return raw_text.str.replace(
+                    rx, lambda match: self.special_replace[match.group(0)]
+                )
             else:
                 return raw_text
+
         # raw_text = (X
         #             .loc[:, nlp_cols]
         #             .astype(str)
@@ -134,15 +130,13 @@ class NLPSelect(Transformer):
         #     rx = re.compile('|'.join(map(re.escape, self.special_replace)))
         #     # allow user-input special replacements.
         #     raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
-        self.clean_together = (
-            self.together
-                .pipe(_clean_text, special_replace=self.special_replace)
+        self.clean_together = self.together.pipe(
+            _clean_text, special_replace=self.special_replace
         )
         return self.clean_together
 
 
 class TokenExtractor(TransformerMixin):
-
     def __init__(self, **tfidf_kwargs):
         """
             A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
@@ -196,12 +190,16 @@ class TokenExtractor(TransformerMixin):
                 sublinear_tf : boolean, default=True
                     Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
             """
-        self.default_kws = dict({'input': 'content',
-                                 'ngram_range': (1, 1),
-                                 'stop_words': 'english',
-                                 'sublinear_tf': True,
-                                 'smooth_idf': False,
-                                 'max_features': 5000})
+        self.default_kws = dict(
+            {
+                "input": "content",
+                "ngram_range": (1, 1),
+                "stop_words": "english",
+                "sublinear_tf": True,
+                "smooth_idf": False,
+                "max_features": 5000,
+            }
+        )
 
         self.default_kws.update(tfidf_kwargs)
         # super(TfidfVectorizer, self).__init__(**tf_idfkwargs)
@@ -223,7 +221,7 @@ class TokenExtractor(TransformerMixin):
 
     def transform(self, dask_documents):
 
-        check_is_fitted(self, '_model', 'The tfidf vector is not fitted')
+        check_is_fitted(self, "_model", "The tfidf vector is not fitted")
 
         X = _series_itervals(dask_documents)
         X_tf = self._model.transform(X)
@@ -231,7 +229,7 @@ class TokenExtractor(TransformerMixin):
         return X_tf
 
     @property
-    def  ranks_(self):
+    def ranks_(self):
         """
         Retrieve the rank of each token, for sorting. Uses summed scoring over the
         TF-IDF for each token, so that: :math:`S_t = \\Sum_{\\text{MWO}}\\text{TF-IDF}_t`
@@ -241,8 +239,8 @@ class TokenExtractor(TransformerMixin):
         ranks : numpy.array
         """
         ranks = self._tf_tot.argsort()[::-1]
-        if len(ranks) > self.default_kws['max_features']:
-            ranks = ranks[:self.default_kws['max_features']]
+        if len(ranks) > self.default_kws["max_features"]:
+            ranks = ranks[: self.default_kws["max_features"]]
         return ranks
 
     @property
@@ -268,7 +266,7 @@ class TokenExtractor(TransformerMixin):
         numpy.array
         """
         scores = self._tf_tot[self.ranks_]
-        return scores/scores.sum()
+        return scores / scores.sum()
 
 
 def generate_vocabulary_df(transformer, filename=None, init=None):
@@ -298,29 +296,35 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
     """
 
     try:
-        check_is_fitted(transformer._model, 'vocabulary_', 'The tfidf vector is not fitted')
+        check_is_fitted(
+            transformer._model, "vocabulary_", "The tfidf vector is not fitted"
+        )
     except NotFittedError:
         if (filename is not None) and Path(filename).is_file():
-            print('No model fitted, but file already exists. Importing...')
+            print("No model fitted, but file already exists. Importing...")
             return pd.read_csv(filename, index_col=0)
         elif (init is not None) and Path(init).is_file():
-            print('No model fitted, but file already exists. Importing...')
+            print("No model fitted, but file already exists. Importing...")
             return pd.read_csv(init, index_col=0)
         else:
             raise
 
-    df = pd.DataFrame({'tokens': transformer.vocab_,
-                       'NE': '',
-                       'alias': '',
-                       'notes': '',
-                       'score': transformer.scores_})[['tokens', 'NE', 'alias', 'notes', 'score']]
-    df = df[~df.tokens.duplicated(keep='first')]
-    df.set_index('tokens', inplace=True)
+    df = pd.DataFrame(
+        {
+            "tokens": transformer.vocab_,
+            "NE": "",
+            "alias": "",
+            "notes": "",
+            "score": transformer.scores_,
+        }
+    )[["tokens", "NE", "alias", "notes", "score"]]
+    df = df[~df.tokens.duplicated(keep="first")]
+    df.set_index("tokens", inplace=True)
 
     if init is None:
         if (filename is not None) and Path(filename).is_file():
             init = filename
-            print('attempting to initialize with pre-existing vocab')
+            print("attempting to initialize with pre-existing vocab")
 
     if init is not None:
         df.NE = np.nan
@@ -332,15 +336,15 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
             try:  # assume input pandas df
                 df_import = init.copy()
             except AttributeError:
-                print('File not Found! Can\'t import!')
+                print("File not Found! Can't import!")
                 raise
         df.update(df_import)
         # print('intialized successfully!')
-        df.fillna('', inplace=True)
+        df.fillna("", inplace=True)
 
     if filename is not None:
         df.to_csv(filename)
-        print('saved locally!')
+        print("saved locally!")
     return df
 
 
@@ -353,9 +357,13 @@ def _series_itervals(s):
 def _get_readable_tag_df(tag_df):
     """ helper function to take binary tag co-occurrence matrix and make comma-sep readable columns"""
     temp_df = pd.DataFrame(index=tag_df.index)  # empty init
-    for clf, clf_df in tqdm(tag_df.T.groupby(level=0)):  # loop over top-level classes (ignore NA)
-        join_em = lambda strings: ', '.join([x for x in strings if x != ''])  # func to join str
-        strs = np.where(clf_df.T == 1, clf_df.T.columns.droplevel(0).values, '').T
+    for clf, clf_df in tqdm(
+        tag_df.T.groupby(level=0)
+    ):  # loop over top-level classes (ignore NA)
+        join_em = lambda strings: ", ".join(
+            [x for x in strings if x != ""]
+        )  # func to join str
+        strs = np.where(clf_df.T == 1, clf_df.T.columns.droplevel(0).values, "").T
         temp_df[clf] = pd.DataFrame(strs).apply(join_em)
     return temp_df
 
@@ -374,16 +382,20 @@ def get_tag_completeness(tag_df):
     """
 
     all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
-    tag_pct = 1 - (tag_df.get(['NA', 'U'], all_empt).sum(axis=1) / tag_df.sum(axis=1))  # TODO: if they tag everything?
-    print(f'Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}')
+    tag_pct = 1 - (
+        tag_df.get(["NA", "U"], all_empt).sum(axis=1) / tag_df.sum(axis=1)
+    )  # TODO: if they tag everything?
+    print(f"Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}")
 
-    tag_comp = (tag_df.get('NA', all_empt).sum(axis=1) == 0).sum()
-    print(f'Complete Docs: {tag_comp}, or {tag_comp/len(tag_df):.2%}')
+    tag_comp = (tag_df.get("NA", all_empt).sum(axis=1) == 0).sum()
+    print(f"Complete Docs: {tag_comp}, or {tag_comp/len(tag_df):.2%}")
 
-    tag_empt = ((tag_df.get('I', all_empt).sum(axis=1) == 0) &\
-                (tag_df.get('P', all_empt).sum(axis=1) == 0) &\
-                (tag_df.get('S', all_empt).sum(axis=1) == 0)).sum()
-    print(f'Empty Docs: {tag_empt}, or {tag_empt/len(tag_df):.2%}')
+    tag_empt = (
+        (tag_df.get("I", all_empt).sum(axis=1) == 0)
+        & (tag_df.get("P", all_empt).sum(axis=1) == 0)
+        & (tag_df.get("S", all_empt).sum(axis=1) == 0)
+    ).sum()
+    print(f"Empty Docs: {tag_empt}, or {tag_empt/len(tag_df):.2%}")
     return tag_pct, tag_comp, tag_empt
 
 
@@ -416,33 +428,30 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     """
 
     try:
-        check_is_fitted(transformer._model, 'vocabulary_', 'The tfidf vector is not fitted')
+        check_is_fitted(
+            transformer._model, "vocabulary_", "The tfidf vector is not fitted"
+        )
         toks = transformer.transform(raw_text)
     except NotFittedError:
         toks = transformer.fit_transform(raw_text)
 
     vocab = generate_vocabulary_df(transformer, init=vocab_df).reset_index()
 
-    v_filled = (vocab
-        .replace({
-            'NE':    {'': np.nan},
-            'alias': {'': np.nan}
-        })
-        .fillna({
-            'NE':    'NA',  # TODO make this optional
+    v_filled = vocab.replace({"NE": {"": np.nan}, "alias": {"": np.nan}}).fillna(
+        {
+            "NE": "NA",  # TODO make this optional
             # 'alias': vocab['tokens'],
-            'alias': '_untagged',  # currently combines all NA into 1, for weighted sum
-        })
+            "alias": "_untagged",  # currently combines all NA into 1, for weighted sum
+        }
     )
-    sparse_dtype = pd.SparseDtype(int, fill_value=0.)
+    sparse_dtype = pd.SparseDtype(int, fill_value=0.0)
     # table = pd.pivot_table(v_filled, index=['NE', 'alias'], columns=['tokens']).fillna(0)
     table = (  # more pandas-ey pivot, for future cat-types
-        v_filled
-        .assign(exists=1)  # placehold
-        .groupby(['NE', 'alias','tokens'])['exists']
+        v_filled.assign(exists=1)  # placehold
+        .groupby(["NE", "alias", "tokens"])["exists"]
         .sum()
-        .unstack('tokens').T
-        .fillna(0)
+        .unstack("tokens")
+        .T.fillna(0)
         .astype(sparse_dtype)
     )
 
@@ -460,9 +469,7 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
     A = toks[:, transformer.ranks_]
     A[A > 0] = 1
 
-    docterm = pd.DataFrame.sparse.from_spmatrix(A,
-        columns=v_filled['tokens'],
-    )
+    docterm = pd.DataFrame.sparse.from_spmatrix(A, columns=v_filled["tokens"],)
 
     tag_df = docterm.dot(table)
     tag_df.rename_axis([None, None], axis=1, inplace=True)
@@ -491,13 +498,13 @@ def token_to_alias(raw_text, vocab):
     pd.Series
         new text, with all slang/jargon replaced with unified representations
     """
-    thes_dict = vocab[vocab.alias.replace('', np.nan).notna()].alias.to_dict()
+    thes_dict = vocab[vocab.alias.replace("", np.nan).notna()].alias.to_dict()
     substr = sorted(thes_dict, key=len, reverse=True)
     if substr:
-        rx = re.compile(r'\b(' + '|'.join(map(re.escape, substr)) + r')\b')
+        rx = re.compile(r"\b(" + "|".join(map(re.escape, substr)) + r")\b")
         clean_text = raw_text.str.replace(rx, lambda match: thes_dict[match.group(0)])
     else:
-        clean_text=raw_text
+        clean_text = raw_text
     return clean_text
 
 
@@ -526,48 +533,46 @@ def ngram_automatch(voc1, voc2):
     # NE_map.update(NE_map_rules)
 
     vocab = voc1.copy()
-    vocab.NE.replace('', np.nan, inplace=True)
+    vocab.NE.replace("", np.nan, inplace=True)
 
     # first we need to substitute alias' for their NE identifier
-    NE_dict = (
-        vocab
-        .NE
-        .fillna('U')
-        .to_dict()
-    )
+    NE_dict = vocab.NE.fillna("U").to_dict()
 
     NE_dict.update(
-        vocab
-        .fillna('U')
-        .reset_index()[['NE', 'alias']]
+        vocab.fillna("U")
+        .reset_index()[["NE", "alias"]]
         .drop_duplicates()
-        .set_index('alias')
-        .NE
-        .to_dict()
+        .set_index("alias")
+        .NE.to_dict()
     )
 
-    _ = NE_dict.pop('', None)
+    _ = NE_dict.pop("", None)
 
     # regex-based multi-replace
     NE_sub = sorted(NE_dict, key=len, reverse=True)
-    NErx = re.compile(r'\b(' + '|'.join(map(re.escape, NE_sub)) + r')\b')
+    NErx = re.compile(r"\b(" + "|".join(map(re.escape, NE_sub)) + r")\b")
     NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
 
     # now we have NE-soup/DNA of the original text.
-    mask = voc2.alias.replace('', np.nan).isna() # don't overwrite the NE's the user has input (i.e. alias != NaN)
-    voc2.loc[mask, 'NE'] = NE_text[mask].tolist()
+    mask = voc2.alias.replace(
+        "", np.nan
+    ).isna()  # don't overwrite the NE's the user has input (i.e. alias != NaN)
+    voc2.loc[mask, "NE"] = NE_text[mask].tolist()
 
     # track all combinations of NE types (cartesian prod)
 
-
-
     # apply rule substitutions that are defined
-    voc2.loc[mask, 'NE'] = (voc2
-        .loc[mask, 'NE']
-        .apply(lambda x: NE_map.get(x, ''))  # TODO ne_sub matching issue??
-    )  # special logic for custom NE type-combinations (config.yaml)
+    voc2.loc[mask, "NE"] = voc2.loc[mask, "NE"].apply(
+        lambda x: NE_map.get(x, "")
+    )  # TODO ne_sub matching issue??  # special logic for custom NE type-combinations (config.yaml)
 
     return voc2
+
+
+def pick_tag_types(tag_df, typelist):
+    df_types = list(tag_df.columns.levels[0])
+    available = set(typelist) & set(df_types)
+    return tag_df.loc[:, list(available)]
 
 
 def ngram_keyword_pipe(raw_text, vocab, vocab2):
@@ -575,56 +580,54 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     """
     print("calculating the extracted tags and statistics...")
     # do 1-grams
-    print('\n ONE GRAMS...')
+    print("\n ONE GRAMS...")
     tex = TokenExtractor()
     tex.fit(raw_text)  # bag of words matrix.
     tags_df = tag_extractor(tex, raw_text, vocab_df=vocab)
 
-    replaced_text = token_to_alias(raw_text, vocab)  # raw_text, with token-->alias replacement
+    replaced_text = token_to_alias(
+        raw_text, vocab
+    )  # raw_text, with token-->alias replacement
     tex2 = TokenExtractor(ngram_range=(2, 2))  # new extractor (note 2-gram)
     tex2.fit(replaced_text)
 
     # experimental: we need [item_item action] 2-grams, so let's use 2-gram Items for a 3rd pass...
     tex3 = TokenExtractor(ngram_range=(1, 2))
-    mask = (np.isin(vocab2.NE, ['I', 'P', 'S'])) & (vocab2.alias != '')
+    mask = (np.isin(vocab2.NE, nestorParams.atomics)) & (vocab2.alias != "")
     vocab_combo = pd.concat([vocab, vocab2[mask]])
-    vocab_combo['score'] = 0
+    vocab_combo["score"] = 0
 
     # keep just in case of duplicates
     vocab_combo = (
-        vocab_combo
-            .reset_index()
-            .drop_duplicates(subset=['tokens'])
-            .set_index('tokens')
+        vocab_combo.reset_index().drop_duplicates(subset=["tokens"]).set_index("tokens")
     )
     replaced_text2 = token_to_alias(replaced_text, vocab_combo)
     tex3.fit(replaced_text2)
 
     # make 2-gram dictionary
-    vocab3 = generate_vocabulary_df(tex3)
-    vocab3 = ngram_automatch(vocab_combo, vocab3)
+    vocab3 = generate_vocabulary_df(tex3, init=vocab_combo)
+    vocab3 = ngram_automatch(vocab3, vocab_combo)
 
     # extract 2-gram tags from cleaned text
-    print('\n TWO GRAMS...')
-    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop('NA', axis='columns')
+    print("\n TWO GRAMS...")
+    tags2_df = tag_extractor(
+        tex2, replaced_text, vocab_df=vocab2[vocab2.alias.notna()],
+    )
 
-    print('\n MERGING...')
+    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop(
+        "NA", axis="columns"
+    )
+
+    print("\n MERGING...")
     # merge 1 and 2-grams?
     tag_df = tags_df.join(
         tags3_df.drop(
-            axis='columns',
-            level=1,
-            labels=(
-                tags_df
-                    .columns
-                    .levels[1]
-                    .tolist()
-            )
+            axis="columns", level=1, labels=(tags_df.columns.levels[1].tolist())
         )
     )
-    relation_df = tag_df.loc[:, ['P I', 'S I']]
-    untagged_df = tag_df.NA
-    untagged_df.columns = pd.MultiIndex.from_product([['NA'], untagged_df.columns])
-    tag_df = tag_df.loc[:, ['I', 'P', 'S', 'U']]
-
-    return tag_df, relation_df, untagged_df
+    relation_df = pick_tag_types(tags2_df, nestorParams.derived)
+    # untagged_df = tag_df.NA
+    # untagged_df.columns = pd.MultiIndex.from_product([['NA'], untagged_df.columns])
+    tag_df = pick_tag_types(tag_df, nestorParams.atomics + ["NA"])
+    # TODO keep the 2g->1g definitions in vocab2 somehow?
+    return tag_df, relation_df, vocab3
