@@ -400,7 +400,9 @@ def get_tag_completeness(tag_df):
     return tag_pct, tag_comp, tag_empt
 
 
-def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
+def tag_extractor(
+    transformer, raw_text, vocab_df=None, readable=False, group_untagged=True
+):
     """
     Wrapper for the TokenExtractor to streamline the generation of tags from text.
     Determines the documents in <raw_text> that contain each of the tags in <vocab>,
@@ -437,12 +439,13 @@ def tag_extractor(transformer, raw_text, vocab_df=None, readable=False):
         toks = transformer.fit_transform(raw_text)
 
     vocab = generate_vocabulary_df(transformer, init=vocab_df).reset_index()
-
+    untagged_alias = "_untagged" if group_untagged else vocab["tokens"]
     v_filled = vocab.replace({"NE": {"": np.nan}, "alias": {"": np.nan}}).fillna(
         {
             "NE": "NA",  # TODO make this optional
             # 'alias': vocab['tokens'],
-            "alias": "_untagged",  # currently combines all NA into 1, for weighted sum
+            # "alias": "_untagged",  # currently combines all NA into 1, for weighted sum
+            "alias": untagged_alias,
         }
     )
     sparse_dtype = pd.SparseDtype(int, fill_value=0.0)
@@ -584,6 +587,7 @@ def ngram_vocab_builder(raw_text, vocab1, init=None):
         tex = TokenExtractor(ngram_range=(2, 2))  # new extractor (note 2-gram)
         tex.fit(replaced_text)
         vocab2 = generate_vocabulary_df(tex)
+        replaced_again = None
     else:
         mask = (np.isin(init.NE, nestorParams.atomics)) & (init.alias != "")
         # now we need the 2grams that were annotated as 1grams
@@ -604,7 +608,7 @@ def ngram_vocab_builder(raw_text, vocab1, init=None):
             .set_index("tokens")
             .sort_values("score", ascending=False)
         )
-    return vocab2, tex
+    return vocab2, tex, replaced_text, replaced_again
 
 
 def ngram_keyword_pipe(raw_text, vocab, vocab2):
@@ -614,52 +618,59 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     # do 1-grams
     print("\n ONE GRAMS...")
     tex = TokenExtractor()
+    tex2 = TokenExtractor(ngram_range=(2, 2))
     tex.fit(raw_text)  # bag of words matrix.
-    tags_df = tag_extractor(tex, raw_text, vocab_df=vocab)
+    tag1_df = tag_extractor(tex, raw_text, vocab_df=vocab.loc[vocab.alias.notna()])
+    vocab_combo, tex3, r1, r2 = ngram_vocab_builder(raw_text, vocab, init=vocab2)
 
-    replaced_text = token_to_alias(
-        raw_text, vocab
-    )  # raw_text, with token-->alias replacement
-    tex2 = TokenExtractor(ngram_range=(2, 2))  # new extractor (note 2-gram)
-    tex2.fit(replaced_text)
+    tex2.fit(r1)
+    tag2_df = tag_extractor(tex2, r1, vocab_df=vocab2.loc[vocab2.alias.notna()])
+    tag3_df = tag_extractor(tex3, r2, vocab_df=vocab_combo.loc[vocab2.alias.notna()])
 
-    # experimental: we need [item_item action] 2-grams, so let's use 2-gram Items for a 3rd pass...
-    tex3 = TokenExtractor(ngram_range=(1, 2))
-    mask = (np.isin(vocab2.NE, nestorParams.atomics)) & (vocab2.alias != "")
-    vocab_combo = pd.concat([vocab, vocab2[mask]])
-    # vocab_combo["score"] = 0
+    tags_df = tag1_df.combine_first(tag2_df).combine_first(tag3_df)
 
-    # keep just in case of duplicates
-    vocab_combo = (
-        vocab_combo.reset_index().drop_duplicates(subset=["tokens"]).set_index("tokens")
-    )
-    replaced_text2 = token_to_alias(replaced_text, vocab_combo)
-    tex3.fit(replaced_text2)
+    # replaced_text = token_to_alias(
+    #     raw_text, vocab
+    # )  # raw_text, with token-->alias replacement
+    # tex2 = TokenExtractor(ngram_range=(2, 2))  # new extractor (note 2-gram)
+    # tex2.fit(replaced_text)
 
-    # make 2-gram dictionary
-    vocab3 = generate_vocabulary_df(tex3, init=vocab_combo)
-    vocab3 = ngram_automatch(vocab3, vocab_combo)
+    # # experimental: we need [item_item action] 2-grams, so let's use 2-gram Items for a 3rd pass...
+    # tex3 = TokenExtractor(ngram_range=(1, 2))
+    # mask = (np.isin(vocab2.NE, nestorParams.atomics)) & (vocab2.alias != "")
+    # vocab_combo = pd.concat([vocab, vocab2[mask]])
+    # # vocab_combo["score"] = 0
 
-    # extract 2-gram tags from cleaned text
-    print("\n TWO GRAMS...")
-    tags2_df = tag_extractor(
-        tex2, replaced_text, vocab_df=vocab2[vocab2.alias.notna()],
-    )
+    # # keep just in case of duplicates
+    # vocab_combo = (
+    #     vocab_combo.reset_index().drop_duplicates(subset=["tokens"]).set_index("tokens")
+    # )
+    # replaced_text2 = token_to_alias(replaced_text, vocab_combo)
+    # tex3.fit(replaced_text2)
 
-    tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop(
-        "NA", axis="columns"
-    )
+    # # make 2-gram dictionary
+    # vocab3 = generate_vocabulary_df(tex3, init=vocab_combo)
+    # vocab3 = ngram_automatch(vocab3, vocab_combo)
 
-    print("\n MERGING...")
-    # merge 1 and 2-grams?
-    tag_df = tags_df.join(
-        tags3_df.drop(
-            axis="columns", level=1, labels=(tags_df.columns.levels[1].tolist())
-        )
-    )
-    relation_df = pick_tag_types(tags2_df, nestorParams.derived)
+    # # extract 2-gram tags from cleaned text
+    # print("\n TWO GRAMS...")
+    # tags2_df = tag_extractor(
+    #     tex2, replaced_text, vocab_df=vocab2[vocab2.alias.notna()],
+    # )
+
+    # tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop(
+    #     "NA", axis="columns"
+    # )
+
+    # print("\n MERGING...")
+    # # merge 1 and 2-grams?
+    # tag_df = tags_df.join(
+    #     tags3_df.drop(
+    #         axis="columns", level=1, labels=(tags_df.columns.levels[1].tolist())
+    #     )
+    # )
+    relation_df = pick_tag_types(tags_df, nestorParams.derived)
     # untagged_df = tag_df.NA
     # untagged_df.columns = pd.MultiIndex.from_product([['NA'], untagged_df.columns])
-    tag_df = pick_tag_types(tag_df, nestorParams.atomics + nestorParams.holes + ["NA"])
-    # TODO keep the 2g->1g definitions in vocab2 somehow?
+    tag_df = pick_tag_types(tags_df, nestorParams.atomics + nestorParams.holes + ["NA"])
     return tag_df, relation_df
