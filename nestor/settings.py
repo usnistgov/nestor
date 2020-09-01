@@ -42,6 +42,7 @@ class NestorParams(dict):
         self._entities = None
         self._entity_rules = None
         self._atomics = None
+        self._holes = None
         self._derived = None
 
     def datatype_search(self, property_name):
@@ -66,6 +67,14 @@ class NestorParams(dict):
                 self, next(find_path_from_key(self, "atomic"))
             ).keys()
         return list(self._atomics)
+
+    @property
+    def holes(self):
+        if self._holes is None:
+            self._holes = find_node_from_path(
+                self, next(find_path_from_key(self, "hole"))
+            ).keys()
+        return list(self._holes)
 
     @property
     def derived(self):

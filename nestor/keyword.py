@@ -238,6 +238,7 @@ class TokenExtractor(TransformerMixin):
         -------
         ranks : numpy.array
         """
+        check_is_fitted(self, "_model", "The tfidf vector is not fitted")
         ranks = self._tf_tot.argsort()[::-1]
         if len(ranks) > self.default_kws["max_features"]:
             ranks = ranks[: self.default_kws["max_features"]]
@@ -259,14 +260,14 @@ class TokenExtractor(TransformerMixin):
     @property
     def scores_(self):
         """
-        Returns actual scores of tokens, for progress-tracking (unit-normalized)
+        Returns actual scores of tokens, for progress-tracking (min-max-normalized)
 
         Returns
         -------
         numpy.array
         """
         scores = self._tf_tot[self.ranks_]
-        return scores / scores.sum()
+        return (scores - scores.min()) / (scores.max() - scores.min())
 
 
 def generate_vocabulary_df(transformer, filename=None, init=None):
@@ -536,10 +537,10 @@ def ngram_automatch(voc1, voc2):
     vocab.NE.replace("", np.nan, inplace=True)
 
     # first we need to substitute alias' for their NE identifier
-    NE_dict = vocab.NE.fillna("U").to_dict()
+    NE_dict = vocab.NE.fillna("NA").to_dict()
 
     NE_dict.update(
-        vocab.fillna("U")
+        vocab.fillna("NA")
         .reset_index()[["NE", "alias"]]
         .drop_duplicates()
         .set_index("alias")
@@ -575,6 +576,37 @@ def pick_tag_types(tag_df, typelist):
     return tag_df.loc[:, list(available)]
 
 
+def ngram_vocab_builder(raw_text, vocab1, init=None):
+    # raw_text, with token-->alias replacement
+    replaced_text = token_to_alias(raw_text, vocab1)
+
+    if init is None:
+        tex = TokenExtractor(ngram_range=(2, 2))  # new extractor (note 2-gram)
+        tex.fit(replaced_text)
+        vocab2 = generate_vocabulary_df(tex)
+    else:
+        mask = (np.isin(init.NE, nestorParams.atomics)) & (init.alias != "")
+        # now we need the 2grams that were annotated as 1grams
+        replaced_again = token_to_alias(
+            replaced_text,
+            pd.concat([vocab1, init[mask]])
+            .reset_index()
+            .drop_duplicates(subset=["tokens"])
+            .set_index("tokens"),
+        )
+        tex = TokenExtractor(ngram_range=(2, 2))
+        tex.fit(replaced_again)
+        new_vocab = generate_vocabulary_df(tex, init=init)
+        vocab2 = (
+            pd.concat([init, new_vocab])
+            .reset_index()
+            .drop_duplicates(subset=["tokens"])
+            .set_index("tokens")
+            .sort_values("score", ascending=False)
+        )
+    return vocab2, tex
+
+
 def ngram_keyword_pipe(raw_text, vocab, vocab2):
     """Experimental pipeline for one-shot n-gram extraction from raw text.
     """
@@ -595,7 +627,7 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     tex3 = TokenExtractor(ngram_range=(1, 2))
     mask = (np.isin(vocab2.NE, nestorParams.atomics)) & (vocab2.alias != "")
     vocab_combo = pd.concat([vocab, vocab2[mask]])
-    vocab_combo["score"] = 0
+    # vocab_combo["score"] = 0
 
     # keep just in case of duplicates
     vocab_combo = (
@@ -628,6 +660,6 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     relation_df = pick_tag_types(tags2_df, nestorParams.derived)
     # untagged_df = tag_df.NA
     # untagged_df.columns = pd.MultiIndex.from_product([['NA'], untagged_df.columns])
-    tag_df = pick_tag_types(tag_df, nestorParams.atomics + ["NA"])
+    tag_df = pick_tag_types(tag_df, nestorParams.atomics + nestorParams.holes + ["NA"])
     # TODO keep the 2g->1g definitions in vocab2 somehow?
-    return tag_df, relation_df, vocab3
+    return tag_df, relation_df

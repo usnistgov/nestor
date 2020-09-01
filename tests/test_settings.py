@@ -26,7 +26,11 @@ def test_default_entities():
 
 
 def test_default_atomics():
-    assert set(nestorParams.atomics) == {"I", "P", "S", "U", "X"}
+    assert set(nestorParams.atomics) == {"I", "P", "S"}
+
+
+def test_default_holes():
+    assert set(nestorParams.holes) == {"U", "X"}
 
 
 def test_default_derived():

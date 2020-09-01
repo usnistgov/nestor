@@ -4,11 +4,13 @@ entities:
       'P': 'Problem'
       'I': 'Item'
       'S': 'Solution'
-      'U': 'Unknown'
-      'X': 'Non Entity'
     'derived':  # only made from atoms
       'PI': 'Object Fault'
       'SI': 'Object Resolution'
+    'hole':
+      'U': 'Unknown'
+      'X': 'Non Entity'
+      # 'NA': 'Not Annotated'
     
   rules:
     # two items makes one new item
