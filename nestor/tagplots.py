@@ -1,7 +1,11 @@
 """
 author: Thurston Sexton
 """
-from __future__ import unicode_literals
+import warnings
+warnings.warn("The tagplots module is deprecated! "
+              "Functionality has moved to `nestor-eda`.",
+              DeprecationWarning,
+              stacklevel=2)
 
 import calendar
 from distutils.version import StrictVersion
@@ -15,11 +19,6 @@ from matplotlib.colors import ColorConverter
 
 import nestor
 
-import warnings
-warnings.warn("The tagplots module is deprecated! "
-              "Functionality has moved to `nestor-eda`.",
-              DeprecationWarning,
-              stacklevel=2)
 
 nestorParams = nestor.CFG
 

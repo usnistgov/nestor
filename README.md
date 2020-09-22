@@ -17,6 +17,7 @@ form: service tickets and maintenance work orders (MWOs). **Nestor** is
 a toolkit for using Natural Language Processing (NLP) with efficient
 user-interaction to perform structured data extraction with minimal
 annotation time-cost.
+For further reading, [see @sexton2017hybrid,sharp2017toward]
 
 ### Features
 
