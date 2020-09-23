@@ -47,6 +47,13 @@ format = "{base}"
 [tool.portray.mkdocs]
 repo_url = "https://github.com/usnistgov/nestor"
 
+# [tool.portray.mkdocs.nav]
+# "Home" = "README.md"
+# "Getting Started" = "docs/getting-started.md"
+# "User Interfaces" = "docs/gui-links.md"
+# "Development Repository" = "https://github.com/usnistgov/nestor"
+
+
 [tool.portray.mkdocs.theme]
 favicon = "media/favicon.png"
 logo = "media/icon.png"
