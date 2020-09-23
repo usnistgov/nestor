@@ -11,7 +11,7 @@
 
 NLP in technical domains requires context sensitivity.
 Whether for medical notes, engineering work-orders, or social/behavioral coding, experts often use specialized vocabulary with over-loaded meanings and jargon.
-This is incredibly difficult for off-the-shelf NLP systems to parse through.   
+This is incredibly difficult for off-the-shelf NLP systems to parse through. 
 
 The common solution is to contextualize NLP models.
 For instance, medical NLP has been greatly advanced with the advent of labeled, bio-specific datasets, which have domain-relevant named-entity tags and vocabulary sets. 
@@ -22,6 +22,9 @@ This is where `nestor` comes in.
 
 - [Get started](docs/getting-started.md)
 - [Use a GUI](docs/gui-links.md)
+- Go to our [Project Page](https://www.nist.gov/services-resources/software/nestor)
+
+Nestor and all of it's associated gui's/projects are in the public domain (see the [License](LICENSE.md)). For more information and to provide feedback, please open an issue, submit a pull-request, or email us at <nestor@nist.gov>.
 
 ## How does it work? 
 
