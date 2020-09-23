@@ -1,6 +1,5 @@
-"""
-author: Thurston Sexton
-"""
+__author__ = "Thurston Sexton"
+
 import nestor
 import numpy as np
 import pandas as pd
@@ -44,8 +43,23 @@ class Transformer(TransformerMixin):
 
 class NLPSelect(Transformer):
     """
-    Extract specified natural language columns from
-    a pd.DataFrame, and combine into a single series.
+    Extract specified natural language columns
+
+    Starting from a pd.DataFrame, combine `columns` into a single series
+    containing lowercased text with punctuation and excess newlines removed.
+    Using the `special_replace` dict allows for arbitrary mapping during the
+    cleaning process, for e.g. a priori normalization.
+
+    Attributes
+    ----------
+    columns: int, or list of int or str
+        names/positions of data columns to extract, clean, and merge
+    special_replace: dict or None
+        mapping from strings to normalized strings (known a priori)
+    together: pd.Series
+        merged text, before any cleaning/normalization
+    clean_together: pd.Series
+        merged text, after cleaning (output of `transform`)
     """
 
     def __init__(self, columns=0, special_replace=None):
@@ -54,6 +68,8 @@ class NLPSelect(Transformer):
         ----------
         columns: int, or list of int or str.
             corresponding columns in X to extract, clean, and merge
+        special_replace: dict, optional
+            a dict containing manual text normalization to apply during cleaning
         """
 
         self.columns = columns
@@ -63,11 +79,34 @@ class NLPSelect(Transformer):
         # self.to_np = to_np
 
     def get_params(self, deep=True):
+        """
+        Retrieve parameters of the transformer for sklearn compatibility.
+        """
         return dict(
             columns=self.columns, names=self.names, special_replace=self.special_replace
         )
 
     def transform(self, X, y=None):
+        """get clean column of text from column(s) of raw text in a dataset
+
+        Depending on which of Union[List[Union[int,str]],int,str]
+        `self.columns` is, this will extract desired columns (of text) from
+        positions, names, etc. in the original dataset `X`.
+
+        Columns will be merged, lowercased, and have punctuation and hanging
+        newlines removed.
+
+        Parameters
+        ----------
+        X: pandas.DataFrome
+            dataset containing certain columns with natural language text.
+        y: None
+
+        Returns
+        -------
+        self.clean_together: pandas.Series
+            a single column of merged, cleaned text
+        """
         if isinstance(self.columns, list):  # user passed a list of column labels
             if all([isinstance(x, int) for x in self.columns]):
                 nlp_cols = list(
@@ -110,26 +149,8 @@ class NLPSelect(Transformer):
             else:
                 return raw_text
 
-        # raw_text = (X
-        #             .loc[:, nlp_cols]
-        #             .astype(str)
-        #             .fillna('')  # fill nan's
-        #             .add(' ')
-        #             .sum(axis=1) # if len(nlp_cols) > 1:  # more than one column, concat them
-        #             .str[:-1])
-        # self.together = raw_text
-        self.together = X.pipe(_robust_cat, nlp_cols)
-        # print(nlp_cols)
-        # raw_text = (self.together
-        #             .str.lower()  # all lowercase
-        #             .str.replace('\n', ' ')  # no hanging newlines
-        #             .str.replace('[{}]'.format(string.punctuation), ' ')
-        #             )
 
-        # if self.special_replace:
-        #     rx = re.compile('|'.join(map(re.escape, self.special_replace)))
-        #     # allow user-input special replacements.
-        #     raw_text = raw_text.str.replace(rx, lambda match: self.special_replace[match.group(0)])
+        self.together = X.pipe(_robust_cat, nlp_cols)
         self.clean_together = self.together.pipe(
             _clean_text, special_replace=self.special_replace
         )
@@ -271,14 +292,19 @@ class TokenExtractor(TransformerMixin):
 
 
 def generate_vocabulary_df(transformer, filename=None, init=None):
-    """
+    """ make correctly formatted entity vocabulary (token->tag+type)
+
     Helper method to create a formatted pandas.DataFrame and/or a .csv containing
     the token--tag/alias--classification relationship. Formatted as jargon/slang tokens,
     the Named Entity classifications, preferred labels, notes, and tf-idf summed scores:
 
     tokens | NE | alias | notes | scores
+    --- | --- | --- | --- | ---
+    myexample| I | example | "e.g"| 0.42
 
-    This is intended to be filled out in excel or using the Tagging Tool.
+    This is intended to be filled out in excel or using the Tagging Tool UI
+    - [`nestor-qt](https://github.com/usnistgov/nestor-qt)
+    - [`nestor-web`](https://github.com/usnistgov/nestor-web)
 
     Parameters
     ----------
@@ -368,18 +394,55 @@ def _get_readable_tag_df(tag_df):
         temp_df[clf] = pd.DataFrame(strs).apply(join_em)
     return temp_df
 
+def get_multilabel_representation(tag_df):
+    """ Turn binary tag occurrences into strings of comma-separated tags
 
-def get_tag_completeness(tag_df):
-    """
+    Given a hierarchical column-set of (entity-types, tag), where each row is
+    a document and the binary-valued elements indicate occurrence
+    (see `nestor.tag_extractor`), use this to get something a little more
+    human-readable. Columns will be entity-types, with elements as
+    comma-separated strings of tags.
+
+    Uses some hacks, since categorical from strings tends to assume single (not
+    multi-label) categories per-document. Likely to be re-factored in the future,
+    but used for the `readable=True` flag in `tag_extractor`.
 
     Parameters
     ----------
-    tag_df : pd.DataFrame
-        heirarchical-column df containing
+    tag_df: pd.DataFrame
 
     Returns
     -------
+    pd.DataFrame
+    """
+    return _get_readable_tag_df(tag_df)
 
+
+def get_tag_completeness(tag_df):
+    """ completeness, emptiness, and histograms in-between
+
+    It's hard to estimate "how good of a job you've done" at annotating your
+    data. One way is to calculate the fraction of documents where all tokens
+    have been mapped to their normalized form (a tag). Conversely, the fraction
+    that have no tokens normalized, at all.
+
+    Interpolating between those extremes, we can think of the Positive
+    Predictive Value (PPV, also known as Precision) of our annotations: of the
+    tokens/concepts not cleaned out (ostensibly, the *relevant* ones, how many
+    have been retrieved (i.e. mapped to a known tag)?
+    Parameters
+    ----------
+    tag_df : pd.DataFrame
+        hierarchical-column df containing
+
+    Returns
+    -------
+    tag_pct: pd.Series
+        PPV/precision for all documents, useful for e.g. histograms
+    tag_comp: float
+        Fraction of documents that are *completely* tagged
+    tag_empt: float
+        Fraction of documents that are completely *untagged*
     """
 
     all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
@@ -403,13 +466,14 @@ def get_tag_completeness(tag_df):
 def tag_extractor(
     transformer, raw_text, vocab_df=None, readable=False, group_untagged=True
 ):
-    """
+    """ Turn TokenExtractor instances and raw-text into binary occurrences.
+
     Wrapper for the TokenExtractor to streamline the generation of tags from text.
-    Determines the documents in <raw_text> that contain each of the tags in <vocab>,
+    Determines the documents in `raw_text` that contain each of the tags in `vocab_df`,
     using a TokenExtractor transformer object (i.e. the tfidf vocabulary).
 
     As implemented, this function expects an existing transformer object, though in
-    the future this will be changed to a class-like functionality (e.g. sklearn's
+    the future this may be changed to a class-like functionality (e.g. sklearn's
     AdaBoostClassifier, etc) which wraps a transformer into a new one.
 
     Parameters
@@ -426,8 +490,10 @@ def tag_extractor(
 
     Returns
     -------
-    pd.DataFrame, extracted tags for each document, whether binary indicator (default)
-    or in readable, categorized, comma-sep str format (readable=True, takes longer)
+    tag_df: pd.DataFrame
+        extracted tags for each document, whether binary indicator (default)
+        or in readable, categorized, comma-sep str format
+        (readable=True, takes longer)
     """
 
     try:
@@ -487,8 +553,14 @@ def tag_extractor(
 
 def token_to_alias(raw_text, vocab):
     """
-    Replaces known tokens with their "tag" form, i.e. the alias' in some
-    known vocabulary list
+    Replaces known tokens with their "tag" form
+
+    Useful if normalized text is needed, i.e. using the token->tag map from some
+    known vocabulary list. As implemented, looks for the longest matched substrings
+    first, ensuring precedence for compound tags or similar spellings, e.g.
+    "thes->these" would get substituted before "the -> [article]"
+
+    Needed for higher-order tag creation (see `nestor.keyword.ngram_vocab_builder`).
 
     Parameters
     ----------
@@ -500,7 +572,7 @@ def token_to_alias(raw_text, vocab):
     Returns
     -------
     pd.Series
-        new text, with all slang/jargon replaced with unified representations
+        new text, with all slang/jargon replaced with unified tag representations
     """
     thes_dict = vocab[vocab.alias.replace("", np.nan).notna()].alias.to_dict()
     substr = sorted(thes_dict, key=len, reverse=True)
@@ -512,29 +584,27 @@ def token_to_alias(raw_text, vocab):
     return clean_text
 
 
-# ne_map = {'I I': 'I',  # two items makes one new item
-#           'I P': 'P I', 'I S': 'S I', 'P I': 'P I', 'S I': 'S I',  # order-free
-#           'P P': 'X', 'P S': 'X', 'S P': 'X', 'S S': 'X'}  # redundancies
-# ne_types = 'IPSUX'
-
-
 def ngram_automatch(voc1, voc2):
-    """ Experimental method to auto-match tag combinations into higher-level
-    concepts, for user-suggestion. Used in ``nestor.ui`` """
-    # if NE_types is None:
-    #     NE_types = nestorParams.entities
-    # NE_comb = {' '.join(i) for i in product(NE_types, repeat=2)}
-    #
-    # if NE_map_rules is None:
-    #     NE_map = dict(zip(NE_comb,map(nestorParams.apply_rules, NE_comb)))
-    # else:
-    #     NE_map = {typ:'' for typ in NE_comb}.update(NE_map_rules)
+    """ auto-match tag combinations using `nestorParams.entity_rules_map`
+
+    Experimental method to auto-match tag combinations into higher-level
+    concepts, primarily to suggest compound entity types to a user.
+
+    Used in ``nestor.ui``
+
+    Parameters
+    ----------
+    voc1: pd.DataFrame
+        known 1-gram token->tag mapping, with types
+    voc2: pd.DataFrame
+        current 2-gram map, with missing types to fill in from 1-grams
+    Returns
+    -------
+    voc2: pd.DataFrame
+        new 2-gram map, with type combinations partially filled (no alias')
+    """
 
     NE_map = nestorParams.entity_rules_map
-
-    # for typ in NE_types:
-    #     NE_map[typ] = typ
-    # NE_map.update(NE_map_rules)
 
     vocab = voc1.copy()
     vocab.NE.replace("", np.nan, inplace=True)
@@ -574,12 +644,70 @@ def ngram_automatch(voc1, voc2):
 
 
 def pick_tag_types(tag_df, typelist):
+    """ convenience function to pick out one entity type (top-lvl column)
+
+    tag_df (output from `tag_extractor`) contains multi-level columns. These can
+    be unwieldy, especially if one needs to focus on a particular tag type,
+    slicing by tag name. This function abstracts some of that logic away.
+
+    Gracefully finds columns that exist, ignoring ones you want that don't.
+
+    Parameters
+    ----------
+    tag_df: pd.DataFrame
+        binary tag occurrence matrix, as output by `tag_extractor`
+    typelist: List[str]
+        names of entity types you want to slice from.
+    Returns
+    -------
+    pd.DataFrame:
+        a sliced copy of `tag_df`, given `typelist`
+    """
     df_types = list(tag_df.columns.levels[0])
     available = set(typelist) & set(df_types)
     return tag_df.loc[:, list(available)]
 
 
 def ngram_vocab_builder(raw_text, vocab1, init=None):
+    """complete pipeline for constructing higher-order tags
+
+    A useful technique for analysts is to use their tags like lego-blocks,
+    building up compound concepts from atomic tags. Nestor calls these *derived*
+    entities, and are determined by `nestorParams.derived`. It is possible to
+    construct new derived types on the fly whenever atomic or derived types are
+    encountered together that match a "rule" set forth by the user. These are
+    found in `nestorParams.entity_rules_map`.
+
+    Doing this in pandas and sklearn requires a bit of maneuvering with the
+    `TokenExtractor` objects, `token_to_alias`, and `ngram_automatch`.
+    The behavior of this function is to either produce a new ngram list from
+    scratch using the 1-grams and the original raw-text, or to take existing
+    n-gram mappings and add novel derived types to them.
+
+    This is a high-level function that may hide a lot of the other function calls.
+    IT MAY SLOW DOWN YOUR CODE. The primary use is within interactive UIs that
+    require a stream of new suggested derived-type instances, given user
+    activity making new atomic instances.
+
+    Parameters
+    ----------
+    raw_text: pd.Series
+        original merged text (output from `NLPSelect`)
+    vocab1: pd.DataFrame
+        known 1-gram token->tag mapping (w/ aliases)
+    init: 2-gram mapping, known a priori (could be a prev. output of this function.
+
+    Returns
+    -------
+    vocab2: pd.DataFrame
+        new/updated n-gram mapping
+    tex: TokenExtractor
+        now-trained transformer that contains n-gram tf-idf scores, etc.
+    replaced_text: pd.Series
+        raw text whose 1-gram tokens have been replaced with known tags
+    replaced_again: pd.Series
+        replaced_text whose atomic tags have been replaced with known derived types.
+    """
     # raw_text, with token-->alias replacement
     replaced_text = token_to_alias(raw_text, vocab1)
 
@@ -614,6 +742,10 @@ def ngram_vocab_builder(raw_text, vocab1, init=None):
 def ngram_keyword_pipe(raw_text, vocab, vocab2):
     """Experimental pipeline for one-shot n-gram extraction from raw text.
     """
+    import warnings
+    warnings.warn("This function is deprecated! Use `ngram_vocab_builder`.",
+                  DeprecationWarning,
+                  stacklevel=2)
     print("calculating the extracted tags and statistics...")
     # do 1-grams
     print("\n ONE GRAMS...")
@@ -629,48 +761,8 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
 
     tags_df = tag1_df.combine_first(tag2_df).combine_first(tag3_df)
 
-    # replaced_text = token_to_alias(
-    #     raw_text, vocab
-    # )  # raw_text, with token-->alias replacement
-    # tex2 = TokenExtractor(ngram_range=(2, 2))  # new extractor (note 2-gram)
-    # tex2.fit(replaced_text)
 
-    # # experimental: we need [item_item action] 2-grams, so let's use 2-gram Items for a 3rd pass...
-    # tex3 = TokenExtractor(ngram_range=(1, 2))
-    # mask = (np.isin(vocab2.NE, nestorParams.atomics)) & (vocab2.alias != "")
-    # vocab_combo = pd.concat([vocab, vocab2[mask]])
-    # # vocab_combo["score"] = 0
-
-    # # keep just in case of duplicates
-    # vocab_combo = (
-    #     vocab_combo.reset_index().drop_duplicates(subset=["tokens"]).set_index("tokens")
-    # )
-    # replaced_text2 = token_to_alias(replaced_text, vocab_combo)
-    # tex3.fit(replaced_text2)
-
-    # # make 2-gram dictionary
-    # vocab3 = generate_vocabulary_df(tex3, init=vocab_combo)
-    # vocab3 = ngram_automatch(vocab3, vocab_combo)
-
-    # # extract 2-gram tags from cleaned text
-    # print("\n TWO GRAMS...")
-    # tags2_df = tag_extractor(
-    #     tex2, replaced_text, vocab_df=vocab2[vocab2.alias.notna()],
-    # )
-
-    # tags3_df = tag_extractor(tex3, replaced_text2, vocab_df=vocab3).drop(
-    #     "NA", axis="columns"
-    # )
-
-    # print("\n MERGING...")
-    # # merge 1 and 2-grams?
-    # tag_df = tags_df.join(
-    #     tags3_df.drop(
-    #         axis="columns", level=1, labels=(tags_df.columns.levels[1].tolist())
-    #     )
-    # )
     relation_df = pick_tag_types(tags_df, nestorParams.derived)
-    # untagged_df = tag_df.NA
-    # untagged_df.columns = pd.MultiIndex.from_product([['NA'], untagged_df.columns])
+
     tag_df = pick_tag_types(tags_df, nestorParams.atomics + nestorParams.holes + ["NA"])
     return tag_df, relation_df

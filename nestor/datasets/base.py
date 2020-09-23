@@ -10,6 +10,17 @@ def load_excavators(cleaned=False):
     "Cleaning historical maintenance work order data for reliability analysis"
     in Journal of Quality in Maintenance Engineering, Vol 22 (2), pp. 146-163.
 
+    BscStartDate :
+        initialization of MWO
+    Asset :
+        which excavator this MWO concerns (A, B, C, D, E)
+    OriginalShorttext :
+        natural language description of the MWO
+    PMType :
+        repair (PM01) or replacement (PM02)
+    Cost :
+        MWO expense (AUD)
+
     Parameters
     ----------
     cleaned : bool (default=False)
@@ -19,16 +30,7 @@ def load_excavators(cleaned=False):
     Returns
     -------
     pandas.DataFrame
-        BscStartDate :
-            initialization of MWO
-        Asset :
-            which excavator this MWO concerns (A, B, C, D, E)
-        OriginalShorttext :
-            natural language description of the MWO
-        PMType :
-            repair (PM01) or replacement (PM02)
-        Cost :
-            MWO expense (AUD)
+        
     """
     module_path = Path(__file__).parent
     if cleaned:

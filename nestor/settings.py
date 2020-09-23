@@ -2,25 +2,38 @@ from pathlib import Path
 from itertools import product
 import yaml
 
-
-__all__ = [
-    "nestor_params",
-    "NestorParams",
-]
+__author__ = "Thurston Sexton"
 
 
 def nestor_fnames():
-    """return defult file being used by nestor (could use environment
-    variables, etc. in the future), in order of priority"""
+    """
+    Get nestor's default config filepath
 
+    Return default file being used by nestor ( in the future,
+    could use environment variables, etc.), in order of priority
+
+    Returns
+    -------
+    pathlib.Path
+    """
     default_cfg = Path(__file__).parent / "settings.yaml"
 
     return default_cfg
 
 
 def nestor_params_from_files(fname):
-    """Build up a :class:`nestor.NestorParams` object from the default
-    config file locations"""
+    """
+    Build up a `nestor.NestorParams` object from the default
+    config file locations
+
+    Parameters
+    ----------
+    fname: pathlib.Path
+
+    Returns
+    -------
+    nestor.NestorParams
+    """
 
     settings_dict = yaml.safe_load(open(fname))
     cfg = NestorParams(**settings_dict)
@@ -36,6 +49,7 @@ def nestor_params():
 
 
 class NestorParams(dict):
+
     def __init__(self, *arg, **kw):
         super(NestorParams, self).__init__(*arg, **kw)
         self._datatypes = None
