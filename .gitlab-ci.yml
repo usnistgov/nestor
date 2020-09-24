@@ -1,0 +1,31 @@
+image: python:3.8-buster
+
+stages:
+  - test
+  - lint
+  - pages
+
+before_script:
+  - pip install poetry
+  - poetry config virtualenvs.create false
+  - poetry install
+
+Unit Tests:
+  stage: test
+  script:
+    - poetry run pytest
+
+Python Code Lint:
+  stage: lint
+  script:
+    - poetry run task format 
+
+Deploy Docs:
+  stage: pages
+  script:
+    - portray as_html
+  artifacts:
+    paths:
+      - public
+  only:
+    - dev
