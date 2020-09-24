@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "nestor"
+name = "nist-nestor"
 version = "0.4.0"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
@@ -16,6 +16,10 @@ classifiers=[
 ]
 keywords = [ "nlp", "smart", "manufacturing", "maintenance", "tag" ]
 homepage = "https://www.nist.gov/services-resources/software/nestor"
+
+packages = [
+    {include = "nestor"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
