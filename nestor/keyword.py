@@ -149,7 +149,6 @@ class NLPSelect(Transformer):
             else:
                 return raw_text
 
-
         self.together = X.pipe(_robust_cat, nlp_cols)
         self.clean_together = self.together.pipe(
             _clean_text, special_replace=self.special_replace
@@ -393,6 +392,7 @@ def _get_readable_tag_df(tag_df):
         strs = np.where(clf_df.T == 1, clf_df.T.columns.droplevel(0).values, "").T
         temp_df[clf] = pd.DataFrame(strs).apply(join_em)
     return temp_df
+
 
 def get_multilabel_representation(tag_df):
     """ Turn binary tag occurrences into strings of comma-separated tags
@@ -743,9 +743,12 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     """Experimental pipeline for one-shot n-gram extraction from raw text.
     """
     import warnings
-    warnings.warn("This function is deprecated! Use `ngram_vocab_builder`.",
-                  DeprecationWarning,
-                  stacklevel=2)
+
+    warnings.warn(
+        "This function is deprecated! Use `ngram_vocab_builder`.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     print("calculating the extracted tags and statistics...")
     # do 1-grams
     print("\n ONE GRAMS...")
@@ -760,7 +763,6 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
     tag3_df = tag_extractor(tex3, r2, vocab_df=vocab_combo.loc[vocab2.alias.notna()])
 
     tags_df = tag1_df.combine_first(tag2_df).combine_first(tag3_df)
-
 
     relation_df = pick_tag_types(tags_df, nestorParams.derived)
 

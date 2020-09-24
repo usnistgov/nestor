@@ -34,10 +34,10 @@ def load_excavators(cleaned=False):
     """
     module_path = Path(__file__).parent
     if cleaned:
-        csv_filename = module_path/'excavators-cleaned.csv'
+        csv_filename = module_path / "excavators-cleaned.csv"
     else:
-        csv_filename = module_path / 'excavators.csv'
+        csv_filename = module_path / "excavators.csv"
 
     df = pd.read_csv(csv_filename)
-    df['BscStartDate'] = pd.to_datetime(df.BscStartDate)
+    df["BscStartDate"] = pd.to_datetime(df.BscStartDate)
     return df

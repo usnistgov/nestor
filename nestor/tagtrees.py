@@ -14,9 +14,9 @@ import nestor
 nestorParams = nestor.CFG
 
 
-
-def node_adj_mat(tag_df, similarity='cosine', pct_thres=None,
-                 dag=False, dag_order=None):
+def node_adj_mat(
+    tag_df, similarity="cosine", pct_thres=None, dag=False, dag_order=None
+):
     """
     Calculate the similarity of tags, in the form of a similarity kernel.
     Used as input to graph/network methods.
@@ -41,21 +41,23 @@ def node_adj_mat(tag_df, similarity='cosine', pct_thres=None,
     -------
     pandas.DataFrame, containing adjacency measures for each tag-tag (row-column) occurrence
     """
-    cts = tag_df.T@tag_df
+    cts = tag_df.T @ tag_df
 
-    if similarity == 'cosine':
+    if similarity == "cosine":
         # adj_mat.loc[:, :] = cosine_similarity(tag_df.T)
-        adj_mat = (cts-np.diag(cts.values))/cts.sum(axis=1)[:, None]
+        adj_mat = (cts - np.diag(cts.values)) / cts.sum(axis=1)[:, None]
 
     else:
-        if similarity != 'count':
-            print('similarity must be one of [count, cosine]!'
-                  '\nDefaulting to count...')
+        if similarity != "count":
+            print(
+                "similarity must be one of [count, cosine]!" "\nDefaulting to count..."
+            )
         adj_mat = cts - np.diag(cts.values)
 
     # np.fill_diagonal(adj_mat.values, 0)
 
     if dag:
+
         def pairwise(iterable):
             """recipe from itertools docs
             s -> (s0,s1), (s1,s2), (s2, s3), ...
@@ -68,16 +70,16 @@ def node_adj_mat(tag_df, similarity='cosine', pct_thres=None,
             # we only want a pipeline of types, no inter-connections
             pipe = nestorParams.atomics if dag_order is None else dag_order
             if not pair in pairwise(pipe):
-                adj_mat.loc[pair] = 0.  # no self-self
+                adj_mat.loc[pair] = 0.0  # no self-self
         # adj_mat.loc['P', 'S'] = 0.   # no action-action
         # adj_mat.loc['S', 'P'] = 0.
         # adj_mat.loc['I', 'P'] = 0.   # ensure DAG
         # adj_mat.loc['S', 'I'] = 0.   # (P)->(I)->(S)
 
     if pct_thres is not None:
-        assert 0 <= pct_thres <= 100, 'percentiles must be between [0,100]'
+        assert 0 <= pct_thres <= 100, "percentiles must be between [0,100]"
         lower = np.percentile(adj_mat, pct_thres)
-        adj_mat.loc[adj_mat < lower] = 0.
+        adj_mat.loc[adj_mat < lower] = 0.0
 
     return adj_mat
 
@@ -89,7 +91,8 @@ def tag_network(adj_mat, column_lvl=0):
     """
     G = nx.from_numpy_matrix(adj_mat.values)
     G = nx.relabel_nodes(
-        G, dict(zip(G.nodes(), adj_mat.columns.get_level_values(column_lvl))))
+        G, dict(zip(G.nodes(), adj_mat.columns.get_level_values(column_lvl)))
+    )
     return G
 
 
@@ -117,39 +120,44 @@ def tag_df_network(tag_df, **node_adj_kws):
     G = tag_network(adj_mat, column_lvl=1)
 
     ct = tag_df.sum().xs(slice(None))  # counts
-    nx.set_node_attributes(G, name='count', values=ct.to_dict())
+    nx.set_node_attributes(G, name="count", values=ct.to_dict())
 
     # size scaling...wait for holoviews `op()` functionality
     # ct_std = np.log(1+(ct-ct.min(axis=0))/(ct.max(axis=0)-ct.min(axis=0)))
     # nx.set_node_attributes(G, 'size', (ct_std*(30-10) + 10).to_dict())
 
     # add tag classification
-    nx.set_node_attributes(G, name='NE',
-                           values=dict(tag_df.swaplevel(axis=1).columns.tolist()))
+    nx.set_node_attributes(
+        G, name="NE", values=dict(tag_df.swaplevel(axis=1).columns.tolist())
+    )
 
     # Deprecated
     # node_info = pd.concat([pd.DataFrame(nx.layout.spring_layout(G)).T,
     #                        pd.DataFrame.from_dict({k: v for k, v in G.nodes(data=True)}, orient='index')],
     #                       axis=1).reset_index()
     node_info = pd.DataFrame.from_dict(
-        {k: v for k, v in G.nodes(data=True)}, orient='index')
+        {k: v for k, v in G.nodes(data=True)}, orient="index"
+    )
 
     edge_info = adj_mat.copy()
-    edge_info.index, edge_info.columns = edge_info.index.droplevel(
-        0), edge_info.columns.droplevel(0)
+    edge_info.index, edge_info.columns = (
+        edge_info.index.droplevel(0),
+        edge_info.columns.droplevel(0),
+    )
 
     # trick to get out source-target relationships with pandas
     edge_info = edge_info.stack(level=0).reset_index()
-    edge_info.columns = ['source', 'target', 'weight']
-    edge_info = edge_info.replace(0., np.nan)
+    edge_info.columns = ["source", "target", "weight"]
+    edge_info = edge_info.replace(0.0, np.nan)
 
     # edge_info.weight = np.log(1+edge_info.weight)  # wait for Holoviews `op()` functionality
 
     return G, node_info, edge_info.dropna()
 
 
-def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
-                     dynamic=False, dotfile=None, verbose=False):
+def heymann_taxonomy(
+    dist_mat, cent_prog="pr", tau=5e-4, dynamic=False, dotfile=None, verbose=False
+):
     """
 
     Parameters
@@ -177,10 +185,10 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
     """
     #     tau = 5e-4
     cent_dict = {
-        'pr': nx.pagerank,
-        'eig': nx.eigenvector_centrality,
-        'btw': nx.betweenness_centrality,
-        'cls': nx.closeness_centrality
+        "pr": nx.pagerank,
+        "eig": nx.eigenvector_centrality,
+        "btw": nx.betweenness_centrality,
+        "cls": nx.closeness_centrality,
     }
 
     # Create the co-occurence graph, G
@@ -217,8 +225,7 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
             # recalculate node centralities after removing each <tag>
             # EXPENSIVE.
             G.remove_node(tag)
-            cent = pd.Series(cent_dict[cent_prog](
-                G)).sort_values(ascending=False)
+            cent = pd.Series(cent_dict[cent_prog](G)).sort_values(ascending=False)
         else:
             cent.drop(tag, inplace=True)
 
@@ -230,15 +237,15 @@ def heymann_taxonomy(dist_mat, cent_prog='pr', tau=5e-4,
 
     if dotfile is not None:
         from networkx.drawing.nx_pydot import graphviz_layout, write_dot
-        D.graph['graph'] = {'rankdir': 'LR',
-                            'splines': 'true',
-                            'ranksep': '4'}
+
+        D.graph["graph"] = {"rankdir": "LR", "splines": "true", "ranksep": "4"}
         write_dot(D, dotfile)
 
     return D
 
 
 ######### DEPRECATED ################
+
 
 def get_relevant(df, col, topn=20):
     """
@@ -254,18 +261,22 @@ def get_relevant(df, col, topn=20):
     -------
     list of (tag,count,numpy.array) tuples
     """
-    tags = [x[1][col].split(', ') for x in df.iterrows()]
+    tags = [x[1][col].split(", ") for x in df.iterrows()]
     binner = MultiLabelBinarizer().fit(tags)
     vecs = binner.transform(tags)
     counts = vecs.sum(axis=0)
-    relevant = [(binner.classes_[i], counts[i], vecs[:, i])
-                for i in counts.argsort()[-topn:][::-1]]
+    relevant = [
+        (binner.classes_[i], counts[i], vecs[:, i])
+        for i in counts.argsort()[-topn:][::-1]
+    ]
     return relevant
 
 
 def get_onehot(df, col, topn=700):
     """DEPRECATED!"""
     itm_relevant = get_relevant(df, col, topn=topn)
-    itm_event = pd.DataFrame(columns=[i[0] for i in itm_relevant if i[0] != u''],
-                             data=np.array([i[2] for i in itm_relevant if i[0] != u'']).T)
+    itm_event = pd.DataFrame(
+        columns=[i[0] for i in itm_relevant if i[0] != u""],
+        data=np.array([i[2] for i in itm_relevant if i[0] != u""]).T,
+    )
     return itm_event

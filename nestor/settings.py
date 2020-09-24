@@ -49,7 +49,6 @@ def nestor_params():
 
 
 class NestorParams(dict):
-
     def __init__(self, *arg, **kw):
         super(NestorParams, self).__init__(*arg, **kw)
         self._datatypes = None
