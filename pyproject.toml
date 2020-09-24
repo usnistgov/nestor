@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nist-nestor"
-version = "0.4.0"
+version = "0.4.1"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
 include = ["*.md", "*.rst", "*.ui",
@@ -38,7 +38,11 @@ pytest-check = "^0.3.9"
 portray = "^1.4.0"
 # pdocs = { git = "https://github.com/kylebarron/pdocs.git", branch = "parse-docstring"}
 mkdocs-bibtex = "^0.3.0"
+black = "^19.10b0"
+taskipy = "^1.2.1"
 
+[tool.taskipy.tasks]
+format = "black nestor/"
 
 [tool.poetry-dynamic-versioning]
 enable = true
