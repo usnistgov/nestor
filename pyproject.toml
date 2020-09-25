@@ -3,9 +3,7 @@ name = "nist-nestor"
 version = "0.4.1"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
-include = ["*.md", "*.rst", "*.ui",
-           "nestor/datasets/*.csv",
-           "nestor/settings.yaml"]
+include = ["./*.md", "nestor/datasets/*.csv", "nestor/settings.yaml"]
 classifiers=[
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -35,11 +33,16 @@ seaborn = "^0.10.1"
 poetry-dynamic-versioning = "^0.8.3"
 pytest = "^6.0.1"
 pytest-check = "^0.3.9"
-portray = "^1.4.0"
-# pdocs = { git = "https://github.com/kylebarron/pdocs.git", branch = "parse-docstring"}
-mkdocs-bibtex = "^0.3.0"
 black = "^19.10b0"
 taskipy = "^1.2.1"
+# portray = "^1.4.0"
+mkdocs = "^1.1.2"
+pdocs = "^1.0.2"
+# pdocs = { git = "https://github.com/kylebarron/pdocs.git", branch = "parse-docstring"}
+mkdocs-bibtex = "^0.3.0"
+mkdocs-pdf-export-plugin = "^0.5.8"
+mkdocs-material = "^5.5.14"
+mkdocs-mermaid2-plugin = "^0.4.2"
 
 [tool.taskipy.tasks]
 format = "black nestor/"
@@ -52,9 +55,19 @@ format = "{base}"
 
 [tool.poetry-dynamic-versioning.substitution]
 
-[tool.portray.mkdocs]
-repo_url = "https://github.com/usnistgov/nestor"
+# [tool.portray]
+# modules = ["nestor"]
 
+# [tool.portray.mkdocs]
+# repo_url = "https://github.com/usnistgov/nestor"
+# plugins = [
+#     "markdownmermaid",
+#     "pdf-export",
+#     "search",
+# ]
+# extra_javascript = [
+#     "https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js"
+# ]
 # [tool.portray.mkdocs.nav]
 # "Home" = "README.md"
 # "Getting Started" = "docs/getting-started.md"
@@ -62,11 +75,11 @@ repo_url = "https://github.com/usnistgov/nestor"
 # "Development Repository" = "https://github.com/usnistgov/nestor"
 
 
-[tool.portray.mkdocs.theme]
-favicon = "media/favicon.png"
-logo = "media/icon.png"
-name = "material"
-palette = {primary = "deep orange", accent = "teal"}
+# [tool.portray.mkdocs.theme]
+# favicon = "media/favicon.png"
+# logo = "media/icon.png"
+# name = "material"
+# palette = {primary = "deep orange", accent = "teal"}
 
 # [[tool.portray.mkdocs.plugins]]
 #     [[tool.portray.mkdocs.plugins.bibtex]]

@@ -7,6 +7,7 @@
 
 build
 dist
+public
 _build
 _static
 _templates
