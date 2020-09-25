@@ -12,9 +12,9 @@ nav:
   - User Interfaces: "gui-links.md"
   - API Reference:
       - settings: "nestor/settings.md"
-      - "nestor/keyword.md"
-      - "nestor/tagtrees.md"
-      - "nestor/datasets/index.md"
+      - keyword: "nestor/keyword.md"
+      - tagtrees: "nestor/tagtrees.md"
+      - datasets: "nestor/datasets.md"
 theme:
   name: "material"
   favicon: "media/favicon.png"
