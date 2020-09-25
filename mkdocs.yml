@@ -13,7 +13,7 @@ nav:
   - API Reference:
       - settings: "nestor/settings.md"
       - keyword: "nestor/keyword.md"
-      - tagtrees: "nestor/tagtrees.md"
+      # - tagtrees: "nestor/tagtrees.md"
       - datasets: "nestor/datasets.md"
 theme:
   name: "material"

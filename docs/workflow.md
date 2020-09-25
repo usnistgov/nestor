@@ -38,7 +38,7 @@ This means the user can't know what to *type* the "hot" entity without more cont
 Nestor uses the idea of *derived types*, so that context-sensitive keywords can be built out of otherwise ambiguous blocks. 
 
 > Derived types are governed by the `derived` property of `nestor.CFG`. 
-> Rules for creating them from atomic types are defined by the `entity_rules_map` property. 
+> Rules for creating them from atomic types are defined by the `entity_rules_map` property. See [`nestor.settings`](nestor/settings.md) for more information.  
 
 \bibliography
 
