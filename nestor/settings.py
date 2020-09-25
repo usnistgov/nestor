@@ -3,7 +3,11 @@ from itertools import product
 import yaml
 
 __author__ = "Thurston Sexton"
-
+__all__ = [
+    "nestor_params_from_files",
+    "nestor_params",
+    "NestorParams",
+]
 
 def nestor_fnames():
     """
@@ -12,9 +16,8 @@ def nestor_fnames():
     Return default file being used by nestor ( in the future,
     could use environment variables, etc.), in order of priority
 
-    Returns
-    -------
-    pathlib.Path
+    Returns:
+        pathlib.Path
     """
     default_cfg = Path(__file__).parent / "settings.yaml"
 
@@ -26,13 +29,11 @@ def nestor_params_from_files(fname):
     Build up a `nestor.NestorParams` object from the default
     config file locations
 
-    Parameters
-    ----------
-    fname: pathlib.Path
+    Parameters: 
+        fname (pathlib.Path): location of a valid `.yaml` that defines a NestorParams object
 
-    Returns
-    -------
-    nestor.NestorParams
+    Returns:
+        nestor.NestorParams: context-setting config object for other nestor behavior
     """
 
     settings_dict = yaml.safe_load(open(fname))
@@ -49,6 +50,10 @@ def nestor_params():
 
 
 class NestorParams(dict):
+    """Temporary subclass of `dict` to manage nestor contexts.
+
+    To be re-factored as dataclasses.  
+    """
     def __init__(self, *arg, **kw):
         super(NestorParams, self).__init__(*arg, **kw)
         self._datatypes = None
@@ -59,6 +64,8 @@ class NestorParams(dict):
         self._derived = None
 
     def datatype_search(self, property_name):
+        """find any datatype that has a specific key
+        """
         return find_path_from_key(self["datatypes"], property_name)
 
     @property
@@ -120,15 +127,13 @@ def find_node_from_path(data_dict, pathstr):
     """
     Gets a specific leaf/branch of a nested dict, by passing a `.`-separated
     string of keys. NB: Requires all accessed keys in `dataDict` to be `str`!
-    Parameters
-    ----------
-    data_dict: dict
-        potentially nested, keyed on strings
-    pathstr: string of dot-separated key path to traverse/retrieve
 
-    Returns
-    -------
-    object
+    Parameters:
+        data_dict (dict): potentially nested, keyed on strings
+        pathstr (str):  dot-separated key path to traverse/retrieve
+
+    Returns:
+        object
     """
     maplist = pathstr.split(".")
     first, rest = maplist[0], ".".join(maplist[1:])
@@ -149,14 +154,10 @@ def find_path_from_key(deep_dict, value, join="."):
 
     hackey pattern matching
 
-    Parameters
-    ----------
-    deep_dict: dict
-        Must have keys/values of type str
-    value: str
-        value (or key) to search for
-    join: str
-        connector between key names
+    Parameters:
+        deep_dict (dict): Must have keys/values of type str
+        value (str): value (or key) to search for
+        join (str): connector between key names
     """
     for key, val in deep_dict.items():
         # check if not leaf of tree
@@ -192,12 +193,11 @@ def flatten_dict(deep_dict):
 def leafnames(deep_dict):
     """
     Find keys of leaf-items in a nested dict, using recursion.
-    Parameters
-    ----------
-    deep_dict
+    Parameters:
+        deep_dict (dict): nested dictionary
 
-    Returns
-    -------
+    Returns:
+        list: list of keys that map to leaves of a deeply nested dict
 
     """
     keylist = []
