@@ -1,10 +1,11 @@
 # `nestor.keyword`
 
-::: nestor.keyword.NLPSelect
+
+
+::: nestor.keyword
 
 
 
-::: nestor.keyword.TokenExtractor
 
 
 

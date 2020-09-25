@@ -4,3 +4,8 @@ Intended as a user-centric workflow, many of the associated tasks are better app
 Nestor originally began as a prototype interface to a scikit-learn pipeline. 
 It morphed a bit over time, as we realized that 
 
+- [`nestor-qt`](https://github.com/usnistgov/nestor-qt)
+- [`nestor-web`](https://github.com/usnistgov/nestor-web)
+
+
+
