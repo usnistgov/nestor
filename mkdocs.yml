@@ -1,0 +1,38 @@
+site_name: Nestor
+repo_url: "https://github.com/usnistgov/nestor"
+site_description: "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
+site_author: "Thurston Sexton"
+nav: 
+  - Home: "README.md"
+  - License: "LICENSE.md"
+  - Getting Started:
+      - "Install & Setup": "getting-started.md"
+      - Motivation: "motivation.md"
+      - Workflow: "workflow.md"
+  - User Interfaces: "gui-links.md"
+  - API Reference:
+      - settings: "nestor/settings.md"
+      - "nestor/keyword.md"
+      - "nestor/tagtrees.md"
+      - "nestor/datasets/index.md"
+theme:
+  name: "material"
+  favicon: "media/favicon.png"
+  logo: "media/icon.png"
+  palette:
+    primary: "deep orange"
+    accent : "teal"
+plugins:
+  - search
+  - mkdocstrings:
+      watch:
+        - nestor
+  # - pdf-export:
+      # combined: true
+  - mermaid2
+  - bibtex:
+      bib_file: "docs/biblio.bib"
+      cite_style: "pandoc"
+extra_javascript:
+  - "https://unpkg.com/mermaid/dist/mermaid.min.js"
+site_dir: "public"

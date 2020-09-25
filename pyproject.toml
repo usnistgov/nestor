@@ -37,12 +37,13 @@ black = "^19.10b0"
 taskipy = "^1.2.1"
 # portray = "^1.4.0"
 mkdocs = "^1.1.2"
-pdocs = "^1.0.2"
+# pdocs = "^1.0.2"
 # pdocs = { git = "https://github.com/kylebarron/pdocs.git", branch = "parse-docstring"}
 mkdocs-bibtex = "^0.3.0"
 mkdocs-pdf-export-plugin = "^0.5.8"
 mkdocs-material = "^5.5.14"
 mkdocs-mermaid2-plugin = "^0.4.2"
+mkdocstrings = "^0.13.4"
 
 [tool.taskipy.tasks]
 format = "black nestor/"
