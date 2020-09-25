@@ -30,7 +30,7 @@ class _Transformer(TransformerMixin):
     """
     Base class for pure transformers that don't need a fit method (returns self)
     """
-    
+
     def fit(self, X, y=None, **fit_params):
         return self
 
@@ -168,16 +168,17 @@ class TokenExtractor(TransformerMixin):
 
            
        """
+
     def __init__(
-            self,
-            input="content",
-            ngram_range=(1,1),
-            stop_words="english",
-            sublinear_tf=True,
-            smooth_idf=False,
-            max_features=5000,
-            **tfidf_kwargs
-        ):
+        self,
+        input="content",
+        ngram_range=(1, 1),
+        stop_words="english",
+        sublinear_tf=True,
+        smooth_idf=False,
+        max_features=5000,
+        **tfidf_kwargs,
+    ):
         """Initialize the extractor
 
         Args:
@@ -219,7 +220,7 @@ class TokenExtractor(TransformerMixin):
                 Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
 
            **tfidf_kwargs: other arguments passed to `sklearn.TfidfVectorizer`
-        """ 
+        """
         self.default_kws = dict(
             {
                 "input": input,
