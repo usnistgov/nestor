@@ -31,7 +31,7 @@ plugins:
         - nestor
   # - pdf-export:
       # combined: true
-  - mermaid2
+  # - mermaid2
   - bibtex:
       bib_file: "docs/biblio.bib"
       cite_style: "pandoc"
@@ -40,5 +40,4 @@ plugins:
 site_dir: "public"
 markdown_extensions:
   - footnotes
-  - pymdownx.highlight
   - pymdownx.superfences
