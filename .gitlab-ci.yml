@@ -3,7 +3,7 @@ image: python:3.7
 stages:
   # - test
   # - lint
-  - pages
+  - deploy
 
 before_script:
   - conda env update --file gldeployenv.yaml
@@ -20,8 +20,8 @@ before_script:
 #   script:
 #     - poetry run task format 
 
-Deploy Docs:
-  stage: pages
+pages:
+  stage: deploy
   script:
     - poetry run task deploy-docs
   artifacts:
