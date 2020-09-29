@@ -1,4 +1,4 @@
-image: python:3.8
+image: python:3.7
 
 stages:
   - test
@@ -7,7 +7,6 @@ stages:
 
 before_script:
   - pip install poetry
-  - poetry config virtualenvs.create false
   - poetry install
 
 Unit Tests:
@@ -23,7 +22,7 @@ Python Code Lint:
 Deploy Docs:
   stage: pages
   script:
-    - mkdocs build --strict --verbose
+    - poetry run task deploy-docs
   artifacts:
     paths:
       - public
