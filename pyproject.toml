@@ -94,5 +94,5 @@ format = "{base}"
 # bibtex = { bib_file = "docs/biblio.bib", cite_style = "pandoc" }
 
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry>=0.12", "poetry-dynamic-versioning"]
 build-backend = "poetry.masonry.api"
