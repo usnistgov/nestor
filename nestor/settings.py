@@ -9,6 +9,7 @@ __all__ = [
     "NestorParams",
 ]
 
+
 def nestor_fnames():
     """
     Get nestor's default config filepath
@@ -159,6 +160,7 @@ class NestorParams(dict):
     to define their own types, it is still possible to use these settings for a
     wide variety of tasks. 
     """
+
     def __init__(self, *arg, **kw):
         super(NestorParams, self).__init__(*arg, **kw)
         self._datatypes = None
