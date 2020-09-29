@@ -47,7 +47,7 @@ mkdocstrings = "^0.13.4"
 
 [tool.taskipy.tasks]
 format = "black nestor/"
-deploy-docs = "mkdocs build --strict --verbose"
+deploy-docs = "mkdocs build --verbose"
 
 [tool.poetry-dynamic-versioning]
 enable = true
