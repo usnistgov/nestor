@@ -23,7 +23,7 @@ Python Code Lint:
 Deploy Docs:
   stage: pages
   script:
-    - portray as_html
+    - mkdocs build --strict --verbose
   artifacts:
     paths:
       - public
