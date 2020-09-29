@@ -10,6 +10,8 @@ nav:
       - Motivation: "motivation.md"
       - Workflow: "workflow.md"
   - User Interfaces: "gui-links.md"
+  - Examples:
+      "Survival Analysis": "examples/survival-analysis/survival-analysis.md"
   - API Reference:
       - settings: "nestor/settings.md"
       - keyword: "nestor/keyword.md"
@@ -36,3 +38,7 @@ plugins:
 extra_javascript:
   - "https://unpkg.com/mermaid/dist/mermaid.min.js"
 site_dir: "public"
+markdown_extensions:
+  - footnotes
+  - pymdownx.highlight
+  - pymdownx.superfences
