@@ -35,8 +35,8 @@ plugins:
   - bibtex:
       bib_file: "docs/biblio.bib"
       cite_style: "pandoc"
-extra_javascript:
-  - "https://unpkg.com/mermaid/dist/mermaid.min.js"
+# extra_javascript:
+#   - "https://unpkg.com/mermaid/dist/mermaid.min.js"
 site_dir: "public"
 markdown_extensions:
   - footnotes
