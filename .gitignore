@@ -17,7 +17,6 @@ _pdf
 #   special file type
 **.pyc
 **.csv
-**.yaml
 **/reveal.js
 **.h5
 
