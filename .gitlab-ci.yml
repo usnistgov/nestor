@@ -6,7 +6,8 @@ stages:
   - pages
 
 before_script:
-  - pip install poetry
+  - conda env update --file gldeployenv.yaml
+  - conda activate nestor-dev
   - poetry install
 
 Unit Tests:
