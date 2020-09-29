@@ -20,7 +20,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 scikit-learn = "^0.23.2"
 networkx = "^2.4"
 pyyaml = "^5.3.1"
