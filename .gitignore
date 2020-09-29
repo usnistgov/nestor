@@ -1,5 +1,5 @@
 #   special folder cache or others
-**/__pycache__/*
+**/__pycache__/
 .idea/
 **/.ipynb_checkpoints
 **.egg-info
@@ -26,3 +26,4 @@ _pdf
 
 /poetry.lock
 **/.mypy_cache/
+**/.auctec-auto
