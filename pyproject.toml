@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nist-nestor"
-version = "0.4.2"
+version = "0.4.3"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
 include = ["./*.md", "nestor/datasets/*.csv", "nestor/settings.yaml"]

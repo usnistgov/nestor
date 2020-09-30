@@ -778,7 +778,11 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
 
     tex2.fit(r1)
     tag2_df = tag_extractor(tex2, r1, vocab_df=vocab2.loc[vocab2.alias.notna()])
-    tag3_df = tag_extractor(tex3, r2, vocab_df=vocab_combo.loc[vocab2.alias.notna()])
+    tag3_df = tag_extractor(
+        tex3,
+        r2,
+        vocab_df=vocab_combo.loc[vocab_combo.index.isin(vocab2.alias.dropna().index)],
+    )
 
     tags_df = tag1_df.combine_first(tag2_df).combine_first(tag3_df)
 
