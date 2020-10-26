@@ -1,0 +1,24 @@
+# run:    conda env create -f environment.yaml
+# update: conda env update -f environment.yaml
+
+# with MacOS: brew install libomp
+
+name: bio_output
+channels: 
+  - default
+  - conda-forge
+
+dependencies:
+  - python=3.8
+  - pip
+  - pandas
+  - matplotlib
+  - ipykernel
+  - seaborn
+  - scikit-learn
+  - pip:
+      - nist-nestor
+
+
+
+
