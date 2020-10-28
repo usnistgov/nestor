@@ -26,56 +26,6 @@ import pandas as pd
 import json
 from nestor import keyword as kex
 
-def get_iob_output(text, vocab):
-    """
-
-    Parameters
-    ----------
-    text : pandas.DataFrame
-    vocab : pandas.DataFrame
-
-    Returns
-    -------
-    str
-
-    """
-    # Create BIO output
-    bio = list()
-
-    for i in text.index:
-        # Get each MWO as list of tokens
-        mwo = text.iat[i].replace('\\', ' ')
-        mwo = mwo.split()
-        # default BIO tag is O
-        ne_tag = 'O'
-        labels = list()
-        # Go through token list for MWO
-        # TODO: Refactor this ***
-        for token in mwo:
-            found = vocab.loc[vocab['tokens'].str.fullmatch(token)]
-            if len(found) > 0:
-                ne = found.iloc[0].loc['NE']
-                if (ne == 'S') or (ne == 'I') or (ne == 'P'):
-                    if ne_tag == 'B_':  # FIXME: check for bigrams (once aliasing works for multi-token ngrams)
-                        ne_tag = 'I_'
-                    else:
-                        ne_tag = 'B_'
-                else:
-                    ne_tag = 'O'
-                    ne = ''
-            else:
-                ne_tag = 'O'
-
-            text_tag = (token, str(ne_tag) + str(ne))
-            # print(text_tag)
-            labels.append(text_tag)
-        # Add MWO's tagged token list to BIO output
-        bio.append(labels)
-
-    # TODO: format output file (JSON?)
-    return bio
-
-
 # %%
 # Get raw MWOs
 df = (pd.read_csv('/Users/amc8/Documents/datasets/MWOs.csv')
@@ -111,7 +61,7 @@ toks = tex.fit_transform(replaced_text)
 
 
 # %%
-bio = get_iob_output(raw_text, vocab)
+bio = kex.get_iob_output(raw_text, vocab)
 bio
 
 

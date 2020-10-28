@@ -578,6 +578,55 @@ def tag_extractor(
     return tag_df
 
 
+def iob_extractor(raw_text, vocab_df):
+    """Use Nestor named entity tags to create IOB format output for NER tasks
+
+    #todo
+
+    Args:
+       raw_text (pd.Series): contains jargon/slang-filled raw text to be tagged
+       vocab_df (pd.DataFrame, optional): An existing vocabulary dataframe or .csv filename, expected in the format of
+           kex.generate_vocabulary_df(). (Default value = None)
+
+    Returns:
+       list: #todo
+    """
+    # Create BIO output
+    bio = list()
+
+    for i in raw_text.index:
+        # Get each MWO as list of tokens
+        mwo = raw_text.iat[i].replace('\\', ' ')
+        mwo = mwo.split()
+        # default BIO tag is O
+        ne_tag = 'O'
+        labels = list()
+        # Go through token list for MWO
+        # TODO: Refactor this ***
+        for token in mwo:
+            found = vocab_df.loc[vocab_df['tokens'].str.fullmatch(token)]
+            if len(found) > 0:
+                ne = found.iloc[0].loc['NE']
+                if (ne == 'S') or (ne == 'I') or (ne == 'P'):
+                    if ne_tag == 'B_':  # FIXME: check for bigrams (once aliasing works for multi-token ngrams)
+                        ne_tag = 'I_'
+                    else:
+                        ne_tag = 'B_'
+                else:
+                    ne_tag = 'O'
+                    ne = ''
+            else:
+                ne_tag = 'O'
+
+            text_tag = (token, str(ne_tag) + str(ne))
+            # print(text_tag)
+            labels.append(text_tag)
+        # Add MWO's tagged token list to BIO output
+        bio.append(labels)
+
+    # TODO: format output file (JSON?)
+    return bio
+
 def token_to_alias(raw_text, vocab):
     """Replaces known tokens with their "tag" form
     
