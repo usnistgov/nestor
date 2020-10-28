@@ -22,22 +22,16 @@
 # #### https://pythonprogramming.net/using-bio-tags-create-named-entity-lists/
 
 # %%
-from pathlib import Path
-import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import json
 
 from nestor import keyword as kex
 
-# %matplotlib inline
-
 # %%
 # Get raw MWOs
 df = (pd.read_csv('/Users/amc8/Documents/datasets/MWOs.csv')
-          .rename(columns={'BscStartDate': 'StartDate'})
-          )
+      .rename(columns={'BscStartDate': 'StartDate'})
+      )
 
 # Change date column to DateTime objects
 df.StartDate = pd.to_datetime(df['StartDate'])
@@ -45,46 +39,46 @@ df.head(5)
 
 # %%
 # Get tagged MWOs
-
 tags = pd.read_csv('/Users/amc8/Documents/datasets/READABLE_TAGS.csv')
 tags.head(5)
 
 # %%
 # Get vocab file (unigrams)
-
 vocab = pd.read_csv('/Users/amc8/Documents/datasets/1g_original.csv')
 vocab.head(5)
 
 # %%
 # merge and cleanse NLP-containing columns of the data
-nlp_select = kex.NLPSelect(columns = ['OriginalShorttext'])
-raw_text = nlp_select.transform(df)  #Series
+nlp_select = kex.NLPSelect(columns=['OriginalShorttext'])
+raw_text = nlp_select.transform(df)  # Series
 raw_text
 
 # %%
-# todo: use raw text. get list of tokens for each MWO. use each token in list to look up in vocab and label as NE
-    # also label as BIO
+# TODO: make sure tokens are aliased
+tex = kex.TokenExtractor()
+# toks = tex.fit_transform(raw_text)
+# replaced_text = kex.token_to_alias(raw_text, vocab)  # raw_text, with token-->alias replacement
+# toks = tex.fit_transform(replaced_text)
 
 # Create BIO output
 bio = list()
-
-#fixme: Problems in this section:
-#   [('jump', 'S'), ('start', 'U'), ('not', nan), ('run', 'U')]   ***nans throughout
 
 # %%
 for i in raw_text.index:
     # Get each MWO as list of tokens
     mwo = raw_text.iat[i].replace('\\', ' ')
     mwo = mwo.split()
-    ne_tag = 'O_'   #default BIO tag is O
+    # default BIO tag is O
+    ne_tag = 'O'
     labels = list()
     # Go through token list for MWO
+    # TODO: Refactor this ***
     for token in mwo:
-        found = vocab.loc[vocab['tokens'].str.match(token)]  # fixme: this gets multiple rows, ie. "jump" and "jumpstart"
+        found = vocab.loc[vocab['tokens'].str.fullmatch(token)]
         if len(found) > 0:
             ne = found.iloc[0].loc['NE']
             if (ne == 'S') or (ne == 'I') or (ne == 'P'):
-                if ne_tag == 'B_':  #fixme: AND tag is of same type (or use this to look up in bigram table??)
+                if ne_tag == 'B_':  # FIXME: check for bigrams
                     ne_tag = 'I_'
                 else:
                     ne_tag = 'B_'
@@ -95,26 +89,14 @@ for i in raw_text.index:
             ne_tag = 'O'
 
         text_tag = (token, str(ne_tag) + str(ne))
-        print(text_tag)
+        # print(text_tag)
         labels.append(text_tag)
     # Add MWO's tagged token list to BIO output
     bio.append(labels)
+
 # %%
+# TODO: format output file
 bio
-
-# %%
-# fixme - format JSON output
-json_bio = json.dumps(bio)
-json_bio
-
-
-# %%
-# TODO: make sure tokens are aliased
-# replaced_text = kex.token_to_alias(raw_text, vocab)  # raw_text, with token-->alias replacement
-# replaced_text
-# toks2 = tex2.fit_transform(replaced_text)
-
-
 
 # %%
 # # %%
@@ -124,7 +106,7 @@ json_bio
 # space = re.compile('(\w)( )(\w)')
 # underscore = re.compile('g<1>_g<3>')
 #
-# subset = df_tags[['I', 'P', 'S', 'P I', 'S I']].values  # fixme: Need to not get repeat tokens in same row
+# subset = df_tags[['I', 'P', 'S', 'P I', 'S I']].values  # Need to not get repeat tokens in same row
 # subset = subset.tolist()
 #
 # corpus = list()
