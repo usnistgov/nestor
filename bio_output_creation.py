@@ -27,6 +27,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import json
 
 from nestor import keyword as kex
 
@@ -79,16 +80,19 @@ for i in raw_text.index:
     labels = list()
     # Go through token list for MWO
     for token in mwo:
-        # print(token)
         found = vocab.loc[vocab['tokens'].str.match(token)]  # fixme: this gets multiple rows, ie. "jump" and "jumpstart"
         if len(found) > 0:
             ne = found.iloc[0].loc['NE']
-            if ne_tag == 'B_':  #fixme: AND tag is of same type (or use this to look up in bigram table??)
-                ne_tag = 'I_'
+            if (ne == 'S') or (ne == 'I') or (ne == 'P'):
+                if ne_tag == 'B_':  #fixme: AND tag is of same type (or use this to look up in bigram table??)
+                    ne_tag = 'I_'
+                else:
+                    ne_tag = 'B_'
             else:
-                ne_tag = 'B_'
+                ne_tag = 'O'
+                ne = ''
         else:
-            ne_tag = 'O_'
+            ne_tag = 'O'
 
         text_tag = (token, str(ne_tag) + str(ne))
         print(text_tag)
@@ -99,10 +103,18 @@ for i in raw_text.index:
 bio
 
 # %%
+# fixme - format JSON output
+json_bio = json.dumps(bio)
+json_bio
+
+
+# %%
 # TODO: make sure tokens are aliased
 # replaced_text = kex.token_to_alias(raw_text, vocab)  # raw_text, with token-->alias replacement
 # replaced_text
 # toks2 = tex2.fit_transform(replaced_text)
+
+
 
 # %%
 # # %%
