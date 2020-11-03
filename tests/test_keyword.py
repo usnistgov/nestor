@@ -49,3 +49,24 @@ def test_token_to_alias(raw_text, vocab):
         clean_text,
         {"the fast_animal jump over the slow_animal", "the fox jump over the dog"},
     )
+
+
+# TODO add parametric test for plaintext/list-of-tup option
+def test_iob_extractor(raw_text, vocab):
+    iob_format = kex.iob_extractor(raw_text, vocab)
+    print(iob_format)
+    dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
+    dt.validate(
+        iob_format.query("doc_id==0")[["token", "NE"]].to_records(index=False),
+        [
+            ("the", "O"),
+            ("quick", "I"),
+            ("brown", "I"),
+            ("fox", "I"),
+            ("jumped", "V"),
+            ("over ", "O"),
+            ("the", "O"),
+            ("lazy", "I"),
+            ("dog", "I"),
+        ],
+    )
