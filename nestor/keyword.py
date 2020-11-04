@@ -604,7 +604,7 @@ def iob_extractor(raw_text, vocab_df):
         # Go through token list for MWO
         # TODO: Refactor this ***
         for token in mwo:
-            found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
+            found = vocab_df.loc[vocab_df.tokens.str.fullmatch(token)]
             if len(found) > 0:
                 ne = found.iloc[0].loc["NE"]
                 if (ne == "S") or (ne == "I") or (ne == "P"):

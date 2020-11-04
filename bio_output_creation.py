@@ -54,14 +54,14 @@ raw_text
 
 # %%
 # TODO: make sure tokens are aliased
-tex = kex.TokenExtractor()
-# toks = tex.fit_transform(raw_text)
-replaced_text = kex.token_to_alias(raw_text, vocab)  # raw_text, with token-->alias replacement
-toks = tex.fit_transform(replaced_text)
+# tex = kex.TokenExtractor()
+# # toks = tex.fit_transform(raw_text)
+# replaced_text = kex.token_to_alias(raw_text, vocab)  # raw_text, with token-->alias replacement
+# toks = tex.fit_transform(replaced_text)
 
 
 # %%
-bio = kex.get_iob_output(raw_text, vocab)
+bio = kex.iob_extractor(raw_text, vocab)
 bio
 
 
