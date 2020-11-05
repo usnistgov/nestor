@@ -25,15 +25,15 @@
 import pandas as pd
 import json
 from nestor import keyword as kex
+import nestor.datasets as nd
 
 # %%
 # Get raw MWOs
-df = (pd.read_csv('/Users/amc8/Documents/datasets/MWOs.csv')
+df = (nd.load_excavators(cleaned=False)  # already formats dates
       .rename(columns={'BscStartDate': 'StartDate'})
       )
 
 # Change date column to DateTime objects
-df.StartDate = pd.to_datetime(df['StartDate'])
 df.head(5)
 
 # %%
@@ -43,7 +43,10 @@ tags.head(5)
 
 # %%
 # Get vocab file (unigrams)
-vocab = pd.read_csv('/Users/amc8/Documents/datasets/1g_original.csv')
+vocab = kex.generate_vocabulary_df(
+      kex.TokenExtractor(),  # doesn't need to be fitted, since vocab exists
+      filename='/Users/amc8/Documents/datasets/1g_original.csv'
+)
 vocab.head(5)
 
 # %%
