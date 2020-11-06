@@ -578,39 +578,76 @@ def tag_extractor(
     return tag_df
 
 
-def iob_extractor(raw_text, vocab_df):
+def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
     """Use Nestor named entity tags to create IOB format output for NER tasks
 
     #todo
 
     Args:
        raw_text (pd.Series): contains jargon/slang-filled raw text to be tagged
-       vocab_df (pd.DataFrame, optional): An existing vocabulary dataframe or .csv filename, expected in the format of
+       vocab_df_1grams (pd.DataFrame, optional): An existing vocabulary dataframe or .csv filename, expected in the format of
            kex.generate_vocabulary_df(). (Default value = None)
 
     Returns:
        list: #todo
+
+    Parameters
+    ----------
+    raw_text
+    vocab_df_1grams
+    vocab_df_ngrams
     """
-    # Create IOB output
+
+    # Create IOB output DataFrame
     iob = pd.DataFrame(columns=["token", "NE", "doc_id"])
 
-    # fixme: get NE tags for tokens that are only labeled as part of an n-gram
+    if vocab_df_ngrams is not None:
+        # Concatenate 1gram and ngram dataframes
+        vocab_df = pd.concat([vocab_df_1grams, vocab_df_ngrams])
+        # Get aliased text using ngrams # todo: ok to skip aliasing with 1gram file?
+        raw_text = token_to_alias(raw_text, vocab_df_ngrams)
+    else:
+        # Just use 1gram vocabulary provided # todo: Any need to generate ngram vocab if it's not supplied?
+        vocab_df = vocab_df_1grams
+        # Get aliased text using ngrams
+        raw_text = token_to_alias(raw_text, vocab_df_1grams)
+
+    # fixme: Need get NE tags for combined NE types? ie. PI, SI, etc...make sure these are labeled correctly
     for i in raw_text.index:
         # Get each MWO as list of tokens
         mwo = raw_text.iat[i].replace("\\", " ")
         mwo = mwo.split()
+
         # Go through token list for MWO
         for token in mwo:
+            # Find single word tokens, will match in index
             found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
+            # Find combined tokens (i.e. "grease_line"), will match in alias column
+            found2 = vocab_df.loc[vocab_df.alias.str.fullmatch(token).fillna(False)]
+            # Start token list (needed in case of combined tokens)
+            tokens = token
+            # Default NE label is "O"
+            ne = "O"
+            # Get NE label, use applicable DataFrame (found or found2)
             if len(found) > 0:
                 ne = found.iloc[0].loc["NE"]
                 if (ne == "X") or (ne == "U"):
                     ne = "O"
-            else:
-                ne = "O"
-            text_tag = {"token": token, "NE": ne, "doc_id": i}
+            elif len(found2) > 0:
+                # fixme : This section (I think?) is causing nan in NE column
+                ne = found2.iloc[0].loc["NE"]
+                # multi-word index is split into list of tokens. i.e. "grease line" --> ["grease", "line"]
+                original = found2.index[0]
+                tokens = original.split(" ")
+                if (ne == "X") or (ne == "U"):
+                    ne = "O"
+            text_tag = {"token": tokens, "NE": ne, "doc_id": i}
+            # Add token(s) to iob DataFrame
             iob = iob.append(text_tag, ignore_index=True)
+            iob[["NE"]] = iob[["NE"]].fillna("O")  # fixme : fix logic statements so this isn't needed
 
+    # row containing ["grease", "line"] as "token" will be split into two rows with same values in other columns
+    iob = iob.explode("token")
     return iob
 
 
