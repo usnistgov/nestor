@@ -64,7 +64,7 @@ def test_iob_extractor(raw_text, vocab):
             ("brown", "I"),
             ("fox", "I"),
             ("jumped", "V"),
-            ("over ", "O"),
+            ("over", "O"),
             ("the", "O"),
             ("lazy", "I"),
             ("dog", "I"),

@@ -591,39 +591,25 @@ def iob_extractor(raw_text, vocab_df):
     Returns:
        list: #todo
     """
-    # Create BIO output
+    # Create IOB output
     iob = pd.DataFrame(columns=["token", "NE", "doc_id"])
 
+    # fixme: get NE tags for tokens that are only labeled as part of an n-gram
     for i in raw_text.index:
         # Get each MWO as list of tokens
         mwo = raw_text.iat[i].replace("\\", " ")
         mwo = mwo.split()
-        # default BIO tag is O
-        ne_tag = "O"
-        labels = []
         # Go through token list for MWO
-        # TODO: Refactor this ***
         for token in mwo:
             found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
             if len(found) > 0:
                 ne = found.iloc[0].loc["NE"]
-                if (ne == "S") or (ne == "I") or (ne == "P"):
-                    if (
-                        ne_tag == "B_"
-                    ):  # FIXME: check for bigrams (once aliasing works for multi-token ngrams)
-                        ne_tag = "I_"
-                    else:
-                        ne_tag = "B_"
-                else:
-                    ne_tag = "O"
+                if (ne == "X") or (ne == "U"):
                     ne = "O"
             else:
-                ne_tag = "O"
-
-            text_tag = {"token": token, "NE": ne, "doc_id": i}  #fixme: doc_id
+                ne = "O"
+            text_tag = {"token": token, "NE": ne, "doc_id": i}
             iob = iob.append(text_tag, ignore_index=True)
-        # Add MWO's tagged token list to IOB output
-        # bio.append(labels, ignore_index=True)
 
     return iob
 
