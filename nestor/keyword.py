@@ -592,7 +592,7 @@ def iob_extractor(raw_text, vocab_df):
        list: #todo
     """
     # Create BIO output
-    bio = list()
+    iob = pd.DataFrame(columns=["token", "NE", "doc_id"])
 
     for i in raw_text.index:
         # Get each MWO as list of tokens
@@ -600,11 +600,11 @@ def iob_extractor(raw_text, vocab_df):
         mwo = mwo.split()
         # default BIO tag is O
         ne_tag = "O"
-        labels = list()
+        labels = []
         # Go through token list for MWO
         # TODO: Refactor this ***
         for token in mwo:
-            found = vocab_df.loc[vocab_df.tokens.str.fullmatch(token)]
+            found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
             if len(found) > 0:
                 ne = found.iloc[0].loc["NE"]
                 if (ne == "S") or (ne == "I") or (ne == "P"):
@@ -616,18 +616,16 @@ def iob_extractor(raw_text, vocab_df):
                         ne_tag = "B_"
                 else:
                     ne_tag = "O"
-                    ne = ""
+                    ne = "O"
             else:
                 ne_tag = "O"
 
-            text_tag = (token, str(ne_tag) + str(ne))
-            # print(text_tag)
-            labels.append(text_tag)
-        # Add MWO's tagged token list to BIO output
-        bio.append(labels)
+            text_tag = {"token": token, "NE": ne, "doc_id": i}  #fixme: doc_id
+            iob = iob.append(text_tag, ignore_index=True)
+        # Add MWO's tagged token list to IOB output
+        # bio.append(labels, ignore_index=True)
 
-    # TODO: format output file (JSON?)
-    return bio
+    return iob
 
 
 def token_to_alias(raw_text, vocab):

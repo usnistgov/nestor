@@ -14,16 +14,15 @@
 # ---
 
 # %% [markdown]
-# # Output tags in BIO format for NER analysis
+# # Output tags in IOB format for NER analysis
 # ### Make function that takes a vocab list and a set of MWOs and returns MWOs in bio format
-# #### TODO: BIO or IOB?
 # #### TODO: Handle SI, PI, longer ngrams
 #
 # #### https://pythonprogramming.net/using-bio-tags-create-named-entity-lists/
 
 # %%
 import pandas as pd
-import json
+from pathlib import Path
 from nestor import keyword as kex
 import nestor.datasets as nd
 
@@ -38,14 +37,14 @@ df.head(5)
 
 # %%
 # Get tagged MWOs
-tags = pd.read_csv('/Users/amc8/Documents/datasets/READABLE_TAGS.csv')
+tags = pd.read_csv(Path.home()/'Documents'/'datasets'/'1g_original.csv')
 tags.head(5)
 
 # %%
 # Get vocab file (unigrams)
 vocab = kex.generate_vocabulary_df(
       kex.TokenExtractor(),  # doesn't need to be fitted, since vocab exists
-      filename='/Users/amc8/Documents/datasets/1g_original.csv'
+      filename=Path.home()/'Documents'/'datasets'/'1g_original.csv'
 )
 vocab.head(5)
 
@@ -64,7 +63,7 @@ raw_text
 
 
 # %%
-bio = kex.iob_extractor(raw_text, vocab)
-bio
+iob = kex.iob_extractor(raw_text, vocab)
+iob
 
 
