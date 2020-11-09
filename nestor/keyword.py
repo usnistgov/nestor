@@ -631,7 +631,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             # Get NE label, use applicable DataFrame (found or found2)
             if len(found) > 0:
                 ne = found.iloc[0].loc["NE"]
-                if (ne == "X") or (ne == "U"):
+                if ne in nestorParams.holes:
                     ne = "O"
             elif len(found2) > 0:
                 # fixme : This section (I think?) is causing nan in NE column
@@ -639,7 +639,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                 # multi-word index is split into list of tokens. i.e. "grease line" --> ["grease", "line"]
                 original = found2.index[0]
                 tokens = original.split(" ")
-                if (ne == "X") or (ne == "U"):
+                if ne in nestorParams.holes:
                     ne = "O"
             text_tag = {"token": tokens, "NE": ne, "doc_id": i}
             # Add token(s) to iob DataFrame
