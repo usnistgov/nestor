@@ -22,7 +22,7 @@ _pdf
 
 # exception
 !nestor/settings.yaml
-!nestor/datasets/**
+!nestor/datasets/**.csv
 
 /poetry.lock
 **/.mypy_cache/
