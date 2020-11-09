@@ -619,11 +619,12 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         mwo = mwo.split()
 
         # Go through token list for MWO
-        for token in mwo:
+        for index, token in enumerate(mwo):
             # Find single word tokens, will match in index
             found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
             # Find combined tokens (i.e. "grease_line"), will match in alias column
             found2 = vocab_df.loc[vocab_df.alias.str.fullmatch(token).fillna(False)]
+            found_multi_word = vocab_df.loc[vocab_df.alias.str.contains(token).fillna(False)]
             # Start token list (needed in case of combined tokens)
             tokens = token
             # Default NE label is "O"
@@ -631,6 +632,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             # Get NE label, use applicable DataFrame (found or found2)
             if len(found) > 0:
                 ne = found.iloc[0].loc["NE"]
+                individual_alias = found.iloc[0].loc["alias"]
                 if ne in nestorParams.holes:
                     ne = "O"
             elif len(found2) > 0:
@@ -641,6 +643,22 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                 tokens = original.split(" ")
                 if ne in nestorParams.holes:
                     ne = "O"
+
+            # todo : see if an individual token is part of a concatenated label (such as "oil leak" --> "PI")
+            if len(found_multi_word) > 0:
+                # multi_tag_token
+                thes_dict = found_multi_word[found_multi_word.alias.replace("", np.nan).notna()].alias.to_dict()
+                substr = sorted(thes_dict, key=len, reverse=True)
+                if index < (len(mwo) - 1):
+                    possible_multi_word_token = token + " " + mwo[index + 1]
+                    multi_ne_label = found_multi_word.loc[found_multi_word.alias.str.fullmatch(possible_multi_word_token).fillna(False)]
+                    if len(multi_ne_label) > 0:
+                        # print(found_multi_word)
+                        ne_long = multi_ne_label.iloc[0].loc["NE"]
+                        ne = ne_long
+
+                # todo: handle latter word(s) if full multi-word token is found
+
             text_tag = {"token": tokens, "NE": ne, "doc_id": i}
             # Add token(s) to iob DataFrame
             iob = iob.append(text_tag, ignore_index=True)

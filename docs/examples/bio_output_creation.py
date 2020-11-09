@@ -37,7 +37,7 @@ df.head(5)
 
 # %%
 # Get tagged MWOs
-tags = pd.read_csv(Path.home()/'Documents'/'datasets'/'1g_original.csv')
+tags = pd.read_csv(Path.home()/'Documents'/'datasets'/'READABLE_TAGS.csv')
 tags.head(5)
 
 # %%
@@ -62,7 +62,13 @@ nlp_select = kex.NLPSelect(columns=['OriginalShorttext'])
 raw_text = nlp_select.transform(df)  # Series
 raw_text = raw_text.head(700)
 
+
 # %%
 # Use iob_extractor with both 1gram and ngram vocab outputs from Nestor
 iob = kex.iob_extractor(raw_text, vocab_1, vocab_df_ngrams=vocab_2)
 iob
+# %%
+
+# %%
+
+# %%
