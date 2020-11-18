@@ -644,28 +644,35 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                 if ne in nestorParams.holes:
                     ne = "O"
 
+            # Create dictionary with token info, to be put into DataFrame
+            text_tag = {"token": tokens, "NE": ne, "doc_id": i}
+
             # todo : see if an individual token is part of a concatenated label (such as "oil leak" --> "PI")
             if len(found_multi_word) > 0:
-                # multi_tag_token
                 thes_dict = found_multi_word[found_multi_word.alias.replace("", np.nan).notna()].alias.to_dict()
                 substr = sorted(thes_dict, key=len, reverse=True)
                 if index < (len(mwo) - 1):
                     possible_multi_word_token = token + " " + mwo[index + 1]
                     multi_ne_label = found_multi_word.loc[found_multi_word.alias.str.fullmatch(possible_multi_word_token).fillna(False)]
                     if len(multi_ne_label) > 0:
-                        # print(found_multi_word)
                         ne_long = multi_ne_label.iloc[0].loc["NE"]
                         ne = ne_long
-
+                        # Overwrite token info dictionary with multi-word token and
+                        text_tag = {"token": possible_multi_word_token.split(" "), "NE": ne_long, "doc_id": i} # fixme: gets aliased instead of actual text
                 # todo: handle latter word(s) if full multi-word token is found
 
-            text_tag = {"token": tokens, "NE": ne, "doc_id": i}
             # Add token(s) to iob DataFrame
             iob = iob.append(text_tag, ignore_index=True)
             iob[["NE"]] = iob[["NE"]].fillna("O")  # fixme : fix logic statements so this isn't needed
 
-    # row containing ["grease", "line"] as "token" will be split into two rows with same values in other columns
+    # Row containing ["grease", "line"] as "token" will be split into two rows with same values in other columns
     iob = iob.explode("token")
+    # Looking at only "token" and "doc_id" columns, keep only the first tag that a token gets assigned with
+    # When a multi-word token receives a combined entity tag, only need to keep the row with the multi-entity tag
+    # todo: Find a better way to do this?
+    cols_df = iob[["token", "doc_id"]]
+    iob = iob[cols_df.ne(cols_df.shift()).any(1)]
+
     return iob
 
 
