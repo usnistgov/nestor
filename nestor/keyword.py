@@ -589,7 +589,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
            kex.generate_vocabulary_df(). (Default value = None)
 
     Returns:
-       list: #todo
+        pd.DataFrame: contains row for each token ("token", "NE" (IOB format tag), and "doc_id")
 
     Parameters
     ----------
@@ -612,7 +612,6 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         # Get aliased text using ngrams
         raw_text = token_to_alias(raw_text, vocab_df_1grams)
 
-    # fixme: Need get NE tags for combined NE types? ie. PI, SI, etc...make sure these are labeled correctly
     for i in raw_text.index:
         # Get each MWO as list of tokens
         mwo = raw_text.iat[i].replace("\\", " ")
@@ -659,11 +658,11 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                         ne = ne_long
                         originals = substr[0].split(" ")
                         text_tag = {"token": originals, "NE": ne, "doc_id": i}
+                        # If upcoming token is already labeled here via a combination label, then skip ahead
                         i =+ 1
 
             # Add token(s) to iob DataFrame
             iob = iob.append(text_tag, ignore_index=True)
-            print(text_tag)
             iob[["NE"]] = iob[["NE"]].fillna("O")  # fixme : fix logic statements so this isn't needed
 
     # Row containing ["grease", "line"] as "token" will be split into two rows with same values in other columns
