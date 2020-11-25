@@ -581,12 +581,24 @@ def tag_extractor(
 def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
     """Use Nestor named entity tags to create IOB format output for NER tasks
 
-    #todo
+    This function provides IOB-formatted tagged text, which allows for further NLP analysis. In the output,
+    each token is listed sequentially, as they appear in the raw text. Inside and Beginning Tokens are labeled with
+    their Named Entity tags; any multi-token entities all receive the same label. Untagged tokens are labeled
+    as "O" (Outside).
+
+    Example output (in this example, "PI" is "Problem Item":
+
+    token | NE | doc_id
+    an | O | 0
+    oil | PI | 0
+    leak | PI | 0
 
     Args:
        raw_text (pd.Series): contains jargon/slang-filled raw text to be tagged
-       vocab_df_1grams (pd.DataFrame, optional): An existing vocabulary dataframe or .csv filename, expected in the format of
-           kex.generate_vocabulary_df(). (Default value = None)
+       vocab_df_1grams (pd.DataFrame): An existing vocabulary dataframe or .csv filename, expected in the format of
+           kex.generate_vocabulary_df(), containing tagged 1-gram tokens
+        vocab_df_ngrams (pd.DataFrame, optional): An existing vocabulary dataframe or .csv filename, expected in
+        the format of kex.generate_vocabulary_df(), containing tagged n-gram tokens (Default value = None)
 
     Returns:
         pd.DataFrame: contains row for each token ("token", "NE" (IOB format tag), and "doc_id")
@@ -604,12 +616,12 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
     if vocab_df_ngrams is not None:
         # Concatenate 1gram and ngram dataframes
         vocab_df = pd.concat([vocab_df_1grams, vocab_df_ngrams])
-        # Get aliased text using ngrams # todo: ok to skip aliasing with 1gram file?
+        # Get aliased text using ngrams
         raw_text = token_to_alias(raw_text, vocab_df_ngrams)
     else:
-        # Just use 1gram vocabulary provided # todo: Any need to generate ngram vocab if it's not supplied?
+        # Only use 1gram vocabulary provided
         vocab_df = vocab_df_1grams
-        # Get aliased text using ngrams
+        # Get aliased text
         raw_text = token_to_alias(raw_text, vocab_df_1grams)
 
     for i in raw_text.index:
@@ -618,7 +630,9 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         mwo = mwo.split()
 
         # Go through token list for MWO
-        for index, token in enumerate(mwo):
+        index = 0
+        while index < len(mwo):
+            token = mwo[index]
             # Find single word tokens, will match in index
             found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
             # Find combined tokens (i.e. "grease_line"), will match in alias column
@@ -631,7 +645,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             # Get NE label, use applicable DataFrame (found or found2)
             if len(found) > 0:
                 ne = found.iloc[0].loc["NE"]
-                individual_alias = found.iloc[0].loc["alias"]
+                individual_alias = found.iloc[0].loc["alias"]  # fixme: is this needed?
                 if ne in nestorParams.holes:
                     ne = "O"
             elif len(found2) > 0:
@@ -659,19 +673,17 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                         originals = substr[0].split(" ")
                         text_tag = {"token": originals, "NE": ne, "doc_id": i}
                         # If upcoming token is already labeled here via a combination label, then skip ahead
-                        i =+ 1
+                        index += 1
+            # Increment index of token in MWO
+            index += 1
 
             # Add token(s) to iob DataFrame
             iob = iob.append(text_tag, ignore_index=True)
+            # print(text_tag)
             iob[["NE"]] = iob[["NE"]].fillna("O")  # fixme : fix logic statements so this isn't needed
 
     # Row containing ["grease", "line"] as "token" will be split into two rows with same values in other columns
     iob = iob.explode("token")
-    # Looking at only "token" and "doc_id" columns, keep only the first tag that a token gets assigned with
-    # When a multi-word token receives a combined entity tag, only need to keep the row with the multi-entity tag
-    # todo: Find a better way to do this?
-    cols_df = iob[["token", "doc_id"]]
-    iob = iob[cols_df.ne(cols_df.shift()).any(1)]
 
     return iob
 
