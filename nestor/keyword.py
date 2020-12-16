@@ -125,8 +125,8 @@ class NLPSelect(_Transformer):
             else:
                 return (
                     df[cols[0]]
-                        .astype(str)
-                        .str.cat(df.loc[:, cols[1:]].astype(str), sep=" ", na_rep="", )
+                    .astype(str)
+                    .str.cat(df.loc[:, cols[1:]].astype(str), sep=" ", na_rep="",)
                 )
 
         def _clean_text(s, special_replace=None):
@@ -141,8 +141,8 @@ class NLPSelect(_Transformer):
             """
             raw_text = (
                 s.str.lower()  # all lowercase
-                    .str.replace("\n", " ")  # no hanging newlines
-                    .str.replace("[{}]".format(string.punctuation), " ")
+                .str.replace("\n", " ")  # no hanging newlines
+                .str.replace("[{}]".format(string.punctuation), " ")
             )
             if special_replace is not None:
                 rx = re.compile("|".join(map(re.escape, special_replace)))
@@ -170,14 +170,14 @@ class TokenExtractor(TransformerMixin):
        """
 
     def __init__(
-            self,
-            input="content",
-            ngram_range=(1, 1),
-            stop_words="english",
-            sublinear_tf=True,
-            smooth_idf=False,
-            max_features=5000,
-            **tfidf_kwargs,
+        self,
+        input="content",
+        ngram_range=(1, 1),
+        stop_words="english",
+        sublinear_tf=True,
+        smooth_idf=False,
+        max_features=5000,
+        **tfidf_kwargs,
     ):
         """Initialize the extractor
 
@@ -432,7 +432,7 @@ def _get_readable_tag_df(tag_df):
     """
     temp_df = pd.DataFrame(index=tag_df.index)  # empty init
     for clf, clf_df in tqdm(
-            tag_df.T.groupby(level=0)
+        tag_df.T.groupby(level=0)
     ):  # loop over top-level classes (ignore NA)
         join_em = lambda strings: ", ".join(
             [x for x in strings if x != ""]
@@ -493,7 +493,7 @@ def get_tag_completeness(tag_df):
 
     all_empt = np.zeros_like(tag_df.index.values.reshape(-1, 1))
     tag_pct = 1 - (
-            tag_df.get(["NA", "U"], all_empt).sum(axis=1) / tag_df.sum(axis=1)
+        tag_df.get(["NA", "U"], all_empt).sum(axis=1) / tag_df.sum(axis=1)
     )  # TODO: if they tag everything?
     print(f"Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}")
 
@@ -501,16 +501,16 @@ def get_tag_completeness(tag_df):
     print(f"Complete Docs: {tag_comp}, or {tag_comp / len(tag_df):.2%}")
 
     tag_empt = (
-            (tag_df.get("I", all_empt).sum(axis=1) == 0)
-            & (tag_df.get("P", all_empt).sum(axis=1) == 0)
-            & (tag_df.get("S", all_empt).sum(axis=1) == 0)
+        (tag_df.get("I", all_empt).sum(axis=1) == 0)
+        & (tag_df.get("P", all_empt).sum(axis=1) == 0)
+        & (tag_df.get("S", all_empt).sum(axis=1) == 0)
     ).sum()
     print(f"Empty Docs: {tag_empt}, or {tag_empt / len(tag_df):.2%}")
     return tag_pct, tag_comp, tag_empt
 
 
 def tag_extractor(
-        transformer, raw_text, vocab_df=None, readable=False, group_untagged=True
+    transformer, raw_text, vocab_df=None, readable=False, group_untagged=True
 ):
     """Turn TokenExtractor instances and raw-text into binary occurrences.
     
@@ -557,17 +557,17 @@ def tag_extractor(
     sparse_dtype = pd.SparseDtype(int, fill_value=0.0)
     table = (  # more pandas-ey pivot, for future cat-types
         v_filled.assign(exists=1)  # placehold
-            .groupby(["NE", "alias", "tokens"])["exists"]
-            .sum()
-            .unstack("tokens")
-            .T.fillna(0)
-            .astype(sparse_dtype)
+        .groupby(["NE", "alias", "tokens"])["exists"]
+        .sum()
+        .unstack("tokens")
+        .T.fillna(0)
+        .astype(sparse_dtype)
     )
 
     A = toks[:, transformer.ranks_]
     A[A > 0] = 1
 
-    docterm = pd.DataFrame.sparse.from_spmatrix(A, columns=v_filled["tokens"], )
+    docterm = pd.DataFrame.sparse.from_spmatrix(A, columns=v_filled["tokens"],)
 
     tag_df = docterm.dot(table)
     tag_df.rename_axis([None, None], axis=1, inplace=True)
@@ -637,7 +637,9 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
             # Find combined tokens (i.e. "grease_line"), will match in alias column
             found2 = vocab_df.loc[vocab_df.alias.str.fullmatch(token).fillna(False)]
-            found_multi_word = vocab_df.loc[vocab_df.alias.str.contains(token).fillna(False)]
+            found_multi_word = vocab_df.loc[
+                vocab_df.alias.str.contains(token).fillna(False)
+            ]
             # Start token list (needed in case of combined tokens)
             tokens = token
             # Default NE label is "O"
@@ -661,12 +663,17 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             text_tag = {"token": tokens, "NE": ne, "doc_id": i}
 
             if len(found_multi_word) > 0:
-                thes_dict = found_multi_word[found_multi_word.alias.replace("", np.nan).notna()].alias.to_dict()
+                thes_dict = found_multi_word[
+                    found_multi_word.alias.replace("", np.nan).notna()
+                ].alias.to_dict()
                 substr = sorted(thes_dict, key=len, reverse=True)
                 if index < (len(mwo) - 1):
                     possible_multi_word_token = token + " " + mwo[index + 1]
                     multi_ne_label = found_multi_word.loc[
-                        found_multi_word.alias.str.fullmatch(possible_multi_word_token).fillna(False)]
+                        found_multi_word.alias.str.fullmatch(
+                            possible_multi_word_token
+                        ).fillna(False)
+                    ]
                     if len(multi_ne_label) > 0:
                         ne_long = multi_ne_label.iloc[0].loc["NE"]
                         ne = ne_long
@@ -680,7 +687,9 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             # Add token(s) to iob DataFrame
             iob = iob.append(text_tag, ignore_index=True)
             # print(text_tag)
-            iob[["NE"]] = iob[["NE"]].fillna("O")  # fixme : fix logic statements so this isn't needed
+            iob[["NE"]] = iob[["NE"]].fillna(
+                "O"
+            )  # fixme : fix logic statements so this isn't needed
 
     # Row containing ["grease", "line"] as "token" will be split into two rows with same values in other columns
     iob = iob.explode("token")
@@ -743,10 +752,10 @@ def ngram_automatch(voc1, voc2):
 
     NE_dict.update(
         vocab.fillna("NA")
-            .reset_index()[["NE", "alias"]]
-            .drop_duplicates()
-            .set_index("alias")
-            .NE.to_dict()
+        .reset_index()[["NE", "alias"]]
+        .drop_duplicates()
+        .set_index("alias")
+        .NE.to_dict()
     )
 
     _ = NE_dict.pop("", None)
@@ -842,19 +851,19 @@ def ngram_vocab_builder(raw_text, vocab1, init=None):
         replaced_again = token_to_alias(
             replaced_text,
             pd.concat([vocab1, init[mask]])
-                .reset_index()
-                .drop_duplicates(subset=["tokens"])
-                .set_index("tokens"),
+            .reset_index()
+            .drop_duplicates(subset=["tokens"])
+            .set_index("tokens"),
         )
         tex = TokenExtractor(ngram_range=(2, 2))
         tex.fit(replaced_again)
         new_vocab = generate_vocabulary_df(tex, init=init)
         vocab2 = (
             pd.concat([init, new_vocab])
-                .reset_index()
-                .drop_duplicates(subset=["tokens"])
-                .set_index("tokens")
-                .sort_values("score", ascending=False)
+            .reset_index()
+            .drop_duplicates(subset=["tokens"])
+            .set_index("tokens")
+            .sort_values("score", ascending=False)
         )
     return vocab2, tex, replaced_text, replaced_again
 
