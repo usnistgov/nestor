@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nist-nestor"
-version = "0.4.3"
+version = "0.0.0"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
 include = ["./*.md", "nestor/datasets/*.csv", "nestor/settings.yaml"]
@@ -30,7 +30,7 @@ fuzzywuzzy = "^0.18.0"
 pandas = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
-poetry-dynamic-versioning = "^0.8.3"
+poetry-dynamic-versioning = "^0.10.0"
 pytest = "^6.0.1"
 pytest-check = "^0.3.9"
 black = "^19.10b0"
@@ -94,5 +94,7 @@ format = "{base}"
 # bibtex = { bib_file = "docs/biblio.bib", cite_style = "pandoc" }
 
 [build-system]
-requires = ["poetry>=0.12", "poetry-dynamic-versioning"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry.core.masonry.api"
+# requires = ["poetry>=0.12", "poetry-dynamic-versioning"]
+# build-backend = "poetry.masonry.api"
