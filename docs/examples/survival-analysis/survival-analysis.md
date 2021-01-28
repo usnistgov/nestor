@@ -414,7 +414,7 @@ sns.despine()
 ```
 
 
-    
+
 ![png](output_12_0.png)
     
 
@@ -485,7 +485,7 @@ plt.tight_layout()
 ```
 
 
-    
+
 ![png](output_15_0.png)
     
 
@@ -819,7 +819,7 @@ wf.summary.iloc[:,:2].apply(to_bounds, 1)
 
 
 
-    
+
 ![png](output_21_3.png)
     
 
@@ -1165,7 +1165,7 @@ plt.tight_layout()
 ```
 
 
-    
+
 ![png](output_29_0.png)
     
 

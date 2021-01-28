@@ -22,8 +22,8 @@ theme:
   favicon: "media/favicon.png"
   logo: "media/icon.png"
   palette:
-    primary: "deep orange"
-    accent : "teal"
+    primary: "blue grey"
+    accent : "orange"
 plugins:
   - search
   - mkdocstrings:
@@ -35,8 +35,12 @@ plugins:
   - bibtex:
       bib_file: "docs/biblio.bib"
       cite_style: "pandoc"
+extra_css:
+  - "https://pages.nist.gov/nist-header-footer/css/nist-combined.css"
 extra_javascript:
   - "https://unpkg.com/mermaid/dist/mermaid.min.js"
+  - "https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"
+  - "https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"
 site_dir: "public"
 markdown_extensions:
   - footnotes
