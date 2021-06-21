@@ -27,3 +27,5 @@ _pdf
 /poetry.lock
 **/.mypy_cache/
 **/.auctec-auto
+/nestor/datasets/__pycache__/
+/docs/.auctex-auto/

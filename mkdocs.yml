@@ -31,6 +31,10 @@ plugins:
         - nestor
   # - pdf-export:
       # combined: true
+  - with-pdf:
+      cover: true
+      # exclude_pages:
+      #   - 'about/templates/'
   - mermaid2
   - bibtex:
       bib_file: "docs/biblio.bib"

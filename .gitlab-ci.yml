@@ -1,8 +1,8 @@
 image: python:3.7
 
 stages:
-  # - test
   # - lint
+  - test
   - deploy
 
 before_script:
@@ -10,15 +10,16 @@ before_script:
   - conda activate nestor-dev
   - poetry install
 
-# Unit Tests:
-#   stage: test
-#   script:
-#     - poetry run pytest
-
-# Python Code Lint:
+# code-lint:
 #   stage: lint
 #   script:
-#     - poetry run task format 
+#     - poetry run task format
+ 
+tests:
+  stage: test
+  script:
+    - poetry run pytest
+
 
 pages:
   stage: deploy
