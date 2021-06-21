@@ -1,16 +1,17 @@
 __author__ = "Thurston Sexton"
 
-import nestor
+import re
+import string
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import re, sys, string
-from scipy.sparse import csc_matrix
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import TransformerMixin
-from sklearn.utils.validation import check_is_fitted, NotFittedError
-from itertools import product
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.utils.validation import NotFittedError, check_is_fitted
 from tqdm.autonotebook import tqdm
+
+import nestor
 
 nestorParams = nestor.CFG
 
