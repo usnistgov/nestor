@@ -15,5 +15,23 @@ __all__ = [
 ]
 
 from nestor.settings import nestor_params
+import os
+from pathlib import Path
 
 CFG = nestor_params()
+
+DEFAULT_CACHE = Path.home() / ".nestor"
+
+
+def get_nestor_cache_dir() -> Path:
+    """return the location of nestor's cache directory
+
+    Looks for a `$NESTOR_CACHE` environment variable.
+    If none exists, returns the default `$HOME/.nestor/`
+    """
+    cache_str = os.environ.get("NESTOR_CACHE", str(DEFAULT_CACHE))
+    return Path(cache_str)
+
+
+def set_nestor_cache_dir(dir: Path, migrate: bool = False) -> None:
+    pass
