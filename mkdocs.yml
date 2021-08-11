@@ -33,6 +33,8 @@ plugins:
       # combined: true
   - with-pdf:
       cover: true
+      render_js: true
+      cover_subtitle: "Toolkit Documentation"
       # exclude_pages:
       #   - 'about/templates/'
   - mermaid2
