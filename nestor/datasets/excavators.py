@@ -41,8 +41,9 @@ def load_excavators(cleaned=False):
     csv_filename = _download_excavators(cleaned=cleaned)
 
     df = (
-        pd.read_csv(datapath, parse_dates="BscStartDate")
-        #     load_excavators()
+        pd.read_csv(
+            csv_filename, parse_dates=["BscStartDate"], sep=",", escapechar="\\"
+        )
         .astype(
             {
                 "Asset": AssetType,
@@ -50,8 +51,8 @@ def load_excavators(cleaned=False):
                 "PMType": PMType,
                 "Cost": float,
             }
-        ).rename_axis("ID")
-        #     .pipe(unnest_tokens)
+        )
+        .rename_axis("ID")
     )
 
     return df

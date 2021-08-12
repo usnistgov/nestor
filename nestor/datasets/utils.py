@@ -1,6 +1,6 @@
 import requests
 from pathlib import Path
-from ..nestor import get_nestor_cache_dir
+from .. import get_nestor_cache_dir
 
 
 def download_datafile(url: str, filename: str, overwrite: bool = False) -> Path:
@@ -19,7 +19,7 @@ def download_datafile(url: str, filename: str, overwrite: bool = False) -> Path:
 
     if (not datapath.is_file()) or overwrite:
         response = requests.get(url)
-        datapath.parent.mkdir(exist_ok=True)
+        datapath.parent.mkdir(exist_ok=True, parents=True)
         datapath.write_bytes(response.content)
 
     return datapath
