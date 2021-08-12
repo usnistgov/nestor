@@ -5,8 +5,10 @@ stages:
   - deploy
 
 before_script:
+  - export PIP_CACHE_DIR="/opt/cache/pip"
   - micromamba install -y -n base -f gldeployenv.yaml
   - micromamba clean --all --yes
+  - poetry config virtualenvs.create false
   - poetry install
 
 tests:
