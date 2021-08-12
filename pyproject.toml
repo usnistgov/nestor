@@ -3,7 +3,7 @@ name = "nist-nestor"
 version = "0.0.0"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
-include = ["./*.md", "nestor/datasets/*.csv", "nestor/settings.yaml"]
+include = ["./*.md", "nestor/settings.yaml"]
 classifiers=[
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
