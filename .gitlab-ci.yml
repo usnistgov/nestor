@@ -13,10 +13,6 @@ tests:
   stage: test
   script:
     - poetry run pytest
-    - mkdocs build --verbose --site-dir test
-  artifacts:
-    paths:
-      - test
 
 pages:
   stage: deploy
