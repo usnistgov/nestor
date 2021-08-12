@@ -1,4 +1,4 @@
-name: base
+name: nestor-dev
 channels:
   - conda-forge
 dependencies:

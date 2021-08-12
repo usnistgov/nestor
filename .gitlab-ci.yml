@@ -1,13 +1,13 @@
-image: mambaorg/micromamba:latest
+image: continuumio/miniconda3
 
 stages:
   - test
   - deploy
 
 before_script:
-  - micromamba install -y -n base -f gldeployenv.yaml
-  - micromamba clean --all --yes
-  - poetry config virtualenvs.create false
+  - conda env update -f gldeployenv.yaml
+  - conda activate nestor-dev
+  # - poetry config virtualenvs.create false
   - poetry install
 
 tests:
