@@ -1,25 +1,22 @@
-image: python:3.7
+image: mambaorg/micromamba:latest
 
 stages:
-  # - lint
   - test
   - deploy
 
 before_script:
-  - conda env update --file gldeployenv.yaml
-  - conda activate nestor-dev
+  - micromamba install -y -n base -f gldeployenv.yaml
+  - micromamba clean --all --yes
   - poetry install
 
-# code-lint:
-#   stage: lint
-#   script:
-#     - poetry run task format
- 
 tests:
   stage: test
   script:
     - poetry run pytest
-
+    - mkdocs build --verbose --site-dir test
+  artifacts:
+    paths:
+      - test
 
 pages:
   stage: deploy
@@ -31,3 +28,4 @@ pages:
   only:
     - dev
     - docs
+    - master

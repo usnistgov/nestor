@@ -33,10 +33,7 @@ pytest = "^6.0.1"
 pytest-check = "^0.3.9"
 black = "^19.10b0"
 taskipy = "^1.2.1"
-# portray = "^1.4.0"
 mkdocs = "^1.1.2"
-# pdocs = "^1.0.2"
-# pdocs = { git = "https://github.com/kylebarron/pdocs.git", branch = "parse-docstring"}
 mkdocs-bibtex = "^0.3.0"
 mkdocs-material = "^5.5.14"
 mkdocs-mermaid2-plugin = "^0.4.2"
@@ -47,7 +44,7 @@ datatest = "^0.11.1"
 
 [tool.taskipy.tasks]
 format = "black nestor/ && black tests/"
-deploy-docs = "mkdocs build --verbose"
+deploy-docs = "ENABLE_PDF_EXPORT=1 mkdocs build --verbose --clean"
 
 [tool.poetry-dynamic-versioning]
 enable = true

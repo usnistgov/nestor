@@ -32,9 +32,13 @@ plugins:
   # - pdf-export:
       # combined: true
   - with-pdf:
-      cover: true
       render_js: true
+      cover: true
       cover_subtitle: "Toolkit Documentation"
+      toc_level: 2
+      ordered_chapter_level: 2
+      enabled_if_env: ENABLE_PDF_EXPORT
+      output_path: 'pdf/nestor-documentation.pdf'
       # exclude_pages:
       #   - 'about/templates/'
   - mermaid2

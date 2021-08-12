@@ -1,9 +1,10 @@
-name: nestor-dev
+name: base
 channels:
-  - defaults
+  - conda-forge
 dependencies:
   - python=3.8
   - git
+  - weasyprint
   - pip
   - pip:
       - poetry
