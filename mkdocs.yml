@@ -32,7 +32,7 @@ plugins:
   # - pdf-export:
       # combined: true
   - with-pdf:
-      render_js: true
+      # render_js: true
       cover: true
       cover_subtitle: "Toolkit Documentation"
       toc_level: 2
