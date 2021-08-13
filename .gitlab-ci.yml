@@ -16,23 +16,26 @@ fonts:
   stage: deps
   script:
     - apt-get update
-    - apt-get install-y fontconfig fonts-roboto
+    - apt-get install -y fontconfig fonts-roboto
   only:
     - dev
     - docs
     - master
 
-tests:
+pytest:
   stage: test
   needs: ["conda_env"]
   script:
-    - poetry run pytest
+    - poetry run pytest --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
 
 pages:
   stage: deploy
   needs: ["conda_env", "fonts"]
   script:
-    - apt-get update && apt-get install -y fontconfig fonts-roboto
     - MKDOCS_SITE_URL = 'https://kea.ipages.nist.gov/nestor-suite/nestor/'
     - MKDOCS_REPO_URL = 'https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/'
     - poetry run task deploy-docs
