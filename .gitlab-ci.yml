@@ -40,7 +40,8 @@ fonts:
   stage: deps
   script:
     - apt-get update
-    - apt-get install -y fontconfig fonts-roboto
+    # - apt-get install -y fontconfig fonts-roboto
+    - apt-get install texlive-fonts-recommended
   only:
     - dev
     - docs
