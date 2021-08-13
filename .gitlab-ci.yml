@@ -1,13 +1,5 @@
 default:
-  image: continuumio/miniconda3
-  cache:
-    paths:
-      - ".cache/conda/envs"
-      - ".cache/conda/pkgs"
-
-  before_script:
-    - source activate nestor-dev
-
+  image: $CI_REGISTRY/kea/templates/docker-conda
 
 stages:
   - deps
@@ -15,37 +7,18 @@ stages:
   - deploy
 
 variables:
-  CONDA_ENVS_PATH: "${CI_PROJECT_DIR}/.cache/conda/envs"
-  CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/.cache/conda/pkgs"
+  POETRY_VIRTUALENVS_PATH: "${CI_PROJECT_DIR}/.cache/venv"
   MKDOCS_SITE_URL: "https://kea.ipages.nist.gov/nestor-suite/nestor/"
   MKDOCS_REPO_URL: "https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/"
-
-conda_env:
-  stage: deps
-  script:
-    - conda env update -f gldeployenv.yaml
-
-  rules:
-    - changes:
-        - "gldeployenv.yaml"
-
 
 poetry_install:
   stage: deps
   script:
     - poetry install
+  cache:
+    paths:
+      - ".cache/venv"
 
-
-fonts:
-  stage: deps
-  script:
-    - apt-get update
-    # - apt-get install -y fontconfig fonts-roboto
-    - apt-get install -y texlive-fonts-recommended
-  only:
-    - dev
-    - docs
-    - master
 
 pytest:
   stage: test
@@ -59,7 +32,7 @@ pytest:
 
 pages:
   stage: deploy
-  needs: ["poetry_install", "fonts"]
+  needs: ["poetry_install"]
   script:
     - poetry run task deploy-docs
   artifacts:
