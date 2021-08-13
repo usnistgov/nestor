@@ -27,7 +27,7 @@ conda_env:
 
   rules:
     - changes:
-        gldeployenv.yaml
+        - "gldeployenv.yaml"
 
 
 poetry_install:
