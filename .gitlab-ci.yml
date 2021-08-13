@@ -6,10 +6,7 @@ stages:
 
 before_script:
   - conda env update -f gldeployenv.yaml
-  - apt install fontconfig fonts-roboto
   - source activate nestor-dev
-  - poetry config --local site_url 'https://kea.ipages.nist.gov/nestor-suite/nestor/'
-  - poetry config --local repo_url 'https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/'
   - poetry install
 
 tests:
@@ -20,6 +17,9 @@ tests:
 pages:
   stage: deploy
   script:
+    - apt-get update && apt-get install-y fontconfig fonts-roboto
+    - MKDOCS_SITE_URL = 'https://kea.ipages.nist.gov/nestor-suite/nestor/'
+    - MKDOCS_REPO_URL = 'https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/'
     - poetry run task deploy-docs
   artifacts:
     paths:

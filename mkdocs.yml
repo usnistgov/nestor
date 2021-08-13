@@ -1,5 +1,6 @@
 site_name: Nestor
-repo_url: "https://github.com/usnistgov/nestor"
+site_url: !ENV MKDOCS_SITE_URL
+repo_url: !ENV MKDOCS_REPO_URL
 site_description: "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 site_author: "Thurston Sexton"
 nav: 
