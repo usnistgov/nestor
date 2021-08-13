@@ -35,6 +35,10 @@ pages:
   stage: deploy
   needs: ["conda_env", "fonts"]
   script:
+<<<<<<< HEAD
+=======
+    - apt-get update && apt-get install -y fontconfig fonts-roboto
+>>>>>>> 7235d5aeb9dbbbd44ba714cbd5ebbbce450994e7
     - MKDOCS_SITE_URL = 'https://kea.ipages.nist.gov/nestor-suite/nestor/'
     - MKDOCS_REPO_URL = 'https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/'
     - poetry run task deploy-docs
