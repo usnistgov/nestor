@@ -1,23 +1,40 @@
 image: continuumio/miniconda3
 
 stages:
+  - deps
   - test
   - deploy
 
-before_script:
-  - conda env update -f gldeployenv.yaml
-  - source activate nestor-dev
-  - poetry install
+variables:
+  DEPLOY_DOCS: "$CI_COMMIT_BRANC"
+
+conda_env:
+  stage: deps
+  script:
+    - conda env update -f gldeployenv.yaml
+    - source activate nestor-dev
+    - poetry install
+
+fonts:
+  stage: deps
+  script:
+    - apt-get update
+    - apt-get install-y fontconfig fonts-roboto
+  only:
+    - dev
+    - docs
+    - master
 
 tests:
   stage: test
+  needs: ["conda_env"]
   script:
     - poetry run pytest
 
 pages:
   stage: deploy
+  needs: ["conda_env", "fonts"]
   script:
-    - apt-get update && apt-get install-y fontconfig fonts-roboto
     - MKDOCS_SITE_URL = 'https://kea.ipages.nist.gov/nestor-suite/nestor/'
     - MKDOCS_REPO_URL = 'https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/'
     - poetry run task deploy-docs
