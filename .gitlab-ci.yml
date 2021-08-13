@@ -8,6 +8,8 @@ before_script:
   - conda env update -f gldeployenv.yaml
   - apt install fontconfig fonts-roboto
   - source activate nestor-dev
+  - poetry config --local site_url 'https://kea.ipages.nist.gov/nestor-suite/nestor/'
+  - poetry config --local repo_url 'https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/'
   - poetry install
 
 tests:
