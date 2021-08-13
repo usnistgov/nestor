@@ -5,12 +5,23 @@ stages:
   - test
   - deploy
 
-conda_env:
+variables:
+  CONDA_ENVS_PATH: "${CI_PROJECT_DIR}/.cache/conda/envs"
+  CONDA_PKGS_DIRS: "${CI_PROJECT_DIR}/.cache/conda/pkgs"
+cache:
+  paths:
+    - ".cache/conda/envs"
+    - ".cache/conda/pkgs"
+
+before_script:
+  - conda env update -f gldeployenv.yaml
+  - source activate nestor-dev
+
+poetry_install:
   stage: deps
   script:
-    - conda env update -f gldeployenv.yaml
-    - source activate nestor-dev
     - poetry install
+
 
 fonts:
   stage: deps
@@ -24,7 +35,7 @@ fonts:
 
 pytest:
   stage: test
-  needs: ["conda_env"]
+  needs: ["poetry_install"]
   script:
     - poetry run pytest --junitxml=report.xml
   artifacts:
@@ -34,7 +45,7 @@ pytest:
 
 pages:
   stage: deploy
-  needs: ["conda_env", "fonts"]
+  needs: ["poetry_install", "fonts"]
   script:
     - MKDOCS_SITE_URL = 'https://kea.ipages.nist.gov/nestor-suite/nestor/'
     - MKDOCS_REPO_URL = 'https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/'
