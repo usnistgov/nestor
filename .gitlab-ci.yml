@@ -1,8 +1,12 @@
 default:
   image: $CI_REGISTRY/kea/templates/docker-conda
+  before_script:
+    - poetry install
+  cache:
+    paths:
+      - ".cache/venv"
 
 stages:
-  - deps
   - test
   - deploy
 
@@ -11,18 +15,9 @@ variables:
   MKDOCS_SITE_URL: "https://kea.ipages.nist.gov/nestor-suite/nestor/"
   MKDOCS_REPO_URL: "https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/"
 
-poetry_install:
-  stage: deps
-  script:
-    - poetry install
-  cache:
-    paths:
-      - ".cache/venv"
-
-
+  
 pytest:
   stage: test
-  needs: ["poetry_install"]
   script:
     - poetry run pytest --junitxml=report.xml
   artifacts:
@@ -32,7 +27,6 @@ pytest:
 
 pages:
   stage: deploy
-  needs: ["poetry_install"]
   script:
     - poetry run task deploy-docs
   artifacts:
