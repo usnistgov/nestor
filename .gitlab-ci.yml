@@ -6,8 +6,8 @@ stages:
 
 before_script:
   - conda env update -f gldeployenv.yaml
+  - apt install fontconfig fonts-roboto
   - source activate nestor-dev
-  # - poetry config virtualenvs.create false
   - poetry install
 
 tests:
