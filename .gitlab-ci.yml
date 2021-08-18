@@ -1,24 +1,29 @@
-image: python:3.7
+default:
+  image: $CI_REGISTRY/kea/templates/docker-conda
+  before_script:
+    - poetry install
+  cache:
+    paths:
+      - ".cache/venv"
 
 stages:
-  # - test
-  # - lint
+  - test
   - deploy
 
-before_script:
-  - conda env update --file gldeployenv.yaml
-  - conda activate nestor-dev
-  - poetry install
+variables:
+  POETRY_VIRTUALENVS_PATH: "${CI_PROJECT_DIR}/.cache/venv"
+  MKDOCS_SITE_URL: "https://kea.ipages.nist.gov/nestor-suite/nestor/"
+  MKDOCS_REPO_URL: "https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/"
 
-# Unit Tests:
-#   stage: test
-#   script:
-#     - poetry run pytest
-
-# Python Code Lint:
-#   stage: lint
-#   script:
-#     - poetry run task format 
+  
+pytest:
+  stage: test
+  script:
+    - poetry run pytest --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
 
 pages:
   stage: deploy
@@ -29,3 +34,5 @@ pages:
       - public
   only:
     - dev
+    - docs
+    - master

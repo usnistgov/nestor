@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "nist-nestor"
-version = "0.4.3"
+version = "0.0.0"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 authors = ["tbsexton <thurston.sexton@nist.gov>"]
-include = ["./*.md", "nestor/datasets/*.csv", "nestor/settings.yaml"]
+include = ["./*.md", "nestor/settings.yaml"]
 classifiers=[
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -25,31 +25,26 @@ scikit-learn = "^0.23.2"
 networkx = "^2.4"
 pyyaml = "^5.3.1"
 tqdm = "^4.48.2"
-tables = "^3.6.1"
 fuzzywuzzy = "^0.18.0"
 pandas = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
-# poetry-dynamic-versioning = "^0.8.3"
 pytest = "^6.0.1"
 pytest-check = "^0.3.9"
 black = "^19.10b0"
 taskipy = "^1.2.1"
-# portray = "^1.4.0"
 mkdocs = "^1.1.2"
-# pdocs = "^1.0.2"
-# pdocs = { git = "https://github.com/kylebarron/pdocs.git", branch = "parse-docstring"}
 mkdocs-bibtex = "^0.3.0"
-mkdocs-pdf-export-plugin = "^0.5.8"
 mkdocs-material = "^5.5.14"
 mkdocs-mermaid2-plugin = "^0.4.2"
-mkdocstrings = "^0.13.4"
-poetry-dynamic-versioning = "^0.10.0"
-datatest = "^0.9.6"
+mkdocstrings = "^0.15.0"
+mkdocs-with-pdf = "^0.9.2"
+poetry-dynamic-versioning = "^0.13.0"
+datatest = "^0.11.1"
 
 [tool.taskipy.tasks]
 format = "black nestor/ && black tests/"
-deploy-docs = "mkdocs build --verbose"
+deploy-docs = "ENABLE_PDF_EXPORT=1 mkdocs build --verbose --clean"
 
 
 [tool.poetry-dynamic-versioning]
@@ -97,5 +92,7 @@ format = "{base}"
 # bibtex = { bib_file = "docs/biblio.bib", cite_style = "pandoc" }
 
 [build-system]
-requires = ["poetry>=0.12", "poetry-dynamic-versioning"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry.core.masonry.api"
+# requires = ["poetry>=0.12", "poetry-dynamic-versioning"]
+# build-backend = "poetry.masonry.api"

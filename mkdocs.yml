@@ -1,5 +1,6 @@
 site_name: Nestor
-repo_url: "https://github.com/usnistgov/nestor"
+site_url: !ENV MKDOCS_SITE_URL
+repo_url: !ENV MKDOCS_REPO_URL
 site_description: "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 site_author: "Thurston Sexton"
 nav: 
@@ -22,8 +23,8 @@ theme:
   favicon: "media/favicon.png"
   logo: "media/icon.png"
   palette:
-    primary: "deep orange"
-    accent : "teal"
+    primary: "blue grey"
+    accent : "orange"
 plugins:
   - search
   - mkdocstrings:
@@ -31,12 +32,26 @@ plugins:
         - nestor
   # - pdf-export:
       # combined: true
+  - with-pdf:
+      # render_js: true
+      cover: true
+      cover_subtitle: "Toolkit Documentation"
+      toc_level: 2
+      ordered_chapter_level: 2
+      enabled_if_env: ENABLE_PDF_EXPORT
+      output_path: 'pdf/nestor-documentation.pdf'
+      # exclude_pages:
+      #   - 'about/templates/'
   - mermaid2
   - bibtex:
       bib_file: "docs/biblio.bib"
       cite_style: "pandoc"
+extra_css:
+  - "https://pages.nist.gov/nist-header-footer/css/nist-combined.css"
 extra_javascript:
   - "https://unpkg.com/mermaid/dist/mermaid.min.js"
+  - "https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"
+  - "https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"
 site_dir: "public"
 markdown_extensions:
   - footnotes
