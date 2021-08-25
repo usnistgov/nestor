@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from math import isnan
 from sklearn.base import TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.utils.validation import NotFittedError, check_is_fitted
@@ -646,11 +647,13 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             # Default NE label is "O"
             ne = "O"
             # Get NE label, use applicable DataFrame (found or found2)
-            if len(found) > 0:
-                ne = found.iloc[0].loc["NE"]
+            if len(found) > 0:  #todo : is this always true bc the row is full of nan?
+                ne = found.iloc[0].fillna("O").loc["NE"]
                 individual_alias = found.iloc[0].loc["alias"]  # fixme: is this needed?
                 if ne in nestorParams.holes:
                     ne = "O"
+                if (ne is not ("O" or "X" or "U")): #or (not isnan(ne))
+                    ne = "B-" + str(ne)  #fixme: also needs to handle I in BIO scheme
             elif len(found2) > 0:
                 # fixme : This section (I think?) is causing nan in NE column
                 ne = found2.iloc[0].loc["NE"]
@@ -676,7 +679,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                         ).fillna(False)
                     ]
                     if len(multi_ne_label) > 0:
-                        ne_long = multi_ne_label.iloc[0].loc["NE"]
+                        ne_long = multi_ne_label.iloc[0].loc["NE"]  #fixme : handle BIO formatting
                         ne = ne_long
                         originals = substr[0].split(" ")
                         text_tag = {"token": originals, "NE": ne, "doc_id": i}
