@@ -5,6 +5,14 @@ import nestor.keyword as kex
 
 # todo: add testing for combined NE labels
 
+"""
+NE tags in testing: 
+    I = item
+    V = verb
+    N = number
+    NI = number-item 
+"""
+
 @pytest.fixture(scope="module")
 def vocab():
     return pd.DataFrame(
@@ -22,9 +30,10 @@ def vocab():
                 "ten dogs",
                 "dogs",
                 "one",
-                "one brown fox"
+                "one brown fox",
+                "twenty one"
             ],
-            "NE": ["I", "I", "I", "V", "I", "I", "X", "U", "N", "N I", "I", "N", "N I"],
+            "NE": ["I", "I", "I", "V", "I", "I", "X", "U", "N", "NI", "I", "N", "NI", "N"],
             "alias": [
                 "fox",
                 "brown_animal",
@@ -38,10 +47,11 @@ def vocab():
                 "ten dogs",
                 "dog",
                 "one",
-                "one brown_animal"
+                "one brown_animal",
+                "twenty_one"
             ],
             "notes": "",
-            "score": [6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 7.0, 8.0, 2.0, 1.5, 1.1],
+            "score": [6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 7.0, 8.0, 2.0, 1.5, 1.1, 1.2],
         }
     ).set_index("tokens")
 
@@ -52,7 +62,8 @@ def raw_text():
         ["the quick brown fox jumped over the lazy dog",
          "the fox jumped over the dog",
          "the dog jumped over ten dogs",
-         "the one brown fox"
+         "the one brown fox",
+         "twenty one animals"
          ]
     )
 
@@ -65,7 +76,8 @@ def test_token_to_alias(raw_text, vocab):
         {"the fast_animal jump over the slow_animal",
          "the fox jump over the dog",
          "the dog jump over ten dogs",
-         "the one brown_animal"
+         "the one brown_animal",
+         "twenty_one animals"
          },
     )
 
@@ -79,14 +91,14 @@ def test_iob_extractor_1g_tokens(raw_text, vocab):
         iob_format.query("doc_id==0")[["token", "NE"]].to_records(index=False),
         [
             ("the", "O"),
-            ("quick", "I"),
-            ("brown", "I"),
-            ("fox", "I"),
-            ("jumped", "V"),
+            ("quick", "B-I"),
+            ("brown", "I-I"),
+            ("fox", "I-I"),
+            ("jumped", "B-V"),
             ("over", "O"),
             ("the", "O"),
-            ("lazy", "I"),
-            ("dog", "I"),
+            ("lazy", "B-I"),
+            ("dog", "I-I"),
         ],
     )
 
@@ -99,11 +111,11 @@ def test_iob_extractor_2g_tokens(raw_text, vocab):
         iob_format.query("doc_id==2")[["token", "NE"]].to_records(index=False),
         [
             ("the", "O"),
-            ("dog", "I"),
-            ("jumped", "V"),
+            ("dog", "B-I"),
+            ("jumped", "B-V"),
             ("over", "O"),
-            ("ten", "N I"),
-            ("dogs", "N I"),
+            ("ten", "B-NI"),
+            ("dogs", "I-NI"),
         ],
     )
 
@@ -116,9 +128,9 @@ def test_iob_extractor_extended_tokens(raw_text, vocab):
         iob_format.query("doc_id==3")[["token", "NE"]].to_records(index=False),
         [
             ("the", "O"),
-            ("one", "N I"),
-            ("brown", "N I"),
-            ("fox", "N I"),
+            ("one", "B-NI"),
+            ("brown", "I-NI"),
+            ("fox", "I-NI"),
         ],
     )
 
