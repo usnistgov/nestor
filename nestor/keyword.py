@@ -585,15 +585,15 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
 
     This function provides IOB-formatted tagged text, which allows for further NLP analysis. In the output,
     each token is listed sequentially, as they appear in the raw text. Inside and Beginning Tokens are labeled with
-    their Named Entity tags; any multi-token entities all receive the same label. Untagged tokens are labeled
-    as "O" (Outside).
+    "I-" or "B-" and their Named Entity tags; any multi-token entities all receive the same label.
+    Untagged tokens are labeled as "O" (Outside).
 
     Example output (in this example, "PI" is "Problem Item":
 
     token | NE | doc_id
     an | O | 0
-    oil | PI | 0
-    leak | PI | 0
+    oil | B-PI | 0
+    leak | I-PI | 0
 
     Args:
        raw_text (pd.Series): contains jargon/slang-filled raw text to be tagged
@@ -653,7 +653,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                 if ne in nestorParams.holes:
                     ne = "O"
                 if (ne is not ("O" or "X" or "U")): #or (not isnan(ne))
-                    ne = "B-" + str(ne)  #fixme: also needs to handle I in BIO scheme
+                    ne = "B-" + str(ne)
             elif len(found2) > 0:
                 # fixme : This section (I think?) is causing nan in NE column
                 ne = found2.iloc[0].loc["NE"]
@@ -662,6 +662,8 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                 tokens = original.split(" ")
                 if ne in nestorParams.holes:
                     ne = "O"
+                if (ne is not ("O" or "X" or "U")): #or (not isnan(ne))
+                    ne = "B-" + str(ne)
 
             # Create dictionary with token info, to be put into DataFrame
             text_tag = {"token": tokens, "NE": ne, "doc_id": i}
@@ -679,8 +681,12 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                         ).fillna(False)
                     ]
                     if len(multi_ne_label) > 0:
-                        ne_long = multi_ne_label.iloc[0].loc["NE"]  #fixme : handle BIO formatting
+                        ne_long = multi_ne_label.iloc[0].loc["NE"]
                         ne = ne_long
+                        if ne in nestorParams.holes:
+                            ne = "O"
+                        if (ne is not ("O" or "X" or "U")):  # or (not isnan(ne))
+                            ne = "B-" + str(ne)
                         originals = substr[0].split(" ")
                         text_tag = {"token": originals, "NE": ne, "doc_id": i}
                         # If upcoming token is already labeled here via a combination label, then skip ahead
@@ -689,6 +695,17 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             index += 1
 
             # Add token(s) to iob DataFrame
+            if type(text_tag['token']) is list:
+                intermediate_df = pd.DataFrame.from_dict(text_tag)  #todo: refactor this
+                for j, row in intermediate_df.iterrows():
+                    # Change "B" to "I" for inner tokens
+                    if j > 0:
+                        s = list(row["NE"])
+                        s[0] = "I"
+                        s = "".join(s)
+                        intermediate_df.at[j,'NE'] = s
+                text_tag = intermediate_df
+
             iob = iob.append(text_tag, ignore_index=True)
             # print(text_tag)
             iob[["NE"]] = iob[["NE"]].fillna(

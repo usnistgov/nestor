@@ -80,6 +80,9 @@ def test_token_to_alias(raw_text, vocab):
 
 # TODO add parametric test for plaintext/list-of-tup option
 def test_iob_extractor_1g_tokens(raw_text, vocab):
+    """
+    Test for single-label NE tags (I, V, or N)
+    """
     iob_format = kex.iob_extractor(raw_text, vocab)
     print(iob_format)
     dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
@@ -101,7 +104,6 @@ def test_iob_extractor_1g_tokens(raw_text, vocab):
 
 def test_iob_extractor_2g_tokens(raw_text, vocab):
     iob_format = kex.iob_extractor(raw_text, vocab)
-    # print(iob_format)
     dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
     dt.validate(
         iob_format.query("doc_id==2")[["token", "NE"]].to_records(index=False),
