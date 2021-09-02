@@ -37,10 +37,10 @@ df_ngrams = pd.read_csv(
     index_col=0
 )
 
-nlp_select = kex.NLPSelect(columns = ['Long Text'])
-raw_text = nlp_select.transform(df.head(10))   #fixme (using abridged dataset here for efficiency)
+nlp_select = kex.NLPSelect(columns = ['Description.1', 'Long Text'])
+raw_text = nlp_select.transform(df.head(30))   #fixme (using abridged dataset here for efficiency)
 
-iob = kex.iob_extractor(raw_text, df_1grams) #, vocab_df_ngrams=df_ngrams  #fixme (handle multi tokens)
+iob = kex.iob_extractor(raw_text, df_1grams, vocab_df_ngrams=df_ngrams) #, vocab_df_ngrams=df_ngrams  #fixme (handle multi tokens)
 
 # iob.to_csv('out.csv')
 # iob = pd.read_csv(
@@ -81,7 +81,7 @@ def convert_iob_to_spacy_file(ner_file_path: str):
 
     """
     # todo: make this command customizable, handle tokens better (actually need to group by MWO)
-    os.system("python -m spacy convert -c ner -s -n 10 -b en_core_web_sm iob_test_function.iob .")
+    os.system("python -m spacy convert -c ner -s -n 10 -b en_core_web_sm iob_data.iob .")
 
 
 # pathname/document title should match what is in `congif.cfg file`

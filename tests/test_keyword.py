@@ -31,8 +31,9 @@ def vocab():
                 "dogs",
                 "one",
                 "one brown fox",
+                "test nothing"
             ],
-            "NE": ["I", "I", "I", "V", "I", "I", "X", "U", "N", "NI", "I", "N", "NI"],
+            "NE": ["I", "I", "I", "V", "I", "I", "X", "U", "N", "NI", "I", "N", "NI", "X"],
             "alias": [
                 "fox",
                 "brown_animal",
@@ -47,9 +48,10 @@ def vocab():
                 "dog",
                 "one",
                 "one brown_animal",
+                "test nothing"
             ],
             "notes": "",
-            "score": [6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 7.0, 8.0, 2.0, 1.5, 1.1],
+            "score": [6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0, 0.0, 7.0, 8.0, 2.0, 1.5, 1.1, 1.2],
         }
     ).set_index("tokens")
 
@@ -61,6 +63,7 @@ def raw_text():
          "the fox jumped over the dog",
          "the dog jumped over ten dogs",
          "the one brown fox",
+         "this test nothing fox"
          ]
     )
 
@@ -74,6 +77,7 @@ def test_token_to_alias(raw_text, vocab):
          "the fox jump over the dog",
          "the dog jump over ten dogs",
          "the one brown_animal",
+         "this test nothing fox"
          },
     )
 
@@ -131,3 +135,19 @@ def test_iob_extractor_extended_tokens(raw_text, vocab):
             ("fox", "I-NI"),
         ],
     )
+
+
+def test_iob_extractor_multi_token_X_tag(raw_text, vocab):
+    iob_format = kex.iob_extractor(raw_text, vocab)
+    # print(iob_format)
+    dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
+    dt.validate(
+        iob_format.query("doc_id==4")[["token", "NE"]].to_records(index=False),
+        [
+            ("this", "O"),
+            ("test", "O"),
+            ("nothing", "O"),
+            ("fox", "B-I"),
+        ],
+    )
+

@@ -581,6 +581,7 @@ def tag_extractor(
 
 
 def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
+    # FIXME: tag format error for mulitoken X: "beginning work" = X. "beginning" gets assigned "I"
     """Use Nestor named entity tags to create IOB format output for NER tasks
 
     This function provides IOB-formatted tagged text, which allows for further NLP analysis. In the output,
@@ -668,7 +669,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             # Create dictionary with token info, to be put into DataFrame
             text_tag = {"token": tokens, "NE": ne, "doc_id": i}
 
-            if len(found_multi_word) > 0:
+            if len(found_multi_word) > 0: # fixme: handle multi-token X or U tags
                 thes_dict = found_multi_word[
                     found_multi_word.alias.replace("", np.nan).notna()
                 ].alias.to_dict()
@@ -695,7 +696,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             index += 1
 
             # Add token(s) to iob DataFrame
-            if type(text_tag['token']) is list:
+            if type(text_tag['token']) is list and (text_tag['NE'] is not 'O'):
                 intermediate_df = pd.DataFrame.from_dict(text_tag)  #todo: refactor this
                 for j, row in intermediate_df.iterrows():
                     # Change "B" to "I" for inner tokens
