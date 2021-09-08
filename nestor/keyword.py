@@ -629,7 +629,6 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
 
     for i in list(raw_text.index):
         # Get each MWO as list of tokens
-        print(raw_text.iat[i] + "\t")
         mwo = raw_text.iat[i].replace("\\", " ")
         mwo = mwo.split()
 
