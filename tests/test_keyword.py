@@ -3,7 +3,6 @@ import datatest as dt
 import pandas as pd
 import nestor.keyword as kex
 
-# todo: add testing for combined NE labels
 
 """
 NE tags in testing: 
@@ -88,7 +87,6 @@ def test_iob_extractor_1g_tokens(raw_text, vocab):
     Test for single-label NE tags (I, V, or N)
     """
     iob_format = kex.iob_extractor(raw_text, vocab)
-    print(iob_format)
     dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
     dt.validate(
         iob_format.query("doc_id==0")[["token", "NE"]].to_records(index=False),
@@ -107,6 +105,9 @@ def test_iob_extractor_1g_tokens(raw_text, vocab):
 
 
 def test_iob_extractor_2g_tokens(raw_text, vocab):
+    """
+        Test includes multi-label NE tags ("ten dogs" = NI)
+    """
     iob_format = kex.iob_extractor(raw_text, vocab)
     dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
     dt.validate(
@@ -123,8 +124,10 @@ def test_iob_extractor_2g_tokens(raw_text, vocab):
 
 
 def test_iob_extractor_extended_tokens(raw_text, vocab):
+    """
+        Test includes multi-label NE tags ("one brown fox" = NI)
+    """
     iob_format = kex.iob_extractor(raw_text, vocab)
-    # print(iob_format)
     dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
     dt.validate(
         iob_format.query("doc_id==3")[["token", "NE"]].to_records(index=False),
@@ -138,8 +141,10 @@ def test_iob_extractor_extended_tokens(raw_text, vocab):
 
 
 def test_iob_extractor_multi_token_X_tag(raw_text, vocab):
+    """
+        Test includes multi-token "outside" tags (eg. "this test nothing" grouped in Nestor and then assigned "X")
+    """
     iob_format = kex.iob_extractor(raw_text, vocab)
-    # print(iob_format)
     dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
     dt.validate(
         iob_format.query("doc_id==4")[["token", "NE"]].to_records(index=False),
