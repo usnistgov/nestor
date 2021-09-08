@@ -627,8 +627,9 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         # Get aliased text
         raw_text = token_to_alias(raw_text, vocab_df_1grams)
 
-    for i in raw_text.index:
+    for i in list(raw_text.index):
         # Get each MWO as list of tokens
+        print(raw_text.iat[i] + "\t")
         mwo = raw_text.iat[i].replace("\\", " ")
         mwo = mwo.split()
 

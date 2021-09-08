@@ -15,38 +15,9 @@
 
 import os
 import pandas as pd
-from nestor import datasets as ds
 from nestor import keyword as kex
-import nltk
+from sklearn.model_selection import train_test_split
 
-import spacy
-import en_core_web_sm
-
-# Get dataset and Nestor vocab files  #todo : update import statements to use DVC
-df = pd.read_csv(
-    "/Users/amc8/nestor/SMALL_data_combined_and_tagged.csv"
-)
-
-df_1grams = pd.read_csv(
-    "/Users/amc8/nestor/vocab1g.csv",
-    index_col=0
-)
-
-df_ngrams = pd.read_csv(
-    "/Users/amc8/nestor/vocabNg.csv",
-    index_col=0
-)
-
-nlp_select = kex.NLPSelect(columns = ['Description.1', 'Long Text'])
-raw_text = nlp_select.transform(df.head(30))   #fixme (using abridged dataset here for efficiency)
-
-iob = kex.iob_extractor(raw_text, df_1grams, vocab_df_ngrams=df_ngrams) #, vocab_df_ngrams=df_ngrams  #fixme (handle multi tokens)
-
-# iob.to_csv('out.csv')
-# iob = pd.read_csv(
-#     "/Users/amc8/nestor/out.csv",
-#     index_col=0
-# )
 
 def create_iob_format_data(df_iob: pd.DataFrame, ner_file_path: str):
     """
@@ -65,7 +36,7 @@ def create_iob_format_data(df_iob: pd.DataFrame, ner_file_path: str):
     """
     # to do: make sure that
     # Convert IOB DataFrame to token-per-line tsv file
-    iob[["token", "NE"]].to_csv(ner_file_path, sep="\t", index=False, header=False)
+    df_iob[["token", "NE"]].to_csv(ner_file_path, sep="\t", index=False, header=False)
 
 
 def convert_iob_to_spacy_file(ner_file_path: str):
@@ -81,18 +52,38 @@ def convert_iob_to_spacy_file(ner_file_path: str):
 
     """
     # todo: make this command customizable, handle tokens better (actually need to group by MWO)
-    os.system("python -m spacy convert -c ner -s -n 10 -b en_core_web_sm iob_data.iob .")
+    os.system("python -m spacy convert -c ner -s -n 10 -b en_core_web_sm " + ner_file_path + " .")
 
+
+# Get dataset and Nestor vocab files  #todo : update import statements to use DVC
+df = pd.read_csv(
+    "/Users/amc8/nestor/SMALL_data_combined_and_tagged.csv"
+)
+
+df_1grams = pd.read_csv(
+    "/Users/amc8/nestor/vocab1g.csv",
+    index_col=0
+)
+
+df_ngrams = pd.read_csv(
+    "/Users/amc8/nestor/vocabNg.csv",
+    index_col=0
+)
+
+nlp_select = kex.NLPSelect(columns = ['Description.1', 'Long Text'])
+raw_text = nlp_select.transform(df.head(30))   #fixme (using abridged dataset here for efficiency)
+train, test = train_test_split(raw_text, test_size=0.2, random_state=1, shuffle=False)
+test = test.reset_index(drop=True)
+
+iob_train = kex.iob_extractor(train, df_1grams, vocab_df_ngrams=df_ngrams)
+iob_test = kex.iob_extractor(test, df_1grams, vocab_df_ngrams=df_ngrams)
 
 # pathname/document title should match what is in `congif.cfg file`
-create_iob_format_data(iob, "iob_data.iob")
+create_iob_format_data(iob_train, "iob_data.iob")
 convert_iob_to_spacy_file("iob_data.iob")
+create_iob_format_data(iob_test, "iob_valid.iob")
+convert_iob_to_spacy_file("iob_valid.iob")
 
 
 # Run data through basic spacy training for proof of concept.
-"""
-THIS REQUIRES .spacy FILE NAMES TO MATCH THE FILE NAMES LISTED IN [paths] IN spacy_config.cfg
-FOR NOW, I MANUALLY COPIED `iob_data.spacy` TO CREATE `iob_valid.spacy'.
-STILL NEED TO SPLIT INTO ACTUAL TRAINING/VALIDATION DATA, SO MODEL RESULTS ARE GARBAGE, BUT IT RUNS ;)
-"""
 os.system("python -m spacy train spacy_config.cfg --output ./output")
