@@ -648,12 +648,12 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             # Default NE label is "O"
             ne = "O"
             # Get NE label, use applicable DataFrame (found or found2)
-            if len(found) > 0:  #todo : is this always true bc the row is full of nan?
+            if len(found) > 0:  # todo : is this always true bc the row is full of nan?
                 ne = found.iloc[0].fillna("O").loc["NE"]
                 individual_alias = found.iloc[0].loc["alias"]  # fixme: is this needed?
                 if ne in nestorParams.holes:
                     ne = "O"
-                if (ne is not ("O" or "X" or "U")): #or (not isnan(ne))
+                if ne is not ("O" or "X" or "U"):  # or (not isnan(ne))
                     ne = "B-" + str(ne)
             elif len(found2) > 0:
                 # fixme : This section (I think?) is causing nan in NE column
@@ -663,13 +663,13 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                 tokens = original.split(" ")
                 if ne in nestorParams.holes:
                     ne = "O"
-                if (ne is not ("O" or "X" or "U")): #or (not isnan(ne))
+                if ne is not ("O" or "X" or "U"):  # or (not isnan(ne))
                     ne = "B-" + str(ne)
 
             # Create dictionary with token info, to be put into DataFrame
             text_tag = {"token": tokens, "NE": ne, "doc_id": i}
 
-            if len(found_multi_word) > 0: # fixme: handle multi-token X or U tags
+            if len(found_multi_word) > 0:  # fixme: handle multi-token X or U tags
                 thes_dict = found_multi_word[
                     found_multi_word.alias.replace("", np.nan).notna()
                 ].alias.to_dict()
@@ -686,7 +686,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
                         ne = ne_long
                         if ne in nestorParams.holes:
                             ne = "O"
-                        if (ne is not ("O" or "X" or "U")):  # or (not isnan(ne))
+                        if ne is not ("O" or "X" or "U"):  # or (not isnan(ne))
                             ne = "B-" + str(ne)
                         originals = substr[0].split(" ")
                         text_tag = {"token": originals, "NE": ne, "doc_id": i}
@@ -696,15 +696,17 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             index += 1
 
             # Add token(s) to iob DataFrame
-            if type(text_tag['token']) is list and (text_tag['NE'] is not 'O'):
-                intermediate_df = pd.DataFrame.from_dict(text_tag)  #todo: refactor this
+            if isinstance(text_tag["token"], list) and (text_tag["NE"] != "O"):
+                intermediate_df = pd.DataFrame.from_dict(
+                    text_tag
+                )  # todo: refactor this
                 for j, row in intermediate_df.iterrows():
                     # Change "B" to "I" for inner tokens
                     if j > 0:
                         s = list(row["NE"])
                         s[0] = "I"
                         s = "".join(s)
-                        intermediate_df.at[j,'NE'] = s
+                        intermediate_df.at[j, "NE"] = s
                 text_tag = intermediate_df
 
             iob = iob.append(text_tag, ignore_index=True)
