@@ -3,6 +3,7 @@ __author__ = "Thurston Sexton"
 import re
 import string
 from pathlib import Path
+from _pytest.compat import REGEX_TYPE
 
 import numpy as np
 import pandas as pd
@@ -179,6 +180,7 @@ class TokenExtractor(TransformerMixin):
         sublinear_tf=True,
         smooth_idf=False,
         max_features=5000,
+        token_pattern=nestorParams.token_pattern,
         **tfidf_kwargs,
     ):
         """Initialize the extractor
@@ -231,6 +233,7 @@ class TokenExtractor(TransformerMixin):
                 "sublinear_tf": sublinear_tf,
                 "smooth_idf": smooth_idf,
                 "max_features": max_features,
+                "token_pattern": token_pattern,
             }
         )
 
@@ -580,6 +583,37 @@ def tag_extractor(
     return tag_df
 
 
+def regex_match_vocab(vocab_iter) -> re.Pattern:
+    """regex-based multi-replace
+
+    Fast way to get all matches for a list of vocabulary (e.g. to replace them with preferred labels).
+
+    NOTE: This will avoid nested matches by sorting the vocabulary by length! This means ambiguous substring
+    matches will default to the longest match, only.
+
+    > e.g. with vocabulary `['these','there', 'the']` and text `'there-in'`
+    > the match will defer to `there` rather than `the`.
+    Args:
+      vocab_iter (Iterable[str]): container of strings. If a dict is pass, will operate on keys.
+
+    Returns:
+      re.Pattern: a compiled regex pattern for finding all vocabulary.
+    """
+    sort = sorted(vocab_iter, key=len, reverse=True)
+    if sort:  # valid vocab -> match them in order of len
+        rx = re.compile(r"\b(" + "|".join(map(re.escape, sort)) + r")\b")
+    else:
+        rx = re.compile(r"(?!x)x")  # match nothing, ever
+    return rx
+
+
+def regex_thesaurus_normalizer(thesaurus: dict, text: pd.Series) -> pd.Series:
+    """Quick way to replace text substrings in a Series with a dictionary of replacements (thesaurus)"""
+    rx = regex_match_vocab(thesaurus)
+    clean_text = text.str.replace(rx, lambda match: thesaurus[match.group(0)])
+    return clean_text
+
+
 def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
     # FIXME: tag format error for mulitoken X: "beginning work" = X. "beginning" gets assigned "I"
     """Use Nestor named entity tags to create IOB format output for NER tasks
@@ -620,13 +654,73 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         # Concatenate 1gram and ngram dataframes
         vocab_df = pd.concat([vocab_df_1grams, vocab_df_ngrams])
         # Get aliased text using ngrams
-        raw_text = token_to_alias(raw_text, vocab_df_ngrams)
+        # raw_text = token_to_alias(raw_text, vocab_df_ngrams)
     else:
         # Only use 1gram vocabulary provided
         vocab_df = vocab_df_1grams
         # Get aliased text
-        raw_text = token_to_alias(raw_text, vocab_df_1grams)
+        # raw_text = token_to_alias(raw_text, vocab_df_1grams)
 
+    # user_verified_mask = vocab_df.alias.replace(
+    #     "", np.nan
+    # ).notna()  # TODO: no, actually we want all... for 'holes' -> 'O'
+    #
+    vocab_thesaurus = vocab_df.alias.to_dict()
+    NE_thesaurus = vocab_df.NE.fillna("NA").to_dict()
+
+    # TODO: first explode the vocab/NE regex, then tokenize to explode IOB
+
+    rx_vocab = regex_match_vocab(vocab_thesaurus)
+    # rx_NE = regex_match_vocab(NE_thesaurus)
+    #
+    def beginning_token(df: pd.DataFrame) -> pd.DataFrame:
+        """after tokens are split and iob column exists"""
+        print(df.columns)
+        b_locs = df.groupby("token_id", as_index=False).nth(0).index
+        df["iob"].iloc[b_locs] = "B"
+        return df
+
+    def outside_token(df: pd.DataFrame) -> pd.DataFrame:
+        """after tokens are split and iob,NE columns exist"""
+        print(df.columns)
+        is_out = df["NE"].isin(nestorParams.holes)
+        return df.assign(iob=df["iob"].mask(is_out, "O"))
+
+    tidy_tokens = (  # unpivot the text into one-known-token-per-row
+        raw_text.rename("text")
+        .rename_axis("doc_id")
+        .str.lower()
+        .str.findall(rx_vocab)
+        .explode()  # longer series, one-row-per-token
+        .reset_index()  # it's a dataframe now, with doc_id column
+        .assign(  # map tokens to NE, _fast tho_
+            NE=lambda df: regex_thesaurus_normalizer(NE_thesaurus, df.text)
+        )  # now split on spaces and underscores (nestor's compound tokens)
+        .assign(token=lambda df: df.text.str.split(r"[_\s]"))
+        #  # could have also split more generally using the current global token pattern
+        # .assign(onegrams = lambda df: df.text.str.findall(nestorParams.token_patt))
+        .rename_axis("token_id")  # keep track of which nestor token was used
+        .explode("token")
+        .reset_index()
+        .assign(iob="I")
+        .pipe(beginning_token)
+        .pipe(outside_token)
+    )
+    iob = (
+        tidy_tokens[["token", "NE", "doc_id"]]
+        .assign(
+            NE=tidy_tokens["NE"].mask(tidy_tokens["iob"] == "O", np.nan)
+        )  # remove unused NE's
+        .assign(
+            NE=lambda df: tidy_tokens["iob"]
+            .str.cat(df["NE"], sep="-", na_rep="")
+            .str.strip("-")
+        )  # concat iob-NE
+    )
+    return iob
+
+
+"""
     for i in list(raw_text.index):
         # Get each MWO as list of tokens
         mwo = raw_text.iat[i].replace("\\", " ")
@@ -719,6 +813,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
     iob = iob.explode("token")
 
     return iob
+"""
 
 
 def token_to_alias(raw_text, vocab):
@@ -740,13 +835,7 @@ def token_to_alias(raw_text, vocab):
     
     """
     thes_dict = vocab[vocab.alias.replace("", np.nan).notna()].alias.to_dict()
-    substr = sorted(thes_dict, key=len, reverse=True)
-    if substr:
-        rx = re.compile(r"\b(" + "|".join(map(re.escape, substr)) + r")\b")
-        clean_text = raw_text.str.replace(rx, lambda match: thes_dict[match.group(0)])
-    else:
-        clean_text = raw_text
-    return clean_text
+    return regex_thesaurus_normalizer(thes_dict, raw_text)
 
 
 def ngram_automatch(voc1, voc2):
@@ -784,10 +873,7 @@ def ngram_automatch(voc1, voc2):
 
     _ = NE_dict.pop("", None)
 
-    # regex-based multi-replace
-    NE_sub = sorted(NE_dict, key=len, reverse=True)
-    NErx = re.compile(r"\b(" + "|".join(map(re.escape, NE_sub)) + r")\b")
-    NE_text = voc2.index.str.replace(NErx, lambda match: NE_dict[match.group(0)])
+    NE_text = regex_thesaurus_normalizer(NE_dict, voc2.index)
 
     # now we have NE-soup/DNA of the original text.
     mask = voc2.alias.replace(

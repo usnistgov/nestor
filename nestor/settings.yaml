@@ -1,3 +1,4 @@
+token_pattern: '(?u)\b\w\w+\b' # default for sklearn-compatibility
 entities:
   types:
     'atomic': # atomic types
