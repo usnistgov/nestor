@@ -62,7 +62,8 @@ def raw_text():
          "the fox jumped over the dog",
          "the dog jumped over ten dogs",
          "the one brown fox",
-         "this test nothing fox"
+         "this test nothing fox",
+         "the black dog jumped over ten cats"
          ]
     )
 
@@ -76,7 +77,8 @@ def test_token_to_alias(raw_text, vocab):
          "the fox jump over the dog",
          "the dog jump over ten dogs",
          "the one brown_animal",
-         "this test nothing fox"
+         "this test nothing fox",
+         "the black dog jump over ten cats"
          },
     )
 
@@ -153,6 +155,26 @@ def test_iob_extractor_multi_token_X_tag(raw_text, vocab):
             ("test", "O"),
             ("nothing", "O"),
             ("fox", "B-I"),
+        ],
+    )
+
+
+def test_iob_extractor_unknown_tokens(raw_text, vocab):
+    """
+        Test includes tokens not found in vocab lists ("ten dogs" = NI)
+    """
+    iob_format = kex.iob_extractor(raw_text, vocab)
+    dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
+    dt.validate(
+        iob_format.query("doc_id==5")[["token", "NE"]].to_records(index=False),
+        [
+            ("the", "O"),
+            ("black", "O"),
+            ("dog", "B-I"),
+            ("jumped", "B-V"),
+            ("over", "O"),
+            ("ten", "B-N"),
+            ("cats", "O"),
         ],
     )
 
