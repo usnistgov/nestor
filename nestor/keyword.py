@@ -721,7 +721,6 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
             .str.strip("-")
         )  # concat iob-NE
     )
-    print(tidy_tokens.NE)
     return iob
 
 

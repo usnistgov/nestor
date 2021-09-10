@@ -6,11 +6,11 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.11.3
 #   kernelspec:
-#     display_name: Python [conda env:bio_output]
+#     display_name: Python [conda env:nestor-docs]
 #     language: python
-#     name: conda-env-bio_output-py
+#     name: conda-env-nestor-docs-py
 # ---
 
 # %% [markdown]
@@ -29,24 +29,19 @@ import nestor.datasets as nd
 # %%
 # Get raw MWOs
 df = (nd.load_excavators(cleaned=False)  # already formats dates
-      .rename(columns={'BscStartDate': 'StartDate'})
+#       .rename(columns={'BscStartDate': 'StartDate'})
       )
 
 # Change date column to DateTime objects
 df.head(5)
 
 # %%
-# Get tagged MWOs
-tags = pd.read_csv(Path.home()/'Documents'/'datasets'/'READABLE_TAGS.csv')
-tags.head(5)
+vocab=nd.load_vocab('excavators')
+vocab.dropna(subset=['alias'])
 
 # %%
-# Get vocab file (unigrams)
-vocab_1 = kex.generate_vocabulary_df(
-      kex.TokenExtractor(),  # doesn't need to be fitted, since vocab exists
-      filename=Path.home()/'Documents'/'datasets'/'1g_original.csv'
-)
-vocab_1.head(5)
+iob = kex.iob_extractor(df.OriginalShorttext, vocab)
+iob
 
 # %%
 # Get vocab file (bigrams)
