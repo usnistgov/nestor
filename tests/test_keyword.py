@@ -95,6 +95,7 @@ def raw_text():
             "the dog jumped over ten dogs",
             "the one brown fox",
             "this test nothing fox",
+            "the black dog jumped over ten cats",
         ]
     )
 
@@ -110,6 +111,7 @@ def test_token_to_alias(raw_text, vocab):
             "the dog jump over ten dogs",
             "the one brown_animal",
             "this test nothing fox",
+            "the black dog jump over ten cats",
         },
     )
 
@@ -175,4 +177,22 @@ class TestIOB:
         dt.validate(
             iob_format.query("doc_id==4")[["token", "NE"]].to_records(index=False),
             [("this", "O"), ("test", "O"), ("nothing", "O"), ("fox", "B-I"),],
+        )
+
+    def test_iob_extractor_unknown_tokens(self, iob_format):
+        """
+            Test includes tokens not found in vocab lists ("ten dogs" = NI)
+        """
+        dt.validate(iob_format.columns, {"token", "NE", "doc_id"})
+        dt.validate(
+            iob_format.query("doc_id==5")[["token", "NE"]].to_records(index=False),
+            [
+                ("the", "O"),
+                ("black", "O"),
+                ("dog", "B-I"),
+                ("jumped", "B-V"),
+                ("over", "O"),
+                ("ten", "B-N"),
+                ("cats", "O"),
+            ],
         )
