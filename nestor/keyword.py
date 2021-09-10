@@ -3,11 +3,9 @@ __author__ = "Thurston Sexton"
 import re
 import string
 from pathlib import Path
-from _pytest.compat import REGEX_TYPE
 
 import numpy as np
 import pandas as pd
-from math import isnan
 from sklearn.base import TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.utils.validation import NotFittedError, check_is_fitted
@@ -670,8 +668,8 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         vocab_df = vocab_df_1grams.copy()
         # Get aliased text
         # raw_text = token_to_alias(raw_text, vocab_df_1grams)
-
-    vocab_thesaurus = vocab_df.alias.to_dict()
+        #
+    vocab_thesaurus = vocab_df.alias.dropna().to_dict()
     NE_thesaurus = vocab_df.NE.fillna("U").to_dict()
 
     rx_vocab = regex_match_vocab(vocab_thesaurus, tokenize=True)
