@@ -6,11 +6,11 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.11.3
 #   kernelspec:
-#     display_name: nestor
+#     display_name: Python [conda env:nestor-dev]
 #     language: python
-#     name: nist-nestor-tUZR9SdD-py3.8
+#     name: conda-env-nestor-dev-py
 # ---
 
 import os
