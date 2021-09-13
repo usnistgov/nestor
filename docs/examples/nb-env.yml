@@ -5,3 +5,5 @@ dependencies:
   - ipykernel
   - lifelines
   - spacy
+  - sklearn-crfsuite
+  - spacy-model-en_core_web_sm
