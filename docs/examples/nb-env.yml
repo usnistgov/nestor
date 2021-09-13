@@ -5,3 +5,4 @@ dependencies:
   - ipykernel
   - lifelines
   - spacy
+  - seaborn
