@@ -6,11 +6,11 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.3
+#       jupytext_version: 1.11.2
 #   kernelspec:
-#     display_name: nist-nestor-tUZR9SdD-py3.8
+#     display_name: Python [conda env:nestor-docs]
 #     language: python
-#     name: nist-nestor-tuzr9sdd-py3.8
+#     name: conda-env-nestor-docs-py
 # ---
 
 # # NER Example: Using IOB output SpaCy
@@ -18,6 +18,7 @@
 import os
 import pandas as pd
 from nestor import keyword as kex
+import nestor.datasets as dat
 from sklearn.model_selection import train_test_split
 
 
@@ -98,8 +99,8 @@ test = test.reset_index(drop=True)
 
 # Pass text data and vocab files from Nestor through `iob_extractor`
 
-iob_train = kex.iob_extractor(train, df_1grams, vocab_df_ngrams=df_ngrams)
-iob_test = kex.iob_extractor(test, df_1grams, vocab_df_ngrams=df_ngrams)
+iob_train = kex.iob_extractor(train, df_vocab)
+iob_test = kex.iob_extractor(test, df_vocab)
 
 # Create `.iob` files (these are essentially tsv files with proper IOB tag format). Convert `.iob` files to `.spacy` binary files
 
@@ -116,3 +117,5 @@ convert_iob_to_spacy_file("iob_valid.iob")
 
 # Run data through basic spacy training for proof of concept.
 os.system("python -m spacy train spacy_config.cfg --output ./output")
+
+
