@@ -1,0 +1,7 @@
+name: nestor-docs
+channels:
+  - conda-forge
+dependencies:
+  - ipykernel
+  - lifelines
+  - spacy
