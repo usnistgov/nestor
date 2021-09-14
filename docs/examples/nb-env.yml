@@ -5,9 +5,6 @@ dependencies:
   - ipykernel
   - lifelines
   - spacy
-<<<<<<< HEAD
   - sklearn-crfsuite
   - spacy-model-en_core_web_sm
-=======
   - seaborn
->>>>>>> tagextractor

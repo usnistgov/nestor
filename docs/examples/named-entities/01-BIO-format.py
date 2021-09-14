@@ -37,5 +37,5 @@ vocab=nd.load_vocab('excavators')#.dropna(subset=['alias'])
 vocab
 
 # %%
-# %timeit iob = kex.iob_extractor(df.OriginalShorttext, vocab)
+iob = kex.iob_extractor(df.OriginalShorttext, vocab)
 iob

@@ -15,9 +15,9 @@
 # ---
 
 # %% [markdown]
-# # Survival Analysis
+# # Case Study: Excavator Survival Analysis
 #
-# Mining Excavator dataset case study
+# Mining Excavator dataset case study, as originally presented in Sexton et al. [@sexton2018benchmarking].
 
 # %% hide_input=false
 from pathlib import Path
@@ -50,7 +50,16 @@ vocab
 
 # %% [markdown]
 # ## Knowledge Extraction
-# ### Import vocabulary from tagging tool
+#
+#
+# We already have vocabulary and data, so let's merge them to structure our data to a more useful format. 
+#
+# ### scikit-learn's `Pipeline`
+#
+# Convenient way to use [`TagExtractor`](nestor.keyword.TagExtractor) to output a more usable format. Let's use the multi-index `binary` format for now. Other options include:
+# - list-of-tokens `multilabel`
+# - NER-trainer `iob`.  
+#
 
 # %%
 # merge and cleanse NLP-containing columns of the data
@@ -58,15 +67,21 @@ from sklearn.pipeline import Pipeline
 
 pipe = Pipeline([
     ('clean_combine', kex.NLPSelect(columns=["OriginalShorttext"])),
-    ('tag', kex.TagExtractor(thesaurus=vocab, ngram_range=(1,2))),
+    ('tag', kex.TagExtractor(
+        thesaurus=vocab, # load up pre-trained vocab file from [@sexton2018benchmarking]
+        group_untagged=True,  # merge untagged tokens into a misc. `_untagged` label
+        filter_types=None,  # keep all tag types
+        ngram_range=(1,2),  # this vocab file includes compound tags, so make sure we find them
+        verbose=True,  # report how much coverage our vocab file got on proposed tags (tokens)
+        output_type='binary', # could use `multilabel` or `iob` as well
+    )),
 ])
 tags = pipe.fit_transform(df)
 
-
-# nlp_select = kex.NLPSelect(columns = ['OriginalShorttext'])
-# raw_text = nlp_select.transform(df)
-# plt.spy(tag_df)
 tags.sum().sort_values(ascending=False)
+
+# %% [markdown]
+# We can also access the trained steps in the pipeline to make use of convenience functions. 
 
 # %%
 tagger = pipe.named_steps['tag']
@@ -77,6 +92,8 @@ tag_df = tags.loc[:, ['I', 'P', 'S', 'U', 'X', 'NA']]
 
 # %% [markdown] slideshow={"slide_type": "subslide"}
 # ### Quality of Extracted Keywords
+#
+# It's 
 
 # %% hide_input=false
 nbins = int(np.percentile(tag_df.sum(axis=1), 90))
@@ -108,8 +125,56 @@ plt.xlabel('precision (PPV)')
 
 
 # %% [markdown]
+# ### An Aside: Effectiveness of Tagging
+#
+# What have we actually gained using the `TagExtractor`? 
+#
+# The `vocab` file functions as a thesaurus, that has a default `alias` representing multiple disparate tokens. This means our resulting matrix dimensionality can be significantly reduced _using this domain knowledge_, which can improve model predictability, performance, applicability, etc.
+#
+
+# %%
+# original token string frequencies
+cts = np.where(tagger.tfidf.todense()>0., 1, 0).sum(axis=0)
+sns.histplot(
+    cts, log_scale=True,
+    stat='probability',discrete=True,
+    label='Raw Tokens',
+    color='grey'
+)
+# tag frequencies
+sns.histplot(
+    tag_df[['I', 'P', 'S']].sum(), log_scale=True,
+    stat='probability', discrete=True,
+    label='Tagged Aliases', 
+    hatch='///', 
+    color='dodgerblue',alpha=0.3,
+)
+plt.legend()
+plt.title('Probability of a Token/Tag\'s frequency')
+
+# %% [markdown]
+# The entire goal, in some sense, is for us to remove low-occurence, unimportant information from our data, and form concept conglomerates that allow more useful statistical inferences to be made. 
+# Tags mapped from `nestor-gui`, as the plot shows, have very few instances of 1x-occurrence concepts, compared to several thousand in the raw-tokens (this is by design, of course). 
+# Additionally, high occurence concepts that might have had misspellings or synonyms drastically inprove their average occurence rate. 
+#
+# NOTE: This is _without_ artificial thresholding of minimum tag frequency. This would simply get reflected by "cutting off" the blue distribution below some threshold, not changing its shape overall. 
+
+# %% [markdown]
 #
 # ## Survival Analysis
+#
+# What do we _do_ with tags? 
+#
+# One way is to rely on their ability to normalize raw tokens into consistent aliases so that our estimates of rare-event statistics become possible. 
+#
+# Say you wish to know the median-time-to-failure of an excavator subsystem (e.g. the engines in your fleet): this might help understand the frequency "engine expertise" is needed to plan for hiring or shift scheduls, etc. 
+#
+# To get the raw text occurences into something more consistent for failure-time estimation, one might:
+#
+# - make a rules-based algorithm that checks for known (a priori) pattern occurrences and categorizes/normalizes when matched (think: Regex matching)
+# - create aliases for raw tokens (e.g. using suggestions for "important" tokens from [TokenExtractor.thesaurus_template](nestor.keyword.TokenExtractor.thesaurus_template))
+#
+# This was done in [@sexton2018benchmarking], and whe demonstrate the technique below. See the paper for further details!
 
 # %% [markdown]
 # ### Rules-Based
@@ -126,6 +191,10 @@ df_clean.shape
 
 # %%
 df_clean.sort_values('BscStartDate').head(10)
+
+# %% [markdown]
+# We once again turn to the library [Lifelines](https://lifelines.readthedocs.io/en/latest/) as the work-horse for finding the Survival function (in this context, the probability at time $t$ since the previous MWO that a new MWO has **not** occured).
+#
 
 # %%
 from lifelines import WeibullFitter, ExponentialFitter, KaplanMeierFitter
@@ -350,7 +419,6 @@ for n, ax in enumerate(axes):
     ax.set_title(r"$S(t)$"+f" of {res.index.levels[0][n]}")
     sns.despine()
 plt.tight_layout()
-f.savefig('bkt_KMsurvival.png')   
 
 # %% [markdown]
 # This next one give you an idea of the differences better. using a log-transform. the tags under-estimate death rates a little in the 80-130 day range, probably because there's a failure mode not captured by the [bucket, lip, tooth] tags (because it's rare).

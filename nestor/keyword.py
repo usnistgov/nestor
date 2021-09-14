@@ -376,7 +376,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
     def beginning_token(df: pd.DataFrame) -> pd.DataFrame:
         """after tokens are split and iob column exists"""
         b_locs = df.groupby("token_id", as_index=False).nth(0).index
-        df["iob"].iloc[b_locs] = "B"
+        df.loc[df.index[b_locs], "iob"] = "B"
         return df
 
     def outside_token(df: pd.DataFrame) -> pd.DataFrame:
@@ -407,7 +407,7 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         .pipe(outside_token)
     )
     iob = (
-        tidy_tokens[["token", "NE", "doc_id"]]
+        tidy_tokens.loc[:, ["token", "NE", "doc_id"]]
         .assign(
             NE=tidy_tokens["NE"].mask(tidy_tokens["iob"] == "O", np.nan)
         )  # remove unused NE's
@@ -1008,7 +1008,7 @@ class TagExtractor(TokenExtractor):
         )
         default_kws.update(**tfidf_kwargs)
 
-        # super().__init__(**default_kws)  # get internal attrs from parent
+        super().__init__(**default_kws)  # get internal attrs from parent
         self._tokenmodel = TokenExtractor(
             **default_kws
         )  # persist an instance for composition
@@ -1066,7 +1066,7 @@ class TagExtractor(TokenExtractor):
             self.tag_completeness_,
             self.num_complete_docs_,
             self.num_empty_docs_,
-        ) = get_tag_completeness(self.tag_df_)
+        ) = get_tag_completeness(self.tag_df_, verbose=False)
 
     def report_completeness(self):
         print(
