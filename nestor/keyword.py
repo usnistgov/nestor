@@ -1,15 +1,13 @@
 __author__ = "Thurston Sexton"
 
 import re
-from ssl import ALERT_DESCRIPTION_BAD_CERTIFICATE_STATUS_RESPONSE
 import string
 from pathlib import Path
 from functools import cached_property
-from _pytest.cacheprovider import CACHEDIR_TAG_CONTENT
-
+from typing import Optional, Union
+from enum import Enum
 import numpy as np
 import pandas as pd
-from pandas.core.algorithms import SelectNFrame
 from sklearn.base import TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.utils.validation import NotFittedError, check_is_fitted
@@ -32,7 +30,9 @@ __all__ = [
 ]
 
 
-def generate_vocabulary_df(transformer, filename=None, init=None):
+def generate_vocabulary_df(
+    transformer, filename=None, init: Union[str, pd.DataFrame] = None
+):
     """ make correctly formatted entity vocabulary (token->tag+type)
 
     Helper method to create a formatted pandas.DataFrame and/or a .csv containing
@@ -60,7 +60,7 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
 
     try:
         check_is_fitted(
-            transformer._model, "vocabulary_", "The tfidf vector is not fitted"
+            transformer._model, "vocabulary_", msg="The tfidf vector is not fitted"
         )
     except NotFittedError:
         if (filename is not None) and Path(filename).is_file():
@@ -72,17 +72,19 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
         else:
             raise
 
-    df = pd.DataFrame(
-        {
-            "tokens": transformer.vocab_,
-            "NE": "",
-            "alias": "",
-            "notes": "",
-            "score": transformer.scores_,
-        }
-    )[["tokens", "NE", "alias", "notes", "score"]]
-    df = df[~df.tokens.duplicated(keep="first")]
-    df.set_index("tokens", inplace=True)
+    df = (
+        pd.DataFrame(
+            {
+                "tokens": transformer.vocab_,
+                "NE": "",
+                "alias": "",
+                "notes": "",
+                "score": transformer.scores_,
+            }
+        )
+        # .loc[:,["tokens", "NE", "alias", "notes", "score"]]
+        .pipe(lambda df: df[~df.tokens.duplicated(keep="first")]).set_index("tokens")
+    )
 
     if init is None:
         if (filename is not None) and Path(filename).is_file():
@@ -193,10 +195,14 @@ def get_tag_completeness(tag_df, verbose=True):
         & (tag_df.get("P", all_empt).sum(axis=1) == 0)
         & (tag_df.get("S", all_empt).sum(axis=1) == 0)
     ).sum()
-    if verbose:
+
+    def _report_completeness():
         print(f"Complete Docs: {tag_comp}, or {tag_comp / len(tag_df):.2%}")
         print(f"Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}")
         print(f"Empty Docs: {tag_empt}, or {tag_empt / len(tag_df):.2%}")
+
+    if verbose:
+        _report_completeness()
     return tag_pct, tag_comp, tag_empt
 
 
@@ -866,7 +872,7 @@ class TokenExtractor(TransformerMixin):
         if isinstance(documents, pd.Series):
             X = _series_itervals(documents)
         X_tf = self._model.transform(X)
-        self.sum_tfidf_ = X_tf.sum(axis=0)
+        self.sumtfidf_ = X_tf.sum(axis=0)
         return X_tf
 
     def fit_transform(self, documents, y=None, **fit_params):
@@ -888,28 +894,28 @@ class TokenExtractor(TransformerMixin):
             X_tf = self._model.fit_transform(documents)
         else:
             X_tf = self._model.fit_transform(documents, y)
-        self.sum_tfidf_ = X_tf.sum(axis=0)
+        self.sumtfidf_ = X_tf.sum(axis=0)
 
-        ranks = self.sum_tfidf_.argsort()[::-1]
+        ranks = self.sumtfidf_.argsort()[::-1]
         if len(ranks) > self.default_kws["max_features"]:
             ranks = ranks[: self.default_kws["max_features"]]
         self.ranks_ = ranks
 
         self.vocab_ = np.array(self._model.get_feature_names())[self.ranks_]
-        scores = self.sum_tfidf_[self.ranks_]
+        scores = self.sumtfidf_[self.ranks_]
         self.scores_ = (scores - scores.min()) / (scores.max() - scores.min())
         return X_tf
 
     @property
-    def sum_tfidf_(self):
+    def sumtfidf_(self):
         """sum of the tf-idf scores for each token over all documents.
 
         Thought to approximate mutual information content of a given string.
         """
         return self._tf_tot
 
-    @sum_tfidf_.setter
-    def sum_tfidf_(self, sparse_docterm_sum):
+    @sumtfidf_.setter
+    def sumtfidf_(self, sparse_docterm_sum):
         self._tf_tot = np.array(sparse_docterm_sum)[0]
 
     @property
@@ -954,13 +960,29 @@ class TokenExtractor(TransformerMixin):
         return generate_vocabulary_df(self, filename=filename, init=init)
 
 
+class TagRep(str, Enum):
+    """available representation of tags in documents
+
+    """
+
+    binary = "binary"
+    multilabel = "multilabel"
+    iob = "iob"
+
+
 class TagExtractor(TokenExtractor):
     """Wrapper for [TokenExtractor](nestor.keyword.TokenExtractor) to apply a *Nestor* thesaurus or vocabulary
     definition on-top of the token extraction process. Also provides several useful methods as a result.
     """
 
     def __init__(
-        self, thesaurus=None, group_untagged=True, filter_types=None, **tfidf_kwargs,
+        self,
+        thesaurus=None,
+        group_untagged=True,
+        filter_types=None,
+        verbose=False,
+        output_type: TagRep = TagRep["binary"],
+        **tfidf_kwargs,
     ):
         """
         Identical to the [TokenExtractor](nestor.keyword.TokenExtractor) initialization,
@@ -993,10 +1015,15 @@ class TagExtractor(TokenExtractor):
 
         self.group_untagged = group_untagged
         self.filter_types = filter_types
-
+        self.output_type = output_type
+        self._verbose = verbose
         self._thesaurus = thesaurus
-        self._tfidf_docterm = None
+        self.tfidf_ = None
+
         self.tag_df_ = None
+        self.iob_rep_ = None
+        self.multi_rep_ = None
+
         self.tag_completeness_ = None
         self.num_complete_docs_ = None
         self.num_empty_docs_ = None
@@ -1006,12 +1033,12 @@ class TagExtractor(TokenExtractor):
         return self._tokenmodel.thesaurus_template(init=self._thesaurus)
 
     @property
-    def tfidf_(self):
-        return self._tfidf_docterm
+    def tfidf(self):
+        return self.tfidf_
 
-    @tfidf_.setter
-    def tfidf_(self, sparse_docterm):
-        self._tfidf_docterm = sparse_docterm
+    @tfidf.setter
+    def tfidf(self, sparse_docterm):
+        self.tfidf_ = sparse_docterm
 
     @property
     def tag_df(self):
@@ -1033,17 +1060,40 @@ class TagExtractor(TokenExtractor):
     def num_empty_docs(self):
         return self.num_empty_docs_
 
-    def set_stats(self, verbose=False):
+    def set_stats(self):
         check_is_fitted(self)
         (
             self.tag_completeness_,
             self.num_complete_docs_,
             self.num_empty_docs_,
-        ) = get_tag_completeness(self.tag_df_, verbose=verbose)
+        ) = get_tag_completeness(self.tag_df_)
 
-    @cached_property
-    def tags_as_lists_(self):
-        return _get_readable_tag_df(self.tag_df_)
+    def report_completeness(self):
+        print(
+            f"Complete Docs: {self.num_complete_docs}, or {self.num_complete_docs / len(self.tag_df):.2%}"
+        )
+        print(
+            f"Tag completeness: {self.tag_completeness.mean():.2f} +/- {self.tag_completeness.std():.2f}"
+        )
+        print(
+            f"Empty Docs: {self.num_empty_docs}, or {self.num_empty_docs / len(self.tag_df):.2%}"
+        )
+
+    @property
+    def tags_as_lists(self):
+        return self.multi_rep_
+
+    @tags_as_lists.setter
+    def tags_as_lists(self, tag_df):
+        self.multi_rep_ = _get_readable_tag_df(tag_df)
+
+    @property
+    def tags_as_iob(self):
+        return self.iob_rep_
+
+    @tags_as_iob.setter
+    def tags_as_iob(self, documents):
+        self.iob_rep_ = iob_extractor(documents, self.thesaurus)
 
     def fit(self, documents, y=None):
         # self._tokenmodel.fit(documents)
@@ -1059,17 +1109,28 @@ class TagExtractor(TokenExtractor):
             tag_df = pick_tag_types(tag_df, self.filter_types)
 
         self.tag_df = tag_df
+        self.tags_as_iob = documents
+        self.tags_as_lists = tag_df
         self.set_stats()
+        if self._verbose:
+            self.report_completeness()
         return self
 
     def transform(self, documents, y=None):
         """
         """
         check_is_fitted(self, "tag_df_")
-        return self.tag_df_
+
+        if self.output_type == TagRep.multilabel:
+            return self.tags_as_lists
+        elif self.output_type == TagRep.iob:
+            return self.tags_as_iob
+        else:
+            return self.tag_df
 
     @documented_at(tag_extractor, transformer="self")
     def fit_transform(self, documents, y=None):
+        """Fit transformer on `documents` and return the binary, hierarchical """
         self.fit(documents)
 
         return self.transform(documents)
