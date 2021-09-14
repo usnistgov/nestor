@@ -3,15 +3,18 @@ __author__ = "Thurston Sexton"
 import re
 import string
 from pathlib import Path
-
+from functools import cached_property
+from typing import Optional, Union
+from enum import Enum
 import numpy as np
 import pandas as pd
 from sklearn.base import TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.utils.validation import NotFittedError, check_is_fitted
-from tqdm.autonotebook import tqdm
+from tqdm import tqdm
 
 import nestor
+from .utils import documented_at, _series_itervals
 
 nestorParams = nestor.CFG
 
@@ -27,312 +30,9 @@ __all__ = [
 ]
 
 
-class _Transformer(TransformerMixin):
-    """
-    Base class for pure transformers that don't need a fit method (returns self)
-    """
-
-    def fit(self, X, y=None, **fit_params):
-        return self
-
-    def transform(self, X, **transform_params):
-        return X
-
-    def get_params(self, deep=True):
-        return dict()
-
-
-class NLPSelect(_Transformer):
-    """
-    Extract specified natural language columns
-    
-    Starting from a pd.DataFrame, combine `columns` into a single series
-    containing lowercased text with punctuation and excess newlines removed.
-    Using the `special_replace` dict allows for arbitrary mapping during the
-    cleaning process, for e.g. a priori normalization.
-    
-    Args:
-        columns(int,list of int,str): names/positions of data columns to extract, clean, and merge
-        special_replace(dict,None): mapping from strings to normalized strings (known a priori)
-        together(pd.Series): merged text, before any cleaning/normalization
-        clean_together(pd.Series): merged text, after cleaning (output of `transform`)
-    """
-
-    def __init__(self, columns=0, special_replace=None):
-        self.columns = columns
-        self.special_replace = special_replace
-        self.together = None
-        self.clean_together = None
-        # self.to_np = to_np
-
-    def get_params(self, deep=True):
-        """Retrieve parameters of the transformer for sklearn compatibility.
-
-        Args:
-          deep:  (Default value = True)
-
-        Returns:
-
-        """
-        return dict(
-            columns=self.columns, names=self.names, special_replace=self.special_replace
-        )
-
-    def transform(self, X, y=None):
-        """get clean column of text from column(s) of raw text in a dataset
-        
-        Depending on which of Union[List[Union[int,str]],int,str]
-        `self.columns` is, this will extract desired columns (of text) from
-        positions, names, etc. in the original dataset `X`.
-        
-        Columns will be merged, lowercased, and have punctuation and hanging
-        newlines removed.
-
-        Args:
-          X(pandas.DataFrome): dataset containing certain columns with natural language text.
-          y(None, optional):  (Default value = None)
-
-        Returns:
-           clean_together(pd.Series): a single column of merged, cleaned text
-        
-        """
-        if isinstance(self.columns, list):  # user passed a list of column labels
-            if all([isinstance(x, int) for x in self.columns]):
-                nlp_cols = list(
-                    X.columns[self.columns]
-                )  # select columns by user-input indices
-            elif all([isinstance(x, str) for x in self.columns]):
-                nlp_cols = self.columns  # select columns by user-input names
-            else:
-                print("Select error: mixed or wrong column type.")  # can't do both
-                raise Exception
-        elif isinstance(self.columns, int):  # take in a single index
-            nlp_cols = [X.columns[self.columns]]
-        else:
-            nlp_cols = [self.columns]  # allow...duck-typing I guess? Don't remember.
-
-        def _robust_cat(df, cols):
-            """pandas doesn't like batch-cat of string cols...needs 1st col
-
-            Args:
-              df: 
-              cols: 
-
-            Returns:
-
-            """
-            if len(cols) <= 1:
-                return df[cols].astype(str).fillna("").iloc[:, 0]
-            else:
-                return (
-                    df[cols[0]]
-                    .astype(str)
-                    .str.cat(df.loc[:, cols[1:]].astype(str), sep=" ", na_rep="",)
-                )
-
-        def _clean_text(s, special_replace=None):
-            """lower, rm newlines and punct, and optionally special words
-
-            Args:
-              s: 
-              special_replace:  (Default value = None)
-
-            Returns:
-
-            """
-            raw_text = (
-                s.str.lower()  # all lowercase
-                .str.replace("\n", " ")  # no hanging newlines
-                .str.replace("[{}]".format(string.punctuation), " ")
-            )
-            if special_replace is not None:
-                rx = re.compile("|".join(map(re.escape, special_replace)))
-                # allow user-input special replacements.
-                return raw_text.str.replace(
-                    rx, lambda match: self.special_replace[match.group(0)]
-                )
-            else:
-                return raw_text
-
-        self.together = X.pipe(_robust_cat, nlp_cols)
-        self.clean_together = self.together.pipe(
-            _clean_text, special_replace=self.special_replace
-        )
-        return self.clean_together
-
-
-class TokenExtractor(TransformerMixin):
-    """A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
-       total tf-idf score, and getting a list of vocabulary.
-
-       Valid options are given below from sklearn docs.
-
-           
-       """
-
-    def __init__(
-        self,
-        input="content",
-        ngram_range=(1, 1),
-        stop_words="english",
-        sublinear_tf=True,
-        smooth_idf=False,
-        max_features=5000,
-        token_pattern=nestorParams.token_pattern,
-        **tfidf_kwargs,
-    ):
-        """Initialize the extractor
-
-        Args:
-           input (string): {'filename', 'file', 'content'}
-                If 'filename', the sequence passed as an argument to fit is
-                expected to be a list of filenames that need reading to fetch
-                the raw content to analyze.
-
-                If 'file', the sequence items must have a 'read' method (file-like
-                object) that is called to fetch the bytes in memory. 
-                Otherwise the input is expected to be the sequence strings or
-                bytes items are expected to be analyzed directly.
-           ngram_range (tuple): (min_n, max_n), default=(1,1)
-                The lower and upper boundary of the range of n-values for different
-                n-grams to be extracted. All values of n such that min_n <= n <= max_n
-                will be used.
-           stop_words (string): {'english'} (default), list, or None
-                If a string, it is passed to _check_stop_list and the appropriate stop
-                list is returned. 'english' is currently the only supported string
-                value.
-
-                If a list, that list is assumed to contain stop words, all of which
-                will be removed from the resulting tokens.
-                Only applies if ``analyzer == 'word'``.
-
-                If None, no stop words will be used. max_df can be set to a value
-                in the range [0.7, 1.0) to automatically detect and filter stop
-                words based on intra corpus document frequency of terms.
-           max_features (int or None):
-                If not None, build a vocabulary that only consider the top
-                max_features ordered by term frequency across the corpus.
-                This parameter is ignored if vocabulary is not None.
-                (default=5000)
-           smooth_idf (boolean):
-                Smooth idf weights by adding one to document frequencies, as if an
-                extra document was seen containing every term in the collection
-                exactly once. Prevents zero divisions. (default=False)
-           sublinear_tf (boolean): (Default value = True)
-                Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
-
-           **tfidf_kwargs: other arguments passed to `sklearn.TfidfVectorizer`
-        """
-        self.default_kws = dict(
-            {
-                "input": input,
-                "ngram_range": ngram_range,
-                "stop_words": stop_words,
-                "sublinear_tf": sublinear_tf,
-                "smooth_idf": smooth_idf,
-                "max_features": max_features,
-                "token_pattern": token_pattern,
-            }
-        )
-
-        self.default_kws.update(tfidf_kwargs)
-        self._model = TfidfVectorizer(**self.default_kws)
-        self._tf_tot = None
-
-    def fit_transform(self, X, y=None, **fit_params):
-        """
-
-        Args:
-          X: 
-          y:  (Default value = None)
-          **fit_params: 
-
-        Returns:
-
-        
-        """
-        documents = _series_itervals(X)
-        if y is None:
-            X_tf = self._model.fit_transform(documents)
-        else:
-            X_tf = self._model.fit_transform(documents, y)
-        self._tf_tot = np.array(X_tf.sum(axis=0))[0]
-        return X_tf
-
-    def fit(self, X, y=None):
-        """
-
-        Args:
-          X: 
-          y:  (Default value = None)
-
-        Returns:
-
-        
-        """
-        _ = self.fit_transform(X)
-        return self
-
-    def transform(self, dask_documents):
-        """
-
-        Args:
-          dask_documents: 
-
-        Returns:
-
-        
-        """
-
-        check_is_fitted(self, "_model", "The tfidf vector is not fitted")
-
-        X = _series_itervals(dask_documents)
-        X_tf = self._model.transform(X)
-        self._tf_tot = np.array(X_tf.sum(axis=0))[0]
-        return X_tf
-
-    @property
-    def ranks_(self):
-        r"""Retrieve the rank of each token, for sorting. Uses summed scoring over the
-        TF-IDF for each token, so that: $S_t = \Sum_{d\text{TF-IDF}_t$
-
-        Args:
-
-        Returns:
-           np.array: token ranks
-        
-        """
-        check_is_fitted(self, "_model", "The tfidf vector is not fitted")
-        ranks = self._tf_tot.argsort()[::-1]
-        if len(ranks) > self.default_kws["max_features"]:
-            ranks = ranks[: self.default_kws["max_features"]]
-        return ranks
-
-    @property
-    def vocab_(self):
-        """
-        ordered list of tokens, rank-ordered by summed-tf-idf
-        (see :func:`~nestor.keyword.TokenExtractor.ranks_`)
-
-        Returns:
-            numpy.array: extracted tokens
-        """
-        extracted_toks = np.array(self._model.get_feature_names())[self.ranks_]
-        return extracted_toks
-
-    @property
-    def scores_(self):
-        """
-        Returns actual scores of tokens, for progress-tracking (min-max-normalized)
-
-        Returns:
-            numpy.array:
-        """
-        scores = self._tf_tot[self.ranks_]
-        return (scores - scores.min()) / (scores.max() - scores.min())
-
-
-def generate_vocabulary_df(transformer, filename=None, init=None):
+def generate_vocabulary_df(
+    transformer, filename=None, init: Union[str, pd.DataFrame] = None
+):
     """ make correctly formatted entity vocabulary (token->tag+type)
 
     Helper method to create a formatted pandas.DataFrame and/or a .csv containing
@@ -360,7 +60,7 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
 
     try:
         check_is_fitted(
-            transformer._model, "vocabulary_", "The tfidf vector is not fitted"
+            transformer._model, "vocabulary_", msg="The tfidf vector is not fitted"
         )
     except NotFittedError:
         if (filename is not None) and Path(filename).is_file():
@@ -372,17 +72,19 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
         else:
             raise
 
-    df = pd.DataFrame(
-        {
-            "tokens": transformer.vocab_,
-            "NE": "",
-            "alias": "",
-            "notes": "",
-            "score": transformer.scores_,
-        }
-    )[["tokens", "NE", "alias", "notes", "score"]]
-    df = df[~df.tokens.duplicated(keep="first")]
-    df.set_index("tokens", inplace=True)
+    df = (
+        pd.DataFrame(
+            {
+                "tokens": transformer.vocab_,
+                "NE": "",
+                "alias": "",
+                "notes": "",
+                "score": transformer.scores_,
+            }
+        )
+        # .loc[:,["tokens", "NE", "alias", "notes", "score"]]
+        .pipe(lambda df: df[~df.tokens.duplicated(keep="first")]).set_index("tokens")
+    )
 
     if init is None:
         if (filename is not None) and Path(filename).is_file():
@@ -409,19 +111,6 @@ def generate_vocabulary_df(transformer, filename=None, init=None):
         df.to_csv(filename)
         print("saved locally!")
     return df
-
-
-def _series_itervals(s):
-    """wrapper that turns a pandas/dask dataframe into a generator of values only (for sklearn)
-
-    Args:
-      s: 
-
-    Returns:
-
-    """
-    for n, val in s.iteritems():
-        yield val
 
 
 def _get_readable_tag_df(tag_df):
@@ -469,7 +158,7 @@ def get_multilabel_representation(tag_df):
     return _get_readable_tag_df(tag_df)
 
 
-def get_tag_completeness(tag_df):
+def get_tag_completeness(tag_df, verbose=True):
     """completeness, emptiness, and histograms in-between
     
     It's hard to estimate "how good of a job you've done" at annotating your
@@ -498,17 +187,22 @@ def get_tag_completeness(tag_df):
     tag_pct = 1 - (
         tag_df.get(["NA", "U"], all_empt).sum(axis=1) / tag_df.sum(axis=1)
     )  # TODO: if they tag everything?
-    print(f"Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}")
 
     tag_comp = (tag_df.get("NA", all_empt).sum(axis=1) == 0).sum()
-    print(f"Complete Docs: {tag_comp}, or {tag_comp / len(tag_df):.2%}")
 
     tag_empt = (
         (tag_df.get("I", all_empt).sum(axis=1) == 0)
         & (tag_df.get("P", all_empt).sum(axis=1) == 0)
         & (tag_df.get("S", all_empt).sum(axis=1) == 0)
     ).sum()
-    print(f"Empty Docs: {tag_empt}, or {tag_empt / len(tag_df):.2%}")
+
+    def _report_completeness():
+        print(f"Complete Docs: {tag_comp}, or {tag_comp / len(tag_df):.2%}")
+        print(f"Tag completeness: {tag_pct.mean():.2f} +/- {tag_pct.std():.2f}")
+        print(f"Empty Docs: {tag_empt}, or {tag_empt / len(tag_df):.2%}")
+
+    if verbose:
+        _report_completeness()
     return tag_pct, tag_comp, tag_empt
 
 
@@ -541,7 +235,7 @@ def tag_extractor(
 
     try:
         check_is_fitted(
-            transformer._model, "vocabulary_", "The tfidf vector is not fitted"
+            transformer._model, "vocabulary_", msg="The tfidf vector is not fitted"
         )
         toks = transformer.transform(raw_text)
     except NotFittedError:
@@ -557,6 +251,10 @@ def tag_extractor(
             "alias": untagged_alias,
         }
     )
+    if group_untagged:  # makes no sense to keep NE for "_untagged" tags...
+        v_filled = v_filled.assign(
+            NE=v_filled.NE.mask(v_filled.alias == "_untagged", "NA")
+        )
     sparse_dtype = pd.SparseDtype(int, fill_value=0.0)
     table = (  # more pandas-ey pivot, for future cat-types
         v_filled.assign(exists=1)  # placehold
@@ -720,105 +418,6 @@ def iob_extractor(raw_text, vocab_df_1grams, vocab_df_ngrams=None):
         )  # concat iob-NE
     )
     return iob
-
-
-"""
-    for i in list(raw_text.index):
-        # Get each MWO as list of tokens
-        mwo = raw_text.iat[i].replace("\\", " ")
-        mwo = mwo.split()
-
-        # Go through token list for MWO
-        index = 0
-        while index < len(mwo):
-            token = mwo[index]
-            # Find single word tokens, will match in index
-            found = vocab_df.loc[vocab_df.index.str.fullmatch(token)]
-            # Find combined tokens (i.e. "grease_line"), will match in alias column
-            found2 = vocab_df.loc[vocab_df.alias.str.fullmatch(token).fillna(False)]
-            found_multi_word = vocab_df.loc[
-                vocab_df.alias.str.contains(token).fillna(False)
-            ]
-            # Start token list (needed in case of combined tokens)
-            tokens = token
-            # Default NE label is "O"
-            ne = "O"
-            # Get NE label, use applicable DataFrame (found or found2)
-            if len(found) > 0:  # todo : is this always true bc the row is full of nan?
-                ne = found.iloc[0].fillna("O").loc["NE"]
-                individual_alias = found.iloc[0].loc["alias"]  # fixme: is this needed?
-                if ne in nestorParams.holes:
-                    ne = "O"
-                if ne is not ("O" or "X" or "U"):  # or (not isnan(ne))
-                    ne = "B-" + str(ne)
-            elif len(found2) > 0:
-                ne = found2.iloc[0].loc["NE"]
-                # multi-word index is split into list of tokens. i.e. "grease line" --> ["grease", "line"]
-                original = found2.index[0]
-                tokens = original.split(" ")
-                if ne in nestorParams.holes:
-                    ne = "O"
-                if ne is not ("O" or "X" or "U"):  # or (not isnan(ne))
-                    ne = "B-" + str(ne)
-
-            # Create dictionary with token info, to be put into DataFrame
-            text_tag = {"token": tokens, "NE": ne, "doc_id": i}
-
-<<<<<<< HEAD
-            if len(found_multi_word) > 0:  # fixme: handle multi-token X or U tags
-=======
-            if len(found_multi_word) > 0:
->>>>>>> nist-origin/bio
-                thes_dict = found_multi_word[
-                    found_multi_word.alias.replace("", np.nan).notna()
-                ].alias.to_dict()
-                substr = sorted(thes_dict, key=len, reverse=True)
-                if index < (len(mwo) - 1):
-                    possible_multi_word_token = token + " " + mwo[index + 1]
-                    multi_ne_label = found_multi_word.loc[
-                        found_multi_word.alias.str.fullmatch(
-                            possible_multi_word_token
-                        ).fillna(False)
-                    ]
-                    if len(multi_ne_label) > 0:
-                        ne_long = multi_ne_label.iloc[0].loc["NE"]
-                        ne = ne_long
-                        if ne in nestorParams.holes:
-                            ne = "O"
-                        if ne is not ("O" or "X" or "U"):  # or (not isnan(ne))
-                            ne = "B-" + str(ne)
-                        originals = substr[0].split(" ")
-                        text_tag = {"token": originals, "NE": ne, "doc_id": i}
-                        # If upcoming token is already labeled here via a combination label, then skip ahead
-                        index += 1
-            # Increment index of token in MWO
-            index += 1
-
-            # Add token(s) to iob DataFrame
-            if isinstance(text_tag["token"], list) and (text_tag["NE"] != "O"):
-                intermediate_df = pd.DataFrame.from_dict(
-                    text_tag
-                )  # todo: refactor this
-                for j, row in intermediate_df.iterrows():
-                    # Change "B" to "I" for inner tokens
-                    if j > 0:
-                        s = list(row["NE"])
-                        s[0] = "I"
-                        s = "".join(s)
-                        intermediate_df.at[j, "NE"] = s
-                text_tag = intermediate_df
-
-            iob = iob.append(text_tag, ignore_index=True)
-            # print(text_tag)
-            iob[["NE"]] = iob[["NE"]].fillna(
-                "O"
-            )  # fixme : fix logic statements so this isn't needed
-
-    # Row containing ["grease", "line"] as "token" will be split into two rows with same values in other columns
-    iob = iob.explode("token")
-
-    return iob
-"""
 
 
 def token_to_alias(raw_text, vocab):
@@ -1024,3 +623,516 @@ def ngram_keyword_pipe(raw_text, vocab, vocab2):
 
     tag_df = pick_tag_types(tags_df, nestorParams.atomics + nestorParams.holes + ["NA"])
     return tag_df, relation_df
+
+
+class _Transformer(TransformerMixin):
+    """
+    Base class for pure transformers that don't need a fit method (returns self)
+    """
+
+    def fit(self, X, y=None, **fit_params):
+        return self
+
+    def transform(self, X, **transform_params):
+        return X
+
+    def get_params(self, deep=True):
+        return dict()
+
+
+class NLPSelect(_Transformer):
+    """
+    Extract specified natural language columns
+
+    Starting from a pd.DataFrame, combine `columns` into a single series
+    containing lowercased text with punctuation and excess newlines removed.
+    Using the `special_replace` dict allows for arbitrary mapping during the
+    cleaning process, for e.g. a priori normalization.
+
+    Args:
+        columns(int,list of int,str): names/positions of data columns to extract, clean, and merge
+        special_replace(dict,None): mapping from strings to normalized strings (known a priori)
+        together(pd.Series): merged text, before any cleaning/normalization
+        clean_together(pd.Series): merged text, after cleaning (output of `transform`)
+    """
+
+    def __init__(self, columns=0, special_replace=None):
+        self.columns = columns
+        self.special_replace = special_replace
+        self.together = None
+        self.clean_together = None
+        # self.to_np = to_np
+
+    def get_params(self, deep=True):
+        """Retrieve parameters of the transformer for sklearn compatibility.
+
+        Args:
+          deep:  (Default value = True)
+
+        Returns:
+
+        """
+        return dict(
+            columns=self.columns, names=self.names, special_replace=self.special_replace
+        )
+
+    def transform(self, X, y=None):
+        """get clean column of text from column(s) of raw text in a dataset
+
+        Depending on which of Union[List[Union[int,str]],int,str]
+        `self.columns` is, this will extract desired columns (of text) from
+        positions, names, etc. in the original dataset `X`.
+
+        Columns will be merged, lowercased, and have punctuation and hanging
+        newlines removed.
+
+        Args:
+          X(pandas.DataFrome): dataset containing certain columns with natural language text.
+          y(None, optional):  (Default value = None)
+
+        Returns:
+           clean_together(pd.Series): a single column of merged, cleaned text
+
+        """
+        if isinstance(self.columns, list):  # user passed a list of column labels
+            if all([isinstance(x, int) for x in self.columns]):
+                nlp_cols = list(
+                    X.columns[self.columns]
+                )  # select columns by user-input indices
+            elif all([isinstance(x, str) for x in self.columns]):
+                nlp_cols = self.columns  # select columns by user-input names
+            else:
+                print("Select error: mixed or wrong column type.")  # can't do both
+                raise Exception
+        elif isinstance(self.columns, int):  # take in a single index
+            nlp_cols = [X.columns[self.columns]]
+        else:
+            nlp_cols = [self.columns]  # allow...duck-typing I guess? Don't remember.
+
+        def _robust_cat(df, cols):
+            """pandas doesn't like batch-cat of string cols...needs 1st col
+
+            Args:
+              df:
+              cols:
+
+            Returns:
+
+            """
+            if len(cols) <= 1:
+                return df[cols].astype(str).fillna("").iloc[:, 0]
+            else:
+                return (
+                    df[cols[0]]
+                    .astype(str)
+                    .str.cat(df.loc[:, cols[1:]].astype(str), sep=" ", na_rep="",)
+                )
+
+        def _clean_text(s, special_replace=None):
+            """lower, rm newlines and punct, and optionally special words
+
+            Args:
+              s:
+              special_replace:  (Default value = None)
+
+            Returns:
+
+            """
+            raw_text = (
+                s.str.lower()  # all lowercase
+                .str.replace("\n", " ")  # no hanging newlines
+                .str.replace("[{}]".format(string.punctuation), " ")
+            )
+            if special_replace is not None:
+                rx = re.compile("|".join(map(re.escape, special_replace)))
+                # allow user-input special replacements.
+                return raw_text.str.replace(
+                    rx, lambda match: self.special_replace[match.group(0)]
+                )
+            else:
+                return raw_text
+
+        self.together = X.pipe(_robust_cat, nlp_cols)
+        self.clean_together = self.together.pipe(
+            _clean_text, special_replace=self.special_replace
+        )
+        return self.clean_together
+
+
+class TokenExtractor(TransformerMixin):
+    """A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
+       total tf-idf score, and getting a list of vocabulary.
+
+       Valid options are given below from sklearn docs.
+
+
+       """
+
+    def __init__(
+        self,
+        input="content",
+        ngram_range=(1, 1),
+        stop_words="english",
+        sublinear_tf=True,
+        smooth_idf=False,
+        max_features=5000,
+        token_pattern=nestorParams.token_pattern,
+        **tfidf_kwargs,
+    ):
+        """Initialize the extractor
+
+        Args:
+           input (string): {'filename', 'file', 'content'}
+                If 'filename', the sequence passed as an argument to fit is
+                expected to be a list of filenames that need reading to fetch
+                the raw content to analyze.
+
+                If 'file', the sequence items must have a 'read' method (file-like
+                object) that is called to fetch the bytes in memory.
+                Otherwise the input is expected to be the sequence strings or
+                bytes items are expected to be analyzed directly.
+           ngram_range (tuple): (min_n, max_n), default=(1,1)
+                The lower and upper boundary of the range of n-values for different
+                n-grams to be extracted. All values of n such that min_n <= n <= max_n
+                will be used.
+           stop_words (string): {'english'} (default), list, or None
+                If a string, it is passed to _check_stop_list and the appropriate stop
+                list is returned. 'english' is currently the only supported string
+                value.
+
+                If a list, that list is assumed to contain stop words, all of which
+                will be removed from the resulting tokens.
+                Only applies if ``analyzer == 'word'``.
+
+                If None, no stop words will be used. max_df can be set to a value
+                in the range [0.7, 1.0) to automatically detect and filter stop
+                words based on intra corpus document frequency of terms.
+           max_features (int or None):
+                If not None, build a vocabulary that only consider the top
+                max_features ordered by term frequency across the corpus.
+                This parameter is ignored if vocabulary is not None.
+                (default=5000)
+           smooth_idf (boolean):
+                Smooth idf weights by adding one to document frequencies, as if an
+                extra document was seen containing every term in the collection
+                exactly once. Prevents zero divisions. (default=False)
+           sublinear_tf (boolean): (Default value = True)
+                Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
+
+           **tfidf_kwargs: other arguments passed to `sklearn.TfidfVectorizer`
+        """
+        self.default_kws = dict(
+            {
+                "input": input,
+                "ngram_range": ngram_range,
+                "stop_words": stop_words,
+                "sublinear_tf": sublinear_tf,
+                "smooth_idf": smooth_idf,
+                "max_features": max_features,
+                "token_pattern": token_pattern,
+            }
+        )
+
+        self.default_kws.update(tfidf_kwargs)
+        self._model = TfidfVectorizer(**self.default_kws)
+        self._tf_tot = None
+
+        self._ranks = None
+        self._vocab = None
+        self._scores = None
+
+    def fit(self, documents, y=None):
+        """
+        Learn a vocabulary dictionary of tokens in raw documents.
+        Args:
+          documents (pd.Series, Iterable): Iterable of raw documents
+          y:  (Default value = None)
+
+        Returns:
+          self
+        """
+        _ = self.fit_transform(documents)
+        return self
+
+    def transform(self, documents):
+        """transform documents into document-term matrix
+
+        Args:
+          documents:
+
+        Returns:
+          X_tf: array of shape (n_samples, n_features)
+                document-term matrix
+
+
+        """
+
+        check_is_fitted(self._model, msg="The tfidf vector is not fitted")
+
+        if isinstance(documents, pd.Series):
+            X = _series_itervals(documents)
+        X_tf = self._model.transform(X)
+        self.sumtfidf_ = X_tf.sum(axis=0)
+        return X_tf
+
+    def fit_transform(self, documents, y=None, **fit_params):
+        """transform a container of text documents to TF-IDF Sparse Matrix
+
+        Args:
+          documents (pd.Series, Iterable): Iterable of raw documents
+          y:  (Default value = None) unused
+          **fit_params: kwargs passed to underlying TfidfVectorizer
+
+        Returns:
+          X_tf: array of shape (n_samples, n_features)
+                document-term matrix
+
+        """
+        if isinstance(documents, pd.Series):
+            documents = _series_itervals(documents)
+        if y is None:
+            X_tf = self._model.fit_transform(documents)
+        else:
+            X_tf = self._model.fit_transform(documents, y)
+        self.sumtfidf_ = X_tf.sum(axis=0)
+
+        ranks = self.sumtfidf_.argsort()[::-1]
+        if len(ranks) > self.default_kws["max_features"]:
+            ranks = ranks[: self.default_kws["max_features"]]
+        self.ranks_ = ranks
+
+        self.vocab_ = np.array(self._model.get_feature_names())[self.ranks_]
+        scores = self.sumtfidf_[self.ranks_]
+        self.scores_ = (scores - scores.min()) / (scores.max() - scores.min())
+        return X_tf
+
+    @property
+    def sumtfidf_(self):
+        """sum of the tf-idf scores for each token over all documents.
+
+        Thought to approximate mutual information content of a given string.
+        """
+        return self._tf_tot
+
+    @sumtfidf_.setter
+    def sumtfidf_(self, sparse_docterm_sum):
+        self._tf_tot = np.array(sparse_docterm_sum)[0]
+
+    @property
+    def ranks_(self):
+        """Retrieve the rank of each token, for sorting. Uses summed scoring over the
+        TF-IDF for each token, so that: $S_t = \Sum_{d\text{TF-IDF}_t$
+        """
+        return self._ranks
+
+    @ranks_.setter
+    def ranks_(self, rank_data: pd.Series):
+        self._ranks = rank_data
+
+    @property
+    def vocab_(self):
+        """
+        ordered list of tokens, rank-ordered by summed-tf-idf
+        (see :func:`~nestor.keyword.TokenExtractor.ranks_`)
+        """
+        return self._vocab
+
+    @vocab_.setter
+    def vocab_(self, rankedlist):
+        self._vocab = rankedlist
+
+    @property
+    def scores_(self):
+        """
+        Returns actual scores of tokens, for progress-tracking (min-max-normalized)
+
+        Returns:
+            numpy.array:
+        """
+        return self._scores
+
+    @scores_.setter
+    def scores_(self, scoreframe: pd.Series):
+        self._scores = scoreframe
+
+    @documented_at(generate_vocabulary_df, transformer="self")
+    def thesaurus_template(self, filename=None, init=None):
+        return generate_vocabulary_df(self, filename=filename, init=init)
+
+
+class TagRep(str, Enum):
+    """available representation of tags in documents
+
+    """
+
+    binary = "binary"
+    multilabel = "multilabel"
+    iob = "iob"
+
+
+class TagExtractor(TokenExtractor):
+    """Wrapper for [TokenExtractor](nestor.keyword.TokenExtractor) to apply a *Nestor* thesaurus or vocabulary
+    definition on-top of the token extraction process. Also provides several useful methods as a result.
+    """
+
+    def __init__(
+        self,
+        thesaurus=None,
+        group_untagged=True,
+        filter_types=None,
+        verbose=False,
+        output_type: TagRep = TagRep["binary"],
+        **tfidf_kwargs,
+    ):
+        """
+        Identical to the [TokenExtractor](nestor.keyword.TokenExtractor) initialization,
+        Except for the addition of an optional `vocab` argument that allows for pre-defined
+        thesaurus/dictionary mappings of tokens to named entities
+        (see [generate_vocabulary_df](nestor.keyword.generate_vocabulary_df))
+        to get used in the transformation doc-term form.
+
+        Rather than outputting a TF-IDF-weighted sparse matrix, this transformer outputs a Multi-column
+        `pd.DataFrame` with the top-level columns being current tag-types in `nestor.CFG`, and the sub-level
+        being the actual tokens/compound-tokens.
+
+        """
+        # super().__init__()
+        default_kws = dict(
+            input="content",
+            ngram_range=(1, 1),
+            stop_words="english",
+            sublinear_tf=True,
+            smooth_idf=False,
+            max_features=5000,
+            token_pattern=nestorParams.token_pattern,
+        )
+        default_kws.update(**tfidf_kwargs)
+
+        # super().__init__(**default_kws)  # get internal attrs from parent
+        self._tokenmodel = TokenExtractor(
+            **default_kws
+        )  # persist an instance for composition
+
+        self.group_untagged = group_untagged
+        self.filter_types = filter_types
+        self.output_type = output_type
+        self._verbose = verbose
+        self._thesaurus = thesaurus
+        self.tfidf_ = None
+
+        self.tag_df_ = None
+        self.iob_rep_ = None
+        self.multi_rep_ = None
+
+        self.tag_completeness_ = None
+        self.num_complete_docs_ = None
+        self.num_empty_docs_ = None
+
+    @cached_property
+    def thesaurus(self):
+        return self._tokenmodel.thesaurus_template(init=self._thesaurus)
+
+    @property
+    def tfidf(self):
+        return self.tfidf_
+
+    @tfidf.setter
+    def tfidf(self, sparse_docterm):
+        self.tfidf_ = sparse_docterm
+
+    @property
+    def tag_df(self):
+        return self.tag_df_
+
+    @tag_df.setter
+    def tag_df(self, binary_df):
+        self.tag_df_ = binary_df
+
+    @property
+    def tag_completeness(self):
+        return self.tag_completeness_
+
+    @property
+    def num_complete_docs(self):
+        return self.num_complete_docs_
+
+    @property
+    def num_empty_docs(self):
+        return self.num_empty_docs_
+
+    def set_stats(self):
+        check_is_fitted(self)
+        (
+            self.tag_completeness_,
+            self.num_complete_docs_,
+            self.num_empty_docs_,
+        ) = get_tag_completeness(self.tag_df_)
+
+    def report_completeness(self):
+        print(
+            f"Complete Docs: {self.num_complete_docs}, or {self.num_complete_docs / len(self.tag_df):.2%}"
+        )
+        print(
+            f"Tag completeness: {self.tag_completeness.mean():.2f} +/- {self.tag_completeness.std():.2f}"
+        )
+        print(
+            f"Empty Docs: {self.num_empty_docs}, or {self.num_empty_docs / len(self.tag_df):.2%}"
+        )
+
+    @property
+    def tags_as_lists(self):
+        return self.multi_rep_
+
+    @tags_as_lists.setter
+    def tags_as_lists(self, tag_df):
+        self.multi_rep_ = _get_readable_tag_df(tag_df)
+
+    @property
+    def tags_as_iob(self):
+        return self.iob_rep_
+
+    @tags_as_iob.setter
+    def tags_as_iob(self, documents):
+        self.iob_rep_ = iob_extractor(documents, self.thesaurus)
+
+    def fit(self, documents, y=None):
+        # self._tokenmodel.fit(documents)
+        self.tfidf_ = self._tokenmodel.fit_transform(documents)
+        # check_is_fitted(self._tokenmodel, msg="The tfidf vector is not fitted")
+        tag_df = tag_extractor(
+            self._tokenmodel,
+            documents,
+            vocab_df=self.thesaurus,
+            group_untagged=self.group_untagged,
+        )
+        if self.filter_types:
+            tag_df = pick_tag_types(tag_df, self.filter_types)
+
+        self.tag_df = tag_df
+        self.tags_as_iob = documents
+        self.tags_as_lists = tag_df
+        self.set_stats()
+        if self._verbose:
+            self.report_completeness()
+        return self
+
+    def transform(self, documents, y=None):
+        """
+        """
+        check_is_fitted(self, "tag_df_")
+
+        if self.output_type == TagRep.multilabel:
+            return self.tags_as_lists
+        elif self.output_type == TagRep.iob:
+            return self.tags_as_iob
+        else:
+            return self.tag_df
+
+    @documented_at(tag_extractor, transformer="self")
+    def fit_transform(self, documents, y=None):
+        """Fit transformer on `documents` and return the binary, hierarchical """
+        self.fit(documents)
+
+        return self.transform(documents)
+
+    # __init__.__doc__ += TokenExtractor.__init__.__doc__
