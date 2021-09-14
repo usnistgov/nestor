@@ -46,6 +46,7 @@ datatest = "^0.11.1"
 format = "black nestor/ && black tests/"
 deploy-docs = "ENABLE_PDF_EXPORT=1 mkdocs build --verbose --clean"
 
+
 [tool.poetry-dynamic-versioning]
 enable = true
 vcs = "git"

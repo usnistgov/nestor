@@ -5,6 +5,8 @@ import pandas as pd
 import pytest
 from datatest import Deviation, Extra, Invalid, Missing, accepted
 
+pytestmark = pytest.mark.filterwarnings("ignore:subset and superset warning")
+
 
 @pytest.fixture(scope="session", autouse=True)
 def pandas_integration():
@@ -66,6 +68,40 @@ class TestExcavators:
         }
         with accepted(Extra):
             df.dtypes.validate(required_types)
+
+
+class TestVocab:
+    @pytest.fixture(params=["excavators"] + [x.value for x in nd.vocab.VocabOption])
+    def vocab_name(self, request):
+        return request.param
+
+    @pytest.fixture(params=[True, False])
+    def compound2g(self, request):
+        return request.param
+
+    @pytest.fixture(params=[True, False])
+    def base1g(self, request):
+        return request.param
+
+    @pytest.fixture(params=[True, False])
+    def remote(self, request):
+        return request.param
+
+    @pytest.fixture
+    def vocab(self, vocab_name, compound2g, base1g, remote):
+        return nd.load_vocab(
+            vocab_name, base1g=base1g, compound2g=compound2g, remote=remote
+        )
+
+    def test_vocab_headers(self, vocab):
+        required_headers = {"NE", "alias"}
+        possible_headers = required_headers | {"score", "notes"}
+        vocab.columns.validate.superset(required_headers)
+        vocab.columns.validate.subset(possible_headers)
+
+    def test_vocab_index(self, vocab):
+        vocab.index.validate(str)
+        assert vocab.index.name == "tokens"
 
 
 if __name__ == "__main__":

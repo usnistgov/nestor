@@ -87,6 +87,7 @@ class NestorParams(dict):
     in manufacturing maintenance:
 
     ```yaml
+    token_patt = '(?u)\b\w\w+\b'
     entities:
       types:
         'atomic': # atomic types
@@ -163,6 +164,7 @@ class NestorParams(dict):
 
     def __init__(self, *arg, **kw):
         super(NestorParams, self).__init__(*arg, **kw)
+        self._token_patt = None
         self._datatypes = None
         self._entities = None
         self._entity_rules = None
@@ -174,6 +176,12 @@ class NestorParams(dict):
         """find any datatype that has a specific key
         """
         return find_path_from_key(self["datatypes"], property_name)
+
+    @property
+    def token_pattern(self):
+        if not self._token_patt:
+            self._token_patt = self["token_pattern"]
+        return r"{}".format(self._token_patt)
 
     @property
     def datatypes(self):
