@@ -8,6 +8,7 @@ default:
 
 stages:
   - test
+  - build_env
   - deploy
 
 variables:
@@ -24,10 +25,16 @@ pytest:
     when: always
     reports:
       junit: report.xml
+  only:
+    refs:
+      - branches
+    changes:
+      - nestor/**/*
+      - tests/**/*
 
 
 nbenv:
-  stage: deploy
+  stage: build_env
   script:
     - 'conda env update --file docs/examples/nb-env.yml'
     - 'jupytext --to notebook --execute docs/examples/**/*.py'
