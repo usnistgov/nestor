@@ -1,6 +1,6 @@
 import requests
 from pathlib import Path
-from .. import get_nestor_cache_dir
+from ..settings import get_nestor_cache_dir
 
 
 def download_datafile(url: str, filename: str, overwrite: bool = False) -> Path:

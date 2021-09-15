@@ -25,6 +25,16 @@ pytest:
     reports:
       junit: report.xml
 
+
+nbenv:
+  stage: deploy
+  script:
+    - 'conda env update --file docs/examples/nb-env.yml'
+    - 'jupytext --to notebook --execute docs/examples/**/*.py'
+  only:
+    - docs
+    - master
+
 pages:
   stage: deploy
   script:
@@ -33,6 +43,5 @@ pages:
     paths:
       - public
   only:
-    - dev
     - docs
     - master

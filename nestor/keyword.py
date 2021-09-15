@@ -4,7 +4,7 @@ import re
 import string
 from pathlib import Path
 from functools import cached_property
-from typing import Optional, Union
+from typing import Union
 from enum import Enum
 import numpy as np
 import pandas as pd
@@ -13,21 +13,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.utils.validation import NotFittedError, check_is_fitted
 from tqdm import tqdm
 
-import nestor
+from .settings import CFG as nestorParams  # global settings for nestor tags
 from .utils import documented_at, _series_itervals
 
-nestorParams = nestor.CFG
 
-__all__ = [
-    "NLPSelect",
-    "TokenExtractor",
-    "generate_vocabulary_df",
-    "get_tag_completeness",
-    "tag_extractor",
-    "token_to_alias",
-    "ngram_automatch",
-    "ngram_keyword_pipe",
-]
+__all__ = ["NLPSelect", "TokenExtractor", "TagExtractor"]
 
 
 def generate_vocabulary_df(
