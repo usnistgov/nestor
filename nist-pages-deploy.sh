@@ -1,3 +1,4 @@
+#!/bin/bash
 # adapted from https://stackoverflow.com/a/40178818 (Thanks @Matt Zeunert)
 
 STATUS="$(git status)"
