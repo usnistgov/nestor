@@ -30,8 +30,8 @@ pytest:
 nbenv:
   stage: build_env
   script:
-    - mamba env create --file docs/examples/nb-env.yml
-    - jupytext --to notebook --execute docs/examples/**/*.py
+    - "mamba env create --file docs/examples/nb-env.yml"
+    - "jupytext --to notebook --execute docs/examples/**/*.py"
   only:
     - docs
     - master
