@@ -1,5 +1,5 @@
 default:
-  image: $CI_REGISTRY/kea/templates/docker-conda:latest
+  image: $CI_REGISTRY/kea/templates/docker-conda:master
   before_script:
     - poetry install
   cache:
@@ -13,9 +13,6 @@ stages:
 
 variables:
   POETRY_VIRTUALENVS_PATH: "${CI_PROJECT_DIR}/.cache/venv"
-  MKDOCS_SITE_URL: "https://kea.ipages.nist.gov/nestor-suite/nestor/"
-  MKDOCS_REPO_URL: "https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/"
-
   
 pytest:
   stage: test
@@ -28,6 +25,9 @@ pytest:
 
 pages:
   stage: deploy
+  MKDOCS_SITE_URL: "https://kea.ipages.nist.gov/nestor-suite/nestor/"
+  MKDOCS_REPO_URL: "https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/"
+
   script:
     - conda env update --file docs/examples/nb-env.yml
     - jupytext --to notebook --execute docs/examples/**/*.py
@@ -37,4 +37,17 @@ pages:
       - public
   only:
     - docs
+    - master
+
+nist-pages:
+  stage: deploy
+  MKDOCS_SITE_URL: "https://pages.nist.gov/nestor/"
+  MKDOCS_REPO_URL: "https://github.com/usnistgov/nestor"
+
+  script:
+    - conda env update --file docs/examples/nb-env.yml
+    - jupytext --to notebook --execute docs/examples/**/*.py
+    - poetry run task deploy-docs
+    - git push nist-origin `git subtree split --prefix public master`:nist-pages --force
+  only:
     - master
