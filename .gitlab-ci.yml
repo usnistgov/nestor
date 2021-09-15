@@ -29,8 +29,8 @@ pytest:
 pages:
   stage: deploy
   script:
-    - "mamba env create --file docs/examples/nb-env.yml"
-    - "jupytext --to notebook --execute docs/examples/**/*.py"
+    - micromamba create -y -f docs/examples/nb-env.yml
+    - jupytext --to notebook --execute docs/examples/**/*.py
     - poetry run task deploy-docs
   artifacts:
     paths:
