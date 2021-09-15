@@ -12,11 +12,11 @@ nav:
       - Workflow: "workflow.md"
   - User Interfaces: "gui-links.md"
   - Examples:
-      - "Survival Analysis": "examples/survival-analysis/survival-analysis.md"
+      - "Survival Analysis": "examples/survival-analysis/survival-analysis.ipynb"
       - Named Entity Recognition:
-          - "examples/named-entities/01-BIO-format.md"
-          - "examples/named-entities/02-NER-example-NLTK.md"
-          - "examples/named-entities/03-NER-example-Spacy.md"
+          - IOB Format Intro: "examples/named-entities/01-BIO-format.ipynb"
+          - "examples/named-entities/02-NER-example-NLTK.ipynb"
+          - "examples/named-entities/03-NER-example-Spacy.ipynb"
   - API Reference:
       - settings: "nestor/settings.md"
       - keyword: "nestor/keyword.md"
@@ -31,6 +31,7 @@ theme:
     accent : "orange"
 plugins:
   - search
+  - mknotebooks
   - mkdocstrings:
       watch:
         - nestor
@@ -60,3 +61,4 @@ site_dir: "public"
 markdown_extensions:
   - footnotes
   - pymdownx.superfences
+  - pymdownx.arithmatex
