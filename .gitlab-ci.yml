@@ -9,7 +9,6 @@ default:
 
 stages:
   - test
-  - build_env
   - deploy
 
 variables:
@@ -27,21 +26,15 @@ pytest:
     reports:
       junit: report.xml
 
-nbenv:
-  stage: build_env
-  script:
-    - "mamba env create --file docs/examples/nb-env.yml"
-    - "jupytext --to notebook --execute docs/examples/**/*.py"
-  only:
-    - docs
-    - master
-
 pages:
   stage: deploy
   script:
+    - "mamba env create --file docs/examples/nb-env.yml"
+    - "jupytext --to notebook --execute docs/examples/**/*.py"
     - poetry run task deploy-docs
   artifacts:
     paths:
       - public
-  needs:
-    - nbenv
+  only:
+    - docs
+    - master
