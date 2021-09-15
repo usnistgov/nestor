@@ -42,6 +42,5 @@ pages:
   artifacts:
     paths:
       - public
-  only:
-    - docs
-    - master
+  needs:
+    - nbenv
