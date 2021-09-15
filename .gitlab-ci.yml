@@ -1,5 +1,5 @@
 default:
-  image: $CI_REGISTRY/kea/templates/docker-conda
+  image: $CI_REGISTRY/kea/templates/docker-conda:latest
   before_script:
     - poetry install
   cache:
@@ -29,7 +29,7 @@ pytest:
 pages:
   stage: deploy
   script:
-    - micromamba create -y -f docs/examples/nb-env.yml
+    - conda env update --file docs/examples/nb-env.yml
     - jupytext --to notebook --execute docs/examples/**/*.py
     - poetry run task deploy-docs
   artifacts:
