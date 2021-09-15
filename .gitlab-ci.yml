@@ -29,7 +29,7 @@ pytest:
 nbenv:
   stage: build_env
   script:
-    - 'conda env update --file docs/examples/nb-env.yml'
+    - 'mamba env update --file docs/examples/nb-env.yml'
     - 'jupytext --to notebook --execute docs/examples/**/*.py'
   only:
     - docs
