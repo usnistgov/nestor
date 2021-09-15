@@ -1,0 +1,17 @@
+# NIST Opensource Portal repositories categories and themes.
+# Source: https://www.nist.gov/topics
+# The following NIST topics and categories are based on the NIST
+# Taxonomy. It can be found here:
+# https://data.nist.gov/od/id/691DDF3315711C14E0532457068146BE1907
+
+categories:
+  - scientific-software:
+      - python
+      - annotation
+  - ai-ml:
+      - NLP
+themes:
+  - Artificial intelligence
+  - Information Technology
+  - Manufacturing
+  - Mathematics & Statistics
