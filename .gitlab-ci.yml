@@ -3,8 +3,9 @@ default:
   before_script:
     - poetry install
   cache:
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
-      - ".cache/venv"
+      - .cache/venv
 
 stages:
   - test
@@ -29,8 +30,8 @@ pytest:
 nbenv:
   stage: build_env
   script:
-    - 'mamba env create --file docs/examples/nb-env.yml'
-    - 'jupytext --to notebook --execute docs/examples/**/*.py'
+    - mamba env create --file docs/examples/nb-env.yml
+    - jupytext --to notebook --execute docs/examples/**/*.py
   only:
     - docs
     - master
