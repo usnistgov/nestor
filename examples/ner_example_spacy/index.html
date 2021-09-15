@@ -1,0 +1,385 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis" name="description"/>
+<meta content="Thurston Sexton" name="author"/>
+<link href="../../media/favicon.png" rel="shortcut icon"/>
+<meta content="mkdocs-1.2.2, mkdocs-material-5.5.14" name="generator"/>
+<title>NER Example: Using IOB output SpaCy - Nestor</title>
+<link href="../../assets/stylesheets/main.d3202873.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ff0a5ce4.min.css" rel="stylesheet"/>
+<meta content="#546d78" name="theme-color"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
+<style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+<link href="../../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" rel="stylesheet"/>
+<link href="../../css/ansi-colours.css" rel="stylesheet"/>
+<link href="../../css/jupyter-cells.css" rel="stylesheet"/>
+<link href="../../css/pandas-dataframe.css" rel="stylesheet"/>
+</head>
+<body data-md-color-accent="orange" data-md-color-primary="blue-grey" data-md-color-scheme="" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#ner-example-using-iob-output-spacy">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header-nav md-grid">
+<a aria-label="Nestor" class="md-header-nav__button md-logo" href="../.." title="Nestor">
+<img alt="logo" src="../../media/icon.png"/>
+</a>
+<label class="md-header-nav__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
+</label>
+<div class="md-header-nav__title" data-md-component="header-title">
+<div class="md-header-nav__ellipsis">
+<span class="md-header-nav__topic md-ellipsis">
+            Nestor
+          </span>
+<span class="md-header-nav__topic md-ellipsis">
+            
+              NER Example: Using IOB output SpaCy
+            
+          </span>
+</div>
+</div>
+<label class="md-header-nav__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</label>
+<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
+</button>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Nestor" class="md-nav__button md-logo" href="../.." title="Nestor">
+<img alt="logo" src="../../media/icon.png"/>
+</a>
+    Nestor
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../.." title="Home">
+      Home
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../LICENSE/" title="License">
+      License
+    </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
+<label class="md-nav__link" for="nav-3">
+      Getting Started
+      <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Getting Started" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="nav-3">
+<span class="md-nav__icon md-icon"></span>
+        Getting Started
+      </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting-started/" title="Install &amp; Setup">
+      Install &amp; Setup
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../motivation/" title="Motivation">
+      Motivation
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../workflow/" title="Workflow">
+      Workflow
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../gui-links/" title="User Interfaces">
+      User Interfaces
+    </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-5" id="nav-5" type="checkbox"/>
+<label class="md-nav__link" for="nav-5">
+      Examples
+      <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Examples" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="nav-5">
+<span class="md-nav__icon md-icon"></span>
+        Examples
+      </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../survival-analysis/survival-analysis/" title="Survival Analysis">
+      Survival Analysis
+    </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-5-2" id="nav-5-2" type="checkbox"/>
+<label class="md-nav__link" for="nav-5-2">
+      Named Entity Recognition
+      <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Named Entity Recognition" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="nav-5-2">
+<span class="md-nav__icon md-icon"></span>
+        Named Entity Recognition
+      </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../named-entities/01-BIO-format/" title="IOB Format Intro">
+      IOB Format Intro
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../named-entities/02-NER-example-NLTK/" title="02 NER example NLTK">
+      02 NER example NLTK
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../named-entities/03-NER-example-Spacy/" title="03 NER example Spacy">
+      03 NER example Spacy
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-6" id="nav-6" type="checkbox"/>
+<label class="md-nav__link" for="nav-6">
+      API Reference
+      <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="API Reference" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="nav-6">
+<span class="md-nav__icon md-icon"></span>
+        API Reference
+      </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../nestor/settings/" title="settings">
+      settings
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../nestor/keyword/" title="keyword">
+      keyword
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../nestor/datasets/" title="datasets">
+      datasets
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#helper-functions">
+    Helper functions
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#load-data">
+    Load data
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#prepare-data-for-modeling">
+    Prepare data for modeling
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#spacy-model">
+    SpaCy model
+  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content">
+<article class="md-content__inner md-typeset">
+<h1 id="ner-example-using-iob-output-spacy">NER Example: Using IOB output SpaCy</h1>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">nestor</span> <span class="kn">import</span> <span class="n">keyword</span> <span class="k">as</span> <span class="n">kex</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+</code></pre></div>
+<h2 id="helper-functions">Helper functions</h2>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_iob_format_data</span><span class="p">(</span><span class="n">df_iob</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ner_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Create .iob file with token-per-line IOB format</span>
+<span class="sd">    (see https://github.com/explosion/spaCy/blob/master/extra/example_data/ner_example_data/ner-token-per-line.iob</span>
+<span class="sd">        for example format)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df_iob: DataFrame created by kex.iob_extractor()</span>
+<span class="sd">    ner_file_path: pathname for where to save the file in IOB-formatted output, use ".iob" extension</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    """</span>
+    <span class="c1"># to do: make sure that</span>
+    <span class="c1"># Convert IOB DataFrame to token-per-line tsv file</span>
+    <span class="n">df_iob</span><span class="p">[[</span><span class="s2">"token"</span><span class="p">,</span> <span class="s2">"NE"</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">ner_file_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">convert_iob_to_spacy_file</span><span class="p">(</span><span class="n">ner_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">"""</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ner_file_path: pathname for where to save the file in IOB-formatted output, use ".iob" extension, must be in format</span>
+<span class="sd">        as shown here: https://github.com/explosion/spaCy/blob/master/extra/example_data/ner_example_data/ner-token-per-line.iob</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    """</span>
+    <span class="c1"># todo: make this command customizable, handle tokens better (actually need to group by MWO)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"python -m spacy convert -c ner -s -n 10 -b en_core_web_sm "</span> <span class="o">+</span> <span class="n">ner_file_path</span> <span class="o">+</span> <span class="s2">" ."</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="load-data">Load data</h2>
+<p>Here, we are loading the excavator dataset and associated vocabulary from the Nestor package. </p>
+<p>To use this workflow with your own dataset and Nestor tagging, set up the following dataframes:</p>
+<div class="highlight"><pre><span></span><code>df = pd.read_csv(
+    "original_data.csv"
+)
+
+df_1grams = pd.read_csv(
+    "vocab1g.csv",
+    index_col=0
+)
+
+df_ngrams = pd.read_csv(
+    "vocabNg.csv",
+    index_col=0
+)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">load_excavators</span><span class="p">()</span>
+<span class="c1"># This vocab data inclues 1grams and Ngrams</span>
+<span class="n">df_vocab</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">load_vocab</span><span class="p">(</span><span class="s2">"excavators"</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="prepare-data-for-modeling">Prepare data for modeling</h2>
+<p>Select column(s) that inlcude text.</p>
+<p>Split data into training and test sets.</p>
+<div class="highlight"><pre><span></span><code><span class="n">nlp_select</span> <span class="o">=</span> <span class="n">kex</span><span class="o">.</span><span class="n">NLPSelect</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'OriginalShorttext'</span><span class="p">])</span>
+<span class="n">raw_text</span> <span class="o">=</span> <span class="n">nlp_select</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>   
+<span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">raw_text</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p>Pass text data and vocab files from Nestor through <code>iob_extractor</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">iob_train</span> <span class="o">=</span> <span class="n">kex</span><span class="o">.</span><span class="n">iob_extractor</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">df_1grams</span><span class="p">,</span> <span class="n">vocab_df_ngrams</span><span class="o">=</span><span class="n">df_ngrams</span><span class="p">)</span>
+<span class="n">iob_test</span> <span class="o">=</span> <span class="n">kex</span><span class="o">.</span><span class="n">iob_extractor</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">df_1grams</span><span class="p">,</span> <span class="n">vocab_df_ngrams</span><span class="o">=</span><span class="n">df_ngrams</span><span class="p">)</span>
+</code></pre></div>
+<p>Create <code>.iob</code> files (these are essentially tsv files with proper IOB tag format). Convert <code>.iob</code> files to <code>.spacy</code> binary files</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># pathname/document title should match what is in `congif.cfg file`</span>
+<span class="n">create_iob_format_data</span><span class="p">(</span><span class="n">iob_train</span><span class="p">,</span> <span class="s2">"iob_data.iob"</span><span class="p">)</span>
+<span class="n">convert_iob_to_spacy_file</span><span class="p">(</span><span class="s2">"iob_data.iob"</span><span class="p">)</span>
+<span class="n">create_iob_format_data</span><span class="p">(</span><span class="n">iob_test</span><span class="p">,</span> <span class="s2">"iob_valid.iob"</span><span class="p">)</span>
+<span class="n">convert_iob_to_spacy_file</span><span class="p">(</span><span class="s2">"iob_valid.iob"</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="spacy-model">SpaCy model</h2>
+<p>Run data through basic spaCy training (relies on <code>spacy_config.cfg</code>). This stage can be customized as needed for your particular modeling and analysis.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run data through basic spacy training for proof of concept.</span>
+<span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">"python -m spacy train spacy_config.cfg --output ./output"</span><span class="p">)</span>
+</code></pre></div>
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+          Material for MkDocs
+        </a>
+ ... <a class="link--pdf-download" download="" href="../../pdf/nestor-documentation.pdf" title="PDF">download PDF</a></div>
+</div>
+</div>
+</footer>
+</div>
+<script src="../../assets/javascripts/vendor.2d1db4bd.min.js"></script>
+<script src="../../assets/javascripts/bundle.6627ddf3.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+<script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.5eca75d3.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script src="https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"></script>
+<script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"></script>
+</body>
+</html>
