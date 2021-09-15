@@ -12,7 +12,11 @@ nav:
       - Workflow: "workflow.md"
   - User Interfaces: "gui-links.md"
   - Examples:
-      "Survival Analysis": "examples/survival-analysis/survival-analysis.md"
+      - "Survival Analysis": "examples/survival-analysis/survival-analysis.md"
+      - Named Entity Recognition:
+          - "examples/named-entities/01-BIO-format.md"
+          - "examples/named-entities/02-NER-example-NLTK.md"
+          - "examples/named-entities/03-NER-example-Spacy.md"
   - API Reference:
       - settings: "nestor/settings.md"
       - keyword: "nestor/keyword.md"
