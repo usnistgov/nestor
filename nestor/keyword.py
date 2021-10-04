@@ -4,7 +4,7 @@ import re
 import string
 from pathlib import Path
 from functools import cached_property
-from typing import Union
+from typing import Union, Optional
 from enum import Enum
 import numpy as np
 import pandas as pd
@@ -21,7 +21,7 @@ __all__ = ["NLPSelect", "TokenExtractor", "TagExtractor"]
 
 
 def generate_vocabulary_df(
-    transformer, filename=None, init: Union[str, pd.DataFrame] = None
+    transformer, filename=None, init: Optional[Union[str, pd.DataFrame]] = None
 ):
     """ make correctly formatted entity vocabulary (token->tag+type)
 
@@ -40,7 +40,7 @@ def generate_vocabulary_df(
 
     Parameters:
         transformer (TokenExtractor): the (TRAINED) token extractor used to generate the ranked list of vocab.
-        filename (str, optional) the file location to read/write a csv containing a formatted vocabulary list
+        filename (str, optional): the file location to read/write a csv containing a formatted vocabulary list
         init (str or pd.Dataframe, optional): file location of csv or dataframe of existing vocab list to read and update
             token classification values from
 
@@ -56,7 +56,10 @@ def generate_vocabulary_df(
         if (filename is not None) and Path(filename).is_file():
             print("No model fitted, but file already exists. Importing...")
             return pd.read_csv(filename, index_col=0)
-        elif (init is not None) and Path(init).is_file():
+        elif isinstance(init, str):
+            assert Path(
+                init
+            ).is_file(), "Assumed path-like was passed, but does not exist!"
             print("No model fitted, but file already exists. Importing...")
             return pd.read_csv(init, index_col=0)
         else:
@@ -85,16 +88,17 @@ def generate_vocabulary_df(
         df.NE = np.nan
         df.alias = np.nan
         df.notes = np.nan
-        if isinstance(init, Path) and init.is_file():  # filename is passed
+        if isinstance(init, pd.DataFrame):
+            df_import = init.copy()
+        elif isinstance(init, str):
+            assert Path(init).is_file(), "`filename` does not exist!"
             df_import = pd.read_csv(init, index_col=0)
         else:
-            try:  # assume input pandas df
-                df_import = init.copy()
-            except AttributeError:
-                print("File not Found! Can't import!")
-                raise
+            import warnings
+
+            warnings.warn("File not Found! Can't import!")
+            raise IOError
         df.update(df_import)
-        # print('intialized successfully!')
         df.fillna("", inplace=True)
 
     if filename is not None:
@@ -245,7 +249,7 @@ def tag_extractor(
         v_filled = v_filled.assign(
             NE=v_filled.NE.mask(v_filled.alias == "_untagged", "NA")
         )
-    sparse_dtype = pd.SparseDtype(int, fill_value=0.0)
+    sparse_dtype = pd.SparseDtype(dtype=int, fill_value=0.0)
     table = (  # more pandas-ey pivot, for future cat-types
         v_filled.assign(exists=1)  # placehold
         .groupby(["NE", "alias", "tokens"])["exists"]
@@ -269,7 +273,7 @@ def tag_extractor(
     return tag_df
 
 
-def regex_match_vocab(vocab_iter, tokenize=False) -> re.Pattern:
+def regex_match_vocab(vocab_iter, tokenize=False) -> re.Pattern[str]:
     """regex-based multi-replace
 
     Fast way to get all matches for a list of vocabulary (e.g. to replace them with preferred labels).

@@ -13,6 +13,7 @@ stages:
 
 variables:
   POETRY_VIRTUALENVS_PATH: "${CI_PROJECT_DIR}/.cache/venv"
+  MKDOCS_SITE_DIR: "public"
   
 pytest:
   stage: test
@@ -26,14 +27,13 @@ pytest:
 pages:
   stage: deploy
   variables:
-
     MKDOCS_SITE_URL: "https://kea.ipages.nist.gov/nestor-suite/nestor/"
     MKDOCS_REPO_URL: "https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/"
 
   script:
-    - conda env update --file docs/examples/nb-env.yml
-    - jupytext --to notebook --execute docs/examples/**/*.py
-    - poetry run task deploy-docs
+    # - conda env update --file docs/examples/nb-env.yml
+    # - jupytext --to notebook --execute docs/examples/**/*.py
+    - poetry run task deploy
   artifacts:
     paths:
       - public
@@ -41,16 +41,16 @@ pages:
     - docs
     - master
 
-nist-pages:
-  stage: deploy
-  variables:
-    MKDOCS_SITE_URL: "https://pages.nist.gov/nestor/"
-    MKDOCS_REPO_URL: "https://github.com/usnistgov/nestor"
+# nist-pages:
+#   stage: deploy
+#   variables:
+#     MKDOCS_SITE_URL: "https://pages.nist.gov/nestor/"
+#     MKDOCS_REPO_URL: "https://github.com/usnistgov/nestor"
 
-  script:
-    - conda env update --file docs/examples/nb-env.yml
-    - jupytext --to notebook --execute docs/examples/**/*.py
-    - poetry run task deploy-docs
-    - git push nist-origin `git subtree split --prefix public master`:nist-pages --force
-  only:
-    - master
+#   script:
+#     - conda env update --file docs/examples/nb-env.yml
+#     - jupytext --to notebook --execute docs/examples/**/*.py
+#     - poetry run task deploy-docs
+#     - git push nist-origin `git subtree split --prefix public master`:nist-pages --force
+#   only:
+#     - master

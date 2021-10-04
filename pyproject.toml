@@ -42,11 +42,21 @@ mkdocs-with-pdf = "^0.9.2"
 poetry-dynamic-versioning = "^0.13.0"
 datatest = "^0.11.1"
 mknotebooks = "^0.7.1"
+mypy = "^0.910"
+pandas-stubs = "^1.2.0"
 
 [tool.taskipy.tasks]
-format = "black nestor/ && black tests/"
-deploy-docs = "ENABLE_PDF_EXPORT=1 mkdocs build --verbose --clean"
+lint_format = "black nestor/ && black tests/"
+lint_mypy = "mypy nestor/keyword.py nestor/settings.py nestor/datasets"
+lint = "task lint_format && task lint_mypy"
 
+env_update = "conda env update --file docs/examples/nb-env.yml"
+env_nb-exec = "jupytext --to notebook --execute docs/examples/**/*.py"
+env = "task env_update && task env_nb-exec"
+
+deploy_docs = "ENABLE_PDF_EXPORT=1 mkdocs build --verbose --clean"
+pre_deploy = "task env"
+deploy = "task deploy_docs"
 
 [tool.poetry-dynamic-versioning]
 enable = true
@@ -56,44 +66,6 @@ format = "{base}"
 
 [tool.poetry-dynamic-versioning.substitution]
 
-# [tool.portray]
-# modules = ["nestor"]
-
-# [tool.portray.mkdocs]
-# repo_url = "https://github.com/usnistgov/nestor"
-# plugins = [
-#     "markdownmermaid",
-#     "pdf-export",
-#     "search",
-# ]
-# extra_javascript = [
-#     "https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js"
-# ]
-# [tool.portray.mkdocs.nav]
-# "Home" = "README.md"
-# "Getting Started" = "docs/getting-started.md"
-# "User Interfaces" = "docs/gui-links.md"
-# "Development Repository" = "https://github.com/usnistgov/nestor"
-
-
-# [tool.portray.mkdocs.theme]
-# favicon = "media/favicon.png"
-# logo = "media/icon.png"
-# name = "material"
-# palette = {primary = "deep orange", accent = "teal"}
-
-# [[tool.portray.mkdocs.plugins]]
-#     [[tool.portray.mkdocs.plugins.bibtex]]
-#     bib_file = "docs/biblio.bib"
-#     [[tool.portray.mkdocs.plugins.bibtex]]
-#     cite_style = "pandoc"
-#     [[tool.portray.mkdocs.plugins.search]]
-
-# [tool.portray.mkdocs.plugins]
-# bibtex = { bib_file = "docs/biblio.bib", cite_style = "pandoc" }
-
 [build-system]
 requires = ["poetry_core>=1.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry.core.masonry.api"
-# requires = ["poetry>=0.12", "poetry-dynamic-versioning"]
-# build-backend = "poetry.masonry.api"

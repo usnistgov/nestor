@@ -57,7 +57,7 @@ extra_javascript:
   - "https://unpkg.com/mermaid/dist/mermaid.min.js"
   - "https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"
   - "https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"
-site_dir: "public"
+site_dir: !ENV MKDOCS_SITE_DIR
 markdown_extensions:
   - footnotes
   - pymdownx.superfences
