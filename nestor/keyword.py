@@ -4,7 +4,7 @@ import re
 import string
 from pathlib import Path
 from functools import cached_property
-from typing import Union, Optional
+from typing import Union, Optional, Pattern
 from enum import Enum
 import numpy as np
 import pandas as pd
@@ -273,7 +273,7 @@ def tag_extractor(
     return tag_df
 
 
-def regex_match_vocab(vocab_iter, tokenize=False) -> re.Pattern[str]:
+def regex_match_vocab(vocab_iter, tokenize=False) -> Pattern[str]:
     """regex-based multi-replace
 
     Fast way to get all matches for a list of vocabulary (e.g. to replace them with preferred labels).
