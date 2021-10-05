@@ -1,0 +1,21 @@
+name: NIST Pages
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy-pages:
+    container: ghcr.io/usnistgov/continuous-scientific-python:latest
+    env:
+      # POETRY_VIRTUALENVS_PATH: "${CI_PROJECT_DIR}/.cache/venv"
+      MKDOCS_SITE_DIR: "public"
+      MKDOCS_SITE_URL: "https://pages.nist.gov/nestor/"
+      MKDOCS_REPO_URL: "https://github.com/usnistgov/nestor"
+
+
+    steps:
+      - name: "install dev dependencies"
+        run: poetry install
+      - name: "subtree script for nist-pages branch"
+        run: |
+          ./nist-pages-deploy.sh
