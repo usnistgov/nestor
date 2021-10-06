@@ -754,11 +754,51 @@ class NLPSelect(_Transformer):
 
 
 class TokenExtractor(TransformerMixin):
-    """A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
-       total tf-idf score, and getting a list of vocabulary.
+    """
+    A wrapper for the sklearn TfidfVectorizer class, with utilities for ranking by
+    total tf-idf score, and getting a list of vocabulary.
 
-       Valid options are given below from sklearn docs.
+    Valid options are given below from sklearn docs.
 
+    Args:
+       input (string): {'filename', 'file', 'content'}
+            If 'filename', the sequence passed as an argument to fit is
+            expected to be a list of filenames that need reading to fetch
+            the raw content to analyze.
+
+            If 'file', the sequence items must have a 'read' method (file-like
+            object) that is called to fetch the bytes in memory.
+            Otherwise the input is expected to be the sequence strings or
+            bytes items are expected to be analyzed directly.
+       ngram_range (tuple): (min_n, max_n), default=(1,1)
+            The lower and upper boundary of the range of n-values for different
+            n-grams to be extracted. All values of n such that min_n <= n <= max_n
+            will be used.
+       stop_words (string): {'english'} (default), list, or None
+            If a string, it is passed to _check_stop_list and the appropriate stop
+            list is returned. 'english' is currently the only supported string
+            value.
+
+            If a list, that list is assumed to contain stop words, all of which
+            will be removed from the resulting tokens.
+            Only applies if ``analyzer == 'word'``.
+
+            If None, no stop words will be used. max_df can be set to a value
+            in the range [0.7, 1.0) to automatically detect and filter stop
+            words based on intra corpus document frequency of terms.
+       max_features (int or None):
+            If not None, build a vocabulary that only consider the top
+            max_features ordered by term frequency across the corpus.
+            This parameter is ignored if vocabulary is not None.
+            (default=5000)
+       smooth_idf (boolean):
+            Smooth idf weights by adding one to document frequencies, as if an
+            extra document was seen containing every term in the collection
+            exactly once. Prevents zero divisions. (default=False)
+       sublinear_tf (boolean): (Default value = True)
+            Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
+
+       **tfidf_kwargs: other arguments passed to `sklearn.TfidfVectorizer`
 
        """
 
@@ -773,48 +813,6 @@ class TokenExtractor(TransformerMixin):
         token_pattern=nestorParams.token_pattern,
         **tfidf_kwargs,
     ):
-        """Initialize the extractor
-
-        Args:
-           input (string): {'filename', 'file', 'content'}
-                If 'filename', the sequence passed as an argument to fit is
-                expected to be a list of filenames that need reading to fetch
-                the raw content to analyze.
-
-                If 'file', the sequence items must have a 'read' method (file-like
-                object) that is called to fetch the bytes in memory.
-                Otherwise the input is expected to be the sequence strings or
-                bytes items are expected to be analyzed directly.
-           ngram_range (tuple): (min_n, max_n), default=(1,1)
-                The lower and upper boundary of the range of n-values for different
-                n-grams to be extracted. All values of n such that min_n <= n <= max_n
-                will be used.
-           stop_words (string): {'english'} (default), list, or None
-                If a string, it is passed to _check_stop_list and the appropriate stop
-                list is returned. 'english' is currently the only supported string
-                value.
-
-                If a list, that list is assumed to contain stop words, all of which
-                will be removed from the resulting tokens.
-                Only applies if ``analyzer == 'word'``.
-
-                If None, no stop words will be used. max_df can be set to a value
-                in the range [0.7, 1.0) to automatically detect and filter stop
-                words based on intra corpus document frequency of terms.
-           max_features (int or None):
-                If not None, build a vocabulary that only consider the top
-                max_features ordered by term frequency across the corpus.
-                This parameter is ignored if vocabulary is not None.
-                (default=5000)
-           smooth_idf (boolean):
-                Smooth idf weights by adding one to document frequencies, as if an
-                extra document was seen containing every term in the collection
-                exactly once. Prevents zero divisions. (default=False)
-           sublinear_tf (boolean): (Default value = True)
-                Apply sublinear tf scaling, i.e. replace tf with 1 + log(tf).
-
-           **tfidf_kwargs: other arguments passed to `sklearn.TfidfVectorizer`
-        """
         self.default_kws = dict(
             {
                 "input": input,
@@ -955,18 +953,43 @@ class TokenExtractor(TransformerMixin):
 
 
 class TagRep(str, Enum):
-    """available representation of tags in documents
-
+    """
+    Available representation schemes of tags on documents.
+    Tag-types defined using the current [`nestor.CFG`][nestor.settings.NestorParams].
     """
 
     binary = "binary"
+    """a Multi-column
+    `pd.DataFrame` with the top-level columns being current tag-types, and the sub-level being the actual tokens/compound-tokens.
+    """
     multilabel = "multilabel"
+    """a one-level `pd.DataFrame` list-like (comma separated) set of tags, with one column-per-tag-type"""
     iob = "iob"
+    """A one-row-per-token (tidy text) representation of the tags as inside-outside-between, for training NER models."""
 
 
 class TagExtractor(TokenExtractor):
-    """Wrapper for [TokenExtractor](nestor.keyword.TokenExtractor) to apply a *Nestor* thesaurus or vocabulary
+    """
+    Wrapper for [`TokenExtractor`][nestor.keyword.TokenExtractor] to apply a *Nestor* thesaurus or vocabulary
     definition on-top of the token extraction process. Also provides several useful methods as a result.
+
+    Identical to the [`TokenExtractor`][nestor.keyword.TokenExtractor] initialization,
+    Except for the addition of an optional `vocab` argument that allows for pre-defined
+    thesaurus/dictionary mappings of tokens to named entities
+    (see [`generate_vocabulary_df`][nestor.keyword.generate_vocabulary_df])
+    to get used in the transformation doc-term form.
+
+    Rather than outputting a TF-IDF-weighted sparse matrix, this transformer outputs one of the available tag representation
+    types from the [`TagRep`][nestor.keyword.TagRep] Enum class: `multilabel`, `iob`, `binary` (default).
+
+    Arguments:
+        thesaurus:
+        group_untagged:
+        filter_types:
+        verbose:
+        output_type:
+        tfidf_kwargs:
+
     """
 
     def __init__(
@@ -978,18 +1001,6 @@ class TagExtractor(TokenExtractor):
         output_type: TagRep = TagRep["binary"],
         **tfidf_kwargs,
     ):
-        """
-        Identical to the [TokenExtractor](nestor.keyword.TokenExtractor) initialization,
-        Except for the addition of an optional `vocab` argument that allows for pre-defined
-        thesaurus/dictionary mappings of tokens to named entities
-        (see [generate_vocabulary_df](nestor.keyword.generate_vocabulary_df))
-        to get used in the transformation doc-term form.
-
-        Rather than outputting a TF-IDF-weighted sparse matrix, this transformer outputs a Multi-column
-        `pd.DataFrame` with the top-level columns being current tag-types in `nestor.CFG`, and the sub-level
-        being the actual tokens/compound-tokens.
-
-        """
         # super().__init__()
         default_kws = dict(
             input="content",
@@ -1023,11 +1034,13 @@ class TagExtractor(TokenExtractor):
         self.num_empty_docs_ = None
 
     @cached_property
-    def thesaurus(self):
+    def thesaurus(self) -> pd.DataFrame:
+        """accessor to the current vocabulary and aliases used to extract tags"""
         return self._tokenmodel.thesaurus_template(init=self._thesaurus)
 
     @property
-    def tfidf(self):
+    def tfidf(self) -> np.array:
+        """tf-idf weighted doc-term matrix (output of TokenExtractor)"""
         return self.tfidf_
 
     @tfidf.setter
@@ -1035,7 +1048,8 @@ class TagExtractor(TokenExtractor):
         self.tfidf_ = sparse_docterm
 
     @property
-    def tag_df(self):
+    def tag_df(self) -> pd.DataFrame:
+        """binary representation of extracted tags (if fitted)"""
         return self.tag_df_
 
     @tag_df.setter
@@ -1043,15 +1057,18 @@ class TagExtractor(TokenExtractor):
         self.tag_df_ = binary_df
 
     @property
-    def tag_completeness(self):
+    def tag_completeness(self) -> np.ndarray:
+        """fraction of tokens having a non-hole tag type for each document (as a 1-d array)"""
         return self.tag_completeness_
 
     @property
-    def num_complete_docs(self):
+    def num_complete_docs(self) -> int:
+        """number of documents having every token tagged"""
         return self.num_complete_docs_
 
     @property
-    def num_empty_docs(self):
+    def num_empty_docs(self) -> int:
+        """number of documents having no tokens tagged"""
         return self.num_empty_docs_
 
     def set_stats(self):
@@ -1062,7 +1079,8 @@ class TagExtractor(TokenExtractor):
             self.num_empty_docs_,
         ) = get_tag_completeness(self.tag_df_, verbose=False)
 
-    def report_completeness(self):
+    def report_completeness(self) -> None:
+        """print a nicely formatted report of the progress made by `thesaurus` on the documents"""
         print(
             f"Complete Docs: {self.num_complete_docs}, or {self.num_complete_docs / len(self.tag_df):.2%}"
         )
@@ -1074,7 +1092,8 @@ class TagExtractor(TokenExtractor):
         )
 
     @property
-    def tags_as_lists(self):
+    def tags_as_lists(self) -> pd.DataFrame:
+        """multilabel representation of tag output"""
         return self.multi_rep_
 
     @tags_as_lists.setter
@@ -1082,7 +1101,8 @@ class TagExtractor(TokenExtractor):
         self.multi_rep_ = _get_readable_tag_df(tag_df)
 
     @property
-    def tags_as_iob(self):
+    def tags_as_iob(self) -> pd.DataFrame:
+        """IOB representation of tag output (for NER training)"""
         return self.iob_rep_
 
     @tags_as_iob.setter
@@ -1090,9 +1110,8 @@ class TagExtractor(TokenExtractor):
         self.iob_rep_ = iob_extractor(documents, self.thesaurus)
 
     def fit(self, documents, y=None):
-        # self._tokenmodel.fit(documents)
+        """Fit the sklearn transformer"""
         self.tfidf_ = self._tokenmodel.fit_transform(documents)
-        # check_is_fitted(self._tokenmodel, msg="The tfidf vector is not fitted")
         tag_df = tag_extractor(
             self._tokenmodel,
             documents,
@@ -1110,9 +1129,8 @@ class TagExtractor(TokenExtractor):
             self.report_completeness()
         return self
 
-    def transform(self, documents, y=None):
-        """
-        """
+    def transform(self, documents, y=None) -> pd.DataFrame:
+        """apply the fitted transformer to input data (documents)"""
         check_is_fitted(self, "tag_df_")
 
         if self.output_type == TagRep.multilabel:

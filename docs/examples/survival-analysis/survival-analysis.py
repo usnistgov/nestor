@@ -56,7 +56,8 @@ vocab
 #
 # ### scikit-learn's `Pipeline`
 #
-# Convenient way to use [`TagExtractor`](nestor.keyword.TagExtractor) to output a more usable format. Let's use the multi-index `binary` format for now. Other options include:
+# Convenient way to use [`TagExtractor`][nestor.keyword.TagExtractor] to output a more usable format. Let's use the multi-index `binary` format for now. Other options include:
+#
 # - list-of-tokens `multilabel`
 # - NER-trainer `iob`.  
 #
@@ -172,7 +173,7 @@ plt.title('Probability of a Token/Tag\'s frequency')
 # To get the raw text occurences into something more consistent for failure-time estimation, one might:
 #
 # - make a rules-based algorithm that checks for known (a priori) pattern occurrences and categorizes/normalizes when matched (think: Regex matching)
-# - create aliases for raw tokens (e.g. using suggestions for "important" tokens from [TokenExtractor.thesaurus_template](nestor.keyword.TokenExtractor.thesaurus_template))
+# - create aliases for raw tokens (e.g. using suggestions for "important" tokens from [TokenExtractor.thesaurus_template][nestor.keyword.TokenExtractor.thesaurus_template])
 #
 # This was done in [@sexton2018benchmarking], and whe demonstrate the technique below. See the paper for further details!
 

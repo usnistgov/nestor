@@ -14,14 +14,14 @@ nav:
   - Examples:
       - "Survival Analysis": "examples/survival-analysis/survival-analysis.ipynb"
       - Named Entity Recognition:
-          - IOB Format Intro: "examples/named-entities/01-BIO-format.ipynb"
-          - "examples/named-entities/02-NER-example-NLTK.ipynb"
-          - "examples/named-entities/03-NER-example-Spacy.ipynb"
+          - Primer - IOB Format: "examples/named-entities/01-BIO-format.ipynb"
+          - NLTK: "examples/named-entities/02-NER-example-NLTK.ipynb"
+          - SpaCy: "examples/named-entities/03-NER-example-Spacy.ipynb"
   - API Reference:
-      - settings: "nestor/settings.md"
-      - keyword: "nestor/keyword.md"
+      - Nestor Configuration: "nestor/settings.md"
+      - TLP - Assisted NLP: "nestor/keyword.md"
       # - tagtrees: "nestor/tagtrees.md"
-      - datasets: "nestor/datasets.md"
+      - TLP - Datasets: "nestor/datasets.md"
 theme:
   name: "material"
   favicon: "media/favicon.png"
@@ -35,6 +35,11 @@ plugins:
   - mkdocstrings:
       watch:
         - nestor
+      handlers:
+        python:
+          rendering:
+            show_root_heading: true
+
   # - pdf-export:
       # combined: true
   - with-pdf:
@@ -53,6 +58,7 @@ plugins:
       cite_style: "pandoc"
 extra_css:
   - "https://pages.nist.gov/nist-header-footer/css/nist-combined.css"
+  - css/mkdocstrings.css
 extra_javascript:
   - "https://unpkg.com/mermaid/dist/mermaid.min.js"
   - "https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"
@@ -62,3 +68,6 @@ markdown_extensions:
   - footnotes
   - pymdownx.superfences
   - pymdownx.arithmatex
+  - def_list
+  - toc:
+      permalink: "🔗"

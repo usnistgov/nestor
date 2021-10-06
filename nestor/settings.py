@@ -4,11 +4,6 @@ import yaml
 import os
 
 __author__ = "Thurston Sexton"
-__all__ = [
-    "nestor_params_from_files",
-    "nestor_params",
-    "NestorParams",
-]
 
 DEFAULT_CACHE = Path.home() / ".nestor"
 DEFAULT_CFG = Path(__file__).parent / "settings.yaml"
@@ -65,9 +60,10 @@ def nestor_params():
 class NestorParams(dict):
     """Temporary subclass of `dict` to manage nestor contexts.
 
-    > To be re-factored as typed dataclasses.
+    > To be re-factored as typed dataclasses or `pydantic` models.
 
     > TODO: allow context-based switching (a.k.a matplotlib xParams style)
+
     A valid nestor config `yaml` is formated with these feilds:
 
     ```yaml
@@ -94,7 +90,7 @@ class NestorParams(dict):
     in manufacturing maintenance:
 
     ```yaml
-    token_patt = '(?u)\b\w\w+\b'
+    token_patt: '(?u)\b\w\w+\b'
     entities:
       types:
         'atomic': # atomic types
@@ -185,24 +181,28 @@ class NestorParams(dict):
 
     @property
     def token_pattern(self):
+        """regex pattern string for tokenizing the text (default: sklearn's tfidf pattern)"""
         if not self._token_patt:
             self._token_patt = self["token_pattern"]
         return r"{}".format(self._token_patt)
 
     @property
     def datatypes(self):
+        """all defined data-types, as a flattened (dot-separated) dict"""
         if self._datatypes is None:
             self._datatypes = flatten_dict(self["datatypes"])
         return self._datatypes
 
     @property
     def entities(self):
+        """all currently-defined tag types"""
         if self._entities is None:
             self._entities = leafnames(self["entities"]["types"])
         return self._entities
 
     @property
     def atomics(self):
+        """lowest-level tag-types, used to create compound types"""
         if self._atomics is None:
             self._atomics = find_node_from_path(
                 self, next(find_path_from_key(self, "atomic"))
@@ -211,6 +211,7 @@ class NestorParams(dict):
 
     @property
     def holes(self):
+        """types representing missing or uncertain annotations"""
         if self._holes is None:
             self._holes = find_node_from_path(
                 self, next(find_path_from_key(self, "hole"))
@@ -219,6 +220,7 @@ class NestorParams(dict):
 
     @property
     def derived(self):
+        """compound tag types, derived from the atomics"""
         if self._derived is None:
             self._derived = find_node_from_path(
                 self, next(find_path_from_key(self, "derived"))
@@ -227,6 +229,7 @@ class NestorParams(dict):
 
     @property
     def entity_rules_map(self):
+        """mapping of atomic combinations to compound types, for automated re-mapping and suggestions"""
         if self._entity_rules is None:
             raw_rules = self["entities"]["rules"]
             rules = {k: [set(i) for i in v] for k, v in raw_rules.items()}
@@ -345,7 +348,7 @@ def get_nestor_cache_dir() -> Path:
 
 
 def set_nestor_cache_dir(dir: Path, migrate: bool = False) -> None:
-    pass
+    pass  # TODO
 
 
 CFG = nestor_params()
