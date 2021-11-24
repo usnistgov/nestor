@@ -12,6 +12,7 @@ nav:
       - Workflow: "workflow.md"
   - User Interfaces: "gui-links.md"
   - Examples:
+      - 'examples/index.md'
       - "Survival Analysis": "examples/survival-analysis/survival-analysis.ipynb"
       - Named Entity Recognition:
           - Primer - IOB Format: "examples/named-entities/01-BIO-format.ipynb"
@@ -29,6 +30,8 @@ theme:
   palette:
     primary: "blue grey"
     accent : "orange"
+  features:
+    - navigation.indexes
 plugins:
   - search
   - mknotebooks
