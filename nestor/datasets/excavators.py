@@ -4,7 +4,6 @@ from .utils import download_datafile
 
 _RAW_URL = "https://prognosticsdl.systemhealthlab.com/dataset/f4780ee0-efa6-45b6-b6dc-cfc60bfb5687/resource/7c2b0da9-8a8a-4d3a-8102-5d02ea5ba57a/download/excavator_2015_raw_forpdl.csv"
 _CLEAN_URL = "https://prognosticsdl.systemhealthlab.com/dataset/f4780ee0-efa6-45b6-b6dc-cfc60bfb5687/resource/72033940-667f-4815-8d6b-60dd7acbad2e/download/excavator_2015_cleaned_forpdl.csv"
-
 AssetType = pd.CategoricalDtype(categories=list("ABCDE"))
 PMType = pd.CategoricalDtype(categories=[f"PM{i:02}" for i in [1, 2, 4, 5, 6, 13]])
 
