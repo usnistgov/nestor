@@ -1,5 +1,5 @@
 """
-author: Thurston Sexton
+author: Rachael Sexton
 """
 import warnings
 

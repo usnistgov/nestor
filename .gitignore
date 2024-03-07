@@ -163,3 +163,4 @@ cython_debug/
 /.idea/
 /docs/.auctex-auto/
 *.iob
+/.python-version

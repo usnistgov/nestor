@@ -3,7 +3,7 @@ from itertools import product
 import yaml
 import os
 
-__author__ = "Thurston Sexton"
+__author__ = "Rachael Sexton"
 
 DEFAULT_CACHE = Path.home() / ".nestor"
 DEFAULT_CFG = Path(__file__).parent / "settings.yaml"

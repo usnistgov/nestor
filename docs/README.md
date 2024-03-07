@@ -74,7 +74,7 @@ This toolkit is a part of the [Knowledge Extraction and Application for Smart Ma
 
 ### Points of Contact
 - Email the development team at <nestor@nist.gov>
--   [Thurston Sexton](https://www.nist.gov/people/thurston-sexton) [@tbsexton](https://github.com/tbsexton) Nestor Technical Lead, Associate Project Leader 
+-   [Rachael Sexton](https://www.nist.gov/people/rachael-sexton) [@rtbs-dev](https://github.com/rtbs-dev) Nestor Technical Lead, Associate Project Leader 
 -   [Michael Brundage](https://www.nist.gov/people/michael-p-brundage) Project Leader
 
 

@@ -2,7 +2,7 @@ site_name: Nestor
 site_url: !ENV MKDOCS_SITE_URL
 repo_url: !ENV MKDOCS_REPO_URL
 site_description: "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
-site_author: "Thurston Sexton"
+site_author: "Rachael Sexton"
 nav: 
   - Home: "README.md"
   - License: "LICENSE.md"

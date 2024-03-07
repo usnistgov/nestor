@@ -2,7 +2,7 @@
 name = "nist-nestor"
 version = "0.0.0"
 description = "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
-authors = ["tbsexton <thurston.sexton@nist.gov>"]
+authors = ["rtbs-dev <rtbs@nist.gov>"]
 include = ["./*.md", "nestor/settings.yaml"]
 classifiers=[
     "Development Status :: 3 - Alpha",
@@ -20,7 +20,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.10"
+python = ">=3.8,<3.10"
 scikit-learn = "~0"
 networkx = "^2.4"
 pyyaml = "^5.3.1"
@@ -37,13 +37,15 @@ mkdocs = "^1.1.2"
 mkdocs-bibtex = "^0.3.0"
 mkdocs-material = "^5.5.14"
 mkdocs-mermaid2-plugin = "^0.4.2"
-mkdocstrings = "^0.15.0"
 mkdocs-with-pdf = "^0.9.2"
 poetry-dynamic-versioning = "^0.13.0"
 datatest = "^0.11.1"
 mknotebooks = "^0.7.1"
 mypy = "^0.910"
 pandas-stubs = "^1.2.0"
+
+[tool.poetry.group.docs.dependencies]
+mkdocstrings = {extras = ["python"], version = "^0.22.0"}
 
 [tool.taskipy.tasks]
 lint_format = "black nestor/ && black tests/"

@@ -1,4 +1,4 @@
-__author__ = "Thurston Sexton"
+__author__ = "Rachael Sexton"
 
 import re
 import string

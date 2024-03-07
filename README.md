@@ -71,7 +71,7 @@ This toolkit is a part of the Knowledge Extraction and Application for Smart Man
 
 ### Points of Contact
 - Email the dev team at <nestor@nist.gov>
--   [Thurston Sexton](https://www.nist.gov/people/thurston-sexton) [@tbsexton](https://github.com/tbsexton) Nestor Technical Lead 
+-   [Rachael Sexton](https://www.nist.gov/people/rachael-sexton) [@rtbs-dev](https://github.com/rtbs-dev) Nestor Technical Lead 
 -   [Michael Brundage](https://www.nist.gov/people/michael-p-brundage) Principal Investigator 
 
 
