@@ -9,14 +9,25 @@
 
 ## Purpose
 
+**Nestor** is a toolkit for using Natural Language Processing (NLP) with efficient user-interaction to perform structured data extraction with minimal annotation time-cost.
+ 
+### The Problem
 NLP in technical domains requires context sensitivity.
 Whether for medical notes, engineering work-orders, or social/behavioral coding, experts often use specialized vocabulary with over-loaded meanings and jargon.
 This is incredibly difficult for off-the-shelf NLP systems to parse through. 
 
-The common solution is to contextualize NLP models.
-For instance, medical NLP has been greatly advanced with the advent of labeled, bio-specific datasets, which have domain-relevant named-entity tags and vocabulary sets. 
+The common solution is to contextualize and adapt NLP models to technical text -- Technical Language Processing (TLP)[@brundage2020technical].
+For instance, medical research has been greatly advanced with the advent of labeled, bio-specific datasets, which have domain-relevant named-entity tags and vocabulary sets. 
 Unfortunately for analysts of these types of data, creating resources like this is incredibly time consuming. 
 This is where `nestor` comes in. 
+
+### Why Maintenance and Manufacturing?
+
+A reader may notice a heavy focus on maintenance and manufacturing in the Nestor documentation and design. 
+While this is a common problem in technical domains, generally, Nestor got its start in manufacturing data analysis. 
+A large amount of maintenance data is *already* available for use in advanced manufacturing systems, but in a currently-unusable form: service tickets and maintenance work orders (MWOs).
+
+For further reading, see [@sexton2017hybrid] [@sharp2017toward] [@brundage2020technical]. 
 
 ## Quick Links
 
@@ -34,13 +45,7 @@ This application was originally designed to help manufacturers "tag" their maint
 The goal is to help  build context-rich labels in data sets that previously were too unstructured or filled with jargon to analyze.
 The current build is in very early alpha, so please be patient in using this application. If you have any questions, please do not hesitate to contact us (see [Who are we?](#who-are-we). ) 
 
-### Why?
 
-There is often a large amount of maintenance data *already* available for use in Smart Manufacturing systems, but in a currently-unusable form: service tickets and maintenance work orders (MWOs).
-**Nestor** is a toolkit for using Natural Language Processing (NLP) with efficient user-interaction to perform structured data extraction with minimal annotation time-cost. 
-For further reading, see [@sexton2017hybrid] [@sharp2017toward]. 
-
-### Features
 
 -   Rank keywords found in your data by importance, saving you time
 -   Suggest term unification by similarity (e.g. spelling), for quick review
@@ -51,26 +56,26 @@ For further reading, see [@sexton2017hybrid] [@sharp2017toward].
 
 Planned: 
 
-- Customizable entity types and rules
-- export to NER training formats
-- command-line app and REST API
+- Customizable entity types and rules,
+- Export to NER training formats,
+- Command-line app and REST API.
 
 
 ## Who are we?
 
-This toolkit is a part of the Knowledge Extraction and Application for Smart Manufacturing (KEA) project, within the Systems Integration Division at NIST. 
+This toolkit is a part of the [Knowledge Extraction and Application for Smart Manufacturing (KEA)](https://www.nist.gov/programs-projects/knowledge-extraction-and-application-manufacturing-operations) project, within the [Systems Integration Division](https://www.nist.gov/el/systems-integration-division-73400) at NIST. 
 
 
 ### Projects that use Nestor
 
-- Various [Nestor GUIs](gui-links.md)
-- [nestor exploratory data analysis](https://github.com/usnistgov/nestor-eda) (dashboard, viz, etc.)
+- Various [Nestor GUIs](gui-links.md): ways to use the full human-centered Nestor workflow in a user-interface. 
+- [`nestor-eda`](https://github.com/usnistgov/nestor-eda): (exploratory data analysis): things to do with Nestor-annotated data (dashboard, viz, etc.)
 
 
 ### Points of Contact
-- Email the dev team at <nestor@nist.gov>
--   [Thurston Sexton](https://www.nist.gov/people/thurston-sexton) [@tbsexton](https://github.com/tbsexton) Nestor Technical Lead 
--   [Michael Brundage](https://www.nist.gov/people/michael-p-brundage) Principal Investigator 
+- Email the development team at <nestor@nist.gov>
+-   [Thurston Sexton](https://www.nist.gov/people/thurston-sexton) [@tbsexton](https://github.com/tbsexton) Nestor Technical Lead, Associate Project Leader 
+-   [Michael Brundage](https://www.nist.gov/people/michael-p-brundage) Project Leader
 
 
 ### Why "KEA"?
@@ -84,5 +89,8 @@ More to come, but primary requirement is the use of [Poetry](https://python-poet
 Plugins are installed as development dependencies through poetry (e.g. `taskipy` and `poetry-dynamic-versioning`), though if not using `conda` environments, `poetry-dynamic-versioning` may require being installed to the global python installation. 
 
 Notebooks should be kept nicely git-friendly with [Jupytext](https://github.com/mwouts/jupytext)
+
+## Other Tools/Resources
+Know of other tools? Or want to find similar resources as Nestor? A community driven [TLP Community of Interest (COI)](https://www.nist.gov/el/technical-language-processing-community-interest) has been created to provide publicly available resources to the community. Check out our [awesomelist](https://github.com/TLP-COI/awesome-tlp).
 
 \bibliography

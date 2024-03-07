@@ -1,5 +1,6 @@
 site_name: Nestor
-repo_url: "https://github.com/usnistgov/nestor"
+site_url: !ENV MKDOCS_SITE_URL
+repo_url: !ENV MKDOCS_REPO_URL
 site_description: "Quantifying tacit human knowledge for Smart Manufacturing Maintenance, for maintnenance-based investigatory analysis"
 site_author: "Thurston Sexton"
 nav: 
@@ -11,33 +12,65 @@ nav:
       - Workflow: "workflow.md"
   - User Interfaces: "gui-links.md"
   - Examples:
-      "Survival Analysis": "examples/survival-analysis/survival-analysis.md"
+      - 'examples/index.md'
+      - "Survival Analysis": "examples/survival-analysis/survival-analysis.ipynb"
+      - Named Entity Recognition:
+          - Primer - IOB Format: "examples/named-entities/01-BIO-format.ipynb"
+          - NLTK: "examples/named-entities/02-NER-example-NLTK.ipynb"
+          - SpaCy: "examples/named-entities/03-NER-example-Spacy.ipynb"
   - API Reference:
-      - settings: "nestor/settings.md"
-      - keyword: "nestor/keyword.md"
+      - Nestor Configuration: "nestor/settings.md"
+      - TLP - Assisted NLP: "nestor/keyword.md"
       # - tagtrees: "nestor/tagtrees.md"
-      - datasets: "nestor/datasets.md"
+      - TLP - Datasets: "nestor/datasets.md"
 theme:
   name: "material"
   favicon: "media/favicon.png"
   logo: "media/icon.png"
   palette:
-    primary: "deep orange"
-    accent : "teal"
+    primary: "blue grey"
+    accent : "orange"
+  features:
+    - navigation.indexes
 plugins:
   - search
+  - mknotebooks
   - mkdocstrings:
       watch:
         - nestor
+      handlers:
+        python:
+          rendering:
+            show_root_heading: true
+
   # - pdf-export:
       # combined: true
+  - with-pdf:
+      # render_js: true
+      cover: true
+      cover_subtitle: "Toolkit Documentation"
+      toc_level: 2
+      ordered_chapter_level: 2
+      enabled_if_env: ENABLE_PDF_EXPORT
+      output_path: 'pdf/nestor-documentation.pdf'
+      # exclude_pages:
+      #   - 'about/templates/'
   - mermaid2
   - bibtex:
       bib_file: "docs/biblio.bib"
       cite_style: "pandoc"
+extra_css:
+  - "https://pages.nist.gov/nist-header-footer/css/nist-combined.css"
+  - css/mkdocstrings.css
 extra_javascript:
   - "https://unpkg.com/mermaid/dist/mermaid.min.js"
-site_dir: "public"
+  - "https://pages.nist.gov/nist-header-footer/js/jquery-1.9.0.min.js"
+  - "https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js"
+site_dir: !ENV MKDOCS_SITE_DIR
 markdown_extensions:
   - footnotes
   - pymdownx.superfences
+  - pymdownx.arithmatex
+  - def_list
+  - toc:
+      permalink: "🔗"

@@ -8,12 +8,13 @@ user-interaction to perform structured data extraction with minimal annotation t
 # __version__ = "0.2.1"
 
 __all__ = [
-    "keyword",
+    # "keyword",
+    "NLPSelect",
+    "TokenExtractor",
+    "TagExtractor"
     # 'tagplots',
-    "tagtrees",
+    # "tagtrees",
     "datasets",
 ]
-
-from nestor.settings import nestor_params
-
-CFG = nestor_params()
+from nestor.keyword import TagExtractor, TokenExtractor, NLPSelect
+from nestor.settings import CFG

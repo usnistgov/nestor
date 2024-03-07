@@ -1,9 +1,0 @@
-name: nestor-dev
-channels:
-  - defaults
-dependencies:
-  - python=3.7
-  - git
-  - pip
-  - pip:
-      - poetry

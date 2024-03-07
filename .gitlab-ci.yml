@@ -1,31 +1,56 @@
-image: python:3.7
+default:
+  image: $CI_REGISTRY/kea/templates/docker-conda:master
+  before_script:
+    - poetry install
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache/venv
 
 stages:
-  # - test
-  # - lint
+  - test
   - deploy
 
-before_script:
-  - conda env update --file gldeployenv.yaml
-  - conda activate nestor-dev
-  - poetry install
-
-# Unit Tests:
-#   stage: test
-#   script:
-#     - poetry run pytest
-
-# Python Code Lint:
-#   stage: lint
-#   script:
-#     - poetry run task format 
+variables:
+  POETRY_VIRTUALENVS_PATH: "${CI_PROJECT_DIR}/.cache/venv"
+  MKDOCS_SITE_DIR: "public"
+  
+pytest:
+  stage: test
+  script:
+    - poetry run pytest --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
 
 pages:
   stage: deploy
+  variables:
+    MKDOCS_SITE_URL: "https://kea.ipages.nist.gov/nestor-suite/nestor/"
+    MKDOCS_REPO_URL: "https://gitlab.nist.gov/gitlab/kea/nestor-suite/nestor/"
+
   script:
-    - poetry run task deploy-docs
+    # - conda env update --file docs/examples/nb-env.yml
+    # - jupytext --to notebook --execute docs/examples/**/*.py
+    - poetry run task deploy
   artifacts:
     paths:
       - public
   only:
-    - dev
+    - docs
+    - master
+
+# nist-pages:
+#   stage: deploy
+#   variables:
+#     MKDOCS_SITE_URL: "https://pages.nist.gov/nestor/"
+#     MKDOCS_REPO_URL: "https://github.com/usnistgov/nestor"
+
+#   script:
+#     - conda env update --file docs/examples/nb-env.yml
+#     - jupytext --to notebook --execute docs/examples/**/*.py
+#     - poetry run task deploy-docs
+#     - git push nist-origin `git subtree split --prefix public master`:nist-pages --force
+#   only:
+#     - master
